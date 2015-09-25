@@ -142,7 +142,7 @@ def run(image):
     if st['Running']=='False':
       print "Failed to start"
       raise SystemError('Failed to start')
-    return
+    return id
 
 def generate_nginx_deploydev(id,directory):
     # cd to directory
@@ -175,19 +175,26 @@ def generate_nginx_deploydev(id,directory):
           f.write(line)
 
 # some code here
-    p = subprocess.Popen(['docker-compose', 'build','www']) #shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    p = subprocess.Popen(['docker-compose', 'up','-d','www']) #shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    with open('/dev/null','w') as dn:
+      p = subprocess.Popen(['docker-compose', 'build','www'], stdout=dn, stderr=dn)
+      p = subprocess.Popen(['docker-compose', 'up','-d','www'], stdout=dn, stderr=dn)
     # docker-compose build www
     # docker-compose up -d www
     return
+
+def usage():
+    print 'Usage: register [build|run <image name> <deploy_dev dir>]'
 
 """
    Main entrypoint
 """
 def main ():
+    if 'CAT_CONFIG' not in os.environ:
+      print "Please define CAT_CONFIG to point to your config.yaml"
+      sys.exit(1)
     config=read_config(os.environ['CAT_CONFIG'])
     if len(sys.argv)<2:
-      print 'Usage: register <precheck|build|test|run>'
+      usage()
       return
     elif sys.argv[1]=='build':
       print 'Checking'
@@ -199,10 +206,17 @@ def main ():
       test(id,config)
     elif sys.argv[1]=='run':
       print 'Running service'
-      run(sys.argv[2])
+      if len(sys.argv)<4:
+        usage()
+        return
+      image=sys.argv[2]
+      dir=sys.argv[3]
+      id=run(image)
+      generate_nginx_deploydev(id,dir)
     elif sys.argv[1]=='gen':
-      print 'Running service'
-      generate_nginx_deploydev(sys.argv[2],sys.argv[3])
+      id=sys.argv[2]
+      dir=sys.argv[3]
+      generate_nginx_deploydev(id,dir)
     else:
       print "Unknown command"
       sys.exit(1)
