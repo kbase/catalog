@@ -87,8 +87,11 @@ def read_yaml():
 
 def build():
     mod=read_yaml()
+    #module=mod['module-name'].lower()
+    module=os.getcwd().split('/')[-1] 
+    version=mod['module-version']
     c = Client(base_url='unix://var/run/docker.sock')
-    tag='temp/%s:%s'%(mod['module-name'].lower(),mod['module-version'])
+    tag='temp/%s:%s'%(module,version)
     last=''
     for line in c.build( path='.', rm=True, decode=True, tag=tag):
       if 'errorDetail' in line:
@@ -144,7 +147,18 @@ def run(image):
       raise SystemError('Failed to start')
     return id
 
-def generate_nginx_deploydev(id,directory):
+def update_nms(config):
+    nms=config['narrative_method_specs']
+    p = subprocess.Popen(['/bin/cp', '-a', 'ui/narrative/methods/','%s/'%(nms)])
+    os.chdir(nms)
+    p = subprocess.Popen(['git','add','methods'])
+    time.sleep(1)
+    p = subprocess.Popen(['git','commit','-m','catalog update'])
+    p = subprocess.Popen(['git','push'])
+     
+
+def generate_nginx_deploydev(id,config):
+    directory=config['deploy_dev']
     # cd to directory
     os.chdir(directory)
     with open('proxy/default.conf','r') as f:
@@ -204,19 +218,19 @@ def main ():
       print id
       print 'Running Test'
       test(id,config)
+    elif sys.argv[1]=='nms':
+      update_nms(config)
     elif sys.argv[1]=='run':
       print 'Running service'
-      if len(sys.argv)<4:
+      if len(sys.argv)<3:
         usage()
         return
       image=sys.argv[2]
-      dir=sys.argv[3]
       id=run(image)
-      generate_nginx_deploydev(id,dir)
+      generate_nginx_deploydev(id,config)
     elif sys.argv[1]=='gen':
       id=sys.argv[2]
-      dir=sys.argv[3]
-      generate_nginx_deploydev(id,dir)
+      generate_nginx_deploydev(id,config)
     else:
       print "Unknown command"
       sys.exit(1)
