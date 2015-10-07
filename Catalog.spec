@@ -17,6 +17,7 @@ module Catalog {
 
     typedef structure {
         string git_url;
+        string git_commit_hash;
     } RegisterRepoParams;
 
 /* allow/require developer to supply git branch/git commit tag? */
