@@ -84,7 +84,8 @@ module Catalog {
     /*
         Describes how to find repository details.
         module_name - name of module defined in kbase.yaml file;
-        state - one of 'ready', 'building', 'testing', 'disabled'.
+        multiple state fields? (approvalState, buildState, versionState)
+        state - one of 'pending', 'ready', 'building', 'testing', 'disabled'.
     */
     typedef structure {
         string module_name;
