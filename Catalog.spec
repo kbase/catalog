@@ -19,7 +19,7 @@ module Catalog {
         string git_url;
     } RegisterRepoParams;
 
-/* allow developer to supply git branch/git commit tag? */
+/* allow/require developer to supply git branch/git commit tag? */
     funcdef register_repo(RegisterRepoParams params) returns (int version)
         authentication required;
 
