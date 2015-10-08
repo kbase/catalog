@@ -1,0 +1,33 @@
+#!/bin/sh
+
+export KB_SERVICE_NAME={service_name}
+export KB_TOP={kb_top}
+export KB_RUNTIME={kb_runtime}
+export KB_SERVICE_DIR={kb_service_dir}
+
+if [ -z $KB_DEPLOYMENT_CONFIG ]
+then
+    export KB_DEPLOYMENT_CONFIG=$KB_TOP/deployment.cfg
+fi
+
+export PYTHONPATH=$KB_TOP/lib:$PYTHONPATH
+export PATH=$KB_TOP/bin:$KB_RUNTIME/bin:$PATH
+
+pid_file=$KB_SERVICE_DIR/service.pid
+wsgi_file=$KB_TOP/lib/biokbase/$KB_SERVICE_NAME/Server.py
+
+port="$(python get_kb_config.py $KB_SERVICE_NAME port)"
+processes="$(python get_kb_config.py $KB_SERVICE_NAME processes)"
+cheaper="$(python get_kb_config.py $KB_SERVICE_NAME cheaper)"
+http_timeout="$(python get_kb_config.py $KB_SERVICE_NAME http-timeout)"
+
+uwsgi --master \
+    --processes $processes \
+    --cheaper $cheaper \
+    --http :$port \
+    --http-timeout $http_timeout \
+    --pidfile $pid_file \
+    --daemonize $KB_SERVICE_DIR/error.log \
+    --wsgi-file $wsgi_file
+
+
