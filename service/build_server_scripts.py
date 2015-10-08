@@ -53,6 +53,20 @@ def main ():
     with open (sys.argv[7]+'/start_service.sh', "w") as start_service_file:
         start_service_file.write(startScript)
 
+    # create the stop_service.sh script
+    with open (sys.argv[2], "r") as template:
+        stopTemplate=template.read()
+
+    stopScript = stopTemplate.format(
+        service_name=sys.argv[3],
+        kb_runtime=sys.argv[4],
+        kb_top=sys.argv[5],
+        kb_service_dir=sys.argv[6],
+        )
+    with open (sys.argv[7]+'/stop_service.sh', "w") as stop_service_file:
+        stop_service_file.write(stopScript)
+
+
 if __name__ == '__main__':
     try:
         main()

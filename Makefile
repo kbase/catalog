@@ -51,9 +51,10 @@ build-local-server-control-scripts:
 		$(SERVICE) \
 		$(KB_RUNTIME) \
 		$(DIR) \
-		$(DIR)/service/. \
+		$(DIR)/service \
 		service
 	chmod +x service/start_service.sh
+	chmod +x service/stop_service.sh
 
 
 test:

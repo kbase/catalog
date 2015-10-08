@@ -16,10 +16,17 @@ export PATH=$KB_TOP/bin:$KB_RUNTIME/bin:$PATH
 pid_file=$KB_SERVICE_DIR/service.pid
 wsgi_file=$KB_TOP/lib/biokbase/$KB_SERVICE_NAME/Server.py
 
-port="$(python get_kb_config.py $KB_SERVICE_NAME port)"
-processes="$(python get_kb_config.py $KB_SERVICE_NAME processes)"
-cheaper="$(python get_kb_config.py $KB_SERVICE_NAME cheaper)"
-http_timeout="$(python get_kb_config.py $KB_SERVICE_NAME http-timeout)"
+port="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME port)"
+processes="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME processes)"
+cheaper="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME cheaper)"
+http_timeout="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME http-timeout)"
+
+
+if [ -f $pid_file ] ; then 
+    echo "pid file already exists: $pid_file"
+    echo "Is $KB_SERVICE_NAME already running?  Either stop the service or delete the pid file."
+    exit 1
+fi
 
 uwsgi --master \
     --processes $processes \
@@ -30,4 +37,5 @@ uwsgi --master \
     --daemonize $KB_SERVICE_DIR/error.log \
     --wsgi-file $wsgi_file
 
-
+echo "$KB_SERVICE_NAME started on port $port."
+echo "Errors are logged to: $KB_SERVICE_DIR/error.log"
