@@ -21,10 +21,10 @@ module Catalog {
     } RegisterRepoParams;
 
 /* allow/require developer to supply git branch/git commit tag? */
-    funcdef register_repo(RegisterRepoParams params) returns (int version)
+    funcdef register_repo(RegisterRepoParams params) returns (int timestamp)
         authentication required;
 
-    funcdef get_repo_last_version(CurrentRepoParams params) returns (int version);
+    funcdef get_repo_last_timestamp(CurrentRepoParams params) returns (int timestamp);
 
     /*
         Describes how to filter repositories.
@@ -47,6 +47,7 @@ module Catalog {
         string git_url;
         string git_branch;
         string git_commit_hash;
+        string version;
         string module_description;
         string service_language;
         list<string> owners;
@@ -59,21 +60,22 @@ module Catalog {
         Describes how to find repository details (including old versions). In case neither of
             version and git_commit_hash is specified last version is returned.
         module_name - name of module defined in kbase.yaml file;
-        version - optional parameter limiting search by certain version timestamp;
+        timestamp - optional parameter limiting search by certain version timestamp;
         git_commit_hash - optional parameter limiting search by certain git commit hash;
         with_disabled - optional flag adding disabled repos (default value is false).
     */
     typedef structure {
         string module_name;
-        int version;
+        int timestamp;
         string git_commit_hash;
         boolean with_disabled;
     } HistoryRepoParams;
 
     funcdef get_repo_details(HistoryRepoParams params) returns (RepoDetails);
 
+    /* timestamp will be epoch time */
     typedef structure {
-        int version;
+        int timestamp;
         string git_commit_hash;
         boolean with_disabled;
     } RepoVersion;
