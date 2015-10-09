@@ -42,7 +42,7 @@ def get_config():
 
 config = get_config()
 
-from biokbase.catalog.Impl import Catalog
+from biokbase.Catalog.Impl import Catalog
 impl_Catalog = Catalog(config)
 
 
