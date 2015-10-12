@@ -101,6 +101,74 @@ sub new
 
 
 
+=head2 version
+
+  $version = $obj->version()
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$version is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$version is a string
+
+
+=end text
+
+=item Description
+
+Get the version of the deployed catalog service endpoint.
+
+=back
+
+=cut
+
+ sub version
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 0)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function version (received $n, expecting 0)");
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.version",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'version',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method version",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'version',
+				       );
+    }
+}
+ 
+
+
 =head2 is_repo_registered
 
   $return = $obj->is_repo_registered($params)

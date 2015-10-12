@@ -60,6 +60,9 @@ class JSONObjectEncoder(json.JSONEncoder):
 sync_methods = {}
 async_run_methods = {}
 async_check_methods = {}
+async_run_methods['Catalog.version_async'] = ['Catalog', 'version']
+async_check_methods['Catalog.version_check'] = ['Catalog', 'version']
+sync_methods['Catalog.version'] = True
 async_run_methods['Catalog.is_repo_registered_async'] = ['Catalog', 'is_repo_registered']
 async_check_methods['Catalog.is_repo_registered_check'] = ['Catalog', 'is_repo_registered']
 sync_methods['Catalog.is_repo_registered'] = True
@@ -354,6 +357,10 @@ class Application(object):
         self.serverlog.set_log_level(6)
         self.rpc_service = JSONRPCServiceCustom()
         self.method_authentication = dict()
+        self.rpc_service.add(impl_Catalog.version,
+                             name='Catalog.version',
+                             types=[])
+        self.method_authentication['Catalog.version'] = 'none'
         self.rpc_service.add(impl_Catalog.is_repo_registered,
                              name='Catalog.is_repo_registered',
                              types=[dict])

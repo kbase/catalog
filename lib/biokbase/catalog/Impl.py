@@ -1,4 +1,5 @@
 #BEGIN_HEADER
+import biokbase.catalog.version
 #END_HEADER
 
 
@@ -26,6 +27,20 @@ class Catalog:
         #BEGIN_CONSTRUCTOR
         #END_CONSTRUCTOR
         pass
+
+    def version(self, ctx):
+        # ctx is the context object
+        # return variables are: version
+        #BEGIN version
+        version = biokbase.catalog.version.CATALOG_SERVICE_VERSION
+        #END version
+
+        # At some point might do deeper type checking...
+        if not isinstance(version, basestring):
+            raise ValueError('Method version return value ' +
+                             'version is not type basestring as required.')
+        # return the results
+        return [version]
 
     def is_repo_registered(self, ctx, params):
         # ctx is the context object

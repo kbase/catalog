@@ -138,6 +138,22 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: version</p>
+     * <pre>
+     * Get the version of the deployed catalog service endpoint.
+     * </pre>
+     * @return   parameter "version" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String version(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("Catalog.version", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: is_repo_registered</p>
      * <pre>
      * </pre>

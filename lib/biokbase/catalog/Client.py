@@ -170,6 +170,13 @@ class Catalog(object):
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
         return resp['result']
  
+    def version(self, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method version: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.version',
+                          [], json_rpc_context)
+        return resp[0]
+  
     def is_repo_registered(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method is_repo_registered: argument json_rpc_context is not type dict as required.')

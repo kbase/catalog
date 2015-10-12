@@ -3,6 +3,9 @@ module Catalog {
     /* @range [0,1] */
     typedef int boolean;
 
+    /* Get the version of the deployed catalog service endpoint. */
+    funcdef version() returns (string version);
+
     /*
         Describes how to find repository details.
         module_name - name of module defined in kbase.yaml file;
@@ -20,7 +23,7 @@ module Catalog {
         string git_commit_hash;
     } RegisterRepoParams;
 
-/* allow/require developer to supply git branch/git commit tag? */
+    /* allow/require developer to supply git branch/git commit tag? */
     funcdef register_repo(RegisterRepoParams params) returns (int timestamp)
         authentication required;
 
