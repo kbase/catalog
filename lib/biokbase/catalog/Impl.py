@@ -108,8 +108,8 @@ class Catalog:
     def set_repo_state(self, ctx, params):
         # ctx is the context object
         #BEGIN set_repo_state
-        pass
         #END set_repo_state
+        pass
 
     def get_repo_state(self, ctx, params):
         # ctx is the context object
