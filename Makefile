@@ -43,13 +43,13 @@ compile-kb-module:
 		--out $(LIB_DIR) \
 		--plclname Bio::KBase::$(SERVICE_CAPS)::Client \
 		--jsclname javascript/Client \
-		--pyclname biokbase.$(SERVICE_CAPS).Client \
+		--pyclname biokbase.$(SERVICE).Client \
 		--javasrc java \
 		--java \
-		--pysrvname biokbase.$(SERVICE_CAPS).Server \
-		--pyimplname biokbase.$(SERVICE_CAPS).Impl;
+		--pysrvname biokbase.$(SERVICE).Server \
+		--pyimplname biokbase.$(SERVICE).Impl;
 	touch $(LIB_DIR)/biokbase/__init__.py
-	touch $(LIB_DIR)/biokbase/$(SERVICE_CAPS)/__init__.py
+	touch $(LIB_DIR)/biokbase/$(SERVICE)/__init__.py
 
 
 # start/stop the service running out of THIS directory
@@ -57,7 +57,7 @@ build-local-server-control-scripts:
 	python service/build_server_scripts.py \
 		service/start_service.template \
 		service/stop_service.template \
-		$(SERVICE_CAPS) \
+		$(SERVICE) \
 		$(KB_RUNTIME) \
 		$(DIR) \
 		$(DIR)/service \
@@ -66,7 +66,7 @@ build-local-server-control-scripts:
 	chmod +x service/stop_service.sh
 
 
-deploy: deploy-service deploy-server-control-scripts deploy-cfg
+deploy: deploy-clients deploy-service deploy-server-control-scripts deploy-cfg
 
 # TODO: this needs to work outside the dev_container!!  The mkcfg tool should
 # be part of the SDK tooling
@@ -76,14 +76,14 @@ deploy: deploy-service deploy-server-control-scripts deploy-cfg
 deploy-service: deploy-python-service
 
 deploy-clients:
-	rsync -av lib/Bio/* $(TARGET)/lib/Bio/. --exclude *.bak-*
+	rsync -av lib/Bio/* $(TARGET)/lib/Bio/.
 	rsync -av lib/biokbase/* $(TARGET)/lib/biokbase/. --exclude *.bak-*
 	rsync -av lib/javascript/* $(TARGET)/lib/javascript/.
 
 deploy-python-service:
 	rsync -av lib/biokbase/* $(TARGET)/lib/biokbase/. --exclude *.bak-*
-	echo $(GITCOMMIT) > $(TARGET)/lib/biokbase/$(SERVICE_CAPS)/$(SERVICE).version
-	echo $(TAGS) >> $(TARGET)/lib/biokbase/$(SERVICE_CAPS)/$(SERVICE).version
+	echo $(GITCOMMIT) > $(TARGET)/lib/biokbase/$(SERVICE)/$(SERVICE).version
+	echo $(TAGS) >> $(TARGET)/lib/biokbase/$(SERVICE)/$(SERVICE).version
 
 # This will setup the deployment services directory for
 # this service, which includes start/stop scripts
@@ -93,15 +93,15 @@ deploy-server-control-scripts:
 	python service/build_server_scripts.py \
 		service/start_service.template \
 		service/stop_service.template \
-		$(SERVICE_CAPS) \
+		$(SERVICE) \
 		$(KB_RUNTIME) \
 		$(TARGET) \
 		$(TARGET)/services/$(SERVICE) \
 		$(TARGET)/services/$(SERVICE)
 	chmod +x $(TARGET)/services/$(SERVICE)/start_service.sh
 	chmod +x $(TARGET)/services/$(SERVICE)/stop_service.sh
-	echo $(GITCOMMIT) > $(TARGET)/services/$(SERVICE).version
-	echo $(TAGS) >> $(TARGET)/services/$(SERVICE).version
+	echo $(GITCOMMIT) > $(TARGET)/services/$(SERVICE)/$(SERVICE).version
+	echo $(TAGS) >> $(TARGET)/services/$(SERVICE)/$(SERVICE).version
 
 
 test:
