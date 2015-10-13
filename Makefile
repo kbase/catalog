@@ -66,7 +66,7 @@ build-local-server-control-scripts:
 	chmod +x service/stop_service.sh
 
 
-deploy: deploy-clients deploy-service deploy-server-control-scripts deploy-cfg
+deploy: deploy-clients deploy-service deploy-server-control-scripts
 
 # TODO: this needs to work outside the dev_container!!  The mkcfg tool should
 # be part of the SDK tooling
