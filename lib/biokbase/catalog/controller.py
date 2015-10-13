@@ -2,9 +2,12 @@
 
 import warnings
 import threading
+import time
+import copy
 
 import biokbase.catalog.version
 
+from pprint import pprint
 from datetime import datetime
 from biokbase.catalog.db import MongoCatalogDBI
 
@@ -45,8 +48,6 @@ class CatalogController:
                     config['mongodb-user'],
                     config['mongodb-pwd'])
 
-        self.registration_lock = threading.Lock()
-
 
 
     def register_repo(self, params, username):
@@ -63,27 +64,25 @@ class CatalogController:
         # 2) If it has already been registered, make sure the user has permissions to update, and
         # that the module is in a state where it can be registered 
         else:
-            # we need to lock so we don't kick off two registration builds at the same time
-            # if another thread starts a registration, but hasn't written to mongo yet that it
-            # has started
-            self.registration_lock.acquire()
-            try:
-                module_details = self.db.get_module_details(git_url=git_url)
+            module_details = self.db.get_module_details(git_url=git_url)
 
-                # 2a) Make sure the user has permission to register this URL
-                if self.has_permission(username,module_details['owners']):
-                    # 2b) Make sure the current registration state is either 'complete' or 'error'
-                    state = module_details['state']
-                    registration_state = state['registration']
-                    if registration_state == 'complete' or registration_state == 'error':
-                        state['registration'] = 'started'
-                        self.db.set_module_state(git_url=git_url, state=state)
-                    else:
-                        raise ValueError('Registration already in progress for this git repo ('+git_url+')')
-                else :
-                    raise ValueError('You ('+username+') do not have permission to register this git repo ('+git_url+')')
-            finally:
-                self.registration_lock.release()
+            time.sleep(10)
+
+            # 2a) Make sure the user has permission to register this URL
+            if self.has_permission(username,module_details['owners']):
+                # 2b) Make sure the current registration state is either 'complete' or 'error'
+                state = module_details['state']
+                registration_state = state['registration']
+                if registration_state == 'complete' or registration_state == 'error':
+                    success = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
+                    if not success:
+                        # we can fail if the registration state changed when we were first checking to now.  This is important
+                        # to ensure we only ever kick off one registration thread at a time
+                        raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin.')
+                else:
+                    raise ValueError('Registration already in progress for this git repo ('+git_url+')')
+            else :
+                raise ValueError('You ('+username+') do not have permission to register this git repo ('+git_url+')')
 
         # 3) Ok, kick off the registration thread
         #   - This will check out the repo, attempt to build the image, run some tests, store the image
@@ -94,6 +93,8 @@ class CatalogController:
 
         # 4) provide the timestamp 
         return timestamp
+
+
 
 
     def has_permission(self, username, owners):

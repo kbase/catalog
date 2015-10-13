@@ -1,5 +1,6 @@
 
 
+from pprint import pprint
 from pymongo import MongoClient
 
 '''
@@ -127,13 +128,71 @@ class MongoCatalogDBI:
         self.modules.insert(module)
 
 
-    def set_module_state(self, module='', git_url='', state=None):
-        if state:
+    # last_state is for concurency control.  If set, it will match on state as well, and will fail if the
+    # last_state does not match indicating another process changed the state
+    def set_module_registration_state(self, module='', git_url='', new_state=None, last_state=None):
+        if new_state:
             if module:
-                self.modules.update( {'module':module}, {'$set':{'state':state}})
+                if last_state:
+                    result = self.modules.update({'module':module,'state.registration':last_state}, {'$set':{'state.registration':new_state}})
+                else:
+                    result = self.modules.update({'module':module}, {'$set':{'state.registration':new_state}})
             if git_url:
-                self.modules.update( {'git_url':git_url}, {'$set':{'state':state}})
+                if last_state:
+                    result = self.modules.update({'git_url':git_url,'state.registration':last_state}, {'$set':{'state.registration':new_state}})
+                else:
+                    result = self.modules.update({'git_url':git_url}, {'$set':{'state.registration':new_state}})
+            if result:
+                print('printing the result object we gots')
+                # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
+                # we can only check for 'n'!!
+                nModified = 0
+                if 'n' in result:
+                    nModified = result['n']
+                if 'nMatched' in result:
+                    nModified = result['nMatched']
+                if 'nModified' in result:
+                    nModified = result['nModified']
+                if nModified < 1:
+                    return False
+                return True
+        return False
 
+
+    #
+    # 
+    #def set_module_state(self, module='', git_url='', state=None, last_state=None):
+    #    success = False
+    #    if state:
+    #        if module:
+    #            if last_state:
+    #                result = self.modules.update(
+    #                            {'module':module, 'state':last_state}, 
+    #                            { '$set':{'state':state} }
+    #                        )
+    #            else:
+    #                result = self.modules.update(
+    #                            {'module':module}, 
+    #                            { '$set':{'state':state} }
+    #                        )
+    #        if git_url:
+    #            if last_state:
+    #                print('ok, calling mongo')
+    #                pprint(state)
+    #                pprint(last_state)
+    #                result = self.modules.update(
+    #                            {'git_url':git_url, 'state':last_state}, 
+    #                            { '$set':{'state':state} }
+    #                        )
+    #            else:
+    #                result = self.modules.update(
+    #                            {'git_url':git_url}, 
+    #                            { '$set':{'state':state} }
+    #                        )
+    #        if result:
+    #            print('printing the result object we gots')
+    #            
+    #            pprint(result)
 
 
     #### GET methods
