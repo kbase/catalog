@@ -68,11 +68,6 @@ build-local-server-control-scripts:
 
 deploy: deploy-clients deploy-service deploy-server-control-scripts
 
-# TODO: this needs to work outside the dev_container!!  The mkcfg tool should
-# be part of the SDK tooling
-#deploy-cfg:
-#	perl $(MK_CONFIG) -t $(TARGET)
-
 deploy-service: deploy-python-service
 
 deploy-clients:
