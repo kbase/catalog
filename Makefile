@@ -66,16 +66,12 @@ build-local-server-control-scripts:
 	chmod +x service/stop_service.sh
 
 
-deploy: deploy-clients deploy-service deploy-server-control-scripts deploy-cfg
-
-# TODO: this needs to work outside the dev_container!!  The mkcfg tool should
-# be part of the SDK tooling
-#deploy-cfg:
-#	perl $(MK_CONFIG) -t $(TARGET)
+deploy: deploy-clients deploy-service deploy-server-control-scripts
 
 deploy-service: deploy-python-service
 
 deploy-clients:
+        mkdir -p $(TARGET)/lib/Bio $(TARGET)/lib/biokbase $(TARGET)/lib/javascript
 	rsync -av lib/Bio/* $(TARGET)/lib/Bio/.
 	rsync -av lib/biokbase/* $(TARGET)/lib/biokbase/. --exclude *.bak-*
 	rsync -av lib/javascript/* $(TARGET)/lib/javascript/.
