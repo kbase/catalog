@@ -55,11 +55,11 @@ build-local-server-control-scripts:
 	chmod +x service/stop_service.sh
 
 
-deploy: deploy-clients deploy-service deploy-server-control-scripts
+deploy: deploy-client deploy-service deploy-server-control-scripts
 
 deploy-service: deploy-python-service
 
-deploy-clients:
+deploy-client:
 	mkdir -p $(TARGET)/lib/Bio $(TARGET)/lib/biokbase $(TARGET)/lib/javascript
 	rsync -av lib/Bio/* $(TARGET)/lib/Bio/.
 	rsync -av lib/biokbase/* $(TARGET)/lib/biokbase/. --exclude *.bak-*
