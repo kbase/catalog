@@ -66,10 +66,7 @@ class Catalog:
         # return variables are: timestamp
         #BEGIN register_repo
 
-        pprint(ctx)
-        pprint(params)
-        self.cc.register_repo(params, ctx['user_id'])
-        timestamp = 1234
+        timestamp = self.cc.register_repo(params, ctx['user_id'])
 
         #END register_repo
 
