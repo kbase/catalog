@@ -16,7 +16,7 @@ export PATH=$KB_TOP/bin:$KB_RUNTIME/bin:$PATH
 pid_file=$KB_SERVICE_DIR/service.pid
 wsgi_file=$KB_TOP/lib/biokbase/$KB_SERVICE_NAME/Server.py
 
-port="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME port)"
+port="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME service-port)"
 processes="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME processes)"
 cheaper="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME cheaper)"
 http_timeout="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME http-timeout)"
