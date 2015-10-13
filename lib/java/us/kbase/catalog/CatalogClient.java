@@ -206,7 +206,24 @@ public class CatalogClient {
     }
 
     /**
-     * <p>Original spec-file function name: list_repo_module_names</p>
+     * <p>Original spec-file function name: get_repo_registration_state</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.CurrentRepoParams CurrentRepoParams}
+     * @return   parameter "registration_state" of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public String getRepoRegistrationState(CurrentRepoParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("Catalog.get_repo_registration_state", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_module_names</p>
      * <pre>
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.ListReposParams ListReposParams}
@@ -214,11 +231,11 @@ public class CatalogClient {
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public List<String> listRepoModuleNames(ListReposParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public List<String> listModuleNames(ListReposParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<String>>> retType = new TypeReference<List<List<String>>>() {};
-        List<List<String>> res = caller.jsonrpcCall("Catalog.list_repo_module_names", args, retType, true, false, jsonRpcContext);
+        List<List<String>> res = caller.jsonrpcCall("Catalog.list_module_names", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 

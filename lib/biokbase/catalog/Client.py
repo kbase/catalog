@@ -198,10 +198,17 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
-    def list_repo_module_names(self, params, json_rpc_context = None):
+    def get_repo_registration_state(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method list_repo_module_names: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.list_repo_module_names',
+            raise ValueError('Method get_repo_registration_state: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_repo_registration_state',
+                          [params], json_rpc_context)
+        return resp[0]
+  
+    def list_module_names(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method list_module_names: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_module_names',
                           [params], json_rpc_context)
         return resp[0]
   

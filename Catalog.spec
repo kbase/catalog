@@ -29,6 +29,10 @@ module Catalog {
 
     funcdef get_repo_last_timestamp(CurrentRepoParams params) returns (int timestamp);
 
+
+    funcdef get_repo_registration_state(CurrentRepoParams params) returns (string registration_state);
+
+
     /*
         Describes how to filter repositories.
         with_disabled - optional flag adding disabled repos (default value is false).
@@ -37,7 +41,7 @@ module Catalog {
         boolean with_disabled;
     } ListReposParams;
 
-    funcdef list_repo_module_names(ListReposParams params) returns (list<string>);
+    funcdef list_module_names(ListReposParams params) returns (list<string>);
 
     /*
         method_ids - list of method ids (each id is fully qualified, i.e. contains module

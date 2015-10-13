@@ -1,5 +1,6 @@
 #BEGIN_HEADER
-import biokbase.catalog.version
+from pprint import pprint
+from biokbase.catalog.controller import CatalogController
 #END_HEADER
 
 
@@ -25,6 +26,11 @@ class Catalog:
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
+        print('Starting the Catalog service.  Service configuration:')
+        pprint(config)
+        print('Initializing the Catalog Controller...')
+        self.cc = CatalogController(config);
+        print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
 
@@ -32,7 +38,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: version
         #BEGIN version
-        version = biokbase.catalog.version.CATALOG_SERVICE_VERSION
+        version = self.cc.version()
         #END version
 
         # At some point might do deeper type checking...
@@ -59,6 +65,12 @@ class Catalog:
         # ctx is the context object
         # return variables are: timestamp
         #BEGIN register_repo
+
+        pprint(ctx)
+        pprint(params)
+        self.cc.register_repo(params, ctx['user_id'])
+        timestamp = 1234
+
         #END register_repo
 
         # At some point might do deeper type checking...
@@ -81,15 +93,28 @@ class Catalog:
         # return the results
         return [timestamp]
 
-    def list_repo_module_names(self, ctx, params):
+    def get_repo_registration_state(self, ctx, params):
+        # ctx is the context object
+        # return variables are: registration_state
+        #BEGIN get_repo_registration_state
+        #END get_repo_registration_state
+
+        # At some point might do deeper type checking...
+        if not isinstance(registration_state, basestring):
+            raise ValueError('Method get_repo_registration_state return value ' +
+                             'registration_state is not type basestring as required.')
+        # return the results
+        return [registration_state]
+
+    def list_module_names(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
-        #BEGIN list_repo_module_names
-        #END list_repo_module_names
+        #BEGIN list_module_names
+        #END list_module_names
 
         # At some point might do deeper type checking...
         if not isinstance(returnVal, list):
-            raise ValueError('Method list_repo_module_names return value ' +
+            raise ValueError('Method list_module_names return value ' +
                              'returnVal is not type list as required.')
         # return the results
         return [returnVal]

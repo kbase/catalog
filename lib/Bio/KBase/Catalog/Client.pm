@@ -434,9 +434,98 @@ boolean is an int
  
 
 
-=head2 list_repo_module_names
+=head2 get_repo_registration_state
 
-  $return = $obj->list_repo_module_names($params)
+  $registration_state = $obj->get_repo_registration_state($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.CurrentRepoParams
+$registration_state is a string
+CurrentRepoParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	with_disabled has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.CurrentRepoParams
+$registration_state is a string
+CurrentRepoParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	with_disabled has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub get_repo_registration_state
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_repo_registration_state (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_repo_registration_state:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_repo_registration_state');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_repo_registration_state",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_repo_registration_state',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_repo_registration_state",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_repo_registration_state',
+				       );
+    }
+}
+ 
+
+
+=head2 list_module_names
+
+  $return = $obj->list_module_names($params)
 
 =over 4
 
@@ -474,7 +563,7 @@ boolean is an int
 
 =cut
 
- sub list_repo_module_names
+ sub list_module_names
 {
     my($self, @args) = @_;
 
@@ -483,7 +572,7 @@ boolean is an int
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function list_repo_module_names (received $n, expecting 1)");
+							       "Invalid argument count for function list_module_names (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -491,30 +580,30 @@ boolean is an int
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to list_repo_module_names:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to list_module_names:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'list_repo_module_names');
+								   method_name => 'list_module_names');
 	}
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_repo_module_names",
+	method => "Catalog.list_module_names",
 	params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'list_repo_module_names',
+					       method_name => 'list_module_names',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_repo_module_names",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_module_names",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'list_repo_module_names',
+					    method_name => 'list_module_names',
 				       );
     }
 }

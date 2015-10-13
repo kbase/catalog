@@ -72,9 +72,12 @@ sync_methods['Catalog.register_repo'] = True
 async_run_methods['Catalog.get_repo_last_timestamp_async'] = ['Catalog', 'get_repo_last_timestamp']
 async_check_methods['Catalog.get_repo_last_timestamp_check'] = ['Catalog', 'get_repo_last_timestamp']
 sync_methods['Catalog.get_repo_last_timestamp'] = True
-async_run_methods['Catalog.list_repo_module_names_async'] = ['Catalog', 'list_repo_module_names']
-async_check_methods['Catalog.list_repo_module_names_check'] = ['Catalog', 'list_repo_module_names']
-sync_methods['Catalog.list_repo_module_names'] = True
+async_run_methods['Catalog.get_repo_registration_state_async'] = ['Catalog', 'get_repo_registration_state']
+async_check_methods['Catalog.get_repo_registration_state_check'] = ['Catalog', 'get_repo_registration_state']
+sync_methods['Catalog.get_repo_registration_state'] = True
+async_run_methods['Catalog.list_module_names_async'] = ['Catalog', 'list_module_names']
+async_check_methods['Catalog.list_module_names_check'] = ['Catalog', 'list_module_names']
+sync_methods['Catalog.list_module_names'] = True
 async_run_methods['Catalog.get_repo_details_async'] = ['Catalog', 'get_repo_details']
 async_check_methods['Catalog.get_repo_details_check'] = ['Catalog', 'get_repo_details']
 sync_methods['Catalog.get_repo_details'] = True
@@ -373,10 +376,14 @@ class Application(object):
                              name='Catalog.get_repo_last_timestamp',
                              types=[dict])
         self.method_authentication['Catalog.get_repo_last_timestamp'] = 'none'
-        self.rpc_service.add(impl_Catalog.list_repo_module_names,
-                             name='Catalog.list_repo_module_names',
+        self.rpc_service.add(impl_Catalog.get_repo_registration_state,
+                             name='Catalog.get_repo_registration_state',
                              types=[dict])
-        self.method_authentication['Catalog.list_repo_module_names'] = 'none'
+        self.method_authentication['Catalog.get_repo_registration_state'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_module_names,
+                             name='Catalog.list_module_names',
+                             types=[dict])
+        self.method_authentication['Catalog.list_module_names'] = 'none'
         self.rpc_service.add(impl_Catalog.get_repo_details,
                              name='Catalog.get_repo_details',
                              types=[dict])
