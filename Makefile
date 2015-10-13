@@ -25,18 +25,7 @@ DIR = $(shell pwd)
 
 LIB_DIR = lib
 
-# we need to stop this.  Everything should be part of the SDK
-ifeq ($(TOP_DIR_NAME), dev_container)
-include $(TOP_DIR)/tools/Makefile.common
-endif
-
 default: compile-kb-module
-
-ifeq ($(TOP_DIR_NAME), dev_container)
-include $(TOP_DIR)/tools/Makefile.common.rules
-else
-	$(warning Warning! Running outside the dev_container - some targets will not work!)
-endif
 
 compile-kb-module:
 	kb-mobu compile $(SPEC_FILE) \
@@ -71,7 +60,7 @@ deploy: deploy-clients deploy-service deploy-server-control-scripts
 deploy-service: deploy-python-service
 
 deploy-clients:
-        mkdir -p $(TARGET)/lib/Bio $(TARGET)/lib/biokbase $(TARGET)/lib/javascript
+	mkdir -p $(TARGET)/lib/Bio $(TARGET)/lib/biokbase $(TARGET)/lib/javascript
 	rsync -av lib/Bio/* $(TARGET)/lib/Bio/.
 	rsync -av lib/biokbase/* $(TARGET)/lib/biokbase/. --exclude *.bak-*
 	rsync -av lib/javascript/* $(TARGET)/lib/javascript/.

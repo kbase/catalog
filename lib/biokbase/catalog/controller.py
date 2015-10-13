@@ -4,12 +4,17 @@ import warnings
 import threading
 import time
 import copy
+import os
 
 import biokbase.catalog.version
 
 from pprint import pprint
 from datetime import datetime
 from biokbase.catalog.db import MongoCatalogDBI
+from biokbase.catalog.registrar import Registrar
+
+
+
 
 
 
@@ -48,9 +53,20 @@ class CatalogController:
                     config['mongodb-user'],
                     config['mongodb-pwd'])
 
+        # check for the temp directory and make sure it exists
+        if 'temp-dir' not in config:
+            raise ValueError('"temp-dir" config variable must be defined to start a CatalogController!')
+        self.temp_dir = config['temp-dir']
+        if not os.path.exists(self.temp_dir):
+            raise ValueError('"temp-dir" does not exist! It is required for registration to work!')
+        if not os.path.exists(self.temp_dir):
+            raise ValueError('"temp-dir" does not exist! Space is required for registration to work!')
+        if not os.access(self.temp_dir, os.W_OK):
+            raise ValueError('"temp-dir" not writable! Writable space is required for registration to work!')
 
 
-    def register_repo(self, params, username):
+
+    def register_repo(self, params, username, token):
 
         if 'git_url' not in params:
             raise ValueError('git_url not defined, but is required for registering a repository')
@@ -65,8 +81,6 @@ class CatalogController:
         # that the module is in a state where it can be registered 
         else:
             module_details = self.db.get_module_details(git_url=git_url)
-
-            time.sleep(10)
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
@@ -90,9 +104,13 @@ class CatalogController:
         #     module and finally update the dev version
         #   - If things failed, it will set the error state, and set an error message.
 
+        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir))
+        t.start()
 
         # 4) provide the timestamp 
         return timestamp
+
+
 
 
 
@@ -116,5 +134,8 @@ class CatalogController:
         return biokbase.catalog.version.CATALOG_VERSION
 
 
-
+# NOT PART OF CLASS CATALOG!!
+def _start_registration(params,timestamp,username,token, db, temp_dir):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir)
+    registrar.start_registration()
 

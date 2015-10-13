@@ -65,8 +65,8 @@ class Catalog:
         # ctx is the context object
         # return variables are: timestamp
         #BEGIN register_repo
-
-        timestamp = self.cc.register_repo(params, ctx['user_id'])
+        
+        timestamp = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
 
         #END register_repo
 

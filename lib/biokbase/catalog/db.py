@@ -143,7 +143,6 @@ class MongoCatalogDBI:
                 else:
                     result = self.modules.update({'git_url':git_url}, {'$set':{'state.registration':new_state}})
             if result:
-                print('printing the result object we gots')
                 # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
                 # we can only check for 'n'!!
                 nModified = 0
