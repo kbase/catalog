@@ -177,17 +177,10 @@ class Catalog(object):
                           [], json_rpc_context)
         return resp[0]
   
-    def is_repo_registered(self, params, json_rpc_context = None):
+    def is_registered(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method is_repo_registered: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.is_repo_registered',
-                          [params], json_rpc_context)
-        return resp[0]
-  
-    def register_repo(self, params, json_rpc_context = None):
-        if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method register_repo: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.register_repo',
+            raise ValueError('Method is_registered: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.is_registered',
                           [params], json_rpc_context)
         return resp[0]
   
@@ -198,10 +191,42 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
-    def list_module_names(self, params, json_rpc_context = None):
+    def register_repo(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method list_module_names: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.list_module_names',
+            raise ValueError('Method register_repo: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.register_repo',
+                          [params], json_rpc_context)
+        return resp[0]
+  
+    def push_dev_to_beta(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method push_dev_to_beta: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.push_dev_to_beta',
+                   [params], json_rpc_context)
+  
+    def request_release(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method request_release: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.request_release',
+                   [params], json_rpc_context)
+  
+    def list_requested_releases(self, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method list_requested_releases: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_requested_releases',
+                          [], json_rpc_context)
+        return resp[0]
+  
+    def review_release_request(self, review, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method review_release_request: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.review_release_request',
+                   [review], json_rpc_context)
+  
+    def list_basic_module_info(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method list_basic_module_info: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_basic_module_info',
                           [params], json_rpc_context)
         return resp[0]
   

@@ -1,3 +1,7 @@
+/*
+
+
+*/
 module Catalog {
 
     /* @range [0,1] */
@@ -9,26 +13,64 @@ module Catalog {
     /*
         Describes how to find module/repository details.
         module_name - name of module defined in kbase.yaml file;
-        with_disabled - optional flag adding disabled repos (default value is false).
+        git_url - the url used to register the module
+        include_disabled - optional flag, set to true to include disabled repos
     */
     typedef structure {
         string module_name;
         string git_url;
-        boolean with_disabled;
+        boolean include_disabled;
     } SelectModuleParams;
 
-    funcdef is_repo_registered(SelectModuleParams params) returns (boolean);
+    funcdef is_registered(SelectModuleParams params) returns (boolean);
+
+    /* */
+    funcdef get_repo_last_timestamp(SelectModuleParams params) returns (int timestamp);
 
     typedef structure {
         string git_url;
         string git_commit_hash;
     } RegisterRepoParams;
 
-    /* allow/require developer to supply git branch/git commit tag? */
-    funcdef register_repo(RegisterRepoParams params) returns (int timestamp)
-        authentication required;
+    /* allow/require developer to supply git branch/git commit tag? 
+    if this is a new module, creates the initial registration with the authenticated user as
+    the sole owner, then launches a build to update the dev version of the module.  You can check
+    the state of this build with the 'get_module_state' method passing in the git_url.  If the module
+    already exists, then you must be an owner to reregister.  That will immediately overwrite your
+    dev version of the module (old dev versions are not stored, but you can always reregister an old
+    version from the repo) and start a build.
+    */
+    funcdef register_repo(RegisterRepoParams params) returns (int timestamp) authentication required;
 
-    funcdef get_repo_last_timestamp(SelectModuleParams params) returns (int timestamp);
+    /* immediately updates the beta tag to what is currently in dev, whatever is currently in beta
+    is discarded.  Will fail if a release request is active and has not been approved/denied */
+    funcdef push_dev_to_beta(SelectModuleParams params) returns () authentication required;
+
+    /* requests a push from beta to release version; must be approved be a kbase Admin */
+    funcdef request_release(SelectModuleParams params) returns () authentication required;
+
+    typedef structure {
+        string module_name;
+        string git_url;
+        string git_commit_hash;
+        string timestamp;
+        list <string> owners;
+    } RequestedReleaseInfo;
+
+    funcdef list_requested_releases() returns (list<RequestedReleaseInfo> requested_releases);
+
+
+    /*
+        decision - approved | denied
+        review_message - 
+    */
+    typedef structure {
+        string module_name;
+        string decision;
+        string review_message;
+    } ReleaseReview;
+
+    funcdef review_release_request(ReleaseReview review) returns () authentication required;
 
 
     /*
@@ -36,10 +78,17 @@ module Catalog {
         with_disabled - optional flag adding disabled repos (default value is false).
     */
     typedef structure {
-        boolean with_disabled;
-    } ListReposParams;
+        boolean include_disabled;
+    } ListModuleParams;
 
-    funcdef list_module_names(ListReposParams params) returns (list<string>);
+
+    typedef structure {
+        string module_name;
+        string git_url;
+    } BasicModuleInfo;
+
+    funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
+
 
     /*
         method_ids - list of method ids (each id is fully qualified, i.e. contains module
@@ -72,7 +121,7 @@ module Catalog {
         string module_name;
         int timestamp;
         string git_commit_hash;
-        boolean with_disabled;
+        boolean include_disabled;
     } HistoryRepoParams;
 
     funcdef get_repo_details(HistoryRepoParams params) returns (RepoDetails);
@@ -81,7 +130,7 @@ module Catalog {
     typedef structure {
         int timestamp;
         string git_commit_hash;
-        boolean with_disabled;
+        boolean include_disabled;
     } RepoVersion;
 
     funcdef list_repo_versions(SelectModuleParams params) returns (list<RepoVersion>
