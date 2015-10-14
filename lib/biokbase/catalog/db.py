@@ -21,7 +21,7 @@ from pymongo import MongoClient
 
 Module Document:
     {
-        module: str, (unique index)
+        module_name: str, (unique index)
         git_url: str, (unique index)
 
         owners: [
@@ -83,7 +83,7 @@ class MongoCatalogDBI:
         self.modules = self.db[MongoCatalogDBI._MODULES]
 
         # Make sure we have an index on module and git_repo_url
-        self.modules.create_index('module_name', unique=True)
+        self.modules.create_index('module_name', unique=True, sparse=True)
         self.modules.create_index('git_url', unique=True)
 
 
@@ -129,62 +129,106 @@ class MongoCatalogDBI:
     # last_state does not match indicating another process changed the state
     def set_module_registration_state(self, module_name='', git_url='', new_state=None, last_state=None, error_message=''):
         if new_state:
-            if module_name:
-                if last_state:
-                    result = self.modules.update({'module_name':module_name,'state.registration':last_state}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
-                else:
-                    result = self.modules.update({'module_name':module_name}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
-            if git_url:
-                if last_state:
-                    result = self.modules.update({'git_url':git_url,'state.registration':last_state}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
-                else:
-                    result = self.modules.update({'git_url':git_url}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
-            if result:
-                # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
-                # we can only check for 'n'!!
-                nModified = 0
-                if 'n' in result:
-                    nModified = result['n']
-                if 'nMatched' in result:
-                    nModified = result['nMatched']
-                if 'nModified' in result:
-                    nModified = result['nModified']
-                if nModified < 1:
-                    return False
-                return True
+            query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+            if last_state:
+                query['state.registration'] = last_state
+            result = self.modules.update(query, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
+            return self._check_update_result(result)
         return False
+
+    def set_module_release_state(self, module_name='', git_url='', new_state=None, last_state=None, review_message=''):
+        if new_state:
+            query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+            if last_state:
+                query['state.release_approval'] = last_state
+            result = self.modules.update(query, {'$set':{'state.release_approval':new_state, 'state.review_message':error_message}})
+            return self._check_update_result(result)
+        return False
+
+
+
+
+    def push_beta_to_release(self, module_name='', git_url=''):
+        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
+        beta_version = current_versions['beta']
+
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        query['current_versions.beta.timestamp'] = beta_version['timestamp']
+        
+        result = self.modules.update(query, {'$set':{'current_versions.release':beta_version}})
+        return self._check_update_result(result)
+
+    def push_dev_to_beta(self, module_name='', git_url=''):
+        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
+        dev_version = current_versions['dev']
+
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        query['current_versions.dev.timestamp'] = dev_version['timestamp']
+        
+        result = self.modules.update(query, {'$set':{'current_versions.beta':dev_version}})
+        return self._check_update_result(result)
+
+    def update_dev_version(self, version_info, module_name='', git_url=''):
+        if version_info:
+            query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+            result = self.modules.update(query, {'$set':{'current_versions.dev':version_info}})
+            return self._check_update_result(result)
+        return False
+
 
 
     #### GET methods
     def get_module_state(self, module_name='', git_url=''):
-        if module_name:
-            print('searching by module name ('+module_name+')');
-            return self.modules.find_one({'module_name':module_name}, fields=['state'])['state']
-        if git_url:
-            print('searching by git url');
-            return self.modules.find_one({'git_url':git_url}, fields=['state'])['state']
-        return None
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        return self.modules.find_one(query, fields=['state'])['state']
+
+    def get_module_current_versions(self, module_name='', git_url=''):
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        return self.modules.find_one(query, fields=['current_versions'])['current_versions']
+
+    def get_module_owners(self, module_name='', git_url=''):
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        return self.modules.find_one(query, fields=['owners'])['owners']
 
     def get_module_details(self, module_name='', git_url=''):
-        if module_name:
-            return self.modules.find_one({'module_name':module_name}, fields=['module_name','git_url','info','owners','state','current_versions'])
-        if git_url:
-            return self.modules.find_one({'git_url':git_url}, fields=['module_name','git_url','info','owners','state','current_versions'])
-        return None
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        return self.modules.find_one(query, fields=['module_name','git_url','info','owners','state','current_versions'])
 
     def get_module_full_details(self, module_name='', git_url=''):
-        if module_name:
-            return self.modules.find_one({'module_name':module_name})
-        if git_url:
-            return self.modules.find_one({'git_url':git_url})
-        return None
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        return self.modules.find_one(query)
 
 
     #### LIST / SEARCH methods
 
-    def list_module_names(self):
-        return self.modules.find({},{'module_name':1,'git_url':1,'_id':0})
+    def find_basic_module_info(self, query):
+        return list(self.modules.find(query,{'module_name':1,'git_url':1,'_id':0}))
 
+
+    #### utility methods
+    def _get_mongo_query(self, module_name='', git_url=''):
+        query={}
+        if module_name:
+            query['module_name'] = module_name
+        if git_url:
+            query['git_url'] = git_url
+        return query
+
+    def _check_update_result(self, result):
+        if result:
+            # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
+            # we can only check for 'n'!!
+            nModified = 0
+            if 'n' in result:
+                nModified = result['n']
+            if 'nMatched' in result:
+                nModified = result['nMatched']
+            if 'nModified' in result:
+                nModified = result['nModified']
+            if nModified < 1:
+                return False
+            return True
+        return False
 
 
 

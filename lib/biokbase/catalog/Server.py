@@ -63,18 +63,30 @@ async_check_methods = {}
 async_run_methods['Catalog.version_async'] = ['Catalog', 'version']
 async_check_methods['Catalog.version_check'] = ['Catalog', 'version']
 sync_methods['Catalog.version'] = True
-async_run_methods['Catalog.is_repo_registered_async'] = ['Catalog', 'is_repo_registered']
-async_check_methods['Catalog.is_repo_registered_check'] = ['Catalog', 'is_repo_registered']
-sync_methods['Catalog.is_repo_registered'] = True
-async_run_methods['Catalog.register_repo_async'] = ['Catalog', 'register_repo']
-async_check_methods['Catalog.register_repo_check'] = ['Catalog', 'register_repo']
-sync_methods['Catalog.register_repo'] = True
+async_run_methods['Catalog.is_registered_async'] = ['Catalog', 'is_registered']
+async_check_methods['Catalog.is_registered_check'] = ['Catalog', 'is_registered']
+sync_methods['Catalog.is_registered'] = True
 async_run_methods['Catalog.get_repo_last_timestamp_async'] = ['Catalog', 'get_repo_last_timestamp']
 async_check_methods['Catalog.get_repo_last_timestamp_check'] = ['Catalog', 'get_repo_last_timestamp']
 sync_methods['Catalog.get_repo_last_timestamp'] = True
-async_run_methods['Catalog.list_module_names_async'] = ['Catalog', 'list_module_names']
-async_check_methods['Catalog.list_module_names_check'] = ['Catalog', 'list_module_names']
-sync_methods['Catalog.list_module_names'] = True
+async_run_methods['Catalog.register_repo_async'] = ['Catalog', 'register_repo']
+async_check_methods['Catalog.register_repo_check'] = ['Catalog', 'register_repo']
+sync_methods['Catalog.register_repo'] = True
+async_run_methods['Catalog.push_dev_to_beta_async'] = ['Catalog', 'push_dev_to_beta']
+async_check_methods['Catalog.push_dev_to_beta_check'] = ['Catalog', 'push_dev_to_beta']
+sync_methods['Catalog.push_dev_to_beta'] = True
+async_run_methods['Catalog.request_release_async'] = ['Catalog', 'request_release']
+async_check_methods['Catalog.request_release_check'] = ['Catalog', 'request_release']
+sync_methods['Catalog.request_release'] = True
+async_run_methods['Catalog.list_requested_releases_async'] = ['Catalog', 'list_requested_releases']
+async_check_methods['Catalog.list_requested_releases_check'] = ['Catalog', 'list_requested_releases']
+sync_methods['Catalog.list_requested_releases'] = True
+async_run_methods['Catalog.review_release_request_async'] = ['Catalog', 'review_release_request']
+async_check_methods['Catalog.review_release_request_check'] = ['Catalog', 'review_release_request']
+sync_methods['Catalog.review_release_request'] = True
+async_run_methods['Catalog.list_basic_module_info_async'] = ['Catalog', 'list_basic_module_info']
+async_check_methods['Catalog.list_basic_module_info_check'] = ['Catalog', 'list_basic_module_info']
+sync_methods['Catalog.list_basic_module_info'] = True
 async_run_methods['Catalog.get_repo_details_async'] = ['Catalog', 'get_repo_details']
 async_check_methods['Catalog.get_repo_details_check'] = ['Catalog', 'get_repo_details']
 sync_methods['Catalog.get_repo_details'] = True
@@ -361,22 +373,38 @@ class Application(object):
                              name='Catalog.version',
                              types=[])
         self.method_authentication['Catalog.version'] = 'none'
-        self.rpc_service.add(impl_Catalog.is_repo_registered,
-                             name='Catalog.is_repo_registered',
+        self.rpc_service.add(impl_Catalog.is_registered,
+                             name='Catalog.is_registered',
                              types=[dict])
-        self.method_authentication['Catalog.is_repo_registered'] = 'none'
-        self.rpc_service.add(impl_Catalog.register_repo,
-                             name='Catalog.register_repo',
-                             types=[dict])
-        self.method_authentication['Catalog.register_repo'] = 'required'
+        self.method_authentication['Catalog.is_registered'] = 'none'
         self.rpc_service.add(impl_Catalog.get_repo_last_timestamp,
                              name='Catalog.get_repo_last_timestamp',
                              types=[dict])
         self.method_authentication['Catalog.get_repo_last_timestamp'] = 'none'
-        self.rpc_service.add(impl_Catalog.list_module_names,
-                             name='Catalog.list_module_names',
+        self.rpc_service.add(impl_Catalog.register_repo,
+                             name='Catalog.register_repo',
                              types=[dict])
-        self.method_authentication['Catalog.list_module_names'] = 'none'
+        self.method_authentication['Catalog.register_repo'] = 'required'
+        self.rpc_service.add(impl_Catalog.push_dev_to_beta,
+                             name='Catalog.push_dev_to_beta',
+                             types=[dict])
+        self.method_authentication['Catalog.push_dev_to_beta'] = 'required'
+        self.rpc_service.add(impl_Catalog.request_release,
+                             name='Catalog.request_release',
+                             types=[dict])
+        self.method_authentication['Catalog.request_release'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_requested_releases,
+                             name='Catalog.list_requested_releases',
+                             types=[])
+        self.method_authentication['Catalog.list_requested_releases'] = 'none'
+        self.rpc_service.add(impl_Catalog.review_release_request,
+                             name='Catalog.review_release_request',
+                             types=[dict])
+        self.method_authentication['Catalog.review_release_request'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_basic_module_info,
+                             name='Catalog.list_basic_module_info',
+                             types=[dict])
+        self.method_authentication['Catalog.list_basic_module_info'] = 'none'
         self.rpc_service.add(impl_Catalog.get_repo_details,
                              name='Catalog.get_repo_details',
                              types=[dict])

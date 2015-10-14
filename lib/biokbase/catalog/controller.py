@@ -93,6 +93,8 @@ class CatalogController:
                         # we can fail if the registration state changed when we were first checking to now.  This is important
                         # to ensure we only ever kick off one registration thread at a time
                         raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin.')
+                    # we know we are the only operation working, so we can clear the dev version and upate the timestamp
+                    self.db.update_dev_version({'timestamp':timestamp}, git_url=git_url)
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
@@ -103,6 +105,8 @@ class CatalogController:
         #   - If all went well, and during the process, it will update the registration state of the
         #     module and finally update the dev version
         #   - If things failed, it will set the error state, and set an error message.
+
+        # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir))
         t.start()
@@ -143,6 +147,27 @@ class CatalogController:
         params = self.filter_module_or_repo_selection(params)
         return self.db.get_module_state(module_name=params['module_name'],git_url=params['git_url'])
 
+    def is_registered(self,params):
+        if 'git_url' not in params:
+            params['git_url'] = ''
+        if 'module_name' not in params:
+            params['module_name'] = ''
+        if self.db.is_registered(module_name=params['module_name'], git_url=params['git_url']) :
+            return True
+        return False
+
+    def list_basic_module_info(self,params):
+        query = { 'state.active':True }
+        if 'include_disabled' in params:
+            if params['include_disabled']>0:
+                query.pop('state.active',None)
+        return self.db.find_basic_module_info(query)
+
+
+
+
+
+    # Some utility methods
 
     def filter_module_or_repo_selection(self, params):
         if 'git_url' not in params:
@@ -154,6 +179,7 @@ class CatalogController:
         return params
 
 
+    # always true if the user is in the admin list
     def has_permission(self, username, owners):
         if self.is_admin(username):
             return True
