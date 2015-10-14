@@ -82,9 +82,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: timestamp
         #BEGIN register_repo
-        
         timestamp = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
-
         #END register_repo
 
         # At some point might do deeper type checking...
@@ -186,8 +184,6 @@ class Catalog:
             state['active']=1
         else:
             state['active']=0
-
-        pprint(state)
         #END get_module_state
 
         # At some point might do deeper type checking...
