@@ -28,14 +28,9 @@ class Registrar:
         # look for docker image / instance
         # if image does not exist, build and set state
         # if instance does not exist, start and set state
-        print self.docker_base_url
 	dockerclient = DockerClient(base_url = str(self.docker_base_url))
-        print dockerclient
-        print dockerclient.containers
         somefile = open(self.temp_dir+'/file'+str(self.timestamp), 'w')
         somefile.write('doing something\n');
-        somefile.write(str(dockerclient));
         somefile.write(str(dockerclient.containers()));
         somefile.write(str(self.params));
         somefile.close();
-        print >> sys.stderr, dockerclient.containers()
