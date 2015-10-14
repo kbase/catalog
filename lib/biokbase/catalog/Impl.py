@@ -97,14 +97,14 @@ class Catalog:
     def push_dev_to_beta(self, ctx, params):
         # ctx is the context object
         #BEGIN push_dev_to_beta
-        #END push_dev_to_beta
         pass
+        #END push_dev_to_beta
 
     def request_release(self, ctx, params):
         # ctx is the context object
         #BEGIN request_release
-        #END request_release
         pass
+        #END request_release
 
     def list_requested_releases(self, ctx):
         # ctx is the context object
@@ -122,8 +122,8 @@ class Catalog:
     def review_release_request(self, ctx, review):
         # ctx is the context object
         #BEGIN review_release_request
-        #END review_release_request
         pass
+        #END review_release_request
 
     def list_basic_module_info(self, ctx, params):
         # ctx is the context object
@@ -173,7 +173,6 @@ class Catalog:
         #BEGIN set_registration_state
         self.cc.set_registration_state(params, ctx['user_id'])
         #END set_registration_state
-        pass
 
     def get_module_state(self, ctx, params):
         # ctx is the context object

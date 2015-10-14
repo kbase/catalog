@@ -64,6 +64,10 @@ class CatalogController:
         if not os.access(self.temp_dir, os.W_OK):
             raise ValueError('"temp-dir" not writable! Writable space is required for registration to work!')
 
+        if 'docker-base-url' not in config:
+            raise ValueError('"docker-base-url" config variable must be defined to start a CatalogController!')
+        self.docker_base_url = config['docker-base-url']
+        print(self.docker_base_url)
 
 
     def register_repo(self, params, username, token):
@@ -108,7 +112,7 @@ class CatalogController:
 
         # first set the dev current_release timestamp
 
-        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir))
+        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url))
         t.start()
 
         # 4) provide the timestamp 
@@ -200,7 +204,7 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir)
+def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url)
     registrar.start_registration()
 
