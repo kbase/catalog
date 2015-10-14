@@ -12,58 +12,23 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: RepoVersion</p>
+ * <p>Original spec-file type: ListModuleParams</p>
  * <pre>
- * timestamp will be epoch time
+ * Describes how to filter repositories.
+ * with_disabled - optional flag adding disabled repos (default value is false).
  * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "timestamp",
-    "git_commit_hash",
     "include_disabled"
 })
-public class RepoVersion {
+public class ListModuleParams {
 
-    @JsonProperty("timestamp")
-    private Long timestamp;
-    @JsonProperty("git_commit_hash")
-    private String gitCommitHash;
     @JsonProperty("include_disabled")
     private Long includeDisabled;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
-
-    @JsonProperty("timestamp")
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
-    @JsonProperty("timestamp")
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public RepoVersion withTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-        return this;
-    }
-
-    @JsonProperty("git_commit_hash")
-    public String getGitCommitHash() {
-        return gitCommitHash;
-    }
-
-    @JsonProperty("git_commit_hash")
-    public void setGitCommitHash(String gitCommitHash) {
-        this.gitCommitHash = gitCommitHash;
-    }
-
-    public RepoVersion withGitCommitHash(String gitCommitHash) {
-        this.gitCommitHash = gitCommitHash;
-        return this;
-    }
 
     @JsonProperty("include_disabled")
     public Long getIncludeDisabled() {
@@ -75,7 +40,7 @@ public class RepoVersion {
         this.includeDisabled = includeDisabled;
     }
 
-    public RepoVersion withIncludeDisabled(Long includeDisabled) {
+    public ListModuleParams withIncludeDisabled(Long includeDisabled) {
         this.includeDisabled = includeDisabled;
         return this;
     }
@@ -92,7 +57,7 @@ public class RepoVersion {
 
     @Override
     public String toString() {
-        return ((((((((("RepoVersion"+" [timestamp=")+ timestamp)+", gitCommitHash=")+ gitCommitHash)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((("ListModuleParams"+" [includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

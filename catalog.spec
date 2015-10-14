@@ -66,6 +66,7 @@ module Catalog {
     */
     typedef structure {
         string module_name;
+        string git_url;
         string decision;
         string review_message;
     } ReleaseReview;

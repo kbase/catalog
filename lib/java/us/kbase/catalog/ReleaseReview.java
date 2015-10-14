@@ -12,12 +12,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: SelectModuleParams</p>
+ * <p>Original spec-file type: ReleaseReview</p>
  * <pre>
- * Describes how to find module/repository details.
- * module_name - name of module defined in kbase.yaml file;
- * git_url - the url used to register the module
- * include_disabled - optional flag, set to true to include disabled repos
+ * decision - approved | denied
+ * review_message -
  * </pre>
  * 
  */
@@ -26,16 +24,19 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "module_name",
     "git_url",
-    "include_disabled"
+    "decision",
+    "review_message"
 })
-public class SelectModuleParams {
+public class ReleaseReview {
 
     @JsonProperty("module_name")
     private String moduleName;
     @JsonProperty("git_url")
     private String gitUrl;
-    @JsonProperty("include_disabled")
-    private Long includeDisabled;
+    @JsonProperty("decision")
+    private String decision;
+    @JsonProperty("review_message")
+    private String reviewMessage;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -48,7 +49,7 @@ public class SelectModuleParams {
         this.moduleName = moduleName;
     }
 
-    public SelectModuleParams withModuleName(String moduleName) {
+    public ReleaseReview withModuleName(String moduleName) {
         this.moduleName = moduleName;
         return this;
     }
@@ -63,23 +64,38 @@ public class SelectModuleParams {
         this.gitUrl = gitUrl;
     }
 
-    public SelectModuleParams withGitUrl(String gitUrl) {
+    public ReleaseReview withGitUrl(String gitUrl) {
         this.gitUrl = gitUrl;
         return this;
     }
 
-    @JsonProperty("include_disabled")
-    public Long getIncludeDisabled() {
-        return includeDisabled;
+    @JsonProperty("decision")
+    public String getDecision() {
+        return decision;
     }
 
-    @JsonProperty("include_disabled")
-    public void setIncludeDisabled(Long includeDisabled) {
-        this.includeDisabled = includeDisabled;
+    @JsonProperty("decision")
+    public void setDecision(String decision) {
+        this.decision = decision;
     }
 
-    public SelectModuleParams withIncludeDisabled(Long includeDisabled) {
-        this.includeDisabled = includeDisabled;
+    public ReleaseReview withDecision(String decision) {
+        this.decision = decision;
+        return this;
+    }
+
+    @JsonProperty("review_message")
+    public String getReviewMessage() {
+        return reviewMessage;
+    }
+
+    @JsonProperty("review_message")
+    public void setReviewMessage(String reviewMessage) {
+        this.reviewMessage = reviewMessage;
+    }
+
+    public ReleaseReview withReviewMessage(String reviewMessage) {
+        this.reviewMessage = reviewMessage;
         return this;
     }
 
@@ -95,7 +111,7 @@ public class SelectModuleParams {
 
     @Override
     public String toString() {
-        return ((((((((("SelectModuleParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("ReleaseReview"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", decision=")+ decision)+", reviewMessage=")+ reviewMessage)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
