@@ -74,7 +74,7 @@ class CatalogController:
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
 
         # 1) If the repo does not yet exist, then create it.  No permission checks needed
-        if not self.db.is_registered(git_url) : 
+        if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
@@ -112,7 +112,46 @@ class CatalogController:
 
 
 
+    def set_registration_state(self, params, username):
+        # first some error handling
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to modify the registration state of this module/repo.')
+        params = self.filter_module_or_repo_selection(params)
+        if 'registration_state' not in params:
+            raise ValueError('Update failed - no registration state indicated.')
+        #TODO: possibly check for empty states or that the state is a valid state here
+        #if not params['registration_state'] :
+        error_message = ''
+        if params['registration_state'] == 'error':
+            if 'error_message' not in params:
+                raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
+            if params['error_message']:
+                raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
+            error_message = params['error_message']
+        else:
+            # then we update the state
+            success = self.db.set_module_registration_state(
+                        git_url=params['git_url'],
+                        module_name=params['module_name'],
+                        new_state=params['registration_state'],
+                        error_message=error_message)
+            if not success:
+                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown mongo error.')
 
+
+    def get_module_state(self, params):
+        params = self.filter_module_or_repo_selection(params)
+        return self.db.get_module_state(module_name=params['module_name'],git_url=params['git_url'])
+
+
+    def filter_module_or_repo_selection(self, params):
+        if 'git_url' not in params:
+            params['git_url'] = ''
+        if 'module_name' not in params:
+            params['module_name'] = ''
+        if not self.db.is_registered(module_name=params['module_name'], git_url=params['git_url']) :
+            raise ValueError('Operation failed - module/repo is not registered.')
+        return params
 
 
     def has_permission(self, username, owners):

@@ -27,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "module_name",
     "git_url",
-    "git_branch",
     "git_commit_hash",
     "version",
     "module_description",
@@ -43,8 +42,6 @@ public class RepoDetails {
     private java.lang.String moduleName;
     @JsonProperty("git_url")
     private java.lang.String gitUrl;
-    @JsonProperty("git_branch")
-    private java.lang.String gitBranch;
     @JsonProperty("git_commit_hash")
     private java.lang.String gitCommitHash;
     @JsonProperty("version")
@@ -90,21 +87,6 @@ public class RepoDetails {
 
     public RepoDetails withGitUrl(java.lang.String gitUrl) {
         this.gitUrl = gitUrl;
-        return this;
-    }
-
-    @JsonProperty("git_branch")
-    public java.lang.String getGitBranch() {
-        return gitBranch;
-    }
-
-    @JsonProperty("git_branch")
-    public void setGitBranch(java.lang.String gitBranch) {
-        this.gitBranch = gitBranch;
-    }
-
-    public RepoDetails withGitBranch(java.lang.String gitBranch) {
-        this.gitBranch = gitBranch;
         return this;
     }
 
@@ -240,7 +222,7 @@ public class RepoDetails {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((((((("RepoDetails"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", gitBranch=")+ gitBranch)+", gitCommitHash=")+ gitCommitHash)+", version=")+ version)+", moduleDescription=")+ moduleDescription)+", serviceLanguage=")+ serviceLanguage)+", owners=")+ owners)+", readme=")+ readme)+", methodIds=")+ methodIds)+", widgetIds=")+ widgetIds)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((("RepoDetails"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", gitCommitHash=")+ gitCommitHash)+", version=")+ version)+", moduleDescription=")+ moduleDescription)+", serviceLanguage=")+ serviceLanguage)+", owners=")+ owners)+", readme=")+ readme)+", methodIds=")+ methodIds)+", widgetIds=")+ widgetIds)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

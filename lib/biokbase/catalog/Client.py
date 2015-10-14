@@ -198,13 +198,6 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
-    def get_repo_registration_state(self, params, json_rpc_context = None):
-        if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method get_repo_registration_state: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.get_repo_registration_state',
-                          [params], json_rpc_context)
-        return resp[0]
-  
     def list_module_names(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method list_module_names: argument json_rpc_context is not type dict as required.')
@@ -226,16 +219,16 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
-    def set_repo_state(self, params, json_rpc_context = None):
+    def set_registration_state(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method set_repo_state: argument json_rpc_context is not type dict as required.')
-        self._call('Catalog.set_repo_state',
+            raise ValueError('Method set_registration_state: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.set_registration_state',
                    [params], json_rpc_context)
   
-    def get_repo_state(self, params, json_rpc_context = None):
+    def get_module_state(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method get_repo_state: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.get_repo_state',
+            raise ValueError('Method get_module_state: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_module_state',
                           [params], json_rpc_context)
         return resp[0]
  

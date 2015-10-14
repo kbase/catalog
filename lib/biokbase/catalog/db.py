@@ -83,24 +83,21 @@ class MongoCatalogDBI:
         self.modules = self.db[MongoCatalogDBI._MODULES]
 
         # Make sure we have an index on module and git_repo_url
-        self.modules.create_index('module', unique=True)
+        self.modules.create_index('module_name', unique=True)
         self.modules.create_index('git_url', unique=True)
 
 
-    def module_exists(self, module):
+
+    def is_registered(self,module_name='',git_url=''):
         if module_name:
-            module = self.modules.find_one({'module':module}, fields=['_id'])
+            module = self.modules.find_one({'module_name':module_name}, fields=['_id'])
             if module is not None:
                 return True
-        return False
-
-    def is_registered(self, git_url):
-        if git_url:
+        elif git_url:
             module = self.modules.find_one({'git_url':git_url}, fields=['_id'])
             if module is not None:
                 return True
         return False
-
 
 
     #### SET methods
@@ -130,18 +127,18 @@ class MongoCatalogDBI:
 
     # last_state is for concurency control.  If set, it will match on state as well, and will fail if the
     # last_state does not match indicating another process changed the state
-    def set_module_registration_state(self, module='', git_url='', new_state=None, last_state=None):
+    def set_module_registration_state(self, module_name='', git_url='', new_state=None, last_state=None, error_message=''):
         if new_state:
-            if module:
+            if module_name:
                 if last_state:
-                    result = self.modules.update({'module':module,'state.registration':last_state}, {'$set':{'state.registration':new_state}})
+                    result = self.modules.update({'module_name':module_name,'state.registration':last_state}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
                 else:
-                    result = self.modules.update({'module':module}, {'$set':{'state.registration':new_state}})
+                    result = self.modules.update({'module_name':module_name}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
             if git_url:
                 if last_state:
-                    result = self.modules.update({'git_url':git_url,'state.registration':last_state}, {'$set':{'state.registration':new_state}})
+                    result = self.modules.update({'git_url':git_url,'state.registration':last_state}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
                 else:
-                    result = self.modules.update({'git_url':git_url}, {'$set':{'state.registration':new_state}})
+                    result = self.modules.update({'git_url':git_url}, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
             if result:
                 # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
                 # we can only check for 'n'!!
@@ -158,61 +155,26 @@ class MongoCatalogDBI:
         return False
 
 
-    #
-    # 
-    #def set_module_state(self, module='', git_url='', state=None, last_state=None):
-    #    success = False
-    #    if state:
-    #        if module:
-    #            if last_state:
-    #                result = self.modules.update(
-    #                            {'module':module, 'state':last_state}, 
-    #                            { '$set':{'state':state} }
-    #                        )
-    #            else:
-    #                result = self.modules.update(
-    #                            {'module':module}, 
-    #                            { '$set':{'state':state} }
-    #                        )
-    #        if git_url:
-    #            if last_state:
-    #                print('ok, calling mongo')
-    #                pprint(state)
-    #                pprint(last_state)
-    #                result = self.modules.update(
-    #                            {'git_url':git_url, 'state':last_state}, 
-    #                            { '$set':{'state':state} }
-    #                        )
-    #            else:
-    #                result = self.modules.update(
-    #                            {'git_url':git_url}, 
-    #                            { '$set':{'state':state} }
-    #                        )
-    #        if result:
-    #            print('printing the result object we gots')
-    #            
-    #            pprint(result)
-
-
     #### GET methods
-
-    def get_module_state(self, module='', git_url=''):
-        if module:
-            return self.modules.find_one({'module':module}, fields=['module','git_url','state'])
+    def get_module_state(self, module_name='', git_url=''):
+        if module_name:
+            print('searching by module name ('+module_name+')');
+            return self.modules.find_one({'module_name':module_name}, fields=['state'])['state']
         if git_url:
-            return self.modules.find_one({'git_url':git_url}, fields=['module','git_url','state'])
+            print('searching by git url');
+            return self.modules.find_one({'git_url':git_url}, fields=['state'])['state']
         return None
 
-    def get_module_details(self, module='', git_url=''):
-        if module:
-            return self.modules.find_one({'module':module}, fields=['module','git_url','info','owners','state','current_versions'])
+    def get_module_details(self, module_name='', git_url=''):
+        if module_name:
+            return self.modules.find_one({'module_name':module_name}, fields=['module_name','git_url','info','owners','state','current_versions'])
         if git_url:
-            return self.modules.find_one({'git_url':git_url}, fields=['module','git_url','info','owners','state','current_versions'])
+            return self.modules.find_one({'git_url':git_url}, fields=['module_name','git_url','info','owners','state','current_versions'])
         return None
 
-    def get_module_full_details(self, module='', git_url=''):
-        if module:
-            return self.modules.find_one({'module':module})
+    def get_module_full_details(self, module_name='', git_url=''):
+        if module_name:
+            return self.modules.find_one({'module_name':module_name})
         if git_url:
             return self.modules.find_one({'git_url':git_url})
         return None
@@ -221,7 +183,7 @@ class MongoCatalogDBI:
     #### LIST / SEARCH methods
 
     def list_module_names(self):
-        return self.modules.find({},{'module':1,'git_url':1,'_id':0})
+        return self.modules.find({},{'module_name':1,'git_url':1,'_id':0})
 
 
 

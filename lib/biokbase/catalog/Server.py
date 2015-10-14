@@ -72,9 +72,6 @@ sync_methods['Catalog.register_repo'] = True
 async_run_methods['Catalog.get_repo_last_timestamp_async'] = ['Catalog', 'get_repo_last_timestamp']
 async_check_methods['Catalog.get_repo_last_timestamp_check'] = ['Catalog', 'get_repo_last_timestamp']
 sync_methods['Catalog.get_repo_last_timestamp'] = True
-async_run_methods['Catalog.get_repo_registration_state_async'] = ['Catalog', 'get_repo_registration_state']
-async_check_methods['Catalog.get_repo_registration_state_check'] = ['Catalog', 'get_repo_registration_state']
-sync_methods['Catalog.get_repo_registration_state'] = True
 async_run_methods['Catalog.list_module_names_async'] = ['Catalog', 'list_module_names']
 async_check_methods['Catalog.list_module_names_check'] = ['Catalog', 'list_module_names']
 sync_methods['Catalog.list_module_names'] = True
@@ -84,12 +81,12 @@ sync_methods['Catalog.get_repo_details'] = True
 async_run_methods['Catalog.list_repo_versions_async'] = ['Catalog', 'list_repo_versions']
 async_check_methods['Catalog.list_repo_versions_check'] = ['Catalog', 'list_repo_versions']
 sync_methods['Catalog.list_repo_versions'] = True
-async_run_methods['Catalog.set_repo_state_async'] = ['Catalog', 'set_repo_state']
-async_check_methods['Catalog.set_repo_state_check'] = ['Catalog', 'set_repo_state']
-sync_methods['Catalog.set_repo_state'] = True
-async_run_methods['Catalog.get_repo_state_async'] = ['Catalog', 'get_repo_state']
-async_check_methods['Catalog.get_repo_state_check'] = ['Catalog', 'get_repo_state']
-sync_methods['Catalog.get_repo_state'] = True
+async_run_methods['Catalog.set_registration_state_async'] = ['Catalog', 'set_registration_state']
+async_check_methods['Catalog.set_registration_state_check'] = ['Catalog', 'set_registration_state']
+sync_methods['Catalog.set_registration_state'] = True
+async_run_methods['Catalog.get_module_state_async'] = ['Catalog', 'get_module_state']
+async_check_methods['Catalog.get_module_state_check'] = ['Catalog', 'get_module_state']
+sync_methods['Catalog.get_module_state'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -376,10 +373,6 @@ class Application(object):
                              name='Catalog.get_repo_last_timestamp',
                              types=[dict])
         self.method_authentication['Catalog.get_repo_last_timestamp'] = 'none'
-        self.rpc_service.add(impl_Catalog.get_repo_registration_state,
-                             name='Catalog.get_repo_registration_state',
-                             types=[dict])
-        self.method_authentication['Catalog.get_repo_registration_state'] = 'none'
         self.rpc_service.add(impl_Catalog.list_module_names,
                              name='Catalog.list_module_names',
                              types=[dict])
@@ -392,14 +385,14 @@ class Application(object):
                              name='Catalog.list_repo_versions',
                              types=[dict])
         self.method_authentication['Catalog.list_repo_versions'] = 'none'
-        self.rpc_service.add(impl_Catalog.set_repo_state,
-                             name='Catalog.set_repo_state',
+        self.rpc_service.add(impl_Catalog.set_registration_state,
+                             name='Catalog.set_registration_state',
                              types=[dict])
-        self.method_authentication['Catalog.set_repo_state'] = 'required'
-        self.rpc_service.add(impl_Catalog.get_repo_state,
-                             name='Catalog.get_repo_state',
+        self.method_authentication['Catalog.set_registration_state'] = 'required'
+        self.rpc_service.add(impl_Catalog.get_module_state,
+                             name='Catalog.get_module_state',
                              types=[dict])
-        self.method_authentication['Catalog.get_repo_state'] = 'none'
+        self.method_authentication['Catalog.get_module_state'] = 'none'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,

@@ -90,19 +90,6 @@ class Catalog:
         # return the results
         return [timestamp]
 
-    def get_repo_registration_state(self, ctx, params):
-        # ctx is the context object
-        # return variables are: registration_state
-        #BEGIN get_repo_registration_state
-        #END get_repo_registration_state
-
-        # At some point might do deeper type checking...
-        if not isinstance(registration_state, basestring):
-            raise ValueError('Method get_repo_registration_state return value ' +
-                             'registration_state is not type basestring as required.')
-        # return the results
-        return [registration_state]
-
     def list_module_names(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
@@ -142,21 +129,30 @@ class Catalog:
         # return the results
         return [versions]
 
-    def set_repo_state(self, ctx, params):
+    def set_registration_state(self, ctx, params):
         # ctx is the context object
-        #BEGIN set_repo_state
-        #END set_repo_state
+        #BEGIN set_registration_state
+        self.cc.set_registration_state(params, ctx['user_id'])
+        #END set_registration_state
         pass
 
-    def get_repo_state(self, ctx, params):
+    def get_module_state(self, ctx, params):
         # ctx is the context object
         # return variables are: state
-        #BEGIN get_repo_state
-        #END get_repo_state
+        #BEGIN get_module_state
+        state = self.cc.get_module_state(params)
+        # make sure booleans are converted to numeric values for KBase compatibility
+        if state['active']:
+            state['active']=1
+        else:
+            state['active']=0
+
+        pprint(state)
+        #END get_module_state
 
         # At some point might do deeper type checking...
-        if not isinstance(state, basestring):
-            raise ValueError('Method get_repo_state return value ' +
-                             'state is not type basestring as required.')
+        if not isinstance(state, dict):
+            raise ValueError('Method get_module_state return value ' +
+                             'state is not type dict as required.')
         # return the results
         return [state]

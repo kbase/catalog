@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: SetRepoStateParams</p>
+ * <p>Original spec-file type: SetRegistrationStateParams</p>
  * <pre>
  * Describes how to find repository details.
  * module_name - name of module defined in kbase.yaml file;
@@ -25,16 +25,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "github_repo",
+    "git_url",
     "registration_state",
     "error_message"
 })
-public class SetRepoStateParams {
+public class SetRegistrationStateParams {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("github_repo")
-    private String githubRepo;
+    @JsonProperty("git_url")
+    private String gitUrl;
     @JsonProperty("registration_state")
     private String registrationState;
     @JsonProperty("error_message")
@@ -51,23 +51,23 @@ public class SetRepoStateParams {
         this.moduleName = moduleName;
     }
 
-    public SetRepoStateParams withModuleName(String moduleName) {
+    public SetRegistrationStateParams withModuleName(String moduleName) {
         this.moduleName = moduleName;
         return this;
     }
 
-    @JsonProperty("github_repo")
-    public String getGithubRepo() {
-        return githubRepo;
+    @JsonProperty("git_url")
+    public String getGitUrl() {
+        return gitUrl;
     }
 
-    @JsonProperty("github_repo")
-    public void setGithubRepo(String githubRepo) {
-        this.githubRepo = githubRepo;
+    @JsonProperty("git_url")
+    public void setGitUrl(String gitUrl) {
+        this.gitUrl = gitUrl;
     }
 
-    public SetRepoStateParams withGithubRepo(String githubRepo) {
-        this.githubRepo = githubRepo;
+    public SetRegistrationStateParams withGitUrl(String gitUrl) {
+        this.gitUrl = gitUrl;
         return this;
     }
 
@@ -81,7 +81,7 @@ public class SetRepoStateParams {
         this.registrationState = registrationState;
     }
 
-    public SetRepoStateParams withRegistrationState(String registrationState) {
+    public SetRegistrationStateParams withRegistrationState(String registrationState) {
         this.registrationState = registrationState;
         return this;
     }
@@ -96,7 +96,7 @@ public class SetRepoStateParams {
         this.errorMessage = errorMessage;
     }
 
-    public SetRepoStateParams withErrorMessage(String errorMessage) {
+    public SetRegistrationStateParams withErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
         return this;
     }
@@ -113,7 +113,7 @@ public class SetRepoStateParams {
 
     @Override
     public String toString() {
-        return ((((((((((("SetRepoStateParams"+" [moduleName=")+ moduleName)+", githubRepo=")+ githubRepo)+", registrationState=")+ registrationState)+", errorMessage=")+ errorMessage)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("SetRegistrationStateParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", registrationState=")+ registrationState)+", errorMessage=")+ errorMessage)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

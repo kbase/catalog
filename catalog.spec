@@ -7,16 +7,17 @@ module Catalog {
     funcdef version() returns (string version);
 
     /*
-        Describes how to find repository details.
+        Describes how to find module/repository details.
         module_name - name of module defined in kbase.yaml file;
         with_disabled - optional flag adding disabled repos (default value is false).
     */
     typedef structure {
         string module_name;
+        string git_url;
         boolean with_disabled;
-    } CurrentRepoParams;
+    } SelectModuleParams;
 
-    funcdef is_repo_registered(CurrentRepoParams params) returns (boolean);
+    funcdef is_repo_registered(SelectModuleParams params) returns (boolean);
 
     typedef structure {
         string git_url;
@@ -27,10 +28,7 @@ module Catalog {
     funcdef register_repo(RegisterRepoParams params) returns (int timestamp)
         authentication required;
 
-    funcdef get_repo_last_timestamp(CurrentRepoParams params) returns (int timestamp);
-
-
-    funcdef get_repo_registration_state(CurrentRepoParams params) returns (string registration_state);
+    funcdef get_repo_last_timestamp(SelectModuleParams params) returns (int timestamp);
 
 
     /*
@@ -52,7 +50,6 @@ module Catalog {
     typedef structure {
         string module_name;
         string git_url;
-        string git_branch;
         string git_commit_hash;
         string version;
         string module_description;
@@ -87,7 +84,7 @@ module Catalog {
         boolean with_disabled;
     } RepoVersion;
 
-    funcdef list_repo_versions(CurrentRepoParams params) returns (list<RepoVersion>
+    funcdef list_repo_versions(SelectModuleParams params) returns (list<RepoVersion>
         versions);
 
     /*
@@ -98,15 +95,31 @@ module Catalog {
     */
     typedef structure {
         string module_name;
-        string state;
-    } SetRepoStateParams;
+        string git_url;
+        string registration_state;
+        string error_message;
+    } SetRegistrationStateParams;
 
-    funcdef set_repo_state(SetRepoStateParams params) returns () authentication
-        required;
+    funcdef set_registration_state(SetRegistrationStateParams params) returns () authentication required;
+
+    /*
+        active: True | False,
+        release_approval: approved | denied | under_review | not_requested, (all releases require approval)
+        review_message: str, (optional)
+        registration: building | complete | error,
+        error_message: str (optional)
+    */
+    typedef structure {
+        boolean active;
+        string release_approval;
+        string review_message;
+        string registration;
+        string error_message;
+    } ModuleState;
 
     /*
         Get repo state (one of 'pending', 'ready', 'building', 'testing', 'disabled').
     */
-    funcdef get_repo_state(CurrentRepoParams params) returns (string state);
+    funcdef get_module_state(SelectModuleParams params) returns (ModuleState state);
 
 };
