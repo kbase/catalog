@@ -79,6 +79,7 @@ class CatalogController:
         # 1) If the repo does not yet exist, then create it.  No permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp)
+            module_details = self.db.get_module_details(git_url=git_url)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
         # that the module is in a state where it can be registered 
@@ -111,7 +112,7 @@ class CatalogController:
 
         # first set the dev current_release timestamp
 
-        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url))
+        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, module_details))
         t.start()
 
         # 4) provide the timestamp 
@@ -316,7 +317,7 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url)
+def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url,module_details):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,module_details)
     registrar.start_registration()
 

@@ -18,6 +18,7 @@ wsgi_file=$KB_TOP/lib/biokbase/$KB_SERVICE_NAME/Server.py
 
 port="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME service-port)"
 processes="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME processes)"
+threads="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME threads)"
 cheaper="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME cheaper)"
 http_timeout="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME http-timeout)"
 
@@ -30,6 +31,7 @@ fi
 
 uwsgi --master \
     --processes $processes \
+    --threads $threads \
     --cheaper $cheaper \
     --http :$port \
     --http-timeout $http_timeout \
