@@ -82,9 +82,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: timestamp
         #BEGIN register_repo
-        
         timestamp = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
-
         #END register_repo
 
         # At some point might do deeper type checking...
@@ -97,19 +95,22 @@ class Catalog:
     def push_dev_to_beta(self, ctx, params):
         # ctx is the context object
         #BEGIN push_dev_to_beta
-        pass
+        self.cc.push_dev_to_beta(params,ctx['user_id'])
         #END push_dev_to_beta
+        pass
 
     def request_release(self, ctx, params):
         # ctx is the context object
         #BEGIN request_release
-        pass
+        self.cc.request_release(params,ctx['user_id'])
         #END request_release
+        pass
 
     def list_requested_releases(self, ctx):
         # ctx is the context object
         # return variables are: requested_releases
         #BEGIN list_requested_releases
+        requested_releases = self.cc.list_requested_releases()
         #END list_requested_releases
 
         # At some point might do deeper type checking...
@@ -122,17 +123,15 @@ class Catalog:
     def review_release_request(self, ctx, review):
         # ctx is the context object
         #BEGIN review_release_request
-        pass
+        self.cc.review_release_request(review, ctx['user_id'])
         #END review_release_request
+        pass
 
     def list_basic_module_info(self, ctx, params):
         # ctx is the context object
         # return variables are: info_list
         #BEGIN list_basic_module_info
         info_list = self.cc.list_basic_module_info(params)
-        print('---')
-        pprint(info_list)
-        print('+++')
         #END list_basic_module_info
 
         # At some point might do deeper type checking...
@@ -173,6 +172,7 @@ class Catalog:
         #BEGIN set_registration_state
         self.cc.set_registration_state(params, ctx['user_id'])
         #END set_registration_state
+        pass
 
     def get_module_state(self, ctx, params):
         # ctx is the context object
@@ -184,8 +184,6 @@ class Catalog:
             state['active']=1
         else:
             state['active']=0
-
-        pprint(state)
         #END get_module_state
 
         # At some point might do deeper type checking...

@@ -12,30 +12,22 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: SelectModuleParams</p>
- * <pre>
- * Describes how to find module/repository details.
- * module_name - name of module defined in kbase.yaml file;
- * git_url - the url used to register the module
- * include_disabled - optional flag, set to true to include disabled repos
- * </pre>
+ * <p>Original spec-file type: BasicModuleInfo</p>
+ * 
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "git_url",
-    "include_disabled"
+    "git_url"
 })
-public class SelectModuleParams {
+public class BasicModuleInfo {
 
     @JsonProperty("module_name")
     private String moduleName;
     @JsonProperty("git_url")
     private String gitUrl;
-    @JsonProperty("include_disabled")
-    private Long includeDisabled;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -48,7 +40,7 @@ public class SelectModuleParams {
         this.moduleName = moduleName;
     }
 
-    public SelectModuleParams withModuleName(String moduleName) {
+    public BasicModuleInfo withModuleName(String moduleName) {
         this.moduleName = moduleName;
         return this;
     }
@@ -63,23 +55,8 @@ public class SelectModuleParams {
         this.gitUrl = gitUrl;
     }
 
-    public SelectModuleParams withGitUrl(String gitUrl) {
+    public BasicModuleInfo withGitUrl(String gitUrl) {
         this.gitUrl = gitUrl;
-        return this;
-    }
-
-    @JsonProperty("include_disabled")
-    public Long getIncludeDisabled() {
-        return includeDisabled;
-    }
-
-    @JsonProperty("include_disabled")
-    public void setIncludeDisabled(Long includeDisabled) {
-        this.includeDisabled = includeDisabled;
-    }
-
-    public SelectModuleParams withIncludeDisabled(Long includeDisabled) {
-        this.includeDisabled = includeDisabled;
         return this;
     }
 
@@ -95,7 +72,7 @@ public class SelectModuleParams {
 
     @Override
     public String toString() {
-        return ((((((((("SelectModuleParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("BasicModuleInfo"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

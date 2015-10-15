@@ -55,7 +55,7 @@ Module Document:
             }
         }
 
-        old_release_versions: {
+        release_versions: {
             timestamp : {
                 commit:''
             }
@@ -111,7 +111,7 @@ class MongoCatalogDBI:
             'state': {
                 'active': True,
                 'release_approval': 'not_requested',
-                'registration': 'building',
+                'registration': 'building'
             },
             'current_versions': {
                 'release':None,
@@ -120,7 +120,7 @@ class MongoCatalogDBI:
                     'timestamp' : timestamp
                 }
             },
-            'old_release_versions': { }
+            'release_versions': { }
         }
         self.modules.insert(module)
 
@@ -141,11 +141,9 @@ class MongoCatalogDBI:
             query = self._get_mongo_query(module_name=module_name, git_url=git_url)
             if last_state:
                 query['state.release_approval'] = last_state
-            result = self.modules.update(query, {'$set':{'state.release_approval':new_state, 'state.review_message':error_message}})
+            result = self.modules.update(query, {'$set':{'state.release_approval':new_state, 'state.review_message':review_message}})
             return self._check_update_result(result)
         return False
-
-
 
 
     def push_beta_to_release(self, module_name='', git_url=''):
@@ -155,7 +153,11 @@ class MongoCatalogDBI:
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         query['current_versions.beta.timestamp'] = beta_version['timestamp']
         
-        result = self.modules.update(query, {'$set':{'current_versions.release':beta_version}})
+        # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
+        result = self.modules.update(query, {'$set':{
+                                                'current_versions.release':beta_version,
+                                                'release_versions.'+str(beta_version['timestamp']):beta_version
+                                                }})
         return self._check_update_result(result)
 
     def push_dev_to_beta(self, module_name='', git_url=''):
@@ -203,6 +205,10 @@ class MongoCatalogDBI:
 
     def find_basic_module_info(self, query):
         return list(self.modules.find(query,{'module_name':1,'git_url':1,'_id':0}))
+
+    def find_current_versions_and_owners(self, query):
+        return list(self.modules.find(query,{'module_name':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))
+
 
 
     #### utility methods

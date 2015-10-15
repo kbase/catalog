@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "module_name",
     "timestamp",
     "git_commit_hash",
-    "with_disabled"
+    "include_disabled"
 })
 public class HistoryRepoParams {
 
@@ -39,8 +39,8 @@ public class HistoryRepoParams {
     private Long timestamp;
     @JsonProperty("git_commit_hash")
     private String gitCommitHash;
-    @JsonProperty("with_disabled")
-    private Long withDisabled;
+    @JsonProperty("include_disabled")
+    private Long includeDisabled;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -88,18 +88,18 @@ public class HistoryRepoParams {
         return this;
     }
 
-    @JsonProperty("with_disabled")
-    public Long getWithDisabled() {
-        return withDisabled;
+    @JsonProperty("include_disabled")
+    public Long getIncludeDisabled() {
+        return includeDisabled;
     }
 
-    @JsonProperty("with_disabled")
-    public void setWithDisabled(Long withDisabled) {
-        this.withDisabled = withDisabled;
+    @JsonProperty("include_disabled")
+    public void setIncludeDisabled(Long includeDisabled) {
+        this.includeDisabled = includeDisabled;
     }
 
-    public HistoryRepoParams withWithDisabled(Long withDisabled) {
-        this.withDisabled = withDisabled;
+    public HistoryRepoParams withIncludeDisabled(Long includeDisabled) {
+        this.includeDisabled = includeDisabled;
         return this;
     }
 
@@ -115,7 +115,7 @@ public class HistoryRepoParams {
 
     @Override
     public String toString() {
-        return ((((((((((("HistoryRepoParams"+" [moduleName=")+ moduleName)+", timestamp=")+ timestamp)+", gitCommitHash=")+ gitCommitHash)+", withDisabled=")+ withDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("HistoryRepoParams"+" [moduleName=")+ moduleName)+", timestamp=")+ timestamp)+", gitCommitHash=")+ gitCommitHash)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
