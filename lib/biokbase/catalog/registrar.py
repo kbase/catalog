@@ -1,13 +1,13 @@
-
-
+import time
 import sys
 import os
 import traceback
 import shutil
-
 import git
 import yaml
-
+import git
+import yaml
+import requests
 from urlparse import urlparse
 from docker import Client as DockerClient
 
@@ -60,9 +60,7 @@ class Registrar:
             # look for docker image / instance
             # if image does not exist, build and set state
             # if instance does not exist, start and set state
-    #        dockerclient = DockerClient(base_url = str(self.docker_base_url))
-    #        somefile.write(str(dockerclient.containers()));
-
+            dockerclient = DockerClient(base_url = str(self.docker_base_url))
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
