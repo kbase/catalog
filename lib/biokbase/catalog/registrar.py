@@ -7,6 +7,7 @@ import shutil
 
 import git
 import yaml
+import pprint
 
 from urlparse import urlparse
 from docker import Client as DockerClient
@@ -68,7 +69,7 @@ class Registrar:
             self.set_build_step('updating the catalog')
             self.update_the_catalog(repo, basedir, kb_yaml)
             
-            self.build_is_complete(self)
+            self.build_is_complete()
 
         except Exception as e:
             # set the build state to error and log it
@@ -80,47 +81,107 @@ class Registrar:
 
 
 
-    def sanity_checks_and_parse(self, repo, basedir, module_details):
+    def sanity_checks_and_parse(self, repo, basedir):
         # check that files exist
         if not os.path.isfile(basedir+'/kbase.yaml') :
             raise ValueError('kbase.yaml file does not exist in repo, but is required!')
         # parse some stuff, and check for things
-        kb_yaml = yaml.load(basedir+'/kbase.yaml')
+        with open(basedir+'/kbase.yaml') as kb_yaml_file:
+            kb_yaml_string = kb_yaml_file.read()
+        kb_yaml = yaml.load(kb_yaml_string)
+        self.log('=====kbase.yaml parse:')
+        self.log(pprint.pformat(kb_yaml))
+        self.log('=====end kbase.yaml')
 
-        module_name = get_required_field_as_string(kb_yaml,'module-name')
-        module_description = get_required_field_as_string(kb_yaml,'module-description')
-        service_language = get_required_field_as_string(kb_yaml,'service-language')
-        owners = get_required_field_as_list(kb_yaml,'owners')
+        module_name = self.get_required_field_as_string(kb_yaml,'module-name')
+        module_description = self.get_required_field_as_string(kb_yaml,'module-description')
+        version = self.get_required_field_as_string(kb_yaml,'module-version')
+        service_language = self.get_required_field_as_string(kb_yaml,'service-language')
+        owners = self.get_required_field_as_list(kb_yaml,'owners')
 
         # module_name must match what exists (unless it is not yet defined)
-        if 'module_name' in module_details:
-            if module_details['module_name'] != module_name:
+        if 'module_name' in self.module_details:
+            if self.module_details['module_name'] != module_name:
                 raise ValueError('kbase.yaml file module_name field has changed since last version! ' +
                                     'Module names are permanent- if this is a problem, contact an admin.')
         else:
             # This must be the first registration, so the module must not exist yet
             if self.db.is_registered(module_name=module_name):
                 raise ValueError('Module name (in kbase.yaml) is already registered.  Please specify a different name and try again.')
+            # TODO: additional contratins on the module name
+
+        # you can't remove yourself from the owners list, or register something that you are not an owner of
+        if self.username not in owners:
+            raise ValueError('Your kbase username ('+self.username+') must be in the owners list in the kbase.yaml file.')
+
+        # TODO: check for directory structure, method spec format, documentation, version 
 
         # return the parse so we can figure things out later
         return kb_yaml
 
 
-    def update_the_catalog(self, repo, basedir, kb_yaml, module_details):
+    def update_the_catalog(self, repo, basedir, kb_yaml):
 
         # get the basic info that we need
-        commit_hash = repo.head.commit
-        module_name = get_required_field_as_string(kb_yaml,'module-name')
-        module_description = get_required_field_as_string(kb_yaml,'module-description')
-        service_language = get_required_field_as_string(kb_yaml,'service-language')
-        owners = get_required_field_as_list(kb_yaml,'owners')
+        commit_hash = repo.head.commit.hexsha
+        commit_message = repo.head.commit.message
+
+        module_name = self.get_required_field_as_string(kb_yaml,'module-name')
+        module_description = self.get_required_field_as_string(kb_yaml,'module-description')
+        version = self.get_required_field_as_string(kb_yaml,'module-version')
+        service_language = self.get_required_field_as_string(kb_yaml,'service-language')
+        owners = self.get_required_field_as_list(kb_yaml,'owners')
 
         # first update the module name, which is now permanent, if we haven't already
-        #if 'module_name' not in module_details:
+        if 'module_name' not in self.module_details:
+            success = self.db.set_module_name(self.git_url, module_name)
+            if not success:
+                raise ValueError('Unable to set module_name - there was an internal database error.')
 
+        # TODO: Could optimize by combining all these things into one mongo call, but for now this is easier.
+        # Combining it into one call would just mean that this update happens as a single transaction, but a partial
+        # update for now that fails midstream is probably not a huge issue- we can always reregister.
 
+        # next update the basic information
+        info = {
+            'description': module_description,
+            'language' : service_language,
+            'version' : version
+        }
+        self.log('new info: '+pprint.pformat(info))
+        success = self.db.set_module_info(info, git_url=self.git_url)
+        if not success:
+            raise ValueError('Unable to set module info - there was an internal database error.')
 
-        pass
+        # next update the owners
+        ownersListForUpdate = []
+        for o in owners:
+            # TODO: add some validation that the username is a valid kbase user
+            ownersListForUpdate.append({'kb_username':o})
+        self.log('new owners list: '+pprint.pformat(ownersListForUpdate))
+        success = self.db.set_module_owners(ownersListForUpdate, git_url=self.git_url)
+        if not success:
+            raise ValueError('Unable to set module owners - there was an internal database error.')
+
+        # finally update the actual dev version info
+        narrative_methods = []
+        if os.path.isdir(basedir+'/ui/narrative/methods') :
+            for m in os.listdir(basedir+'/ui/narrative/methods'):
+                if os.path.isdir(basedir+'/ui/narrative/methods/'+m):
+                    narrative_methods.append(m)
+
+        new_version = {
+            'timestamp':self.timestamp,
+            'git_commit_hash': commit_hash,
+            'git_commit_message': commit_message,
+            'narrative_methods': narrative_methods
+        }
+        self.log('new dev version object: '+pprint.pformat(new_version))
+        success = self.db.update_dev_version(new_version, git_url=self.git_url)
+        if not success:
+            raise ValueError('Unable to update dev version - there was an internal database error.')
+
+        # done!!!
 
 
 

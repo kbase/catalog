@@ -179,6 +179,36 @@ class MongoCatalogDBI:
 
 
 
+    def set_module_name(self, git_url, module_name):
+        if not module_name:
+            raise ValueError('module_name must be defined to set a module name')
+        query = self._get_mongo_query(git_url=git_url)
+        result = self.modules.update(query, {'$set':{'module_name':module_name}})
+        return self._check_update_result(result)
+
+
+    def set_module_info(self, info, module_name='', git_url=''):
+        if not info:
+            raise ValueError('info must be defined to set the info for a module')
+        if type(info) is not dict:
+            raise ValueError('info must be a dictionary')
+        query = self._get_mongo_query(git_url=git_url, module_name=module_name)
+        result = self.modules.update(query, {'$set':{'info':info}})
+        return self._check_update_result(result)
+
+
+    def set_module_owners(self, owners, module_name='', git_url=''):
+        if not owners:
+            raise ValueError('owners must be defined to set the owners for a module')
+        if type(owners) is not list:
+            raise ValueError('owners must be a list')
+        query = self._get_mongo_query(git_url=git_url, module_name=module_name)
+        result = self.modules.update(query, {'$set':{'owners':owners}})
+        return self._check_update_result(result)
+
+
+
+
     #### GET methods
     def get_module_state(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
