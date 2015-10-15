@@ -38,6 +38,7 @@ Module Document:
             review_message: str, (optional)
             registration: building | complete | error,
             error_message: str (optional)
+            released: true | false (set to true if released, false or missing otherwise)
         },
 
         current_versions: {
@@ -89,14 +90,10 @@ class MongoCatalogDBI:
 
 
     def is_registered(self,module_name='',git_url=''):
-        if module_name:
-            module = self.modules.find_one({'module_name':module_name}, fields=['_id'])
-            if module is not None:
-                return True
-        elif git_url:
-            module = self.modules.find_one({'git_url':git_url}, fields=['_id'])
-            if module is not None:
-                return True
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        module = self.modules.find_one(query, fields=['_id'])
+        if module is not None:
+            return True
         return False
 
 
@@ -155,6 +152,7 @@ class MongoCatalogDBI:
         
         # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
         result = self.modules.update(query, {'$set':{
+                                                'state.released':True,
                                                 'current_versions.release':beta_version,
                                                 'release_versions.'+str(beta_version['timestamp']):beta_version
                                                 }})
@@ -229,7 +227,6 @@ class MongoCatalogDBI:
     def get_module_full_details(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query)
-
 
     #### LIST / SEARCH methods
 

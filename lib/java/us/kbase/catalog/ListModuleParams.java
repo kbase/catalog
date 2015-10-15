@@ -15,20 +15,39 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: ListModuleParams</p>
  * <pre>
  * Describes how to filter repositories.
- * with_disabled - optional flag adding disabled repos (default value is false).
+ * include_unreleased - optional flag indicated modules that are not released are included (default:false)
+ * with_disabled - optional flag indicating disabled repos should be included (default:false).
  * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
+    "include_unreleased",
     "include_disabled"
 })
 public class ListModuleParams {
 
+    @JsonProperty("include_unreleased")
+    private Long includeUnreleased;
     @JsonProperty("include_disabled")
     private Long includeDisabled;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    @JsonProperty("include_unreleased")
+    public Long getIncludeUnreleased() {
+        return includeUnreleased;
+    }
+
+    @JsonProperty("include_unreleased")
+    public void setIncludeUnreleased(Long includeUnreleased) {
+        this.includeUnreleased = includeUnreleased;
+    }
+
+    public ListModuleParams withIncludeUnreleased(Long includeUnreleased) {
+        this.includeUnreleased = includeUnreleased;
+        return this;
+    }
 
     @JsonProperty("include_disabled")
     public Long getIncludeDisabled() {
@@ -57,7 +76,7 @@ public class ListModuleParams {
 
     @Override
     public String toString() {
-        return ((((("ListModuleParams"+" [includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("ListModuleParams"+" [includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

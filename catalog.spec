@@ -1,6 +1,5 @@
 /*
-
-
+    Service for managing, registering, and building KBase Modules.
 */
 module Catalog {
 
@@ -11,21 +10,17 @@ module Catalog {
     funcdef version() returns (string version);
 
     /*
-        Describes how to find module/repository details.
+        Describes how to find module/repository.
         module_name - name of module defined in kbase.yaml file;
         git_url - the url used to register the module
-        include_disabled - optional flag, set to true to include disabled repos
     */
     typedef structure {
         string module_name;
         string git_url;
-        boolean include_disabled;
-    } SelectModuleParams;
+    } SelectOneModuleParams;
 
-    funcdef is_registered(SelectModuleParams params) returns (boolean);
 
-    /* */
-    funcdef get_repo_last_timestamp(SelectModuleParams params) returns (int timestamp);
+    funcdef is_registered(SelectOneModuleParams params) returns (boolean);
 
     typedef structure {
         string git_url;
@@ -44,15 +39,16 @@ module Catalog {
 
     /* immediately updates the beta tag to what is currently in dev, whatever is currently in beta
     is discarded.  Will fail if a release request is active and has not been approved/denied */
-    funcdef push_dev_to_beta(SelectModuleParams params) returns () authentication required;
+    funcdef push_dev_to_beta(SelectOneModuleParams params) returns () authentication required;
 
     /* requests a push from beta to release version; must be approved be a kbase Admin */
-    funcdef request_release(SelectModuleParams params) returns () authentication required;
+    funcdef request_release(SelectOneModuleParams params) returns () authentication required;
 
     typedef structure {
         string module_name;
         string git_url;
         string git_commit_hash;
+        string git_commit_message;
         string timestamp;
         list <string> owners;
     } RequestedReleaseInfo;
@@ -76,12 +72,13 @@ module Catalog {
 
     /*
         Describes how to filter repositories.
-        with_disabled - optional flag adding disabled repos (default value is false).
+        include_unreleased - optional flag indicated modules that are not released are included (default:false)
+        with_disabled - optional flag indicating disabled repos should be included (default:false).
     */
     typedef structure {
+        boolean include_unreleased;
         boolean include_disabled;
     } ListModuleParams;
-
 
     typedef structure {
         string module_name;
@@ -91,51 +88,51 @@ module Catalog {
     funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
 
 
+
+    typedef structure {
+        int timestamp;
+        string version;
+        string git_commit_hash;
+        string git_commit_message;
+        list<string> narrative_method_ids;
+    } ModuleVersionInfo;
+
+    typedef structure {
+        string module_name;
+        string git_url;
+
+        string description;
+        string language;
+
+        list <string> owners;
+
+        ModuleVersionInfo release;
+        ModuleVersionInfo beta;
+        ModuleVersionInfo dev;
+    } ModuleInfo;
+
+    funcdef get_module_info(SelectOneModuleParams selection) returns (ModuleInfo info);
+
+
     /*
-        method_ids - list of method ids (each id is fully qualified, i.e. contains module
-            name prefix followed by slash);
-        widget_ids - list of widget ids (each id is name of JavaScript file stored in
-            repo's 'ui/widgets' folder).
+        only required: module_name or git_url, the rest are optional selectors
+        If no selectors given, returns current release version
+        version - release | beta | dev
+        owner_version_string - matches on the 'version' set for a version in 'kbase.yaml'
     */
     typedef structure {
         string module_name;
         string git_url;
+        int timestamp;
         string git_commit_hash;
         string version;
-        string module_description;
-        string service_language;
-        list<string> owners;
-        string readme;
-        list<string> method_ids;
-        list<string> widget_ids;
-    } RepoDetails;
+        string owner_version_string;
+    } SelectModuleVersionParams;
 
-    /*
-        Describes how to find repository details (including old versions). In case neither of
-            version and git_commit_hash is specified last version is returned.
-        module_name - name of module defined in kbase.yaml file;
-        timestamp - optional parameter limiting search by certain version timestamp;
-        git_commit_hash - optional parameter limiting search by certain git commit hash;
-        with_disabled - optional flag adding disabled repos (default value is false).
-    */
-    typedef structure {
-        string module_name;
-        int timestamp;
-        string git_commit_hash;
-        boolean include_disabled;
-    } HistoryRepoParams;
+    funcdef get_version_info(SelectModuleVersionParams params) returns (ModuleVersionInfo version);
 
-    funcdef get_repo_details(HistoryRepoParams params) returns (RepoDetails);
+    funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
 
-    /* timestamp will be epoch time */
-    typedef structure {
-        int timestamp;
-        string git_commit_hash;
-        boolean include_disabled;
-    } RepoVersion;
-
-    funcdef list_repo_versions(SelectModuleParams params) returns (list<RepoVersion>
-        versions);
 
     /*
         Describes how to find repository details.
@@ -170,6 +167,8 @@ module Catalog {
     /*
         Get repo state (one of 'pending', 'ready', 'building', 'testing', 'disabled').
     */
-    funcdef get_module_state(SelectModuleParams params) returns (ModuleState state);
+    funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
+
+    funcdef get_build_log(string timestamp) returns (string);
 };

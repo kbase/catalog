@@ -13,13 +13,15 @@ from urlparse import urlparse
 from docker import Client as DockerClient
 
 from biokbase.catalog.db import MongoCatalogDBI
+from biokbase.narrative_method_store.client import NarrativeMethodStore
 
 
 class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
-    def __init__(self, params, timestamp, username, token, db, temp_dir, docker_base_url, module_details):
+    def __init__(self, params, timestamp, username, token, db, temp_dir, docker_base_url, 
+                    nms_url, nms_admin_user, nms_admin_psswd, module_details):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
@@ -31,6 +33,10 @@ class Registrar:
         self.db = db
         self.temp_dir = temp_dir
         self.docker_base_url = docker_base_url
+
+        self.nms_url = nms_url
+        self.nms_admin_user = nms_admin_user
+        self.nms_admin_psswd = nms_admin_psswd
 
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
@@ -103,7 +109,7 @@ class Registrar:
         if 'module_name' in self.module_details:
             if self.module_details['module_name'] != module_name:
                 raise ValueError('kbase.yaml file module_name field has changed since last version! ' +
-                                    'Module names are permanent- if this is a problem, contact an admin.')
+                                    'Module names are permanent- if this is a problem, contact a kbase admin.')
         else:
             # This must be the first registration, so the module must not exist yet
             if self.db.is_registered(module_name=module_name):
@@ -145,8 +151,7 @@ class Registrar:
         # next update the basic information
         info = {
             'description': module_description,
-            'language' : service_language,
-            'version' : version
+            'language' : service_language
         }
         self.log('new info: '+pprint.pformat(info))
         success = self.db.set_module_info(info, git_url=self.git_url)
@@ -172,6 +177,7 @@ class Registrar:
 
         new_version = {
             'timestamp':self.timestamp,
+            'version' : version,
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
             'narrative_methods': narrative_methods
@@ -180,6 +186,10 @@ class Registrar:
         success = self.db.update_dev_version(new_version, git_url=self.git_url)
         if not success:
             raise ValueError('Unable to update dev version - there was an internal database error.')
+
+        #push to NMS
+        nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+        nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
 
         # done!!!
 

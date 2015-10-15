@@ -68,6 +68,16 @@ class CatalogController:
         self.docker_base_url = config['docker-base-url']
         print(self.docker_base_url)
 
+        if 'nms-url' not in config:
+            raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
+        self.nms_url = config['nms-url']
+        if 'nms-admin-user' not in config:
+            raise ValueError('"nms-admin-user" config variable must be defined to start a CatalogController!')
+        self.nms_admin_user = config['nms-admin-user']
+        if 'nms-admin-psswd' not in config:
+            raise ValueError('"nms-admin-psswd" config variable must be defined to start a CatalogController!')
+        self.nms_admin_psswd = config['nms-admin-psswd']
+
 
     def register_repo(self, params, username, token):
 
@@ -112,7 +122,8 @@ class CatalogController:
 
         # first set the dev current_release timestamp
 
-        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, module_details))
+        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
+            self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
         t.start()
 
         # 4) provide the timestamp 
@@ -204,11 +215,11 @@ class CatalogController:
                 owners.append(o['kb_username'])
             timestamp = r['current_versions']['beta']['timestamp']
             requested_releases.append({
-                    # TODO: add back module name and git commit hash once this info is saved
-                    #'module_name':r['module_name'],
+                    'module_name':r['module_name'],
                     'git_url':r['git_url'],
                     'timestamp':timestamp,
-                    #'git_commit_hash':r['git_commit_hash']
+                    'git_commit_hash':r['git_commit_hash'],
+                    'git_commit_message':r['git_commit_message'],
                     'owners':owners
                 })
         return requested_releases
@@ -264,6 +275,56 @@ class CatalogController:
         params = self.filter_module_or_repo_selection(params)
         return self.db.get_module_state(module_name=params['module_name'],git_url=params['git_url'])
 
+
+    def get_module_info(self, params):
+        params = self.filter_module_or_repo_selection(params)
+        details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
+
+        owners = []
+        for o in details['owners']:
+            owners.append(o['kb_username'])
+
+        info = {
+            module_name: details['module_name'],
+            git_url: details['git_url'],
+
+            description: details['info']['description'],
+            language: details['info']['language'],
+
+            owners: owners,
+
+            release: details['current_versions']['release'],
+            beta: details['current_versions']['beta'],
+            dev: details['current_versions']['dev']
+        }
+        return info
+
+    def get_version_info(self,params):
+        params = self.filter_module_or_repo_selection(params)
+        current_versions = self.db.get_module_current_versions(module_name=params['module_name'], git_url=params['git_url'])
+        if 'version' in params:
+            return current_version[params['version']]
+        if 'timestamp' in params:
+            if current_version['dev']['timestamp'] == params['timestamp']:
+                return current_version['dev']
+            if current_version['beta']: 
+                if current_version['beta']['timestamp'] == params['timestamp']:
+                    return current_version['beta']
+            if current_version['release']: 
+                if current_version['release']['timestamp'] == params['timestamp']:
+                    return current_version['release']
+
+        # TODO: filter the modules old versions based on the info, and get the right one
+        #details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+
+        return None
+
+    def list_released_versions(self, params):
+        params = self.filter_module_or_repo_selection(params)
+        details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+        return details['release_versions']
+
+
     def is_registered(self,params):
         if 'git_url' not in params:
             params['git_url'] = ''
@@ -275,14 +336,20 @@ class CatalogController:
 
     def list_basic_module_info(self,params):
         query = { 'state.active':True }
+        query = { 'state.released':True }
         if 'include_disabled' in params:
             if params['include_disabled']>0:
                 query.pop('state.active',None)
+        if 'include_unreleased' in params:
+            if params['include_unreleased']>0:
+                query.pop('state.released',None)
         return self.db.find_basic_module_info(query)
 
 
-
-
+    def get_build_log(self, timestamp):
+        with open(self.temp_dir+'/registration.log.'+str(self.timestamp)) as log_file:
+            log = log_file.read()
+        return log
 
     # Some utility methods
 
@@ -317,7 +384,8 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url,module_details):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,module_details)
+def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,
+                            nms_url, nms_admin_user, nms_admin_psswd, module_details)
     registrar.start_registration()
 

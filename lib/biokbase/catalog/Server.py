@@ -66,9 +66,6 @@ sync_methods['Catalog.version'] = True
 async_run_methods['Catalog.is_registered_async'] = ['Catalog', 'is_registered']
 async_check_methods['Catalog.is_registered_check'] = ['Catalog', 'is_registered']
 sync_methods['Catalog.is_registered'] = True
-async_run_methods['Catalog.get_repo_last_timestamp_async'] = ['Catalog', 'get_repo_last_timestamp']
-async_check_methods['Catalog.get_repo_last_timestamp_check'] = ['Catalog', 'get_repo_last_timestamp']
-sync_methods['Catalog.get_repo_last_timestamp'] = True
 async_run_methods['Catalog.register_repo_async'] = ['Catalog', 'register_repo']
 async_check_methods['Catalog.register_repo_check'] = ['Catalog', 'register_repo']
 sync_methods['Catalog.register_repo'] = True
@@ -87,18 +84,24 @@ sync_methods['Catalog.review_release_request'] = True
 async_run_methods['Catalog.list_basic_module_info_async'] = ['Catalog', 'list_basic_module_info']
 async_check_methods['Catalog.list_basic_module_info_check'] = ['Catalog', 'list_basic_module_info']
 sync_methods['Catalog.list_basic_module_info'] = True
-async_run_methods['Catalog.get_repo_details_async'] = ['Catalog', 'get_repo_details']
-async_check_methods['Catalog.get_repo_details_check'] = ['Catalog', 'get_repo_details']
-sync_methods['Catalog.get_repo_details'] = True
-async_run_methods['Catalog.list_repo_versions_async'] = ['Catalog', 'list_repo_versions']
-async_check_methods['Catalog.list_repo_versions_check'] = ['Catalog', 'list_repo_versions']
-sync_methods['Catalog.list_repo_versions'] = True
+async_run_methods['Catalog.get_module_info_async'] = ['Catalog', 'get_module_info']
+async_check_methods['Catalog.get_module_info_check'] = ['Catalog', 'get_module_info']
+sync_methods['Catalog.get_module_info'] = True
+async_run_methods['Catalog.get_version_info_async'] = ['Catalog', 'get_version_info']
+async_check_methods['Catalog.get_version_info_check'] = ['Catalog', 'get_version_info']
+sync_methods['Catalog.get_version_info'] = True
+async_run_methods['Catalog.list_released_module_versions_async'] = ['Catalog', 'list_released_module_versions']
+async_check_methods['Catalog.list_released_module_versions_check'] = ['Catalog', 'list_released_module_versions']
+sync_methods['Catalog.list_released_module_versions'] = True
 async_run_methods['Catalog.set_registration_state_async'] = ['Catalog', 'set_registration_state']
 async_check_methods['Catalog.set_registration_state_check'] = ['Catalog', 'set_registration_state']
 sync_methods['Catalog.set_registration_state'] = True
 async_run_methods['Catalog.get_module_state_async'] = ['Catalog', 'get_module_state']
 async_check_methods['Catalog.get_module_state_check'] = ['Catalog', 'get_module_state']
 sync_methods['Catalog.get_module_state'] = True
+async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
+async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
+sync_methods['Catalog.get_build_log'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -377,10 +380,6 @@ class Application(object):
                              name='Catalog.is_registered',
                              types=[dict])
         self.method_authentication['Catalog.is_registered'] = 'none'
-        self.rpc_service.add(impl_Catalog.get_repo_last_timestamp,
-                             name='Catalog.get_repo_last_timestamp',
-                             types=[dict])
-        self.method_authentication['Catalog.get_repo_last_timestamp'] = 'none'
         self.rpc_service.add(impl_Catalog.register_repo,
                              name='Catalog.register_repo',
                              types=[dict])
@@ -405,14 +404,18 @@ class Application(object):
                              name='Catalog.list_basic_module_info',
                              types=[dict])
         self.method_authentication['Catalog.list_basic_module_info'] = 'none'
-        self.rpc_service.add(impl_Catalog.get_repo_details,
-                             name='Catalog.get_repo_details',
+        self.rpc_service.add(impl_Catalog.get_module_info,
+                             name='Catalog.get_module_info',
                              types=[dict])
-        self.method_authentication['Catalog.get_repo_details'] = 'none'
-        self.rpc_service.add(impl_Catalog.list_repo_versions,
-                             name='Catalog.list_repo_versions',
+        self.method_authentication['Catalog.get_module_info'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_version_info,
+                             name='Catalog.get_version_info',
                              types=[dict])
-        self.method_authentication['Catalog.list_repo_versions'] = 'none'
+        self.method_authentication['Catalog.get_version_info'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_released_module_versions,
+                             name='Catalog.list_released_module_versions',
+                             types=[dict])
+        self.method_authentication['Catalog.list_released_module_versions'] = 'none'
         self.rpc_service.add(impl_Catalog.set_registration_state,
                              name='Catalog.set_registration_state',
                              types=[dict])
@@ -421,6 +424,10 @@ class Application(object):
                              name='Catalog.get_module_state',
                              types=[dict])
         self.method_authentication['Catalog.get_module_state'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_build_log,
+                             name='Catalog.get_build_log',
+                             types=[basestring])
+        self.method_authentication['Catalog.get_build_log'] = 'none'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
