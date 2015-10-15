@@ -169,9 +169,9 @@ Get the version of the deployed catalog service endpoint.
  
 
 
-=head2 is_repo_registered
+=head2 is_registered
 
-  $return = $obj->is_repo_registered($params)
+  $return = $obj->is_registered($params)
 
 =over 4
 
@@ -185,7 +185,7 @@ $return is a Catalog.boolean
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 
 </pre>
@@ -199,7 +199,7 @@ $return is a Catalog.boolean
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 
 
@@ -213,7 +213,7 @@ boolean is an int
 
 =cut
 
- sub is_repo_registered
+ sub is_registered
 {
     my($self, @args) = @_;
 
@@ -222,7 +222,7 @@ boolean is an int
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function is_repo_registered (received $n, expecting 1)");
+							       "Invalid argument count for function is_registered (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -230,117 +230,30 @@ boolean is an int
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to is_repo_registered:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to is_registered:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'is_repo_registered');
+								   method_name => 'is_registered');
 	}
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.is_repo_registered",
+	method => "Catalog.is_registered",
 	params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'is_repo_registered',
+					       method_name => 'is_registered',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method is_repo_registered",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method is_registered",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'is_repo_registered',
-				       );
-    }
-}
- 
-
-
-=head2 register_repo
-
-  $timestamp = $obj->register_repo($params)
-
-=over 4
-
-=item Parameter and return types
-
-=begin html
-
-<pre>
-$params is a Catalog.RegisterRepoParams
-$timestamp is an int
-RegisterRepoParams is a reference to a hash where the following keys are defined:
-	git_url has a value which is a string
-	git_commit_hash has a value which is a string
-
-</pre>
-
-=end html
-
-=begin text
-
-$params is a Catalog.RegisterRepoParams
-$timestamp is an int
-RegisterRepoParams is a reference to a hash where the following keys are defined:
-	git_url has a value which is a string
-	git_commit_hash has a value which is a string
-
-
-=end text
-
-=item Description
-
-allow/require developer to supply git branch/git commit tag?
-
-=back
-
-=cut
-
- sub register_repo
-{
-    my($self, @args) = @_;
-
-# Authentication: required
-
-    if ((my $n = @args) != 1)
-    {
-	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function register_repo (received $n, expecting 1)");
-    }
-    {
-	my($params) = @args;
-
-	my @_bad_arguments;
-        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
-        if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to register_repo:\n" . join("", map { "\t$_\n" } @_bad_arguments);
-	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'register_repo');
-	}
-    }
-
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.register_repo",
-	params => \@args,
-    });
-    if ($result) {
-	if ($result->is_error) {
-	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
-					       code => $result->content->{error}->{code},
-					       method_name => 'register_repo',
-					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
-					      );
-	} else {
-	    return wantarray ? @{$result->result} : $result->result->[0];
-	}
-    } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method register_repo",
-					    status_line => $self->{client}->status_line,
-					    method_name => 'register_repo',
+					    method_name => 'is_registered',
 				       );
     }
 }
@@ -363,7 +276,7 @@ $timestamp is an int
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 
 </pre>
@@ -377,7 +290,7 @@ $timestamp is an int
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 
 
@@ -438,9 +351,9 @@ boolean is an int
  
 
 
-=head2 list_module_names
+=head2 register_repo
 
-  $return = $obj->list_module_names($params)
+  $timestamp = $obj->register_repo($params)
 
 =over 4
 
@@ -449,10 +362,104 @@ boolean is an int
 =begin html
 
 <pre>
-$params is a Catalog.ListReposParams
-$return is a reference to a list where each element is a string
-ListReposParams is a reference to a hash where the following keys are defined:
-	with_disabled has a value which is a Catalog.boolean
+$params is a Catalog.RegisterRepoParams
+$timestamp is an int
+RegisterRepoParams is a reference to a hash where the following keys are defined:
+	git_url has a value which is a string
+	git_commit_hash has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.RegisterRepoParams
+$timestamp is an int
+RegisterRepoParams is a reference to a hash where the following keys are defined:
+	git_url has a value which is a string
+	git_commit_hash has a value which is a string
+
+
+=end text
+
+=item Description
+
+allow/require developer to supply git branch/git commit tag? 
+if this is a new module, creates the initial registration with the authenticated user as
+the sole owner, then launches a build to update the dev version of the module.  You can check
+the state of this build with the 'get_module_state' method passing in the git_url.  If the module
+already exists, then you must be an owner to reregister.  That will immediately overwrite your
+dev version of the module (old dev versions are not stored, but you can always reregister an old
+version from the repo) and start a build.
+
+=back
+
+=cut
+
+ sub register_repo
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function register_repo (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to register_repo:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'register_repo');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.register_repo",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'register_repo',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method register_repo",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'register_repo',
+				       );
+    }
+}
+ 
+
+
+=head2 push_dev_to_beta
+
+  $obj->push_dev_to_beta($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.SelectModuleParams
+SelectModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 
 </pre>
@@ -461,11 +468,193 @@ boolean is an int
 
 =begin text
 
-$params is a Catalog.ListReposParams
-$return is a reference to a list where each element is a string
-ListReposParams is a reference to a hash where the following keys are defined:
-	with_disabled has a value which is a Catalog.boolean
+$params is a Catalog.SelectModuleParams
+SelectModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
+
+
+=end text
+
+=item Description
+
+immediately updates the beta tag to what is currently in dev, whatever is currently in beta
+is discarded.  Will fail if a release request is active and has not been approved/denied
+
+=back
+
+=cut
+
+ sub push_dev_to_beta
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function push_dev_to_beta (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to push_dev_to_beta:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'push_dev_to_beta');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.push_dev_to_beta",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'push_dev_to_beta',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method push_dev_to_beta",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'push_dev_to_beta',
+				       );
+    }
+}
+ 
+
+
+=head2 request_release
+
+  $obj->request_release($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.SelectModuleParams
+SelectModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	include_disabled has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.SelectModuleParams
+SelectModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	include_disabled has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+requests a push from beta to release version; must be approved be a kbase Admin
+
+=back
+
+=cut
+
+ sub request_release
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function request_release (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to request_release:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'request_release');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.request_release",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'request_release',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method request_release",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'request_release',
+				       );
+    }
+}
+ 
+
+
+=head2 list_requested_releases
+
+  $requested_releases = $obj->list_requested_releases()
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$requested_releases is a reference to a list where each element is a Catalog.RequestedReleaseInfo
+RequestedReleaseInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	git_commit_hash has a value which is a string
+	timestamp has a value which is a string
+	owners has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$requested_releases is a reference to a list where each element is a Catalog.RequestedReleaseInfo
+RequestedReleaseInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	git_commit_hash has a value which is a string
+	timestamp has a value which is a string
+	owners has a value which is a reference to a list where each element is a string
 
 
 =end text
@@ -478,7 +667,178 @@ boolean is an int
 
 =cut
 
- sub list_module_names
+ sub list_requested_releases
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 0)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_requested_releases (received $n, expecting 0)");
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_requested_releases",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_requested_releases',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_requested_releases",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_requested_releases',
+				       );
+    }
+}
+ 
+
+
+=head2 review_release_request
+
+  $obj->review_release_request($review)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$review is a Catalog.ReleaseReview
+ReleaseReview is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	decision has a value which is a string
+	review_message has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$review is a Catalog.ReleaseReview
+ReleaseReview is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	decision has a value which is a string
+	review_message has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub review_release_request
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function review_release_request (received $n, expecting 1)");
+    }
+    {
+	my($review) = @args;
+
+	my @_bad_arguments;
+        (ref($review) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"review\" (value was \"$review\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to review_release_request:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'review_release_request');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.review_release_request",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'review_release_request',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method review_release_request",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'review_release_request',
+				       );
+    }
+}
+ 
+
+
+=head2 list_basic_module_info
+
+  $info_list = $obj->list_basic_module_info($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ListModuleParams
+$info_list is a reference to a list where each element is a Catalog.BasicModuleInfo
+ListModuleParams is a reference to a hash where the following keys are defined:
+	include_disabled has a value which is a Catalog.boolean
+boolean is an int
+BasicModuleInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ListModuleParams
+$info_list is a reference to a list where each element is a Catalog.BasicModuleInfo
+ListModuleParams is a reference to a hash where the following keys are defined:
+	include_disabled has a value which is a Catalog.boolean
+boolean is an int
+BasicModuleInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_basic_module_info
 {
     my($self, @args) = @_;
 
@@ -487,7 +847,7 @@ boolean is an int
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function list_module_names (received $n, expecting 1)");
+							       "Invalid argument count for function list_basic_module_info (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -495,30 +855,30 @@ boolean is an int
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to list_module_names:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to list_basic_module_info:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'list_module_names');
+								   method_name => 'list_basic_module_info');
 	}
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_module_names",
+	method => "Catalog.list_basic_module_info",
 	params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'list_module_names',
+					       method_name => 'list_basic_module_info',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_module_names",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_basic_module_info",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'list_module_names',
+					    method_name => 'list_basic_module_info',
 				       );
     }
 }
@@ -542,7 +902,7 @@ HistoryRepoParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	timestamp has a value which is an int
 	git_commit_hash has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 RepoDetails is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
@@ -568,7 +928,7 @@ HistoryRepoParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	timestamp has a value which is an int
 	git_commit_hash has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 RepoDetails is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
@@ -656,12 +1016,12 @@ $versions is a reference to a list where each element is a Catalog.RepoVersion
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 RepoVersion is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
 	git_commit_hash has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 
 </pre>
 
@@ -674,12 +1034,12 @@ $versions is a reference to a list where each element is a Catalog.RepoVersion
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 RepoVersion is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
 	git_commit_hash has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 
 
 =end text
@@ -844,7 +1204,7 @@ $state is a Catalog.ModuleState
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 ModuleState is a reference to a hash where the following keys are defined:
 	active has a value which is a Catalog.boolean
@@ -864,7 +1224,7 @@ $state is a Catalog.ModuleState
 SelectModuleParams is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
-	with_disabled has a value which is a Catalog.boolean
+	include_disabled has a value which is a Catalog.boolean
 boolean is an int
 ModuleState is a reference to a hash where the following keys are defined:
 	active has a value which is a Catalog.boolean
@@ -1029,7 +1389,8 @@ an int
 
 Describes how to find module/repository details.
 module_name - name of module defined in kbase.yaml file;
-with_disabled - optional flag adding disabled repos (default value is false).
+git_url - the url used to register the module
+include_disabled - optional flag, set to true to include disabled repos
 
 
 =item Definition
@@ -1040,7 +1401,7 @@ with_disabled - optional flag adding disabled repos (default value is false).
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 git_url has a value which is a string
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1051,7 +1412,7 @@ with_disabled has a value which is a Catalog.boolean
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 git_url has a value which is a string
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 
 =end text
@@ -1092,7 +1453,87 @@ git_commit_hash has a value which is a string
 
 
 
-=head2 ListReposParams
+=head2 RequestedReleaseInfo
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+git_commit_hash has a value which is a string
+timestamp has a value which is a string
+owners has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+git_commit_hash has a value which is a string
+timestamp has a value which is a string
+owners has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ReleaseReview
+
+=over 4
+
+
+
+=item Description
+
+decision - approved | denied
+review_message -
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+decision has a value which is a string
+review_message has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+decision has a value which is a string
+review_message has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ListModuleParams
 
 =over 4
 
@@ -1110,7 +1551,7 @@ with_disabled - optional flag adding disabled repos (default value is false).
 
 <pre>
 a reference to a hash where the following keys are defined:
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1119,7 +1560,39 @@ with_disabled has a value which is a Catalog.boolean
 =begin text
 
 a reference to a hash where the following keys are defined:
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 BasicModuleInfo
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
 
 
 =end text
@@ -1209,7 +1682,7 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 timestamp has a value which is an int
 git_commit_hash has a value which is a string
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1221,7 +1694,7 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 timestamp has a value which is an int
 git_commit_hash has a value which is a string
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 
 =end text
@@ -1249,7 +1722,7 @@ timestamp will be epoch time
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
 git_commit_hash has a value which is a string
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1260,7 +1733,7 @@ with_disabled has a value which is a Catalog.boolean
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
 git_commit_hash has a value which is a string
-with_disabled has a value which is a Catalog.boolean
+include_disabled has a value which is a Catalog.boolean
 
 
 =end text

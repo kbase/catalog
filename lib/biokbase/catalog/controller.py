@@ -29,7 +29,6 @@ class CatalogController:
             self.adminList = [x.strip() for x in config['admin-users'].split(',')]
         if not self.adminList:
             warnings.warn('no "admin-users" are set in config of CatalogController.')
-        print(self.adminList)
 
         # make sure the minimal mongo settings are in place
         if 'mongodb-host' not in config:
@@ -64,6 +63,10 @@ class CatalogController:
         if not os.access(self.temp_dir, os.W_OK):
             raise ValueError('"temp-dir" not writable! Writable space is required for registration to work!')
 
+        if 'docker-base-url' not in config:
+            raise ValueError('"docker-base-url" config variable must be defined to start a CatalogController!')
+        self.docker_base_url = config['docker-base-url']
+        print(self.docker_base_url)
 
 
     def register_repo(self, params, username, token):
@@ -76,6 +79,7 @@ class CatalogController:
         # 1) If the repo does not yet exist, then create it.  No permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp)
+            module_details = self.db.get_module_details(git_url=git_url)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
         # that the module is in a state where it can be registered 
@@ -93,6 +97,8 @@ class CatalogController:
                         # we can fail if the registration state changed when we were first checking to now.  This is important
                         # to ensure we only ever kick off one registration thread at a time
                         raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin.')
+                    # we know we are the only operation working, so we can clear the dev version and upate the timestamp
+                    self.db.update_dev_version({'timestamp':timestamp}, git_url=git_url)
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
@@ -104,7 +110,9 @@ class CatalogController:
         #     module and finally update the dev version
         #   - If things failed, it will set the error state, and set an error message.
 
-        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir))
+        # first set the dev current_release timestamp
+
+        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, module_details))
         t.start()
 
         # 4) provide the timestamp 
@@ -136,13 +144,147 @@ class CatalogController:
                         new_state=params['registration_state'],
                         error_message=error_message)
             if not success:
-                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown mongo error.')
+                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error.')
+
+
+    def push_dev_to_beta(self, params, username):
+        # first make sure everything exists and we have permissions
+        params = self.filter_module_or_repo_selection(params)
+        module_details = self.db.get_module_details(module_name=params['module_name'],git_url=params['git_url'])
+        if not self.has_permission(username,module_details['owners']):
+            raise ValueError('You do not have permission to modify this module/repo.')
+        # next make sure the state of the module is ok (it must be active, no pending registrations or release requests)
+        if not module_details['state']['active']:
+            raise ValueError('Cannot push dev to beta- module/repo is no longer active.')
+        if module_details['state']['registration'] != 'complete':
+            raise ValueError('Cannot push dev to beta- last registration is in progress or has an error.')
+        if module_details['state']['release_approval'] == 'under_review':
+            raise ValueError('Cannot push dev to beta- last release request of beta is still pending.')
+        # ok, do it.
+        success = self.db.push_dev_to_beta(module_name=params['module_name'],git_url=params['git_url'])
+        if not success:
+            raise ValueError('Update operation failed - some unknown database error.')
+
+    def request_release(self, params, username):
+        # first make sure everything exists and we have permissions
+        params = self.filter_module_or_repo_selection(params)
+        module_details = self.db.get_module_details(module_name=params['module_name'],git_url=params['git_url'])
+        if not self.has_permission(username,module_details['owners']):
+            raise ValueError('You do not have permission to modify this module/repo.')
+        # next make sure the state of the module is ok (it must be active, no pending release requests)
+        if not module_details['state']['active']:
+            raise ValueError('Cannot request release - module/repo is no longer active.')
+        if module_details['state']['release_approval'] == 'under_review':
+            raise ValueError('Cannot request release - last release request of beta is still pending.')
+        # beta version must exist
+        if not module_details['current_versions']['beta']:
+            raise ValueError('Cannot request release - no beta version has been created yet.')
+
+        # beta version must be different than release version
+        if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
+            raise ValueError('Cannot request release - beta version is identical to released version.')
+
+
+        # ok, do it.
+        success = self.db.set_module_release_state(
+                        module_name=params['module_name'],git_url=params['git_url'],
+                        new_state='under_review',
+                        last_state=module_details['state']['release_approval']
+                    )
+        if not success:
+            raise ValueError('Release request failed - some unknown database error.')
+
+    def list_requested_releases(self):
+        query={'state.release_approval':'under_review'}
+        results=self.db.find_current_versions_and_owners(query)
+        requested_releases = []
+        for r in results:
+            owners = []
+            for o in r['owners']:
+                owners.append(o['kb_username'])
+            timestamp = r['current_versions']['beta']['timestamp']
+            requested_releases.append({
+                    # TODO: add back module name and git commit hash once this info is saved
+                    #'module_name':r['module_name'],
+                    'git_url':r['git_url'],
+                    'timestamp':timestamp,
+                    #'git_commit_hash':r['git_commit_hash']
+                    'owners':owners
+                })
+        return requested_releases
+
+
+    def review_release_request(self, review, username):
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to review a release request.')
+        review = self.filter_module_or_repo_selection(review)
+
+        module_details = self.db.get_module_details(module_name=review['module_name'],git_url=review['git_url'])
+        if module_details['state']['release_approval'] != 'under_review':
+            raise ValueError('Cannot review request - module/repo is not under review!')
+
+        if not module_details['state']['active']:
+            raise ValueError('Cannot review request - module/repo is no longer active.')
+        if module_details['state']['release_approval'] != 'under_review':
+            raise ValueError('Cannot review request - module/repo is not under review!')
+
+        if 'decision' not in review:
+            raise ValueError('Cannot set review - no "decision" was provided!')
+        if not review['decision']:
+            raise ValueError('Cannot set review - no "decision" was provided!')
+        if review['decision']=='denied':
+            if 'review_message' not in review:
+                raise ValueError('Cannot set review - if denied, you must set a "review_message"!')
+        if 'review_message' not in review:
+            review['review_message']=''
+        if review['decision'] not in ['approved','denied']:
+                raise ValueError('Cannot set review - decision must be "approved" or "denied"')
+
+        # ok, do it.  
+
+        # if the state is approved, then we need to save the beta version over the release version and stash
+        # a new entry.  The DBI will handle that for us. (note that concurency issues don't really matter
+        # here because if this is done twice (for instance, before the release_state is set to approved in
+        # the document in the next call) there won't be any problems.)  I like nested parentheses.
+        if review['decision']=='approved':
+            success = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
+
+        # Now we can update the release state state...
+        success = self.db.set_module_release_state(
+                        module_name=review['module_name'],git_url=review['git_url'],
+                        new_state=review['decision'],
+                        last_state=module_details['state']['release_approval'],
+                        review_message=review['review_message']
+                    )
+        if not success:
+            raise ValueError('Release review update failed - some unknown database error.')
 
 
     def get_module_state(self, params):
         params = self.filter_module_or_repo_selection(params)
         return self.db.get_module_state(module_name=params['module_name'],git_url=params['git_url'])
 
+    def is_registered(self,params):
+        if 'git_url' not in params:
+            params['git_url'] = ''
+        if 'module_name' not in params:
+            params['module_name'] = ''
+        if self.db.is_registered(module_name=params['module_name'], git_url=params['git_url']) :
+            return True
+        return False
+
+    def list_basic_module_info(self,params):
+        query = { 'state.active':True }
+        if 'include_disabled' in params:
+            if params['include_disabled']>0:
+                query.pop('state.active',None)
+        return self.db.find_basic_module_info(query)
+
+
+
+
+
+    # Some utility methods
 
     def filter_module_or_repo_selection(self, params):
         if 'git_url' not in params:
@@ -154,6 +296,7 @@ class CatalogController:
         return params
 
 
+    # always true if the user is in the admin list
     def has_permission(self, username, owners):
         if self.is_admin(username):
             return True
@@ -174,7 +317,7 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir)
+def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url,module_details):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,module_details)
     registrar.start_registration()
 

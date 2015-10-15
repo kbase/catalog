@@ -48,34 +48,22 @@ class Catalog:
         # return the results
         return [version]
 
-    def is_repo_registered(self, ctx, params):
+    def is_registered(self, ctx, params):
         # ctx is the context object
         # return variables are: returnVal
-        #BEGIN is_repo_registered
-        #END is_repo_registered
+        #BEGIN is_registered
+        returnVal = 0
+        is_registered = self.cc.is_registered(params)
+        if is_registered:
+            returnVal = 1
+        #END is_registered
 
         # At some point might do deeper type checking...
         if not isinstance(returnVal, int):
-            raise ValueError('Method is_repo_registered return value ' +
+            raise ValueError('Method is_registered return value ' +
                              'returnVal is not type int as required.')
         # return the results
         return [returnVal]
-
-    def register_repo(self, ctx, params):
-        # ctx is the context object
-        # return variables are: timestamp
-        #BEGIN register_repo
-        
-        timestamp = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
-
-        #END register_repo
-
-        # At some point might do deeper type checking...
-        if not isinstance(timestamp, int):
-            raise ValueError('Method register_repo return value ' +
-                             'timestamp is not type int as required.')
-        # return the results
-        return [timestamp]
 
     def get_repo_last_timestamp(self, ctx, params):
         # ctx is the context object
@@ -90,18 +78,68 @@ class Catalog:
         # return the results
         return [timestamp]
 
-    def list_module_names(self, ctx, params):
+    def register_repo(self, ctx, params):
         # ctx is the context object
-        # return variables are: returnVal
-        #BEGIN list_module_names
-        #END list_module_names
+        # return variables are: timestamp
+        #BEGIN register_repo
+        timestamp = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
+        #END register_repo
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, list):
-            raise ValueError('Method list_module_names return value ' +
-                             'returnVal is not type list as required.')
+        if not isinstance(timestamp, int):
+            raise ValueError('Method register_repo return value ' +
+                             'timestamp is not type int as required.')
         # return the results
-        return [returnVal]
+        return [timestamp]
+
+    def push_dev_to_beta(self, ctx, params):
+        # ctx is the context object
+        #BEGIN push_dev_to_beta
+        self.cc.push_dev_to_beta(params,ctx['user_id'])
+        #END push_dev_to_beta
+        pass
+
+    def request_release(self, ctx, params):
+        # ctx is the context object
+        #BEGIN request_release
+        self.cc.request_release(params,ctx['user_id'])
+        #END request_release
+        pass
+
+    def list_requested_releases(self, ctx):
+        # ctx is the context object
+        # return variables are: requested_releases
+        #BEGIN list_requested_releases
+        requested_releases = self.cc.list_requested_releases()
+        #END list_requested_releases
+
+        # At some point might do deeper type checking...
+        if not isinstance(requested_releases, list):
+            raise ValueError('Method list_requested_releases return value ' +
+                             'requested_releases is not type list as required.')
+        # return the results
+        return [requested_releases]
+
+    def review_release_request(self, ctx, review):
+        # ctx is the context object
+        #BEGIN review_release_request
+        self.cc.review_release_request(review, ctx['user_id'])
+        #END review_release_request
+        pass
+
+    def list_basic_module_info(self, ctx, params):
+        # ctx is the context object
+        # return variables are: info_list
+        #BEGIN list_basic_module_info
+        info_list = self.cc.list_basic_module_info(params)
+        #END list_basic_module_info
+
+        # At some point might do deeper type checking...
+        if not isinstance(info_list, list):
+            raise ValueError('Method list_basic_module_info return value ' +
+                             'info_list is not type list as required.')
+        # return the results
+        return [info_list]
 
     def get_repo_details(self, ctx, params):
         # ctx is the context object
@@ -146,8 +184,6 @@ class Catalog:
             state['active']=1
         else:
             state['active']=0
-
-        pprint(state)
         #END get_module_state
 
         # At some point might do deeper type checking...
