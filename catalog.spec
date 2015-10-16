@@ -72,10 +72,12 @@ module Catalog {
 
     /*
         Describes how to filter repositories.
+        include_released - optional flag indicated modules that are released are included (default:true)
         include_unreleased - optional flag indicated modules that are not released are included (default:false)
         with_disabled - optional flag indicating disabled repos should be included (default:false).
     */
     typedef structure {
+        boolean include_released;
         boolean include_unreleased;
         boolean include_disabled;
     } ListModuleParams;
@@ -170,5 +172,5 @@ module Catalog {
     funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
 
-    funcdef get_build_log(string timestamp) returns (string);
+    funcdef get_build_log(int timestamp) returns (string);
 };

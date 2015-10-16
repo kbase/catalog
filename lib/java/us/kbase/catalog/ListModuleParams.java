@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: ListModuleParams</p>
  * <pre>
  * Describes how to filter repositories.
+ * include_released - optional flag indicated modules that are released are included (default:true)
  * include_unreleased - optional flag indicated modules that are not released are included (default:false)
  * with_disabled - optional flag indicating disabled repos should be included (default:false).
  * </pre>
@@ -23,16 +24,34 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
+    "include_released",
     "include_unreleased",
     "include_disabled"
 })
 public class ListModuleParams {
 
+    @JsonProperty("include_released")
+    private Long includeReleased;
     @JsonProperty("include_unreleased")
     private Long includeUnreleased;
     @JsonProperty("include_disabled")
     private Long includeDisabled;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    @JsonProperty("include_released")
+    public Long getIncludeReleased() {
+        return includeReleased;
+    }
+
+    @JsonProperty("include_released")
+    public void setIncludeReleased(Long includeReleased) {
+        this.includeReleased = includeReleased;
+    }
+
+    public ListModuleParams withIncludeReleased(Long includeReleased) {
+        this.includeReleased = includeReleased;
+        return this;
+    }
 
     @JsonProperty("include_unreleased")
     public Long getIncludeUnreleased() {
@@ -76,7 +95,7 @@ public class ListModuleParams {
 
     @Override
     public String toString() {
-        return ((((((("ListModuleParams"+" [includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("ListModuleParams"+" [includeReleased=")+ includeReleased)+", includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

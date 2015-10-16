@@ -213,13 +213,14 @@ class CatalogController:
             owners = []
             for o in r['owners']:
                 owners.append(o['kb_username'])
-            timestamp = r['current_versions']['beta']['timestamp']
+            beta = r['current_versions']['beta']
+            timestamp = beta['timestamp']
             requested_releases.append({
                     'module_name':r['module_name'],
                     'git_url':r['git_url'],
                     'timestamp':timestamp,
-                    'git_commit_hash':r['git_commit_hash'],
-                    'git_commit_message':r['git_commit_message'],
+                    'git_commit_hash':beta['git_commit_hash'],
+                    'git_commit_message':beta['git_commit_message'],
                     'owners':owners
                 })
         return requested_releases
@@ -335,19 +336,31 @@ class CatalogController:
         return False
 
     def list_basic_module_info(self,params):
-        query = { 'state.active':True }
-        query = { 'state.released':True }
+        query = { 'state.active':True, 'state.released':True }
+
         if 'include_disabled' in params:
             if params['include_disabled']>0:
                 query.pop('state.active',None)
-        if 'include_unreleased' in params:
-            if params['include_unreleased']>0:
-                query.pop('state.released',None)
+
+        if 'include_released' not in params:
+            params['include_released'] = 1
+        if 'include_unreleased' not in params:
+            params['include_unreleased'] = 0
+
+        # figure out release/unreleased options so we can get just the unreleased if needed
+        # default (if none of these matches is to list only released)
+        if params['include_released']<=0 and params['include_unreleased']<=0:
+            return [] # don't include anything...
+        elif params['include_released']<=0 and params['include_unreleased']>0:
+            query['state.released']=False # include only unreleased
+        elif params['include_released']>0 and params['include_unreleased']>0:
+            query.pop('state.released',None) # include everything
+
         return self.db.find_basic_module_info(query)
 
 
     def get_build_log(self, timestamp):
-        with open(self.temp_dir+'/registration.log.'+str(self.timestamp)) as log_file:
+        with open(self.temp_dir+'/registration.log.'+str(timestamp)) as log_file:
             log = log_file.read()
         return log
 

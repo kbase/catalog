@@ -363,12 +363,12 @@ public class CatalogClient {
      * <p>Original spec-file function name: get_build_log</p>
      * <pre>
      * </pre>
-     * @param   timestamp   instance of String
+     * @param   timestamp   instance of Long
      * @return   instance of String
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public String getBuildLog(String timestamp, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public String getBuildLog(Long timestamp, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(timestamp);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};

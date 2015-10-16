@@ -426,7 +426,7 @@ class Application(object):
         self.method_authentication['Catalog.get_module_state'] = 'none'
         self.rpc_service.add(impl_Catalog.get_build_log,
                              name='Catalog.get_build_log',
-                             types=[basestring])
+                             types=[int])
         self.method_authentication['Catalog.get_build_log'] = 'none'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',

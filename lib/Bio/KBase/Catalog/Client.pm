@@ -707,6 +707,7 @@ ReleaseReview is a reference to a hash where the following keys are defined:
 $params is a Catalog.ListModuleParams
 $info_list is a reference to a list where each element is a Catalog.BasicModuleInfo
 ListModuleParams is a reference to a hash where the following keys are defined:
+	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
 boolean is an int
@@ -723,6 +724,7 @@ BasicModuleInfo is a reference to a hash where the following keys are defined:
 $params is a Catalog.ListModuleParams
 $info_list is a reference to a list where each element is a Catalog.BasicModuleInfo
 ListModuleParams is a reference to a hash where the following keys are defined:
+	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
 boolean is an int
@@ -1312,7 +1314,7 @@ Get repo state (one of 'pending', 'ready', 'building', 'testing', 'disabled').
 =begin html
 
 <pre>
-$timestamp is a string
+$timestamp is an int
 $return is a string
 
 </pre>
@@ -1321,7 +1323,7 @@ $return is a string
 
 =begin text
 
-$timestamp is a string
+$timestamp is an int
 $return is a string
 
 
@@ -1632,6 +1634,7 @@ review_message has a value which is a string
 =item Description
 
 Describes how to filter repositories.
+include_released - optional flag indicated modules that are released are included (default:true)
 include_unreleased - optional flag indicated modules that are not released are included (default:false)
 with_disabled - optional flag indicating disabled repos should be included (default:false).
 
@@ -1642,6 +1645,7 @@ with_disabled - optional flag indicating disabled repos should be included (defa
 
 <pre>
 a reference to a hash where the following keys are defined:
+include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
 
@@ -1652,6 +1656,7 @@ include_disabled has a value which is a Catalog.boolean
 =begin text
 
 a reference to a hash where the following keys are defined:
+include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
 

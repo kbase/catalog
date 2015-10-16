@@ -90,6 +90,8 @@ class MongoCatalogDBI:
 
 
     def is_registered(self,module_name='',git_url=''):
+        if not module_name and not git_url:
+            return False
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module = self.modules.find_one(query, fields=['_id'])
         if module is not None:
