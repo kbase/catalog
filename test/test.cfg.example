@@ -1,0 +1,33 @@
+
+
+
+
+[catalog-test]
+
+# KBase user accounts for testing
+test-user-1 =
+test-user-psswd-1 =
+test-user-2 =
+test-user-psswd-2 =
+
+# host where mongo lives, e.g. localhost:27017, for tests there should be not authentication required
+mongodb-host = localhost:27017
+
+# name of the workspace mongo database
+# WARNING: this gets wiped at the end, although should be safe because will error if collections are not 
+#          emtpy at startup
+mongodb-database = catalog-test
+
+
+# Path to docker socket/host
+docker-base-url = unix://var/run/docker.sock
+# for tcp: "tcp://host:port"
+
+# Users (kbase account username) that can review/approve/disable modules and releases.
+# Multiple admin users can be specified as a comma delimited list
+admin-users = 
+
+#Narrative Method Store configuration
+nms-url = 
+nms-admin-user =
+nms-admin-psswd = 

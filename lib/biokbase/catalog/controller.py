@@ -191,10 +191,10 @@ class CatalogController:
         if not module_details['current_versions']['beta']:
             raise ValueError('Cannot request release - no beta version has been created yet.')
 
-        # beta version must be different than release version
-        if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
-            raise ValueError('Cannot request release - beta version is identical to released version.')
-
+        # beta version must be different than release version (if release version exists)
+        if module_details['current_versions']['release']:
+            if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
+                raise ValueError('Cannot request release - beta version is identical to released version.')
 
         # ok, do it.
         success = self.db.set_module_release_state(

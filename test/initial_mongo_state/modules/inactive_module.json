@@ -1,0 +1,49 @@
+{
+    "module_name" : "inactive_module",
+    "git_url" : "https://github.com/kbaseIncubator/inactive_module",
+
+    "info" : {
+        "description" : "KBase module for integration tests of docker-based service/async method calls",
+        "language" : "python"
+    },
+
+    "owners" : [
+        {
+            "kb_username" : "wstester1"
+        }
+    ],
+
+    "state" : {
+        "active" : false,
+        "error_message" : "",
+        "registration" : "complete",
+        "release_approval" : "not_requested",
+        "released" : false,
+        "review_message" : "not good enough"
+    },
+
+    "current_versions" : {
+        "dev" : {
+            "git_commit_hash" : "b06c5f9daf603a4d206071787c3f6184000bf128",
+            "timestamp" : 1445024094055,
+            "git_commit_message" : "another change",
+            "version" : "0.0.1",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+        "beta" : {
+            "git_commit_hash" : "b843888e962642d665a3b0bd701ee630c01835e6",
+            "timestamp" : 1445023985597,
+            "git_commit_message" : "update for testing",
+            "version" : "0.0.1",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+        "release" : null
+    },
+
+    "release_versions" : {
+    }
+}
