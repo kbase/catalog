@@ -926,7 +926,6 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	timestamp has a value which is an int
 	git_commit_hash has a value which is a string
 	version has a value which is a string
-	owner_version_string has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
 	version has a value which is a string
@@ -948,7 +947,6 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	timestamp has a value which is an int
 	git_commit_hash has a value which is a string
 	version has a value which is a string
-	owner_version_string has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
 	version has a value which is a string
@@ -1331,7 +1329,7 @@ $return is a string
 
 =item Description
 
-
+given the timestamp returned from the register method, you can check the build log with this method
 
 =back
 
@@ -1791,8 +1789,16 @@ dev has a value which is a Catalog.ModuleVersionInfo
 
 only required: module_name or git_url, the rest are optional selectors
 If no selectors given, returns current release version
-version - release | beta | dev
-owner_version_string - matches on the 'version' set for a version in 'kbase.yaml'
+version is one of: release | beta | dev
+old release versions can only be retrieved individually by timestamp or git_commit_hash
+
+Note: this method isn't particularly smart or effecient yet, because it pulls the info for a particular
+module first, then searches in code for matches to the relevant query.  Instead, this should be
+performed on the database side through queries.  Will optimize when this becomes an issue.
+
+In the future, this will be extended so that you can retrieve version info by only
+timestamp, git commit, etc, but the necessary indicies have not been setup yet.  In general, we will
+need to add better search capabilities
 
 
 =item Definition
@@ -1806,7 +1812,6 @@ git_url has a value which is a string
 timestamp has a value which is an int
 git_commit_hash has a value which is a string
 version has a value which is a string
-owner_version_string has a value which is a string
 
 </pre>
 
@@ -1820,7 +1825,6 @@ git_url has a value which is a string
 timestamp has a value which is an int
 git_commit_hash has a value which is a string
 version has a value which is a string
-owner_version_string has a value which is a string
 
 
 =end text

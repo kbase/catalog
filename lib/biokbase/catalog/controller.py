@@ -302,22 +302,62 @@ class CatalogController:
 
     def get_version_info(self,params):
         params = self.filter_module_or_repo_selection(params)
-        current_versions = self.db.get_module_current_versions(module_name=params['module_name'], git_url=params['git_url'])
+        current_version = self.db.get_module_current_versions(module_name=params['module_name'], git_url=params['git_url'])
+
+        # TODO: can make this more effecient and flexible by putting in some indicies and doing the query on mongo side
+        # right now, we require a module name / git url, and request specific version based on selectors.  in the future
+        # we could, for instance, get all versions that match a particular git commit hash, or timestamp...
+
+        # If version is in params, it should be one of dev, beta, release
         if 'version' in params:
-            return current_version[params['version']]
+            if params['version'] not in ['dev','beta','release']:
+                raise ValueError('invalid version selection, valid versions are: "dev" | "beta" | "release"')
+            v = current_version[params['version']]
+            # if timestamp or git_commit_hash is given, those need to match as well
+            if 'timestamp' in params:
+                if v['timestamp'] != params['timestamp'] :
+                    return None;
+            if 'git_commit_hash' in params:
+                if v['git_commit_hash'] != params['git_commit_hash'] :
+                    return None;
+            return v
+
         if 'timestamp' in params:
-            if current_version['dev']['timestamp'] == params['timestamp']:
-                return current_version['dev']
-            if current_version['beta']: 
-                if current_version['beta']['timestamp'] == params['timestamp']:
-                    return current_version['beta']
-            if current_version['release']: 
-                if current_version['release']['timestamp'] == params['timestamp']:
-                    return current_version['release']
+            # first check in current versions
+            for version in ['dev','beta','version']:
+                if current_version[version]['timestamp'] == params['timestamp']:
+                    v = current_version[version]
+                    if 'git_commit_hash' in params:
+                        if v['git_commit_hash'] != params['git_commit_hash'] :
+                            return None;
+                    return v
+            # if we get here, we have to look in full history
+            details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+            all_versions = details['released_versions']
+            if params['timestamp'] in all_versions:
+                v = all_versions[params['timestamp']]
+                if 'git_commit_hash' in params:
+                    if v['git_commit_hash'] != params['git_commit_hash'] :
+                        return None;
+                return v
+            return None
 
-        # TODO: filter the modules old versions based on the info, and get the right one
-        #details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+        # if we get here, version and timestamp are not defined, so just look for the commit hash
+        if 'git_commit_hash' in params:
+            # check current versions
+            for version in ['dev','beta','version']:
+                if current_version[version]['git_commit_hash'] == params['git_commit_hash']:
+                    v = current_version[version]
+                    return v
+            # if we get here, we have to look in full history
+            details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+            all_versions = details['released_versions']
+            for timestamp, v in d.all_versions():
+                if v['git_commit_hash'] == params['git_commit_hash']:
+                    return v
+            return None
 
+        # didn't get nothing, so return
         return None
 
     def list_released_versions(self, params):

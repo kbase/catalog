@@ -147,6 +147,8 @@ class Catalog:
         # return variables are: version
         #BEGIN get_version_info
         version = self.cc.get_version_info(params)
+        if version is None:
+            raise ValueError("No version found that matches all your criteria!")
         #END get_version_info
 
         # At some point might do deeper type checking...

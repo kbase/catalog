@@ -16,8 +16,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * only required: module_name or git_url, the rest are optional selectors
  * If no selectors given, returns current release version
- * version - release | beta | dev
- * owner_version_string - matches on the 'version' set for a version in 'kbase.yaml'
+ * version is one of: release | beta | dev
+ * old release versions can only be retrieved individually by timestamp or git_commit_hash
+ * Note: this method isn't particularly smart or effecient yet, because it pulls the info for a particular
+ * module first, then searches in code for matches to the relevant query.  Instead, this should be
+ * performed on the database side through queries.  Will optimize when this becomes an issue.
+ * In the future, this will be extended so that you can retrieve version info by only
+ * timestamp, git commit, etc, but the necessary indicies have not been setup yet.  In general, we will
+ * need to add better search capabilities
  * </pre>
  * 
  */
@@ -28,8 +34,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "git_url",
     "timestamp",
     "git_commit_hash",
-    "version",
-    "owner_version_string"
+    "version"
 })
 public class SelectModuleVersionParams {
 
@@ -43,8 +48,6 @@ public class SelectModuleVersionParams {
     private String gitCommitHash;
     @JsonProperty("version")
     private String version;
-    @JsonProperty("owner_version_string")
-    private String ownerVersionString;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -122,21 +125,6 @@ public class SelectModuleVersionParams {
         return this;
     }
 
-    @JsonProperty("owner_version_string")
-    public String getOwnerVersionString() {
-        return ownerVersionString;
-    }
-
-    @JsonProperty("owner_version_string")
-    public void setOwnerVersionString(String ownerVersionString) {
-        this.ownerVersionString = ownerVersionString;
-    }
-
-    public SelectModuleVersionParams withOwnerVersionString(String ownerVersionString) {
-        this.ownerVersionString = ownerVersionString;
-        return this;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -149,7 +137,7 @@ public class SelectModuleVersionParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((("SelectModuleVersionParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", timestamp=")+ timestamp)+", gitCommitHash=")+ gitCommitHash)+", version=")+ version)+", ownerVersionString=")+ ownerVersionString)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("SelectModuleVersionParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", timestamp=")+ timestamp)+", gitCommitHash=")+ gitCommitHash)+", version=")+ version)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

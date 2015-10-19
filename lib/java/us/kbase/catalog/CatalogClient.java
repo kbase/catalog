@@ -362,6 +362,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_build_log</p>
      * <pre>
+     * given the timestamp returned from the register method, you can check the build log with this method
      * </pre>
      * @param   timestamp   instance of Long
      * @return   instance of String

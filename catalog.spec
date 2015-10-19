@@ -119,8 +119,16 @@ module Catalog {
     /*
         only required: module_name or git_url, the rest are optional selectors
         If no selectors given, returns current release version
-        version - release | beta | dev
-        owner_version_string - matches on the 'version' set for a version in 'kbase.yaml'
+        version is one of: release | beta | dev
+        old release versions can only be retrieved individually by timestamp or git_commit_hash
+
+        Note: this method isn't particularly smart or effecient yet, because it pulls the info for a particular
+        module first, then searches in code for matches to the relevant query.  Instead, this should be
+        performed on the database side through queries.  Will optimize when this becomes an issue.
+
+        In the future, this will be extended so that you can retrieve version info by only
+        timestamp, git commit, etc, but the necessary indicies have not been setup yet.  In general, we will
+        need to add better search capabilities
     */
     typedef structure {
         string module_name;
@@ -128,13 +136,11 @@ module Catalog {
         int timestamp;
         string git_commit_hash;
         string version;
-        string owner_version_string;
     } SelectModuleVersionParams;
 
     funcdef get_version_info(SelectModuleVersionParams params) returns (ModuleVersionInfo version);
 
     funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
-
 
     /*
         Describes how to find repository details.
@@ -171,6 +177,8 @@ module Catalog {
     */
     funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
-
+    /*
+        given the timestamp returned from the register method, you can check the build log with this method
+    */
     funcdef get_build_log(int timestamp) returns (string);
 };
