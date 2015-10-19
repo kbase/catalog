@@ -54,6 +54,9 @@ class Registrar:
             if os.path.isdir(basedir):
                 shutil.rmtree(basedir)
             repo = git.Repo.clone_from(self.git_url, basedir)
+            if 'git_commit_hash' in self.params:
+                repo.git.checkout(self.params['git_commit_hash'])
+
             # TODO: switch to the right commit/branch based on params
             self.log(str(parsed_url.path));
 
