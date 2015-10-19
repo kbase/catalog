@@ -304,6 +304,9 @@ class CatalogController:
         params = self.filter_module_or_repo_selection(params)
         current_version = self.db.get_module_current_versions(module_name=params['module_name'], git_url=params['git_url'])
 
+        if not current_version:
+            return None
+
         # TODO: can make this more effecient and flexible by putting in some indicies and doing the query on mongo side
         # right now, we require a module name / git url, and request specific version based on selectors.  in the future
         # we could, for instance, get all versions that match a particular git commit hash, or timestamp...
@@ -324,7 +327,7 @@ class CatalogController:
 
         if 'timestamp' in params:
             # first check in current versions
-            for version in ['dev','beta','version']:
+            for version in ['dev','beta','release']:
                 if current_version[version]['timestamp'] == params['timestamp']:
                     v = current_version[version]
                     if 'git_commit_hash' in params:
@@ -333,9 +336,9 @@ class CatalogController:
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-            all_versions = details['released_versions']
-            if params['timestamp'] in all_versions:
-                v = all_versions[params['timestamp']]
+            all_versions = details['release_versions']
+            if str(params['timestamp']) in all_versions:
+                v = all_versions[str(params['timestamp'])]
                 if 'git_commit_hash' in params:
                     if v['git_commit_hash'] != params['git_commit_hash'] :
                         return None;
@@ -345,14 +348,14 @@ class CatalogController:
         # if we get here, version and timestamp are not defined, so just look for the commit hash
         if 'git_commit_hash' in params:
             # check current versions
-            for version in ['dev','beta','version']:
+            for version in ['dev','beta','release']:
                 if current_version[version]['git_commit_hash'] == params['git_commit_hash']:
                     v = current_version[version]
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-            all_versions = details['released_versions']
-            for timestamp, v in d.all_versions():
+            all_versions = details['release_versions']
+            for timestamp, v in all_versions.iteritems():
                 if v['git_commit_hash'] == params['git_commit_hash']:
                     return v
             return None

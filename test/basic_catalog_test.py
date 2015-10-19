@@ -155,7 +155,6 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(state['registration'],'building: doing stuff')
         self.assertEqual(state['error_message'],'')
 
-
         state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'git_url':'https://github.com/kbaseIncubator/pending_second_release'})[0]
         self.assertEqual(state['active'],1)
@@ -164,6 +163,22 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(state['registration'],'complete')
         self.assertEqual(state['error_message'],'')
 
+        # test various fail cases where a module does not exist
+        with self.assertRaises(ValueError):
+            self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'module_name':'not_a_module'})
+        with self.assertRaises(ValueError):
+            self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'git_url':'not_a_giturl'})
+        with self.assertRaises(ValueError):
+            self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {})
+        with self.assertRaises(ValueError):
+            self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'module_name':'not_a_module','git_url':'https://github.com/kbaseIncubator/registration_in_progress'})
+        with self.assertRaises(ValueError):
+            self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'module_name':'onerepotest','git_url':'not_a_url'})
 
 
     def test_get_module_info(self):
@@ -206,7 +221,167 @@ class BasicCatalogTest(unittest.TestCase):
 
 
     def test_get_version_info(self):
-        pass
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'dev'})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"b06c5f9daf603a4d206071787c3f6184000bf128")
+        self.assertEqual(vinfo['timestamp'],1445024094055)
+        self.assertEqual(vinfo['git_commit_message'],"another change")
+        self.assertEqual(vinfo['version'],"0.0.5")
+        self.assertEqual(vinfo['narrative_methods'],['send_data2'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'beta'})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"b843888e962642d665a3b0bd701ee630c01835e6")
+        self.assertEqual(vinfo['timestamp'],1445023985597)
+        self.assertEqual(vinfo['git_commit_message'],"update for testing")
+        self.assertEqual(vinfo['version'],"0.0.4")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'release'})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(vinfo['timestamp'],1445022818884)
+        self.assertEqual(vinfo['git_commit_message'],"added username for testing")
+        self.assertEqual(vinfo['version'],"0.0.3")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'version':'release',
+                'git_commit_hash':'49dc505febb8f4cccb2078c58ded0de3320534d7'})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(vinfo['timestamp'],1445022818884)
+        self.assertEqual(vinfo['git_commit_message'],"added username for testing")
+        self.assertEqual(vinfo['version'],"0.0.3")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'version':'release',
+                'timestamp':1445022818884})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(vinfo['timestamp'],1445022818884)
+        self.assertEqual(vinfo['git_commit_message'],"added username for testing")
+        self.assertEqual(vinfo['version'],"0.0.3")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'version':'release',
+                'git_commit_hash':'49dc505febb8f4cccb2078c58ded0de3320534d7',
+                'timestamp':1445022818884})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(vinfo['timestamp'],1445022818884)
+        self.assertEqual(vinfo['git_commit_message'],"added username for testing")
+        self.assertEqual(vinfo['version'],"0.0.3")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        # wrong version set
+        with self.assertRaises(ValueError):
+            self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'version':'not_a_Version'})
+        # test wrong git commit hash
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 'version':'release',
+                    'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128'})[0]
+        # test wrong timestamp
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 'version':'release',
+                    'timestamp':1445024094055})[0]
+        # right git commit, wrong timestamp
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 'version':'release',
+                    'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128',
+                    'timestamp':1445024094055})[0]
+        # right timestamp, wrong git commit hash
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 'version':'release',
+                    'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6',
+                    'timestamp':1445022818884})[0]
+
+        #########
+        # now we test with a timestamp retrieval, first from one of the currents
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'timestamp':1445022818884})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(vinfo['timestamp'],1445022818884)
+        self.assertEqual(vinfo['git_commit_message'],"added username for testing")
+        self.assertEqual(vinfo['version'],"0.0.3")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'timestamp':1445022818884,
+                'git_commit_hash':"49dc505febb8f4cccb2078c58ded0de3320534d7"})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(vinfo['timestamp'],1445022818884)
+        self.assertEqual(vinfo['git_commit_message'],"added username for testing")
+        self.assertEqual(vinfo['version'],"0.0.3")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 'timestamp':1445022818884,
+                    'git_commit_hash':"49dc505febb8f4cccb2078c51ded0de3320534d7"})[0]
+
+        # now with something in the history
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'timestamp':1445022818000})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"d6cd1e2bd19e03a81132a23b2025920577f84e37")
+        self.assertEqual(vinfo['timestamp'],1445022818000)
+        self.assertEqual(vinfo['git_commit_message'],"something else")
+        self.assertEqual(vinfo['version'],"0.0.2")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'timestamp':1445022818000,
+                'git_commit_hash':"d6cd1e2bd19e03a81132a23b2025920577f84e37"})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"d6cd1e2bd19e03a81132a23b2025920577f84e37")
+        self.assertEqual(vinfo['timestamp'],1445022818000)
+        self.assertEqual(vinfo['git_commit_message'],"something else")
+        self.assertEqual(vinfo['version'],"0.0.2")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        # test wrong timestamp
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history',
+                    'timestamp':1445024094078})[0]
+
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 'timestamp':1445022818000, 
+                    'git_commit_hash':"49dc505febb8f4cccb2078c51ded0de3320534d7"})[0]
+
+
+
+        #########
+        # now we test with a git commit hash retrieval, first from one of the currents
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6'})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"b843888e962642d665a3b0bd701ee630c01835e6")
+        self.assertEqual(vinfo['timestamp'],1445023985597)
+        self.assertEqual(vinfo['git_commit_message'],"update for testing")
+        self.assertEqual(vinfo['version'],"0.0.4")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        # next from something in the history
+        vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                {'module_name':'release_history', 'git_commit_hash':'9bedf67800b2923982bdf60c89c57ce6fd2d9a1c'})[0]
+        self.assertEqual(vinfo['git_commit_hash'],"9bedf67800b2923982bdf60c89c57ce6fd2d9a1c")
+        self.assertEqual(vinfo['timestamp'],1445022815000)
+        self.assertEqual(vinfo['git_commit_message'],"and another thing")
+        self.assertEqual(vinfo['version'],"0.0.1")
+        self.assertEqual(vinfo['narrative_methods'],['send_data'])
+
+        # test wrong git commit hash
+        with self.assertRaises(ValueError):
+            vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
+                    {'module_name':'release_history', 
+                    'git_commit_hash':'b06c5f9daf603a4d202071787c3f6184000bf128'})[0]
+
+
 
     def test_list_released_module_versions(self):
         # history should return versions sorted by timestamp
