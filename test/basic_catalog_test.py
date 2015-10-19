@@ -130,9 +130,50 @@ class BasicCatalogTest(unittest.TestCase):
                 'registration_in_progress']))
             )
 
+    def test_get_module_state(self):
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+            {'module_name':'onerepotest'})[0]
+        pass
+
 
     def test_get_module_info(self):
-        pass
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+            {'module_name':'onerepotest'})[0]
+        self.assertEqual(info['module_name'],'onerepotest')
+        self.assertEqual(info['git_url'],'https://github.com/kbaseIncubator/onerepotest')
+        self.assertEqual(info['description'],'KBase module for integration tests of docker-based service/async method calls')
+        self.assertEqual(info['owners'],['rsutormin','wstester1'])
+        self.assertEqual(info['language'],'python')
+
+        self.assertEqual(info['release']['git_commit_hash'],'49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(info['release']['timestamp'],1445022818884)
+        self.assertEqual(info['release']['git_commit_message'],'added username for testing')
+        self.assertEqual(info['release']['version'],'0.0.1')
+        self.assertEqual(info['release']['narrative_methods'],['send_data'])
+
+        self.assertEqual(info['beta']['git_commit_hash'],'b843888e962642d665a3b0bd701ee630c01835e6')
+        self.assertEqual(info['beta']['timestamp'],1445023985597)
+        self.assertEqual(info['beta']['git_commit_message'],'update for testing')
+        self.assertEqual(info['beta']['version'],'0.0.1')
+        self.assertEqual(info['beta']['narrative_methods'],['send_data'])
+
+        self.assertEqual(info['dev']['git_commit_hash'],'b06c5f9daf603a4d206071787c3f6184000bf128')
+        self.assertEqual(info['dev']['timestamp'],1445024094055)
+        self.assertEqual(info['dev']['git_commit_message'],'another change')
+        self.assertEqual(info['dev']['version'],'0.0.1')
+        self.assertEqual(info['dev']['narrative_methods'],['send_data'])
+
+
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+            {'git_url':'https://github.com/kbaseIncubator/pending_Release'})[0]
+
+        self.assertEqual(info['module_name'],'pending_first_release')
+        self.assertEqual(info['git_url'],'https://github.com/kbaseIncubator/pending_Release')
+        self.assertEqual(info['description'],' something')
+        self.assertEqual(info['owners'],['kbasetest'])
+        self.assertEqual(info['language'],'perl')
+        self.assertTrue(info['release'] is None)
+        
 
     def test_get_version_info(self):
         pass
@@ -140,8 +181,7 @@ class BasicCatalogTest(unittest.TestCase):
     def test_list_released_module_versions(self):
         pass
 
-    def test_get_module_state(self):
-        pass
+    
 
     @classmethod
     def setUpClass(cls):

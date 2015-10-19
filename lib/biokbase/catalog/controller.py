@@ -286,17 +286,17 @@ class CatalogController:
             owners.append(o['kb_username'])
 
         info = {
-            module_name: details['module_name'],
-            git_url: details['git_url'],
+            'module_name': details['module_name'],
+            'git_url': details['git_url'],
 
-            description: details['info']['description'],
-            language: details['info']['language'],
+            'description': details['info']['description'],
+            'language': details['info']['language'],
 
-            owners: owners,
+            'owners': owners,
 
-            release: details['current_versions']['release'],
-            beta: details['current_versions']['beta'],
-            dev: details['current_versions']['dev']
+            'release': details['current_versions']['release'],
+            'beta': details['current_versions']['beta'],
+            'dev': details['current_versions']['dev']
         }
         return info
 
