@@ -25,7 +25,7 @@ DIR = $(shell pwd)
 
 LIB_DIR = lib
 
-default: #compile-kb-module
+default: compile-kb-module
 
 compile-kb-module:
 	kb-mobu compile $(SPEC_FILE) \
@@ -51,8 +51,8 @@ build-local-server-control-scripts:
 		$(DIR) \
 		$(DIR)/service \
 		service
-	chmod +x service/start_service.sh
-	chmod +x service/stop_service.sh
+	chmod +x service/start_service
+	chmod +x service/stop_service
 
 
 deploy: deploy-client deploy-service deploy-server-control-scripts
@@ -83,8 +83,8 @@ deploy-server-control-scripts:
 		$(TARGET) \
 		$(TARGET)/services/$(SERVICE) \
 		$(TARGET)/services/$(SERVICE)
-	chmod +x $(TARGET)/services/$(SERVICE)/start_service.sh
-	chmod +x $(TARGET)/services/$(SERVICE)/stop_service.sh
+	chmod +x $(TARGET)/services/$(SERVICE)/start_service
+	chmod +x $(TARGET)/services/$(SERVICE)/stop_service
 	echo $(GITCOMMIT) > $(TARGET)/services/$(SERVICE)/$(SERVICE).version
 	echo $(TAGS) >> $(TARGET)/services/$(SERVICE)/$(SERVICE).version
 

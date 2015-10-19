@@ -50,7 +50,7 @@ def main ():
         kb_top=sys.argv[5],
         kb_service_dir=sys.argv[6],
         )
-    with open (sys.argv[7]+'/start_service.sh', "w") as start_service_file:
+    with open (sys.argv[7]+'/start_service', "w") as start_service_file:
         start_service_file.write(startScript)
 
     # create the stop_service.sh script
@@ -63,7 +63,7 @@ def main ():
         kb_top=sys.argv[5],
         kb_service_dir=sys.argv[6],
         )
-    with open (sys.argv[7]+'/stop_service.sh', "w") as stop_service_file:
+    with open (sys.argv[7]+'/stop_service', "w") as stop_service_file:
         stop_service_file.write(stopScript)
 
 
