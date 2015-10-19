@@ -19,7 +19,7 @@
         "registration" : "complete",
         "release_approval" : "not_requested",
         "released" : false,
-        "review_message" : "not good enough"
+        "review_message" : ""
     },
 
     "current_versions" : {

@@ -323,7 +323,7 @@ class CatalogController:
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)
         details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-        return details['release_versions'].values()
+        return sorted(details['release_versions'].values(), key= lambda v: v['timestamp'])
 
 
     def is_registered(self,params):

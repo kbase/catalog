@@ -131,9 +131,39 @@ class BasicCatalogTest(unittest.TestCase):
             )
 
     def test_get_module_state(self):
-        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+        state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'onerepotest'})[0]
-        pass
+        self.assertEqual(state['active'],1)
+        self.assertEqual(state['release_approval'],'approved')
+        self.assertEqual(state['review_message'],'')
+        self.assertEqual(state['registration'],'complete')
+        self.assertEqual(state['error_message'],'')
+
+        state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'module_name':'inactive_module'})[0]
+        self.assertEqual(state['active'],0)
+        self.assertEqual(state['release_approval'],'not_requested')
+        self.assertEqual(state['review_message'],'')
+        self.assertEqual(state['registration'],'complete')
+        self.assertEqual(state['error_message'],'')
+
+        state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'git_url':'https://github.com/kbaseIncubator/registration_in_progress'})[0]
+        self.assertEqual(state['active'],1)
+        self.assertEqual(state['release_approval'],'not_requested')
+        self.assertEqual(state['review_message'],'')
+        self.assertEqual(state['registration'],'building: doing stuff')
+        self.assertEqual(state['error_message'],'')
+
+
+        state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+            {'git_url':'https://github.com/kbaseIncubator/pending_second_release'})[0]
+        self.assertEqual(state['active'],1)
+        self.assertEqual(state['release_approval'],'under_review')
+        self.assertEqual(state['review_message'],'')
+        self.assertEqual(state['registration'],'complete')
+        self.assertEqual(state['error_message'],'')
+
 
 
     def test_get_module_info(self):
@@ -173,13 +203,39 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(info['owners'],['kbasetest'])
         self.assertEqual(info['language'],'perl')
         self.assertTrue(info['release'] is None)
-        
+
 
     def test_get_version_info(self):
         pass
 
     def test_list_released_module_versions(self):
-        pass
+        # history should return versions sorted by timestamp
+        history = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history'})[0]
+        self.assertTrue(len(history) == 3)
+        self.assertEqual(history[0]['git_commit_hash'], '9bedf67800b2923982bdf60c89c57ce6fd2d9a1c')
+        self.assertEqual(history[0]['timestamp'], 1445022815000)
+        self.assertEqual(history[0]['version'], '0.0.1')
+        self.assertEqual(history[0]['narrative_methods'],['send_data'])
+        self.assertEqual(history[1]['git_commit_hash'], 'd6cd1e2bd19e03a81132a23b2025920577f84e37')
+        self.assertEqual(history[1]['timestamp'], 1445022818000)
+        self.assertEqual(history[1]['version'], '0.0.2')
+        self.assertEqual(history[2]['git_commit_hash'], '49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(history[2]['timestamp'], 1445022818884)
+        self.assertEqual(history[2]['version'], '0.0.3')
+
+        history = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),
+            {'module_name':'onerepotest'})[0]
+        self.assertTrue(len(history) == 1)
+        self.assertEqual(history[0]['git_commit_hash'], '49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(history[0]['git_commit_message'], 'added username for testing')
+        self.assertEqual(history[0]['timestamp'], 1445022818884)
+        self.assertEqual(history[0]['version'], '0.0.1')
+        self.assertEqual(history[0]['narrative_methods'],['send_data'])
+
+        history = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),
+            {'git_url':'https://github.com/kbaseIncubator/pending_Release'})[0]
+        self.assertEqual(history,[])
 
     
 
@@ -192,8 +248,6 @@ class BasicCatalogTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.cUtil.tearDown()
-
-
 
 
 
