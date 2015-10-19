@@ -1,5 +1,5 @@
 
-
+import json
 from pprint import pprint
 from pymongo import MongoClient
 
@@ -261,9 +261,9 @@ class MongoCatalogDBI:
             if 'nModified' in result:
                 nModified = result['nModified']
             if nModified < 1:
-                return False
-            return True
-        return False
+                return json.dumps(result)
+            return None
+        return '{}'
 
 
 

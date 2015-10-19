@@ -210,9 +210,9 @@ class Registrar:
             'language' : service_language
         }
         self.log('new info: '+pprint.pformat(info))
-        success = self.db.set_module_info(info, git_url=self.git_url)
-        if not success:
-            raise ValueError('Unable to set module info - there was an internal database error.')
+        error = self.db.set_module_info(info, git_url=self.git_url)
+        if error is not None:
+            raise ValueError('Unable to set module info - there was an internal database error: '+error)
 
         # next update the owners
         ownersListForUpdate = []
@@ -220,9 +220,9 @@ class Registrar:
             # TODO: add some validation that the username is a valid kbase user
             ownersListForUpdate.append({'kb_username':o})
         self.log('new owners list: '+pprint.pformat(ownersListForUpdate))
-        success = self.db.set_module_owners(ownersListForUpdate, git_url=self.git_url)
-        if not success:
-            raise ValueError('Unable to set module owners - there was an internal database error.')
+        error = self.db.set_module_owners(ownersListForUpdate, git_url=self.git_url)
+        if error is not None:
+            raise ValueError('Unable to set module owners - there was an internal database error: '+error)
 
         # finally update the actual dev version info
         narrative_methods = []
@@ -239,9 +239,9 @@ class Registrar:
             'narrative_methods': narrative_methods
         }
         self.log('new dev version object: '+pprint.pformat(new_version))
-        success = self.db.update_dev_version(new_version, git_url=self.git_url)
-        if not success:
-            raise ValueError('Unable to update dev version - there was an internal database error.')
+        error = self.db.update_dev_version(new_version, git_url=self.git_url)
+        if error is not None:
+            raise ValueError('Unable to update dev version - there was an internal database error: '+error)
 
         #push to NMS
         nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)

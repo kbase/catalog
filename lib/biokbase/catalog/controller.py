@@ -102,11 +102,11 @@ class CatalogController:
                 state = module_details['state']
                 registration_state = state['registration']
                 if registration_state == 'complete' or registration_state == 'error':
-                    success = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
-                    if not success:
+                    error = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
+                    if error is not None:
                         # we can fail if the registration state changed when we were first checking to now.  This is important
                         # to ensure we only ever kick off one registration thread at a time
-                        raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin.')
+                        raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin: '+error)
                     # we know we are the only operation working, so we can clear the dev version and upate the timestamp
                     self.db.update_dev_version({'timestamp':timestamp}, git_url=git_url)
                 else:
@@ -149,13 +149,13 @@ class CatalogController:
             error_message = params['error_message']
         else:
             # then we update the state
-            success = self.db.set_module_registration_state(
+            error = self.db.set_module_registration_state(
                         git_url=params['git_url'],
                         module_name=params['module_name'],
                         new_state=params['registration_state'],
                         error_message=error_message)
-            if not success:
-                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error.')
+            if error is not None:
+                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
 
 
     def push_dev_to_beta(self, params, username):
@@ -172,9 +172,9 @@ class CatalogController:
         if module_details['state']['release_approval'] == 'under_review':
             raise ValueError('Cannot push dev to beta- last release request of beta is still pending.')
         # ok, do it.
-        success = self.db.push_dev_to_beta(module_name=params['module_name'],git_url=params['git_url'])
-        if not success:
-            raise ValueError('Update operation failed - some unknown database error.')
+        error = self.db.push_dev_to_beta(module_name=params['module_name'],git_url=params['git_url'])
+        if error is not None:
+            raise ValueError('Update operation failed - some unknown database error: '+error)
 
     def request_release(self, params, username):
         # first make sure everything exists and we have permissions
@@ -197,13 +197,13 @@ class CatalogController:
                 raise ValueError('Cannot request release - beta version is identical to released version.')
 
         # ok, do it.
-        success = self.db.set_module_release_state(
+        error = self.db.set_module_release_state(
                         module_name=params['module_name'],git_url=params['git_url'],
                         new_state='under_review',
                         last_state=module_details['state']['release_approval']
                     )
-        if not success:
-            raise ValueError('Release request failed - some unknown database error.')
+        if error is not None:
+            raise ValueError('Release request failed - some unknown database error.'+error)
 
     def list_requested_releases(self):
         query={'state.release_approval':'under_review'}
@@ -259,17 +259,17 @@ class CatalogController:
         # here because if this is done twice (for instance, before the release_state is set to approved in
         # the document in the next call) there won't be any problems.)  I like nested parentheses.
         if review['decision']=='approved':
-            success = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
+            error = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
 
         # Now we can update the release state state...
-        success = self.db.set_module_release_state(
+        error = self.db.set_module_release_state(
                         module_name=review['module_name'],git_url=review['git_url'],
                         new_state=review['decision'],
                         last_state=module_details['state']['release_approval'],
                         review_message=review['review_message']
                     )
-        if not success:
-            raise ValueError('Release review update failed - some unknown database error.')
+        if error is not None:
+            raise ValueError('Release review update failed - some unknown database error. ' + error)
 
 
     def get_module_state(self, params):
