@@ -25,7 +25,7 @@ DIR = $(shell pwd)
 
 LIB_DIR = lib
 
-default: compile-kb-module
+default: #compile-kb-module
 
 compile-kb-module:
 	kb-mobu compile $(SPEC_FILE) \

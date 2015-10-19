@@ -683,7 +683,8 @@ def process_async_cli(input_file_path, output_file_path, token):
         ctx['user_id'] = user
         ctx['authenticated'] = 1
         ctx['token'] = token
-    ctx['rpc_context'] = req['context']
+    if 'context' in req:
+        ctx['rpc_context'] = req['context']
     ctx['CLI'] = 1
     resp = None
     try:

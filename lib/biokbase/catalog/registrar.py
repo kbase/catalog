@@ -64,14 +64,25 @@ class Registrar:
             self.set_build_step('basic checks')
             kb_yaml = self.sanity_checks_and_parse(repo, basedir)
 
-            # 3 docker build
+            # 3 docker build - temporarily skip
             # pseudocode
             # get_repo_details
             # look for docker image / instance
             # if image does not exist, build and set state
             # if instance does not exist, start and set state
-    #        dockerclient = DockerClient(base_url = str(self.docker_base_url))
-    #        somefile.write(str(dockerclient.containers()));
+
+            #self.set_build_step('building the docker image')
+            #self.log('building the docker image');
+            #dockerClient = DockerClient(base_url = str(self.docker_base_url))
+            #self.log(str(dockerClient.containers()));
+
+            # temp code added my mike, logic is probably not correct
+            #containerId = self.build_container(repo, basedir, kb_yaml, dockerClient)
+            #self.log('built image: '+ str(containerId))
+
+            #self.set_build_step('testing the docker image by starting a container')
+            #self.log('testing the docker image by starting a container');
+            #test_image(containerId, dockerClient)
 
 
             # 4 - Update the DB
@@ -87,6 +98,48 @@ class Registrar:
             self.log('BUILD_ERROR: '+str(e))
         finally:
             self.logfile.close();
+
+
+    def build_image(self, repo, basedir, kb_yaml, dockerClient):
+
+        # get the basic info that we need
+        module_name = self.get_required_field_as_string(kb_yaml,'module-name')
+        commit_hash = repo.head.commit.hexsha
+
+        #module=os.getcwd().split('/')[-1] 
+        #version=mod['module-version']
+        #c = Client(base_url='unix://var/run/docker.sock')
+        tag='temp/%s:%s'%(module_name,commit_hash)
+        last=''
+        for line in dockerClient.build( path=basedir, rm=True, decode=True, tag=tag):
+          if 'errorDetail' in line:
+            sys.exit(1)
+          last=line
+        if 'stream' in last and last['stream'][:19]=='Successfully built ':
+          return dockerClient.inspect_image(tag)['Id']
+
+
+
+    def test_image(self, image, dockerClient):
+        #c = Client(base_url='unix://var/run/docker.sock')
+        # TODO: need to add some of these to config?
+        self.log('I do not do tests yet.')
+        pass;
+        env={"TEST_USER":config['test_user'],"TEST_TOKEN":config['test_token'],"TEST_WSURL":config['test_wsurl']}
+        
+        container = dockerClient.create_container(image=image,command="test",environment=env)
+        id=container.get('Id')
+        response=dockerClient.start(container=id)
+        status=dict()
+        status['Running']=True
+        while status['Running']==True:
+          status=dockerClient.inspect_container(id)['State']
+          time.sleep(1)
+        c.remove_container(container=id)
+        if status['Running']==False:
+          self.log("Exited with %d"%(status['ExitCode']))
+          self.log(status['ExitCode'])
+        return retval
 
 
 
