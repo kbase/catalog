@@ -1,14 +1,14 @@
-
-
+import time
 import sys
 import os
 import traceback
 import shutil
-
 import git
 import yaml
 import pprint
-
+import git
+import yaml
+import requests
 from urlparse import urlparse
 from docker import Client as DockerClient
 
@@ -54,8 +54,12 @@ class Registrar:
             if os.path.isdir(basedir):
                 shutil.rmtree(basedir)
             repo = git.Repo.clone_from(self.git_url, basedir)
+            # try to get hash from repo
+            self.log(str(repo.heads.master.commit))
+            git_commit_hash = repo.heads.master.commit
             if 'git_commit_hash' in self.params:
                 repo.git.checkout(self.params['git_commit_hash'])
+                git_commit_hash = self.params['git_commit_hash']
 
             # TODO: switch to the right commit/branch based on params
             self.log(str(parsed_url.path));
@@ -70,10 +74,14 @@ class Registrar:
             # look for docker image / instance
             # if image does not exist, build and set state
             # if instance does not exist, start and set state
+            dockerclient = DockerClient(base_url = str(self.docker_base_url))
+            image_name = parsed_url.path[1:].lower() + ':' + str(git_commit_hash)
+            # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
+            #self.log(str(dockerclient.inspect_image(repo_name)))
+            self.build_docker_image(dockerclient,image_name,basedir)
 
             #self.set_build_step('building the docker image')
             #self.log('building the docker image');
-            #dockerClient = DockerClient(base_url = str(self.docker_base_url))
             #self.log(str(dockerClient.containers()));
 
             # temp code added my mike, logic is probably not correct
@@ -280,3 +288,11 @@ class Registrar:
 
     def build_is_complete(self):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
+
+    def build_docker_image(self, docker_client, repo_name, basedir):
+        self.log('start build_docker_image ' + repo_name)
+        response = [ line for line in docker_client.build(path=basedir,rm=True,tag=repo_name) ]
+        response_stream = response
+        self.log(str(response_stream))
+        self.log('done build_docker_image ' + repo_name)
+
