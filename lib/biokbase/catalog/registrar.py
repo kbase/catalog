@@ -196,8 +196,8 @@ class Registrar:
 
         # first update the module name, which is now permanent, if we haven't already
         if 'module_name' not in self.module_details:
-            success = self.db.set_module_name(self.git_url, module_name)
-            if not success:
+            error = self.db.set_module_name(self.git_url, module_name)
+            if error is not None:
                 raise ValueError('Unable to set module_name - there was an internal database error.')
 
         # TODO: Could optimize by combining all these things into one mongo call, but for now this is easier.
