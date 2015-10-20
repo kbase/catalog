@@ -71,10 +71,12 @@ class Registrar:
             # if image does not exist, build and set state
             # if instance does not exist, start and set state
             dockerclient = DockerClient(base_url = str(self.docker_base_url))
+            repo_name = parsed_url.path[1:]
+            repo_name=repo_name.replace('/','_').lower()
+            self.build_docker_image(dockerclient,repo_name,basedir)
 
             #self.set_build_step('building the docker image')
             #self.log('building the docker image');
-            #dockerClient = DockerClient(base_url = str(self.docker_base_url))
             #self.log(str(dockerClient.containers()));
 
             # temp code added my mike, logic is probably not correct
@@ -281,3 +283,11 @@ class Registrar:
 
     def build_is_complete(self):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
+
+    def build_docker_image(self, docker_client, repo_name, basedir):
+        self.log('start build_docker_image ' + repo_name)
+        response = [ line for line in docker_client.build(path=basedir,rm=True,tag=repo_name) ]
+        response_stream = response
+        self.log(str(response_stream))
+        self.log('done build_docker_image ' + repo_name)
+
