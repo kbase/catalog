@@ -54,8 +54,12 @@ class Registrar:
             if os.path.isdir(basedir):
                 shutil.rmtree(basedir)
             repo = git.Repo.clone_from(self.git_url, basedir)
+            # try to get hash from repo
+            self.log(str(repo.heads.master.commit))
+            git_commit_hash = repo.heads.master.commit
             if 'git_commit_hash' in self.params:
                 repo.git.checkout(self.params['git_commit_hash'])
+                git_commit_hash = self.params['git_commit_hash']
 
             # TODO: switch to the right commit/branch based on params
             self.log(str(parsed_url.path));
@@ -71,9 +75,10 @@ class Registrar:
             # if image does not exist, build and set state
             # if instance does not exist, start and set state
             dockerclient = DockerClient(base_url = str(self.docker_base_url))
-            repo_name = parsed_url.path[1:]
-            repo_name=repo_name.replace('/','_').lower()
-            self.build_docker_image(dockerclient,repo_name,basedir)
+            image_name = parsed_url.path[1:].lower() + ':' + str(git_commit_hash)
+            # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
+            #self.log(str(dockerclient.inspect_image(repo_name)))
+            self.build_docker_image(dockerclient,image_name,basedir)
 
             #self.set_build_step('building the docker image')
             #self.log('building the docker image');
