@@ -1,14 +1,14 @@
-
-
+import time
 import sys
 import os
 import traceback
 import shutil
-
 import git
 import yaml
 import pprint
-
+import git
+import yaml
+import requests
 from urlparse import urlparse
 from docker import Client as DockerClient
 
@@ -70,6 +70,7 @@ class Registrar:
             # look for docker image / instance
             # if image does not exist, build and set state
             # if instance does not exist, start and set state
+            dockerclient = DockerClient(base_url = str(self.docker_base_url))
 
             #self.set_build_step('building the docker image')
             #self.log('building the docker image');
