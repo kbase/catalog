@@ -258,8 +258,9 @@ class MongoCatalogDBI:
                 nModified = result['n']
             if 'nMatched' in result:
                 nModified = result['nMatched']
-            if 'nModified' in result:
-                nModified = result['nModified']
+            # not a correct check, because if nothing changed that this will be zero
+            #if 'nModified' in result:
+            #    nModified = result['nModified']
             if nModified < 1:
                 return pprint.pformat(result) #json.dumps(result)
             return None
