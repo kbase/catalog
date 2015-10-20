@@ -1,6 +1,6 @@
 
-
-from pprint import pprint
+import json
+import pprint
 from pymongo import MongoClient
 
 '''
@@ -38,6 +38,7 @@ Module Document:
             review_message: str, (optional)
             registration: building | complete | error,
             error_message: str (optional)
+            released: true | false (set to true if released, false or missing otherwise)
         },
 
         current_versions: {
@@ -89,14 +90,12 @@ class MongoCatalogDBI:
 
 
     def is_registered(self,module_name='',git_url=''):
-        if module_name:
-            module = self.modules.find_one({'module_name':module_name}, fields=['_id'])
-            if module is not None:
-                return True
-        elif git_url:
-            module = self.modules.find_one({'git_url':git_url}, fields=['_id'])
-            if module is not None:
-                return True
+        if not module_name and not git_url:
+            return False
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        module = self.modules.find_one(query, fields=['_id'])
+        if module is not None:
+            return True
         return False
 
 
@@ -155,6 +154,7 @@ class MongoCatalogDBI:
         
         # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
         result = self.modules.update(query, {'$set':{
+                                                'state.released':True,
                                                 'current_versions.release':beta_version,
                                                 'release_versions.'+str(beta_version['timestamp']):beta_version
                                                 }})
@@ -179,6 +179,36 @@ class MongoCatalogDBI:
 
 
 
+    def set_module_name(self, git_url, module_name):
+        if not module_name:
+            raise ValueError('module_name must be defined to set a module name')
+        query = self._get_mongo_query(git_url=git_url)
+        result = self.modules.update(query, {'$set':{'module_name':module_name}})
+        return self._check_update_result(result)
+
+
+    def set_module_info(self, info, module_name='', git_url=''):
+        if not info:
+            raise ValueError('info must be defined to set the info for a module')
+        if type(info) is not dict:
+            raise ValueError('info must be a dictionary')
+        query = self._get_mongo_query(git_url=git_url, module_name=module_name)
+        result = self.modules.update(query, {'$set':{'info':info}})
+        return self._check_update_result(result)
+
+
+    def set_module_owners(self, owners, module_name='', git_url=''):
+        if not owners:
+            raise ValueError('owners must be defined to set the owners for a module')
+        if type(owners) is not list:
+            raise ValueError('owners must be a list')
+        query = self._get_mongo_query(git_url=git_url, module_name=module_name)
+        result = self.modules.update(query, {'$set':{'owners':owners}})
+        return self._check_update_result(result)
+
+
+
+
     #### GET methods
     def get_module_state(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
@@ -199,7 +229,6 @@ class MongoCatalogDBI:
     def get_module_full_details(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query)
-
 
     #### LIST / SEARCH methods
 
@@ -229,12 +258,13 @@ class MongoCatalogDBI:
                 nModified = result['n']
             if 'nMatched' in result:
                 nModified = result['nMatched']
-            if 'nModified' in result:
-                nModified = result['nModified']
+            # not a correct check, because if nothing changed that this will be zero
+            #if 'nModified' in result:
+            #    nModified = result['nModified']
             if nModified < 1:
-                return False
-            return True
-        return False
+                return pprint.pformat(result) #json.dumps(result)
+            return None
+        return '{}'
 
 
 

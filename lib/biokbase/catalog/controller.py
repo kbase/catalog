@@ -68,6 +68,16 @@ class CatalogController:
         self.docker_base_url = config['docker-base-url']
         print(self.docker_base_url)
 
+        if 'nms-url' not in config:
+            raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
+        self.nms_url = config['nms-url']
+        if 'nms-admin-user' not in config:
+            raise ValueError('"nms-admin-user" config variable must be defined to start a CatalogController!')
+        self.nms_admin_user = config['nms-admin-user']
+        if 'nms-admin-psswd' not in config:
+            raise ValueError('"nms-admin-psswd" config variable must be defined to start a CatalogController!')
+        self.nms_admin_psswd = config['nms-admin-psswd']
+
 
     def register_repo(self, params, username, token):
 
@@ -92,11 +102,11 @@ class CatalogController:
                 state = module_details['state']
                 registration_state = state['registration']
                 if registration_state == 'complete' or registration_state == 'error':
-                    success = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
-                    if not success:
+                    error = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
+                    if error is not None:
                         # we can fail if the registration state changed when we were first checking to now.  This is important
                         # to ensure we only ever kick off one registration thread at a time
-                        raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin.')
+                        raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin: '+error)
                     # we know we are the only operation working, so we can clear the dev version and upate the timestamp
                     self.db.update_dev_version({'timestamp':timestamp}, git_url=git_url)
                 else:
@@ -112,7 +122,8 @@ class CatalogController:
 
         # first set the dev current_release timestamp
 
-        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, module_details))
+        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
+            self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
         t.start()
 
         # 4) provide the timestamp 
@@ -138,13 +149,13 @@ class CatalogController:
             error_message = params['error_message']
         else:
             # then we update the state
-            success = self.db.set_module_registration_state(
+            error = self.db.set_module_registration_state(
                         git_url=params['git_url'],
                         module_name=params['module_name'],
                         new_state=params['registration_state'],
                         error_message=error_message)
-            if not success:
-                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error.')
+            if error is not None:
+                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
 
 
     def push_dev_to_beta(self, params, username):
@@ -161,9 +172,9 @@ class CatalogController:
         if module_details['state']['release_approval'] == 'under_review':
             raise ValueError('Cannot push dev to beta- last release request of beta is still pending.')
         # ok, do it.
-        success = self.db.push_dev_to_beta(module_name=params['module_name'],git_url=params['git_url'])
-        if not success:
-            raise ValueError('Update operation failed - some unknown database error.')
+        error = self.db.push_dev_to_beta(module_name=params['module_name'],git_url=params['git_url'])
+        if error is not None:
+            raise ValueError('Update operation failed - some unknown database error: '+error)
 
     def request_release(self, params, username):
         # first make sure everything exists and we have permissions
@@ -180,19 +191,19 @@ class CatalogController:
         if not module_details['current_versions']['beta']:
             raise ValueError('Cannot request release - no beta version has been created yet.')
 
-        # beta version must be different than release version
-        if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
-            raise ValueError('Cannot request release - beta version is identical to released version.')
-
+        # beta version must be different than release version (if release version exists)
+        if module_details['current_versions']['release']:
+            if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
+                raise ValueError('Cannot request release - beta version is identical to released version.')
 
         # ok, do it.
-        success = self.db.set_module_release_state(
+        error = self.db.set_module_release_state(
                         module_name=params['module_name'],git_url=params['git_url'],
                         new_state='under_review',
                         last_state=module_details['state']['release_approval']
                     )
-        if not success:
-            raise ValueError('Release request failed - some unknown database error.')
+        if error is not None:
+            raise ValueError('Release request failed - some unknown database error.'+error)
 
     def list_requested_releases(self):
         query={'state.release_approval':'under_review'}
@@ -202,13 +213,14 @@ class CatalogController:
             owners = []
             for o in r['owners']:
                 owners.append(o['kb_username'])
-            timestamp = r['current_versions']['beta']['timestamp']
+            beta = r['current_versions']['beta']
+            timestamp = beta['timestamp']
             requested_releases.append({
-                    # TODO: add back module name and git commit hash once this info is saved
-                    #'module_name':r['module_name'],
+                    'module_name':r['module_name'],
                     'git_url':r['git_url'],
                     'timestamp':timestamp,
-                    #'git_commit_hash':r['git_commit_hash']
+                    'git_commit_hash':beta['git_commit_hash'],
+                    'git_commit_message':beta['git_commit_message'],
                     'owners':owners
                 })
         return requested_releases
@@ -247,22 +259,115 @@ class CatalogController:
         # here because if this is done twice (for instance, before the release_state is set to approved in
         # the document in the next call) there won't be any problems.)  I like nested parentheses.
         if review['decision']=='approved':
-            success = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
+            error = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
 
         # Now we can update the release state state...
-        success = self.db.set_module_release_state(
+        error = self.db.set_module_release_state(
                         module_name=review['module_name'],git_url=review['git_url'],
                         new_state=review['decision'],
                         last_state=module_details['state']['release_approval'],
                         review_message=review['review_message']
                     )
-        if not success:
-            raise ValueError('Release review update failed - some unknown database error.')
+        if error is not None:
+            raise ValueError('Release review update failed - some unknown database error. ' + error)
 
 
     def get_module_state(self, params):
         params = self.filter_module_or_repo_selection(params)
         return self.db.get_module_state(module_name=params['module_name'],git_url=params['git_url'])
+
+
+    def get_module_info(self, params):
+        params = self.filter_module_or_repo_selection(params)
+        details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
+
+        owners = []
+        for o in details['owners']:
+            owners.append(o['kb_username'])
+
+        info = {
+            'module_name': details['module_name'],
+            'git_url': details['git_url'],
+
+            'description': details['info']['description'],
+            'language': details['info']['language'],
+
+            'owners': owners,
+
+            'release': details['current_versions']['release'],
+            'beta': details['current_versions']['beta'],
+            'dev': details['current_versions']['dev']
+        }
+        return info
+
+    def get_version_info(self,params):
+        params = self.filter_module_or_repo_selection(params)
+        current_version = self.db.get_module_current_versions(module_name=params['module_name'], git_url=params['git_url'])
+
+        if not current_version:
+            return None
+
+        # TODO: can make this more effecient and flexible by putting in some indicies and doing the query on mongo side
+        # right now, we require a module name / git url, and request specific version based on selectors.  in the future
+        # we could, for instance, get all versions that match a particular git commit hash, or timestamp...
+
+        # If version is in params, it should be one of dev, beta, release
+        if 'version' in params:
+            if params['version'] not in ['dev','beta','release']:
+                raise ValueError('invalid version selection, valid versions are: "dev" | "beta" | "release"')
+            v = current_version[params['version']]
+            # if timestamp or git_commit_hash is given, those need to match as well
+            if 'timestamp' in params:
+                if v['timestamp'] != params['timestamp'] :
+                    return None;
+            if 'git_commit_hash' in params:
+                if v['git_commit_hash'] != params['git_commit_hash'] :
+                    return None;
+            return v
+
+        if 'timestamp' in params:
+            # first check in current versions
+            for version in ['dev','beta','release']:
+                if current_version[version]['timestamp'] == params['timestamp']:
+                    v = current_version[version]
+                    if 'git_commit_hash' in params:
+                        if v['git_commit_hash'] != params['git_commit_hash'] :
+                            return None;
+                    return v
+            # if we get here, we have to look in full history
+            details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+            all_versions = details['release_versions']
+            if str(params['timestamp']) in all_versions:
+                v = all_versions[str(params['timestamp'])]
+                if 'git_commit_hash' in params:
+                    if v['git_commit_hash'] != params['git_commit_hash'] :
+                        return None;
+                return v
+            return None
+
+        # if we get here, version and timestamp are not defined, so just look for the commit hash
+        if 'git_commit_hash' in params:
+            # check current versions
+            for version in ['dev','beta','release']:
+                if current_version[version]['git_commit_hash'] == params['git_commit_hash']:
+                    v = current_version[version]
+                    return v
+            # if we get here, we have to look in full history
+            details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+            all_versions = details['release_versions']
+            for timestamp, v in all_versions.iteritems():
+                if v['git_commit_hash'] == params['git_commit_hash']:
+                    return v
+            return None
+
+        # didn't get nothing, so return
+        return None
+
+    def list_released_versions(self, params):
+        params = self.filter_module_or_repo_selection(params)
+        details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
+        return sorted(details['release_versions'].values(), key= lambda v: v['timestamp'])
+
 
     def is_registered(self,params):
         if 'git_url' not in params:
@@ -274,15 +379,33 @@ class CatalogController:
         return False
 
     def list_basic_module_info(self,params):
-        query = { 'state.active':True }
+        query = { 'state.active':True, 'state.released':True }
+
         if 'include_disabled' in params:
             if params['include_disabled']>0:
                 query.pop('state.active',None)
+
+        if 'include_released' not in params:
+            params['include_released'] = 1
+        if 'include_unreleased' not in params:
+            params['include_unreleased'] = 0
+
+        # figure out release/unreleased options so we can get just the unreleased if needed
+        # default (if none of these matches is to list only released)
+        if params['include_released']<=0 and params['include_unreleased']<=0:
+            return [] # don't include anything...
+        elif params['include_released']<=0 and params['include_unreleased']>0:
+            query['state.released']=False # include only unreleased
+        elif params['include_released']>0 and params['include_unreleased']>0:
+            query.pop('state.released',None) # include everything
+
         return self.db.find_basic_module_info(query)
 
 
-
-
+    def get_build_log(self, timestamp):
+        with open(self.temp_dir+'/registration.log.'+str(timestamp)) as log_file:
+            log = log_file.read()
+        return log
 
     # Some utility methods
 
@@ -317,7 +440,8 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url,module_details):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,module_details)
+def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,
+                            nms_url, nms_admin_user, nms_admin_psswd, module_details)
     registrar.start_registration()
 

@@ -1,0 +1,89 @@
+{
+    "module_name" : "release_history",
+    "git_url" : "https://github.com/kbaseIncubator/release_history",
+
+    "info" : {
+        "description" : "KBase module for integration tests of docker-based service/async method calls",
+        "language" : "python"
+    },
+
+    "owners" : [
+        {
+            "kb_username" : "rsutormin"
+        },
+        {
+            "kb_username" : "wstester1"
+        }
+    ],
+
+    "state" : {
+        "active" : true,
+        "error_message" : "",
+        "registration" : "complete",
+        "release_approval" : "approved",
+        "released" : true,
+        "review_message" : ""
+    },
+
+    "current_versions" : {
+        "dev" : {
+            "git_commit_hash" : "b06c5f9daf603a4d206071787c3f6184000bf128",
+            "timestamp" : 1445024094055,
+            "git_commit_message" : "another change",
+            "version" : "0.0.5",
+            "narrative_methods" : [
+                "send_data2"
+            ]
+        },
+        "beta" : {
+            "git_commit_hash" : "b843888e962642d665a3b0bd701ee630c01835e6",
+            "timestamp" : 1445023985597,
+            "git_commit_message" : "update for testing",
+            "version" : "0.0.4",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+        "release" : {
+            "git_commit_hash" : "49dc505febb8f4cccb2078c58ded0de3320534d7",
+            "timestamp" : 1445022818884,
+            "git_commit_message" : "added username for testing",
+            "version" : "0.0.3",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        }
+    },
+
+    "release_versions" : {
+        "1445022818884" : {
+            "git_commit_hash" : "49dc505febb8f4cccb2078c58ded0de3320534d7",
+            "timestamp" : 1445022818884,
+            "git_commit_message" : "added username for testing",
+            "version" : "0.0.3",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+
+        "1445022818000" : {
+            "git_commit_hash" : "d6cd1e2bd19e03a81132a23b2025920577f84e37",
+            "timestamp" : 1445022818000,
+            "git_commit_message" : "something else",
+            "version" : "0.0.2",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+
+        "1445022815000" : {
+            "git_commit_hash" : "9bedf67800b2923982bdf60c89c57ce6fd2d9a1c",
+            "timestamp" : 1445022815000,
+            "git_commit_message" : "and another thing",
+            "version" : "0.0.1",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        }
+    }
+}

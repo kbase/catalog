@@ -10,7 +10,7 @@ class Catalog:
     Catalog
 
     Module Description:
-    
+    Service for managing, registering, and building KBase Modules.
     '''
 
     ######## WARNING FOR GEVENT USERS #######
@@ -64,19 +64,6 @@ class Catalog:
                              'returnVal is not type int as required.')
         # return the results
         return [returnVal]
-
-    def get_repo_last_timestamp(self, ctx, params):
-        # ctx is the context object
-        # return variables are: timestamp
-        #BEGIN get_repo_last_timestamp
-        #END get_repo_last_timestamp
-
-        # At some point might do deeper type checking...
-        if not isinstance(timestamp, int):
-            raise ValueError('Method get_repo_last_timestamp return value ' +
-                             'timestamp is not type int as required.')
-        # return the results
-        return [timestamp]
 
     def register_repo(self, ctx, params):
         # ctx is the context object
@@ -141,28 +128,46 @@ class Catalog:
         # return the results
         return [info_list]
 
-    def get_repo_details(self, ctx, params):
+    def get_module_info(self, ctx, selection):
         # ctx is the context object
-        # return variables are: returnVal
-        #BEGIN get_repo_details
-        #END get_repo_details
+        # return variables are: info
+        #BEGIN get_module_info
+        info = self.cc.get_module_info(selection);
+        #END get_module_info
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, dict):
-            raise ValueError('Method get_repo_details return value ' +
-                             'returnVal is not type dict as required.')
+        if not isinstance(info, dict):
+            raise ValueError('Method get_module_info return value ' +
+                             'info is not type dict as required.')
         # return the results
-        return [returnVal]
+        return [info]
 
-    def list_repo_versions(self, ctx, params):
+    def get_version_info(self, ctx, params):
+        # ctx is the context object
+        # return variables are: version
+        #BEGIN get_version_info
+        version = self.cc.get_version_info(params)
+        if version is None:
+            raise ValueError("No version found that matches all your criteria!")
+        #END get_version_info
+
+        # At some point might do deeper type checking...
+        if not isinstance(version, dict):
+            raise ValueError('Method get_version_info return value ' +
+                             'version is not type dict as required.')
+        # return the results
+        return [version]
+
+    def list_released_module_versions(self, ctx, params):
         # ctx is the context object
         # return variables are: versions
-        #BEGIN list_repo_versions
-        #END list_repo_versions
+        #BEGIN list_released_module_versions
+        versions = self.cc.list_released_versions(params)
+        #END list_released_module_versions
 
         # At some point might do deeper type checking...
         if not isinstance(versions, list):
-            raise ValueError('Method list_repo_versions return value ' +
+            raise ValueError('Method list_released_module_versions return value ' +
                              'versions is not type list as required.')
         # return the results
         return [versions]
@@ -192,3 +197,17 @@ class Catalog:
                              'state is not type dict as required.')
         # return the results
         return [state]
+
+    def get_build_log(self, ctx, timestamp):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN get_build_log
+        returnVal = self.cc.get_build_log(timestamp)
+        #END get_build_log
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, basestring):
+            raise ValueError('Method get_build_log return value ' +
+                             'returnVal is not type basestring as required.')
+        # return the results
+        return [returnVal]

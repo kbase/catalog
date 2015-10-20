@@ -165,6 +165,7 @@ class Catalog(object):
                 raise ServerError('Unknown', 0, ret.text)
         if ret.status_code != _requests.codes.OK:
             ret.raise_for_status()
+        ret.encoding = 'utf-8'
         resp = _json.loads(ret.text)
         if 'result' not in resp:
             raise ServerError('Unknown', 0, 'An unknown server error occurred')
@@ -181,13 +182,6 @@ class Catalog(object):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method is_registered: argument json_rpc_context is not type dict as required.')
         resp = self._call('Catalog.is_registered',
-                          [params], json_rpc_context)
-        return resp[0]
-  
-    def get_repo_last_timestamp(self, params, json_rpc_context = None):
-        if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method get_repo_last_timestamp: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.get_repo_last_timestamp',
                           [params], json_rpc_context)
         return resp[0]
   
@@ -230,17 +224,24 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
-    def get_repo_details(self, params, json_rpc_context = None):
+    def get_module_info(self, selection, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method get_repo_details: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.get_repo_details',
+            raise ValueError('Method get_module_info: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_module_info',
+                          [selection], json_rpc_context)
+        return resp[0]
+  
+    def get_version_info(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_version_info: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_version_info',
                           [params], json_rpc_context)
         return resp[0]
   
-    def list_repo_versions(self, params, json_rpc_context = None):
+    def list_released_module_versions(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method list_repo_versions: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.list_repo_versions',
+            raise ValueError('Method list_released_module_versions: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_released_module_versions',
                           [params], json_rpc_context)
         return resp[0]
   
@@ -255,5 +256,12 @@ class Catalog(object):
             raise ValueError('Method get_module_state: argument json_rpc_context is not type dict as required.')
         resp = self._call('Catalog.get_module_state',
                           [params], json_rpc_context)
+        return resp[0]
+  
+    def get_build_log(self, timestamp, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_build_log: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_build_log',
+                          [timestamp], json_rpc_context)
         return resp[0]
  

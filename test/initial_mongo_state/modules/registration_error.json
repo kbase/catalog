@@ -1,0 +1,43 @@
+{
+    "module_name" : "registration_error",
+    "git_url" : "https://github.com/kbaseIncubator/registration_error",
+
+    "info" : {
+        "description" : "KBase module for integration tests of docker-based service/async method calls",
+        "language" : "python"
+    },
+
+    "owners" : [
+        {
+            "kb_username" : "wstester1"
+        }
+    ],
+
+    "state" : {
+        "active" : true,
+        "error_message" : "everything did't work",
+        "registration" : "error",
+        "release_approval" : "not_requested",
+        "released" : false,
+        "review_message" : ""
+    },
+
+    "current_versions" : {
+        "dev" : {
+            "timestamp" : 1445024094055
+        },
+        "beta" : {
+            "git_commit_hash" : "b843888e962642d665a3b0bd701ee630c01835e6",
+            "timestamp" : 1445023985597,
+            "git_commit_message" : "update for testing",
+            "version" : "0.0.1",
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+        "release" : null
+    },
+
+    "release_versions" : {
+    }
+}
