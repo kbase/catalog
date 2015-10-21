@@ -21,7 +21,7 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, timestamp, username, token, db, temp_dir, docker_base_url, 
-                    nms_url, nms_admin_user, nms_admin_psswd, module_details):
+                    docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
@@ -33,6 +33,7 @@ class Registrar:
         self.db = db
         self.temp_dir = temp_dir
         self.docker_base_url = docker_base_url
+        self.docker_registry_host = docker_registry_host
 
         self.nms_url = nms_url
         self.nms_admin_user = nms_admin_user
@@ -68,24 +69,25 @@ class Registrar:
             self.set_build_step('basic checks')
             kb_yaml = self.sanity_checks_and_parse(repo, basedir)
 
-            # 3 docker build - temporarily skip
-            # pseudocode
-            # get_repo_details
-            # look for docker image / instance
-            # if image does not exist, build and set state
-            # if instance does not exist, start and set state
+            # 3 docker build - in progress
+            # perhaps make this a self attr?
             dockerclient = DockerClient(base_url = str(self.docker_base_url))
-            image_name = parsed_url.path[1:].lower() + ':' + str(git_commit_hash)
+            image_name = self.docker_registry_host + '/' + parsed_url.path[1:].lower() + ':' + str(git_commit_hash)
+            # look for docker image
             # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
             #self.log(str(dockerclient.inspect_image(repo_name)))
-            self.build_docker_image(dockerclient,image_name,basedir)
+            # if image does not exist, build and set state
+            self.set_build_step('building the docker image')
+            # imageId is not yet populated properly
+            imageId = self.build_docker_image(dockerclient,image_name,basedir)
 
-            #self.set_build_step('building the docker image')
-            #self.log('building the docker image');
+            self.set_build_step('pushing docker image to registry')
+            self.push_docker_image(dockerclient,image_name)
+
             #self.log(str(dockerClient.containers()));
 
             # temp code added my mike, logic is probably not correct
-            #containerId = self.build_container(repo, basedir, kb_yaml, dockerClient)
+            #containerId = self.start_container(repo, basedir, kb_yaml, dockerClient)
             #self.log('built image: '+ str(containerId))
 
             #self.set_build_step('testing the docker image by starting a container')
@@ -289,10 +291,19 @@ class Registrar:
     def build_is_complete(self):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
 
-    def build_docker_image(self, docker_client, repo_name, basedir):
-        self.log('start build_docker_image ' + repo_name)
-        response = [ line for line in docker_client.build(path=basedir,rm=True,tag=repo_name) ]
+    def build_docker_image(self, docker_client, image_name, basedir):
+        self.log('building the docker image for ' + image_name);
+        response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
+        response_stream = response
+        imageId = response_stream[-1]
+        self.log(str(response_stream[-1]))
+        # to do: examine stream to determine success/failure of build
+        self.log('done build_docker_image ' + image_name)
+
+    def push_docker_image(self, docker_client, image_name):
+        self.log('pushing docker image to registry for ' + image_name);
+        response = [ line for line in docker_client.push(image_name, stream=True) ]
         response_stream = response
         self.log(str(response_stream))
-        self.log('done build_docker_image ' + repo_name)
-
+        # to do: examine stream to determine success/failure of build
+        self.log('done pushing docker image to registry for ' + image_name);

@@ -68,6 +68,11 @@ class CatalogController:
         self.docker_base_url = config['docker-base-url']
         print(self.docker_base_url)
 
+        if 'docker-registry-host' not in config:
+            raise ValueError('"docker-registry-host" config variable must be defined to start a CatalogController!')
+        self.docker_registry_host = config['docker-registry-host']
+        print(self.docker_registry_host)
+
         if 'nms-url' not in config:
             raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
         self.nms_url = config['nms-url']
@@ -123,7 +128,7 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
+            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
         t.start()
 
         # 4) provide the timestamp 
@@ -440,8 +445,8 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url, nms_url, nms_admin_user, nms_admin_psswd, module_details):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url,
+def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
                             nms_url, nms_admin_user, nms_admin_psswd, module_details)
     registrar.start_registration()
 
