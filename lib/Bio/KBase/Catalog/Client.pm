@@ -1380,6 +1380,485 @@ given the timestamp returned from the register method, you can check the build l
     }
 }
  
+
+
+=head2 set_to_active
+
+  $obj->set_to_active($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.SelectOneModuleParams
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.SelectOneModuleParams
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+admin methods to turn on/off modules
+
+=back
+
+=cut
+
+ sub set_to_active
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function set_to_active (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to set_to_active:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'set_to_active');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.set_to_active",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'set_to_active',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_to_active",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'set_to_active',
+				       );
+    }
+}
+ 
+
+
+=head2 set_to_inactive
+
+  $obj->set_to_inactive($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.SelectOneModuleParams
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.SelectOneModuleParams
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub set_to_inactive
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function set_to_inactive (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to set_to_inactive:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'set_to_inactive');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.set_to_inactive",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'set_to_inactive',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_to_inactive",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'set_to_inactive',
+				       );
+    }
+}
+ 
+
+
+=head2 is_approved_developer
+
+  $is_approved = $obj->is_approved_developer($usernames)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$usernames is a reference to a list where each element is a string
+$is_approved is a reference to a list where each element is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$usernames is a reference to a list where each element is a string
+$is_approved is a reference to a list where each element is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+temporary developer approval, should be moved to more mature user profile service
+
+=back
+
+=cut
+
+ sub is_approved_developer
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function is_approved_developer (received $n, expecting 1)");
+    }
+    {
+	my($usernames) = @args;
+
+	my @_bad_arguments;
+        (ref($usernames) eq 'ARRAY') or push(@_bad_arguments, "Invalid type for argument 1 \"usernames\" (value was \"$usernames\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to is_approved_developer:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'is_approved_developer');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.is_approved_developer",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'is_approved_developer',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method is_approved_developer",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'is_approved_developer',
+				       );
+    }
+}
+ 
+
+
+=head2 list_approved_developers
+
+  $usernames = $obj->list_approved_developers()
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$usernames is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$usernames is a reference to a list where each element is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_approved_developers
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 0)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_approved_developers (received $n, expecting 0)");
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_approved_developers",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_approved_developers',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_approved_developers",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_approved_developers',
+				       );
+    }
+}
+ 
+
+
+=head2 approve_developer
+
+  $obj->approve_developer($username)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$username is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$username is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub approve_developer
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function approve_developer (received $n, expecting 1)");
+    }
+    {
+	my($username) = @args;
+
+	my @_bad_arguments;
+        (!ref($username)) or push(@_bad_arguments, "Invalid type for argument 1 \"username\" (value was \"$username\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to approve_developer:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'approve_developer');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.approve_developer",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'approve_developer',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method approve_developer",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'approve_developer',
+				       );
+    }
+}
+ 
+
+
+=head2 revoke_developer
+
+  $obj->revoke_developer($username)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$username is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$username is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub revoke_developer
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function revoke_developer (received $n, expecting 1)");
+    }
+    {
+	my($username) = @args;
+
+	my @_bad_arguments;
+        (!ref($username)) or push(@_bad_arguments, "Invalid type for argument 1 \"username\" (value was \"$username\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to revoke_developer:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'revoke_developer');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.revoke_developer",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'revoke_developer',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method revoke_developer",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'revoke_developer',
+				       );
+    }
+}
+ 
   
 
 sub version {
@@ -1393,16 +1872,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'get_build_log',
+                method_name => 'revoke_developer',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method get_build_log",
+            error => "Error invoking method revoke_developer",
             status_line => $self->{client}->status_line,
-            method_name => 'get_build_log',
+            method_name => 'revoke_developer',
         );
     }
 }

@@ -69,6 +69,7 @@ class MongoCatalogDBI:
     # Collection Names
 
     _MODULES='modules'
+    _DEVELOPERS='developers'
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
 
@@ -82,10 +83,13 @@ class MongoCatalogDBI:
         # Grab a handle to the database and collections
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
+        self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
 
         # Make sure we have an index on module and git_repo_url
-        self.modules.create_index('module_name', unique=True, sparse=True)
-        self.modules.create_index('git_url', unique=True)
+        self.modules.ensure_index('module_name', unique=True, sparse=True)
+        self.modules.ensure_index('git_url', unique=True)
+
+        self.developers.ensure_index('kb_username', unique=True)
 
 
 
@@ -206,7 +210,11 @@ class MongoCatalogDBI:
         result = self.modules.update(query, {'$set':{'owners':owners}})
         return self._check_update_result(result)
 
-
+    # active = True | False
+    def set_module_active_state(self, active, module_name='', git_url=''):
+        query = self._get_mongo_query(git_url=git_url, module_name=module_name)
+        result = self.modules.update(query, {'$set':{'state.active':active}})
+        return self._check_update_result(result)
 
 
     #### GET methods
@@ -239,6 +247,35 @@ class MongoCatalogDBI:
         return list(self.modules.find(query,{'module_name':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))
 
 
+    #### developer check methods
+
+    def approve_developer(self, developer):
+        # if the developer is already on the list, just return
+        if self.is_approved_developer([developer])[0]:
+            return
+        self.developers.insert({'kb_username':developer})
+
+    def revoke_developer(self, developer):
+        # if the developer is not on the list, throw an error (maybe a typo, so let's catch it)
+        if not self.is_approved_developer([developer])[0]:
+            raise ValueError('Cannot revoke "'+developer+'", that developer was not found.')
+        self.developers.remove({'kb_username':developer})
+
+    def is_approved_developer(self, usernames):
+        #TODO: optimize, but I expect the list of usernames will be fairly small, so we can loop.  Regardless, in
+        # old mongo (2.x) I think this is even faster in most cases than using $in within a very large list
+        is_approved = []
+        for u in usernames:
+            count = self.developers.find({'kb_username':u}).count()
+            if count>0:
+                is_approved.append(True)
+            else:
+                is_approved.append(False)
+        return is_approved
+
+
+    def list_approved_developers(self):
+        return list(self.developers.find({},{'kb_username':1, '_id':0}))
 
     #### utility methods
     def _get_mongo_query(self, module_name='', git_url=''):

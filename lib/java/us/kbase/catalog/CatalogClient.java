@@ -376,4 +376,98 @@ public class CatalogClient {
         List<String> res = caller.jsonrpcCall("Catalog.get_build_log", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
+
+    /**
+     * <p>Original spec-file function name: set_to_active</p>
+     * <pre>
+     * admin methods to turn on/off modules
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.SelectOneModuleParams SelectOneModuleParams}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setToActive(SelectOneModuleParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_to_active", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: set_to_inactive</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.SelectOneModuleParams SelectOneModuleParams}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setToInactive(SelectOneModuleParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_to_inactive", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: is_approved_developer</p>
+     * <pre>
+     * temporary developer approval, should be moved to more mature user profile service
+     * </pre>
+     * @param   usernames   instance of list of String
+     * @return   parameter "is_approved" of list of original type "boolean" (@range [0,1])
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<Long> isApprovedDeveloper(List<String> usernames, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(usernames);
+        TypeReference<List<List<Long>>> retType = new TypeReference<List<List<Long>>>() {};
+        List<List<Long>> res = caller.jsonrpcCall("Catalog.is_approved_developer", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_approved_developers</p>
+     * <pre>
+     * </pre>
+     * @return   parameter "usernames" of list of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<String> listApprovedDevelopers(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        TypeReference<List<List<String>>> retType = new TypeReference<List<List<String>>>() {};
+        List<List<String>> res = caller.jsonrpcCall("Catalog.list_approved_developers", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: approve_developer</p>
+     * <pre>
+     * </pre>
+     * @param   username   instance of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void approveDeveloper(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(username);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.approve_developer", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: revoke_developer</p>
+     * <pre>
+     * </pre>
+     * @param   username   instance of String
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void revokeDeveloper(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(username);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.revoke_developer", args, retType, false, true, jsonRpcContext);
+    }
 }

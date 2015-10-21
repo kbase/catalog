@@ -264,4 +264,42 @@ class Catalog(object):
         resp = self._call('Catalog.get_build_log',
                           [timestamp], json_rpc_context)
         return resp[0]
+  
+    def set_to_active(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method set_to_active: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.set_to_active',
+                   [params], json_rpc_context)
+  
+    def set_to_inactive(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method set_to_inactive: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.set_to_inactive',
+                   [params], json_rpc_context)
+  
+    def is_approved_developer(self, usernames, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method is_approved_developer: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.is_approved_developer',
+                          [usernames], json_rpc_context)
+        return resp[0]
+  
+    def list_approved_developers(self, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method list_approved_developers: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_approved_developers',
+                          [], json_rpc_context)
+        return resp[0]
+  
+    def approve_developer(self, username, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method approve_developer: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.approve_developer',
+                   [username], json_rpc_context)
+  
+    def revoke_developer(self, username, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method revoke_developer: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.revoke_developer',
+                   [username], json_rpc_context)
  

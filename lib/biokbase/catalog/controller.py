@@ -26,7 +26,10 @@ class CatalogController:
         # first grab the admin list
         self.adminList = []
         if 'admin-users' in config:
-            self.adminList = [x.strip() for x in config['admin-users'].split(',')]
+            tokens = config['admin-users'].split(',')
+            for t in tokens:
+                if t.strip():
+                    self.adminList.append(t.strip())
         if not self.adminList:
             warnings.warn('no "admin-users" are set in config of CatalogController.')
 
@@ -86,7 +89,11 @@ class CatalogController:
         git_url = params['git_url']
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
 
-        # 1) If the repo does not yet exist, then create it.  No permission checks needed
+        # 0) Make sure the submitter is on the list
+        if not self.is_approved_developer([username])[0]:
+            raise ValueError('You are not an approved developer.  Contact us to request approval.')
+
+        # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp)
             module_details = self.db.get_module_details(git_url=git_url)
@@ -402,9 +409,51 @@ class CatalogController:
         return self.db.find_basic_module_info(query)
 
 
+    def set_module_active_state(self, active, params, username):
+        params = self.filter_module_or_repo_selection(params)
+        if not self.is_admin(username):
+            raise ValueError('Only Admin users can set a module to be active/inactive.')
+        error = self.db.set_module_active_state(active, module_name=params['module_name'], git_url=params['git_url'])
+        if error is not None:
+            raise ValueError('Update operation failed - some unknown database error: '+error)
+
+
+    def approve_developer(self, developer, username):
+        if not developer:
+            raise ValueError('No username provided')
+        if not developer.strip():
+            raise ValueError('No username provided')
+        if not self.is_admin(username):
+            raise ValueError('Only Admin users can approve or revoke developers.')
+        self.db.approve_developer(developer)
+
+    def revoke_developer(self, developer, username):
+        if not developer:
+            raise ValueError('No username provided')
+        if not developer.strip():
+            raise ValueError('No username provided')
+        if not self.is_admin(username):
+            raise ValueError('Only Admin users can approve or revoke developers.')
+        self.db.revoke_developer(developer)
+
+    def is_approved_developer(self, usernames):
+        if not usernames: return []
+        return self.db.is_approved_developer(usernames)
+
+    def list_approved_developers(self):
+        dev_list = self.db.list_approved_developers()
+        simple_kbase_dev_list = []
+        for d in dev_list:
+            simple_kbase_dev_list.append(d['kb_username'])
+        return sorted(simple_kbase_dev_list)
+
+
     def get_build_log(self, timestamp):
-        with open(self.temp_dir+'/registration.log.'+str(timestamp)) as log_file:
-            log = log_file.read()
+        try:
+            with open(self.temp_dir+'/registration.log.'+str(timestamp)) as log_file:
+                log = log_file.read()
+        except:
+            log = '[log not found - timestamp is invalid or the log has been deleted]'
         return log
 
     # Some utility methods

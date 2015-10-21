@@ -211,3 +211,65 @@ class Catalog:
                              'returnVal is not type basestring as required.')
         # return the results
         return [returnVal]
+
+    def set_to_active(self, ctx, params):
+        # ctx is the context object
+        #BEGIN set_to_active
+        self.cc.set_module_active_state(True, params, ctx['user_id'])
+        #END set_to_active
+        pass
+
+    def set_to_inactive(self, ctx, params):
+        # ctx is the context object
+        #BEGIN set_to_inactive
+        self.cc.set_module_inactive_state(False, params, ctx['user_id'])
+        #END set_to_inactive
+        pass
+
+    def is_approved_developer(self, ctx, usernames):
+        # ctx is the context object
+        # return variables are: is_approved
+        #BEGIN is_approved_developer
+        is_approved_bool = self.cc.is_approved_developer(usernames)
+        is_approved = [] # convert to longs for correct RPC mapping
+        for k in is_approved_bool:
+            if(k):
+                is_approved.append(1)
+            else:
+                is_approved.append(0)
+        #END is_approved_developer
+
+        # At some point might do deeper type checking...
+        if not isinstance(is_approved, list):
+            raise ValueError('Method is_approved_developer return value ' +
+                             'is_approved is not type list as required.')
+        # return the results
+        return [is_approved]
+
+    def list_approved_developers(self, ctx):
+        # ctx is the context object
+        # return variables are: usernames
+        #BEGIN list_approved_developers
+        usernames = self.cc.list_approved_developers()
+        #END list_approved_developers
+
+        # At some point might do deeper type checking...
+        if not isinstance(usernames, list):
+            raise ValueError('Method list_approved_developers return value ' +
+                             'usernames is not type list as required.')
+        # return the results
+        return [usernames]
+
+    def approve_developer(self, ctx, username):
+        # ctx is the context object
+        #BEGIN approve_developer
+        usernames = self.cc.approve_developer(username, ctx['user_id'])
+        #END approve_developer
+        pass
+
+    def revoke_developer(self, ctx, username):
+        # ctx is the context object
+        #BEGIN revoke_developer
+        usernames = self.cc.revoke_developer(username, ctx['user_id'])
+        #END revoke_developer
+        pass

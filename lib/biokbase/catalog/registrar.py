@@ -184,6 +184,9 @@ class Registrar:
         if self.username not in owners:
             raise ValueError('Your kbase username ('+self.username+') must be in the owners list in the kbase.yaml file.')
 
+        # OPTIONAL TODO: check if all the users are on the owners list?  not necessarily required, because we
+        # do a check during registration of the person who started the registration...
+
         # TODO: check for directory structure, method spec format, documentation, version 
 
         # return the parse so we can figure things out later

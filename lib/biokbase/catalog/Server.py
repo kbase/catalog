@@ -102,6 +102,24 @@ sync_methods['Catalog.get_module_state'] = True
 async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
 async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
 sync_methods['Catalog.get_build_log'] = True
+async_run_methods['Catalog.set_to_active_async'] = ['Catalog', 'set_to_active']
+async_check_methods['Catalog.set_to_active_check'] = ['Catalog', 'set_to_active']
+sync_methods['Catalog.set_to_active'] = True
+async_run_methods['Catalog.set_to_inactive_async'] = ['Catalog', 'set_to_inactive']
+async_check_methods['Catalog.set_to_inactive_check'] = ['Catalog', 'set_to_inactive']
+sync_methods['Catalog.set_to_inactive'] = True
+async_run_methods['Catalog.is_approved_developer_async'] = ['Catalog', 'is_approved_developer']
+async_check_methods['Catalog.is_approved_developer_check'] = ['Catalog', 'is_approved_developer']
+sync_methods['Catalog.is_approved_developer'] = True
+async_run_methods['Catalog.list_approved_developers_async'] = ['Catalog', 'list_approved_developers']
+async_check_methods['Catalog.list_approved_developers_check'] = ['Catalog', 'list_approved_developers']
+sync_methods['Catalog.list_approved_developers'] = True
+async_run_methods['Catalog.approve_developer_async'] = ['Catalog', 'approve_developer']
+async_check_methods['Catalog.approve_developer_check'] = ['Catalog', 'approve_developer']
+sync_methods['Catalog.approve_developer'] = True
+async_run_methods['Catalog.revoke_developer_async'] = ['Catalog', 'revoke_developer']
+async_check_methods['Catalog.revoke_developer_check'] = ['Catalog', 'revoke_developer']
+sync_methods['Catalog.revoke_developer'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -428,6 +446,30 @@ class Application(object):
                              name='Catalog.get_build_log',
                              types=[int])
         self.method_authentication['Catalog.get_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.set_to_active,
+                             name='Catalog.set_to_active',
+                             types=[dict])
+        self.method_authentication['Catalog.set_to_active'] = 'required'
+        self.rpc_service.add(impl_Catalog.set_to_inactive,
+                             name='Catalog.set_to_inactive',
+                             types=[dict])
+        self.method_authentication['Catalog.set_to_inactive'] = 'required'
+        self.rpc_service.add(impl_Catalog.is_approved_developer,
+                             name='Catalog.is_approved_developer',
+                             types=[list])
+        self.method_authentication['Catalog.is_approved_developer'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_approved_developers,
+                             name='Catalog.list_approved_developers',
+                             types=[])
+        self.method_authentication['Catalog.list_approved_developers'] = 'none'
+        self.rpc_service.add(impl_Catalog.approve_developer,
+                             name='Catalog.approve_developer',
+                             types=[basestring])
+        self.method_authentication['Catalog.approve_developer'] = 'required'
+        self.rpc_service.add(impl_Catalog.revoke_developer,
+                             name='Catalog.revoke_developer',
+                             types=[basestring])
+        self.method_authentication['Catalog.revoke_developer'] = 'required'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,

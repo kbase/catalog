@@ -33,7 +33,7 @@ class CatalogTestUtil:
             self.test_cfg[entry[0]] = entry[1]
         self.log('test.cfg parse\n'+pformat(self.test_cfg))
 
-        self.test_user_1 = self.test_cfg['test-user-2']
+        self.test_user_1 = self.test_cfg['test-user-1']
         self.test_user_psswd_1 = self.test_cfg['test-user-psswd-1']
         self.test_user_2 = self.test_cfg['test-user-2']
         self.test_user_psswd_2 = self.test_cfg['test-user-psswd-2']
@@ -42,6 +42,7 @@ class CatalogTestUtil:
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])
         db = self.mongo[self.test_cfg['mongodb-database']]
         self.modules = db[MongoCatalogDBI._MODULES]
+        self.developers = db[MongoCatalogDBI._DEVELOPERS]
         if self.modules.count() > 0 :
             raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
 
@@ -92,15 +93,20 @@ class CatalogTestUtil:
 
     def user_ctx(self):
         return {
-            "user_id": self.test_user_1
-            # TODO: authenticate and add token, but not required yet
+            "user_id": self.test_user_1,
+            "token":'fake_token'
+            # TODO: authenticate and add real token, but not required yet
         }
 
     def admin_ctx(self):
         return {
-            "user_id": self.test_user_2
-            # TODO: authenticate and add token, but not required yet
+            "user_id": self.test_user_2,
+            "token":'fake_token'
+            # TODO: authenticate and add real token, but not required yet
         }
+
+    def get_test_repo_1(self):
+        return self.test_cfg['test-module-repo-1']
 
 
     def getCatalogConfig(self):
@@ -109,6 +115,7 @@ class CatalogTestUtil:
     def tearDown(self):
         self.log("tearDown()")
         self.modules.drop()
+        self.developers.drop()
 
     def log(self, mssg):
         #print("CATALOG_TEST_UTIL: "+mssg)
