@@ -53,7 +53,10 @@ class Registrar:
             # 1 - clone the repo
             self.set_build_step('cloning git repo')
             parsed_url=urlparse(self.git_url)
-            basedir = os.path.join(self.temp_dir,parsed_url.path)
+            #note: can't really use join here because parsed path starts with leading slash, so join would throw out
+            # the first arg.  We could cut that out, but I think we actually will need something better here because
+            # not all modules will have urls in the github tradition (eg there might not be any path in the url)
+            basedir = self.temp_dir+str(parsed_url.path)
             # quick fix- if directory exists, then remove it.  should do something smarter
             if os.path.isdir(basedir):
                 shutil.rmtree(basedir)
@@ -171,7 +174,7 @@ class Registrar:
             kb_yaml_string = kb_yaml_file.read()
         self.kb_yaml = yaml.load(kb_yaml_string)
         self.log('=====kbase.yaml parse:')
-        self.log(pprint.pformat(kb_yaml))
+        self.log(pprint.pformat(self.kb_yaml))
         self.log('=====end kbase.yaml')
 
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name').strip()
