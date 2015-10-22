@@ -46,13 +46,14 @@ class Registrar:
     def start_registration(self):
         try:
             self.logfile = open(self.temp_dir+'/registration.log.'+str(self.timestamp), 'w')
-            self.log('Registration started on '+ str(datetime.datetime.now()))
-            self.log(str(self.params));
+            self.log('Registration started on '+ str(datetime.datetime.now()) + ' by '+self.username)
+            self.log('Registration Parameters: '+str(self.params));
 
             ##############################
             # 1 - clone the repo
             self.set_build_step('cloning git repo')
             parsed_url=urlparse(self.git_url)
+            self.log(str(parsed_url.path));
             #note: can't really use join here because parsed path starts with leading slash, so join would throw out
             # the first arg.  We could cut that out, but I think we actually will need something better here because
             # not all modules will have urls in the github tradition (eg there might not be any path in the url)
@@ -60,18 +61,20 @@ class Registrar:
             # quick fix- if directory exists, then remove it.  should do something smarter
             if os.path.isdir(basedir):
                 shutil.rmtree(basedir)
+            self.log('git clone ' + self.git_url)
             repo = git.Repo.clone_from(self.git_url, basedir)
             # try to get hash from repo
-            self.log(str(repo.heads.master.commit))
+            self.log('current commit hash at HEAD:' + str(repo.heads.master.commit))
             git_commit_hash = repo.heads.master.commit
             if 'git_commit_hash' in self.params:
-                repo.git.checkout(self.params['git_commit_hash'])
-                git_commit_hash = self.params['git_commit_hash']
-            self.log(str(parsed_url.path));
+                if self.params['git_commit_hash'].strip():
+                    self.log('git checkout ' + self.params['git_commit_hash'].strip())
+                    repo.git.checkout(self.params['git_commit_hash'].strip())
+                    git_commit_hash = self.params['git_commit_hash'].strip()
 
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
-            self.set_build_step('basic checks')
+            self.set_build_step('reading files and performing basic checks')
             self.sanity_checks_and_parse(repo, basedir)
 
 
@@ -93,15 +96,6 @@ class Registrar:
             self.push_docker_image(dockerclient,image_name)
 
             #self.log(str(dockerClient.containers()));
-
-            # temp code added my mike, logic is probably not correct
-            #containerId = self.start_container(repo, basedir, kb_yaml, dockerClient)
-            #self.log('built image: '+ str(containerId))
-
-            #self.set_build_step('testing the docker image by starting a container')
-            #self.log('testing the docker image by starting a container');
-            #test_image(containerId, dockerClient)
-
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
