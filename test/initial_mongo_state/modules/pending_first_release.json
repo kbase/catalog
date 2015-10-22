@@ -1,5 +1,6 @@
 {
     "module_name" : "pending_first_release",
+    "module_name_lc" : "pending_first_release",
     "git_url" : "https://github.com/kbaseIncubator/pending_Release",
 
     "info" : {

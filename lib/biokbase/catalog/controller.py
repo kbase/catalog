@@ -124,7 +124,7 @@ class CatalogController:
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
-                raise ValueError('You ('+username+') do not have permission to register this git repo ('+git_url+')')
+                raise ValueError('You ('+username+') are an approved developer, but do not have permission to register this repo ('+git_url+')')
 
         # 3) Ok, kick off the registration thread
         #   - This will check out the repo, attempt to build the image, run some tests, store the image

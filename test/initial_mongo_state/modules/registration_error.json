@@ -1,5 +1,6 @@
 {
     "module_name" : "registration_error",
+    "module_name_lc" : "registration_error",
     "git_url" : "https://github.com/kbaseIncubator/registration_error",
 
     "info" : {

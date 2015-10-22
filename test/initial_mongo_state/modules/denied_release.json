@@ -1,5 +1,6 @@
 {
     "module_name" : "denied_release",
+    "module_name_lc" : "denied_release",
     "git_url" : "https://github.com/kbaseIncubator/denied_release",
 
     "info" : {

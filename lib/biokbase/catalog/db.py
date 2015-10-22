@@ -22,6 +22,7 @@ from pymongo import MongoClient
 Module Document:
     {
         module_name: str, (unique index)
+        module_name_lc: str, (unique index, lower case module name)
         git_url: str, (unique index)
 
         owners: [
@@ -87,6 +88,7 @@ class MongoCatalogDBI:
 
         # Make sure we have an index on module and git_repo_url
         self.modules.ensure_index('module_name', unique=True, sparse=True)
+        self.modules.ensure_index('module_name_lc', unique=True, sparse=True)
         self.modules.ensure_index('git_url', unique=True)
 
         self.developers.ensure_index('kb_username', unique=True)
@@ -98,6 +100,14 @@ class MongoCatalogDBI:
             return False
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module = self.modules.find_one(query, fields=['_id'])
+        if module is not None:
+            return True
+        return False
+
+    def module_name_lc_exists(self,module_name_lc=''):
+        if not module_name_lc:
+            return False
+        module = self.modules.find_one({'module_name_lc':module_name_lc.lower()}, fields=['_id'])
         if module is not None:
             return True
         return False
@@ -187,7 +197,7 @@ class MongoCatalogDBI:
         if not module_name:
             raise ValueError('module_name must be defined to set a module name')
         query = self._get_mongo_query(git_url=git_url)
-        result = self.modules.update(query, {'$set':{'module_name':module_name}})
+        result = self.modules.update(query, {'$set':{'module_name':module_name,'module_name_lc':module_name.lower()}})
         return self._check_update_result(result)
 
 
@@ -281,9 +291,9 @@ class MongoCatalogDBI:
     def _get_mongo_query(self, module_name='', git_url=''):
         query={}
         if module_name:
-            query['module_name'] = module_name
+            query['module_name'] = module_name.strip()
         if git_url:
-            query['git_url'] = git_url
+            query['git_url'] = git_url.strip()
         return query
 
     def _check_update_result(self, result):
@@ -295,9 +305,6 @@ class MongoCatalogDBI:
                 nModified = result['n']
             if 'nMatched' in result:
                 nModified = result['nMatched']
-            # not a correct check, because if nothing changed that this will be zero
-            #if 'nModified' in result:
-            #    nModified = result['nModified']
             if nModified < 1:
                 return pprint.pformat(result) #json.dumps(result)
             return None

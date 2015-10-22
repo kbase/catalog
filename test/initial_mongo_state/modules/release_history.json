@@ -1,5 +1,6 @@
 {
     "module_name" : "release_history",
+    "module_name_lc" : "release_history",
     "git_url" : "https://github.com/kbaseIncubator/release_history",
 
     "info" : {

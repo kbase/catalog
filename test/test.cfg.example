@@ -13,6 +13,7 @@ test-module-repo-1 = https://github.com/kbaseIncubator/onerepotest
 
 # host where mongo lives, e.g. localhost:27017, for tests there should be not authentication required
 mongodb-host = localhost:27017
+docker-registry-host = dockerhub-ci.kbase.us
 
 # name of the workspace mongo database
 # WARNING: this gets wiped at the end, although should be safe because will error if collections are not 

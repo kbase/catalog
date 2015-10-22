@@ -47,6 +47,7 @@ class Registrar:
             self.logfile = open(self.temp_dir+'/registration.log.'+str(self.timestamp), 'w')
             self.log(str(self.params));
 
+            ##############################
             # 1 - clone the repo
             self.set_build_step('cloning git repo')
             parsed_url=urlparse(self.git_url)
@@ -61,14 +62,15 @@ class Registrar:
             if 'git_commit_hash' in self.params:
                 repo.git.checkout(self.params['git_commit_hash'])
                 git_commit_hash = self.params['git_commit_hash']
-
-            # TODO: switch to the right commit/branch based on params
             self.log(str(parsed_url.path));
 
+            ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('basic checks')
-            kb_yaml = self.sanity_checks_and_parse(repo, basedir)
+            self.sanity_checks_and_parse(repo, basedir)
 
+
+            ##############################
             # 3 docker build - in progress
             # perhaps make this a self attr?
             dockerclient = DockerClient(base_url = str(self.docker_base_url))
@@ -97,7 +99,7 @@ class Registrar:
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
-            self.update_the_catalog(repo, basedir, kb_yaml)
+            self.update_the_catalog(repo, basedir)
             
             self.build_is_complete()
 
@@ -110,46 +112,46 @@ class Registrar:
             self.logfile.close();
 
 
-    def build_image(self, repo, basedir, kb_yaml, dockerClient):
+    # def build_image(self, repo, basedir, kb_yaml, dockerClient):
 
-        # get the basic info that we need
-        module_name = self.get_required_field_as_string(kb_yaml,'module-name')
-        commit_hash = repo.head.commit.hexsha
+    #     # get the basic info that we need
+    #     module_name = self.get_required_field_as_string(kb_yaml,'module-name')
+    #     commit_hash = repo.head.commit.hexsha
 
-        #module=os.getcwd().split('/')[-1] 
-        #version=mod['module-version']
-        #c = Client(base_url='unix://var/run/docker.sock')
-        tag='temp/%s:%s'%(module_name,commit_hash)
-        last=''
-        for line in dockerClient.build( path=basedir, rm=True, decode=True, tag=tag):
-          if 'errorDetail' in line:
-            sys.exit(1)
-          last=line
-        if 'stream' in last and last['stream'][:19]=='Successfully built ':
-          return dockerClient.inspect_image(tag)['Id']
+    #     #module=os.getcwd().split('/')[-1] 
+    #     #version=mod['module-version']
+    #     #c = Client(base_url='unix://var/run/docker.sock')
+    #     tag='temp/%s:%s'%(module_name,commit_hash)
+    #     last=''
+    #     for line in dockerClient.build( path=basedir, rm=True, decode=True, tag=tag):
+    #       if 'errorDetail' in line:
+    #         sys.exit(1)
+    #       last=line
+    #     if 'stream' in last and last['stream'][:19]=='Successfully built ':
+    #       return dockerClient.inspect_image(tag)['Id']
 
 
 
-    def test_image(self, image, dockerClient):
-        #c = Client(base_url='unix://var/run/docker.sock')
-        # TODO: need to add some of these to config?
-        self.log('I do not do tests yet.')
-        pass;
-        env={"TEST_USER":config['test_user'],"TEST_TOKEN":config['test_token'],"TEST_WSURL":config['test_wsurl']}
+    # def test_image(self, image, dockerClient):
+    #     #c = Client(base_url='unix://var/run/docker.sock')
+    #     # TODO: need to add some of these to config?
+    #     self.log('I do not do tests yet.')
+    #     pass;
+    #     env={"TEST_USER":config['test_user'],"TEST_TOKEN":config['test_token'],"TEST_WSURL":config['test_wsurl']}
         
-        container = dockerClient.create_container(image=image,command="test",environment=env)
-        id=container.get('Id')
-        response=dockerClient.start(container=id)
-        status=dict()
-        status['Running']=True
-        while status['Running']==True:
-          status=dockerClient.inspect_container(id)['State']
-          time.sleep(1)
-        c.remove_container(container=id)
-        if status['Running']==False:
-          self.log("Exited with %d"%(status['ExitCode']))
-          self.log(status['ExitCode'])
-        return retval
+    #     container = dockerClient.create_container(image=image,command="test",environment=env)
+    #     id=container.get('Id')
+    #     response=dockerClient.start(container=id)
+    #     status=dict()
+    #     status['Running']=True
+    #     while status['Running']==True:
+    #       status=dockerClient.inspect_container(id)['State']
+    #       time.sleep(1)
+    #     c.remove_container(container=id)
+    #     if status['Running']==False:
+    #       self.log("Exited with %d"%(status['ExitCode']))
+    #       self.log(status['ExitCode'])
+    #     return retval
 
 
 
@@ -160,16 +162,16 @@ class Registrar:
         # parse some stuff, and check for things
         with open(basedir+'/kbase.yaml') as kb_yaml_file:
             kb_yaml_string = kb_yaml_file.read()
-        kb_yaml = yaml.load(kb_yaml_string)
+        self.kb_yaml = yaml.load(kb_yaml_string)
         self.log('=====kbase.yaml parse:')
         self.log(pprint.pformat(kb_yaml))
         self.log('=====end kbase.yaml')
 
-        module_name = self.get_required_field_as_string(kb_yaml,'module-name')
-        module_description = self.get_required_field_as_string(kb_yaml,'module-description')
-        version = self.get_required_field_as_string(kb_yaml,'module-version')
-        service_language = self.get_required_field_as_string(kb_yaml,'service-language')
-        owners = self.get_required_field_as_list(kb_yaml,'owners')
+        module_name = self.get_required_field_as_string(self.kb_yaml,'module-name').strip()
+        module_description = self.get_required_field_as_string(self.kb_yaml,'module-description').strip()
+        version = self.get_required_field_as_string(self.kb_yaml,'module-version').strip()
+        service_language = self.get_required_field_as_string(self.kb_yaml,'service-language').strip()
+        owners = self.get_required_field_as_list(self.kb_yaml,'owners')
 
         # module_name must match what exists (unless it is not yet defined)
         if 'module_name' in self.module_details:
@@ -178,9 +180,7 @@ class Registrar:
                                     'Module names are permanent- if this is a problem, contact a kbase admin.')
         else:
             # This must be the first registration, so the module must not exist yet
-            if self.db.is_registered(module_name=module_name):
-                raise ValueError('Module name (in kbase.yaml) is already registered.  Please specify a different name and try again.')
-            # TODO: additional contratins on the module name
+            self.check_that_module_name_is_valid(module_name);
 
         # you can't remove yourself from the owners list, or register something that you are not an owner of
         if self.username not in owners:
@@ -192,26 +192,36 @@ class Registrar:
         # TODO: check for directory structure, method spec format, documentation, version 
 
         # return the parse so we can figure things out later
-        return kb_yaml
+        return self.kb_yaml
 
 
-    def update_the_catalog(self, repo, basedir, kb_yaml):
+    def check_that_module_name_is_valid(self, module_name):
+        if self.db.is_registered(module_name=module_name):
+            raise ValueError('Module name (in kbase.yaml) is already registered.  Please specify a different name and try again.')
+        if self.db.module_name_lc_exists(module_name_lc=module_name.lower()):
+            raise ValueError('The case-insensitive module name (in kbase.yaml) is not unique.  Please specify a different name.')
+        # only allow alphanumeric and underscore
+        if not re.match(r'^[A-Za-z0-9_]+$', module_name):
+            raise ValueError('Module names must be alphanumeric characters (including underscores) only, with no spaces.')
+
+
+    def update_the_catalog(self, repo, basedir):
 
         # get the basic info that we need
         commit_hash = repo.head.commit.hexsha
         commit_message = repo.head.commit.message
 
-        module_name = self.get_required_field_as_string(kb_yaml,'module-name')
-        module_description = self.get_required_field_as_string(kb_yaml,'module-description')
-        version = self.get_required_field_as_string(kb_yaml,'module-version')
-        service_language = self.get_required_field_as_string(kb_yaml,'service-language')
-        owners = self.get_required_field_as_list(kb_yaml,'owners')
+        module_name = self.get_required_field_as_string(self.kb_yaml,'module-name')
+        module_description = self.get_required_field_as_string(self.kb_yaml,'module-description')
+        version = self.get_required_field_as_string(self.kb_yaml,'module-version')
+        service_language = self.get_required_field_as_string(self.kb_yaml,'service-language')
+        owners = self.get_required_field_as_list(self.kb_yaml,'owners')
 
         # first update the module name, which is now permanent, if we haven't already
-        if 'module_name' not in self.module_details:
+        if ('module_name' not in self.module_details) or ('module_name_lc' not in self.module_details):
             error = self.db.set_module_name(self.git_url, module_name)
             if error is not None:
-                raise ValueError('Unable to set module_name - there was an internal database error.')
+                raise ValueError('Unable to set module_name - there was an internal database error.' +error)
 
         # TODO: Could optimize by combining all these things into one mongo call, but for now this is easier.
         # Combining it into one call would just mean that this update happens as a single transaction, but a partial
