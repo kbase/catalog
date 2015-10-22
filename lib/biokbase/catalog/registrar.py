@@ -1,11 +1,12 @@
-import time
+
 import sys
 import os
 import traceback
 import shutil
-import git
-import yaml
+import time
+import datetime
 import pprint
+
 import git
 import yaml
 import requests
@@ -45,13 +46,14 @@ class Registrar:
     def start_registration(self):
         try:
             self.logfile = open(self.temp_dir+'/registration.log.'+str(self.timestamp), 'w')
+            self.log('Registration started on '+ str(datetime.datetime.now()))
             self.log(str(self.params));
 
             ##############################
             # 1 - clone the repo
             self.set_build_step('cloning git repo')
             parsed_url=urlparse(self.git_url)
-            basedir = self.temp_dir+parsed_url.path
+            basedir = os.path.join(self.temp_dir,parsed_url.path)
             # quick fix- if directory exists, then remove it.  should do something smarter
             if os.path.isdir(basedir):
                 shutil.rmtree(basedir)
@@ -157,10 +159,14 @@ class Registrar:
 
     def sanity_checks_and_parse(self, repo, basedir):
         # check that files exist
-        if not os.path.isfile(basedir+'/kbase.yaml') :
-            raise ValueError('kbase.yaml file does not exist in repo, but is required!')
+        yaml_filename = 'kbase.yaml'
+        if not os.path.isfile(os.path.join(basedir,'kbase.yaml')) :
+            if not os.path.isfile(os.path.join(basedir,'kbase.yml')):
+                raise ValueError('kbase.yaml file does not exist in repo, but is required!')
+            else:
+                yaml_filename = 'kbase.yml'
         # parse some stuff, and check for things
-        with open(basedir+'/kbase.yaml') as kb_yaml_file:
+        with open(os.path.join(basedir,yaml_filename)) as kb_yaml_file:
             kb_yaml_string = kb_yaml_file.read()
         self.kb_yaml = yaml.load(kb_yaml_string)
         self.log('=====kbase.yaml parse:')
@@ -249,9 +255,9 @@ class Registrar:
 
         # finally update the actual dev version info
         narrative_methods = []
-        if os.path.isdir(basedir+'/ui/narrative/methods') :
-            for m in os.listdir(basedir+'/ui/narrative/methods'):
-                if os.path.isdir(basedir+'/ui/narrative/methods/'+m):
+        if os.path.isdir(os.path.join(basedir,'ui','narrative','methods')) :
+            for m in os.listdir(os.path.join(basedir,'ui','narrative','methods')):
+                if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
                     narrative_methods.append(m)
 
         new_version = {
