@@ -390,6 +390,7 @@ class CatalogController:
             return True
         return False
 
+    # note: maybe a little too mongo centric, but ok for now...
     def list_basic_module_info(self,params):
         query = { 'state.active':True, 'state.released':True }
 
@@ -411,6 +412,10 @@ class CatalogController:
         elif params['include_released']>0 and params['include_unreleased']>0:
             query.pop('state.released',None) # include everything
 
+        if 'owners' in params:
+            if params['owners']: # might want to filter out empty strings in the future
+                query['owners.kb_username']={'$in':params['owners']}
+                
         return self.db.find_basic_module_info(query)
 
 

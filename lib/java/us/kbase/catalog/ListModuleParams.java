@@ -2,6 +2,7 @@
 package us.kbase.catalog;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -24,19 +25,37 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
+    "owners",
     "include_released",
     "include_unreleased",
     "include_disabled"
 })
 public class ListModuleParams {
 
+    @JsonProperty("owners")
+    private List<String> owners;
     @JsonProperty("include_released")
     private Long includeReleased;
     @JsonProperty("include_unreleased")
     private Long includeUnreleased;
     @JsonProperty("include_disabled")
     private Long includeDisabled;
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
+
+    @JsonProperty("owners")
+    public List<String> getOwners() {
+        return owners;
+    }
+
+    @JsonProperty("owners")
+    public void setOwners(List<String> owners) {
+        this.owners = owners;
+    }
+
+    public ListModuleParams withOwners(List<String> owners) {
+        this.owners = owners;
+        return this;
+    }
 
     @JsonProperty("include_released")
     public Long getIncludeReleased() {
@@ -84,18 +103,18 @@ public class ListModuleParams {
     }
 
     @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
+    public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
     @JsonAnySetter
-    public void setAdditionalProperties(String name, Object value) {
+    public void setAdditionalProperties(java.lang.String name, Object value) {
         this.additionalProperties.put(name, value);
     }
 
     @Override
-    public String toString() {
-        return ((((((((("ListModuleParams"+" [includeReleased=")+ includeReleased)+", includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+    public java.lang.String toString() {
+        return ((((((((((("ListModuleParams"+" [owners=")+ owners)+", includeReleased=")+ includeReleased)+", includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

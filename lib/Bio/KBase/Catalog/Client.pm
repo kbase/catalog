@@ -707,6 +707,7 @@ ReleaseReview is a reference to a hash where the following keys are defined:
 $params is a Catalog.ListModuleParams
 $info_list is a reference to a list where each element is a Catalog.BasicModuleInfo
 ListModuleParams is a reference to a hash where the following keys are defined:
+	owners has a value which is a reference to a list where each element is a string
 	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
@@ -724,6 +725,7 @@ BasicModuleInfo is a reference to a hash where the following keys are defined:
 $params is a Catalog.ListModuleParams
 $info_list is a reference to a list where each element is a Catalog.BasicModuleInfo
 ListModuleParams is a reference to a hash where the following keys are defined:
+	owners has a value which is a reference to a list where each element is a string
 	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
@@ -2122,6 +2124,7 @@ with_disabled - optional flag indicating disabled repos should be included (defa
 
 <pre>
 a reference to a hash where the following keys are defined:
+owners has a value which is a reference to a list where each element is a string
 include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
@@ -2133,6 +2136,7 @@ include_disabled has a value which is a Catalog.boolean
 =begin text
 
 a reference to a hash where the following keys are defined:
+owners has a value which is a reference to a list where each element is a string
 include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean

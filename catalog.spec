@@ -77,6 +77,7 @@ module Catalog {
         with_disabled - optional flag indicating disabled repos should be included (default:false).
     */
     typedef structure {
+        list <string> owners;
         boolean include_released;
         boolean include_unreleased;
         boolean include_disabled;

@@ -130,6 +130,39 @@ class BasicCatalogTest(unittest.TestCase):
                 'registration_in_progress']))
             )
 
+        # check for owner search
+        shortlist = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
+            {'owners':['kbasetest'],'include_unreleased':0})[0]
+        module_names = []
+        for m in shortlist:
+            module_names.append(m['module_name'])
+        pprint(module_names)
+        self.assertEqual(
+            ",".join(sorted(module_names)),
+            ",".join([])
+            )
+        shortlist = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
+            {'owners':['kbasetest'],'include_unreleased':1})[0]
+        module_names = []
+        for m in shortlist:
+            module_names.append(m['module_name'])
+        pprint(module_names)
+        self.assertEqual(
+            ",".join(sorted(module_names)),
+            ",".join(['pending_first_release'])
+            )
+        shortlist = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
+            {'owners':['kbasetest', 'wstester1'],'include_unreleased':1})[0]
+        module_names = []
+        for m in shortlist:
+            module_names.append(m['module_name'])
+        pprint(module_names)
+        self.assertEqual(
+            ",".join(sorted(module_names)),
+            ",".join(['denied_release','onerepotest','pending_first_release','pending_second_release','registration_error','registration_in_progress'])
+            )
+
+
     def test_get_module_state(self):
         state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'onerepotest'})[0]

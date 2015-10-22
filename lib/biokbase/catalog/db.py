@@ -91,6 +91,9 @@ class MongoCatalogDBI:
         self.modules.ensure_index('module_name_lc', unique=True, sparse=True)
         self.modules.ensure_index('git_url', unique=True)
 
+        # other indecies for query performance
+        self.modules.ensure_index('owners.kb_username')
+
         self.developers.ensure_index('kb_username', unique=True)
 
 
