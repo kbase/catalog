@@ -67,7 +67,7 @@ class Registrar:
             self.log('current commit hash at HEAD:' + str(repo.heads.master.commit))
             git_commit_hash = repo.heads.master.commit
             if 'git_commit_hash' in self.params:
-                if self.params['git_commit_hash'].strip():
+                if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())
                     repo.git.checkout(self.params['git_commit_hash'].strip())
                     git_commit_hash = self.params['git_commit_hash'].strip()
