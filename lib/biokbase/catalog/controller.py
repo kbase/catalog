@@ -408,14 +408,17 @@ class CatalogController:
         if params['include_released']<=0 and params['include_unreleased']<=0:
             return [] # don't include anything...
         elif params['include_released']<=0 and params['include_unreleased']>0:
-            query['state.released']=False # include only unreleased
+            # minor change that could be removed eventually: check for released=False or missing
+            query.pop('state.released',None)
+            query['$or']=[{'state.released':False},{'state.released':{'$exists':False}}]
+            #query['state.released']=False # include only unreleased (only works if everything has this flag)
         elif params['include_released']>0 and params['include_unreleased']>0:
             query.pop('state.released',None) # include everything
 
         if 'owners' in params:
             if params['owners']: # might want to filter out empty strings in the future
                 query['owners.kb_username']={'$in':params['owners']}
-                
+
         return self.db.find_basic_module_info(query)
 
 

@@ -19,7 +19,6 @@
         "error_message" : "",
         "registration" : "complete",
         "release_approval" : "under_review",
-        "released" : false,
         "review_message" : ""
     },
 

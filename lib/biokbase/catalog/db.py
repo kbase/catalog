@@ -126,6 +126,7 @@ class MongoCatalogDBI:
             'owners':[{'kb_username':username}],
             'state': {
                 'active': True,
+                'released': False,
                 'release_approval': 'not_requested',
                 'registration': 'building'
             },
