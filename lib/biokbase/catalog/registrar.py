@@ -81,7 +81,7 @@ class Registrar:
             ##############################
             # 3 docker build - in progress
             # perhaps make this a self attr?
-            dockerclient = DockerClient(base_url = str(self.docker_base_url))
+            dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=360)
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
             image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
             # look for docker image
