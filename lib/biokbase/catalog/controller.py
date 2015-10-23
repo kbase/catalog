@@ -266,6 +266,8 @@ class CatalogController:
         if review['decision']=='denied':
             if 'review_message' not in review:
                 raise ValueError('Cannot set review - if denied, you must set a "review_message"!')
+            if not review['review_message'].strip():
+                raise ValueError('Cannot set review - if denied, you must set a "review_message"!')
         if 'review_message' not in review:
             review['review_message']=''
         if review['decision'] not in ['approved','denied']:
