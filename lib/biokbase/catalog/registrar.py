@@ -319,7 +319,8 @@ class Registrar:
 
     def push_docker_image(self, docker_client, image_name):
         self.log('pushing docker image to registry for ' + image_name);
-        response = [ line for line in docker_client.push(image_name, stream=True) ]
+        (image,tag)=image_name.split(':')
+        response = [ line for line in docker_client.push(image, tag=tag, stream=True) ]
         response_stream = response
         self.log(str(response_stream))
         # to do: examine stream to determine success/failure of build
