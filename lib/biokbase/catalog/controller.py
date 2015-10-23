@@ -174,6 +174,10 @@ class CatalogController:
         # first make sure everything exists and we have permissions
         params = self.filter_module_or_repo_selection(params)
         module_details = self.db.get_module_details(module_name=params['module_name'],git_url=params['git_url'])
+        # Make sure the submitter is still an approved developer
+        if not self.is_approved_developer([username])[0]:
+            raise ValueError('You are not an approved developer.  Contact us to request approval.')
+
         if not self.has_permission(username,module_details['owners']):
             raise ValueError('You do not have permission to modify this module/repo.')
         # next make sure the state of the module is ok (it must be active, no pending registrations or release requests)
@@ -192,6 +196,9 @@ class CatalogController:
         # first make sure everything exists and we have permissions
         params = self.filter_module_or_repo_selection(params)
         module_details = self.db.get_module_details(module_name=params['module_name'],git_url=params['git_url'])
+        # Make sure the submitter is still an approved developer
+        if not self.is_approved_developer([username])[0]:
+            raise ValueError('You are not an approved developer.  Contact us to request approval.')
         if not self.has_permission(username,module_details['owners']):
             raise ValueError('You do not have permission to modify this module/repo.')
         # next make sure the state of the module is ok (it must be active, no pending release requests)
