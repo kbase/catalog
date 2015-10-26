@@ -1,0 +1,15 @@
+[submodule "kb_sdk"]
+	path = kb_sdk
+	url = https://github.com/kbase/kb_sdk
+[submodule "jars"]
+	path = jars
+	url = https://github.com/kbase/jars
+[submodule "auth"]
+	path = auth
+	url = https://github.com/kbase/auth
+[submodule "kbapi_common"]
+	path = kbapi_common
+	url = https://github.com/kbase/kbapi_common
+[submodule "narrative_method_store"]
+	path = narrative_method_store
+	url = https://github.com/kbase/narrative_method_store
