@@ -291,11 +291,22 @@ class MongoCatalogDBI:
     def list_approved_developers(self):
         return list(self.developers.find({},{'kb_username':1, '_id':0}))
 
+    def migrate_module_to_new_git_url(self, module_name, current_git_url, new_git_url):
+        if not new_git_url.strip():
+            raise ValueError('New git url is required to migrate_module_to_new_git_url.')
+        query = self._get_mongo_query(module_name=module_name, git_url=current_git_url)
+        record = self.modules.find_one(query, fields=['_id'])
+        if not record:
+            raise ValueError('Cannot migrate git_url, no module found with the given name and current url.')
+        result = self.modules.update(query, {'$set':{'git_url':new_git_url.strip()}})
+        return self._check_update_result(result)
+
+
     #### utility methods
     def _get_mongo_query(self, module_name='', git_url=''):
         query={}
         if module_name:
-            query['module_name'] = module_name.strip()
+            query['module_name_lc'] = module_name.strip().lower()
         if git_url:
             query['git_url'] = git_url.strip()
         return query

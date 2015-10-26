@@ -24,7 +24,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "version",
     "git_commit_hash",
     "git_commit_message",
-    "narrative_method_ids"
+    "narrative_method_ids",
+    "docker_img_name"
 })
 public class ModuleVersionInfo {
 
@@ -38,6 +39,8 @@ public class ModuleVersionInfo {
     private java.lang.String gitCommitMessage;
     @JsonProperty("narrative_method_ids")
     private List<String> narrativeMethodIds;
+    @JsonProperty("docker_img_name")
+    private java.lang.String dockerImgName;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("timestamp")
@@ -115,6 +118,21 @@ public class ModuleVersionInfo {
         return this;
     }
 
+    @JsonProperty("docker_img_name")
+    public java.lang.String getDockerImgName() {
+        return dockerImgName;
+    }
+
+    @JsonProperty("docker_img_name")
+    public void setDockerImgName(java.lang.String dockerImgName) {
+        this.dockerImgName = dockerImgName;
+    }
+
+    public ModuleVersionInfo withDockerImgName(java.lang.String dockerImgName) {
+        this.dockerImgName = dockerImgName;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -127,7 +145,7 @@ public class ModuleVersionInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

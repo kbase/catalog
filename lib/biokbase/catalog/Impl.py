@@ -216,6 +216,13 @@ class Catalog:
         # return the results
         return [returnVal]
 
+    def migrate_module_to_new_git_url(self, ctx, params):
+        # ctx is the context object
+        #BEGIN migrate_module_to_new_git_url
+        self.cc.migrate_module_to_new_git_url(params,ctx['user_id'])
+        #END migrate_module_to_new_git_url
+        pass
+
     def set_to_active(self, ctx, params):
         # ctx is the context object
         #BEGIN set_to_active

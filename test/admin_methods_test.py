@@ -9,8 +9,7 @@ from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
 
 
-# tests all the basic get methods
-class DeveloperAddRemoveTest(unittest.TestCase):
+class AdminMethodsTest(unittest.TestCase):
 
 
     # assumes no developers have been added yet
@@ -76,6 +75,61 @@ class DeveloperAddRemoveTest(unittest.TestCase):
             #pprint(state)
             if state['registration'] in ['complete','error']:
                 break
+
+
+    def test_migrate_module_to_new_git_url(self):
+
+        params = {
+            'module_name':"release_history",
+            'current_git_url':"https://github.com/kbaseIncubator/release_history",
+            'new_git_url':"https://github.com/kbase/release_history"
+        }
+        # first make sure we can find a module with this name and url
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+            {'module_name':params['module_name'],
+             'git_url':params['current_git_url']})[0]
+        self.assertEqual(info['module_name'],params['module_name'])
+        self.assertEqual(info['git_url'],params['current_git_url'])
+        self.assertEqual(info['language'],'python')
+
+        # next make sure we get an error if we are not an admin
+        with self.assertRaises(ValueError):
+            self.catalog.migrate_module_to_new_git_url(self.cUtil.user_ctx(),params)
+
+        # if we are an admin, then it should work
+        self.catalog.migrate_module_to_new_git_url(self.cUtil.admin_ctx(),params)
+
+        # the old record should not be retrievable by that url anymore
+        with self.assertRaises(ValueError):
+            self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+                {'module_name':params['module_name'],
+                 'git_url':params['current_git_url']})[0]
+        # but the new url should work
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+            {'module_name':params['module_name'],
+             'git_url':params['new_git_url']})[0]
+        self.assertEqual(info['module_name'],params['module_name'])
+        self.assertEqual(info['git_url'],params['new_git_url'])
+        self.assertEqual(info['language'],'python')
+
+        # things should fail if we just try again
+        with self.assertRaises(ValueError):
+            self.catalog.migrate_module_to_new_git_url(self.cUtil.admin_ctx(),params)
+        # or if the new url is not valid
+        params['current_git_url'] = params['new_git_url']
+        params['new_git_url'] = "http:not_a_url"
+        with self.assertRaises(ValueError):
+            self.catalog.migrate_module_to_new_git_url(self.cUtil.admin_ctx(),params)
+
+        # but we should be able to switch back
+        params['new_git_url'] = "https://github.com/kbaseIncubator/release_history"
+        self.catalog.migrate_module_to_new_git_url(self.cUtil.admin_ctx(),params)
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
+            {'module_name':params['module_name']})[0]
+        self.assertEqual(info['module_name'],params['module_name'])
+        self.assertEqual(info['git_url'],params['new_git_url'])
+        self.assertEqual(info['language'],'python')
+
 
 
 

@@ -102,6 +102,9 @@ sync_methods['Catalog.get_module_state'] = True
 async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
 async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
 sync_methods['Catalog.get_build_log'] = True
+async_run_methods['Catalog.migrate_module_to_new_git_url_async'] = ['Catalog', 'migrate_module_to_new_git_url']
+async_check_methods['Catalog.migrate_module_to_new_git_url_check'] = ['Catalog', 'migrate_module_to_new_git_url']
+sync_methods['Catalog.migrate_module_to_new_git_url'] = True
 async_run_methods['Catalog.set_to_active_async'] = ['Catalog', 'set_to_active']
 async_check_methods['Catalog.set_to_active_check'] = ['Catalog', 'set_to_active']
 sync_methods['Catalog.set_to_active'] = True
@@ -446,6 +449,10 @@ class Application(object):
                              name='Catalog.get_build_log',
                              types=[int])
         self.method_authentication['Catalog.get_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.migrate_module_to_new_git_url,
+                             name='Catalog.migrate_module_to_new_git_url',
+                             types=[dict])
+        self.method_authentication['Catalog.migrate_module_to_new_git_url'] = 'required'
         self.rpc_service.add(impl_Catalog.set_to_active,
                              name='Catalog.set_to_active',
                              types=[dict])

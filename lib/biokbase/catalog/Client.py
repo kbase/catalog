@@ -265,6 +265,12 @@ class Catalog(object):
                           [timestamp], json_rpc_context)
         return resp[0]
   
+    def migrate_module_to_new_git_url(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method migrate_module_to_new_git_url: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.migrate_module_to_new_git_url',
+                   [params], json_rpc_context)
+  
     def set_to_active(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method set_to_active: argument json_rpc_context is not type dict as required.')

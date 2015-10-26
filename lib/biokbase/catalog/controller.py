@@ -10,6 +10,7 @@ import biokbase.catalog.version
 
 from pprint import pprint
 from datetime import datetime
+from urlparse import urlparse
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.catalog.registrar import Registrar
 
@@ -92,6 +93,8 @@ class CatalogController:
         if 'git_url' not in params:
             raise ValueError('git_url not defined, but is required for registering a repository')
         git_url = params['git_url']
+        if not bool(urlparse(git_url).netloc):
+            raise ValueError('The git url provided is not a valid URL.')
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
 
         # 0) Make sure the submitter is on the list
@@ -477,6 +480,22 @@ class CatalogController:
         except:
             log = '[log not found - timestamp is invalid or the log has been deleted]'
         return log
+
+    def migrate_module_to_new_git_url(self, params, username):
+        if not self.is_admin(username):
+            raise ValueError('Only Admin users can migrate module git urls.')
+        if 'module_name' not in params:
+            raise ValueError('You must specify the "module_name" of the module to modify.')
+        if 'current_git_url' not in params:
+            raise ValueError('You must specify the "current_git_url" of the module to modify.')
+        if 'new_git_url' not in params:
+            raise ValueError('You must specify the "new_git_url" of the module to modify.')
+        if not bool(urlparse(params['new_git_url']).netloc):
+            raise ValueError('The new git url is not a valid URL.')
+        error = self.db.migrate_module_to_new_git_url(params['module_name'],params['current_git_url'],params['new_git_url'])
+        if error is not None:
+            raise ValueError('Update operation failed - some unknown database error: '+error)
+
 
     # Some utility methods
 

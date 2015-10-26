@@ -98,6 +98,7 @@ module Catalog {
         string git_commit_hash;
         string git_commit_message;
         list<string> narrative_method_ids;
+        string docker_img_name;
     } ModuleVersionInfo;
 
     typedef structure {
@@ -177,6 +178,20 @@ module Catalog {
     */
     funcdef get_build_log(int timestamp) returns (string);
 
+
+
+    /* all fields are required to make sure you update the right one */
+    typedef structure {
+        string module_name;
+        string current_git_url;
+        string new_git_url;
+    } UpdateGitUrlParams;
+
+    /* admin method to move the git url for a module, should only be used if the exact same code has migrated to
+    a new URL.  It should not be used as a way to change ownership, get updates from a new source, or get a new
+    module name for an existing git url because old versions are retained and git commits saved will no longer
+    be correct. */
+    funcdef migrate_module_to_new_git_url(UpdateGitUrlParams params) returns () authentication required;
 
 
     /* admin methods to turn on/off modules */

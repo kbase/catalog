@@ -823,6 +823,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
 
 </pre>
 
@@ -850,6 +851,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
 
 
 =end text
@@ -934,6 +936,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
 
 </pre>
 
@@ -955,6 +958,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
 
 
 =end text
@@ -1036,6 +1040,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
 
 </pre>
 
@@ -1054,6 +1059,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
 
 
 =end text
@@ -1380,6 +1386,96 @@ given the timestamp returned from the register method, you can check the build l
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_build_log",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'get_build_log',
+				       );
+    }
+}
+ 
+
+
+=head2 migrate_module_to_new_git_url
+
+  $obj->migrate_module_to_new_git_url($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.UpdateGitUrlParams
+UpdateGitUrlParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	current_git_url has a value which is a string
+	new_git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.UpdateGitUrlParams
+UpdateGitUrlParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	current_git_url has a value which is a string
+	new_git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+admin method to move the git url for a module, should only be used if the exact same code has migrated to
+a new URL.  It should not be used as a way to change ownership, get updates from a new source, or get a new
+module name for an existing git url because old versions are retained and git commits saved will no longer
+be correct.
+
+=back
+
+=cut
+
+ sub migrate_module_to_new_git_url
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function migrate_module_to_new_git_url (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to migrate_module_to_new_git_url:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'migrate_module_to_new_git_url');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.migrate_module_to_new_git_url",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'migrate_module_to_new_git_url',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method migrate_module_to_new_git_url",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'migrate_module_to_new_git_url',
 				       );
     }
 }
@@ -2199,6 +2295,7 @@ version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
 narrative_method_ids has a value which is a reference to a list where each element is a string
+docker_img_name has a value which is a string
 
 </pre>
 
@@ -2212,6 +2309,7 @@ version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
 narrative_method_ids has a value which is a reference to a list where each element is a string
+docker_img_name has a value which is a string
 
 
 =end text
@@ -2395,6 +2493,45 @@ release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 UpdateGitUrlParams
+
+=over 4
+
+
+
+=item Description
+
+all fields are required to make sure you update the right one
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+current_git_url has a value which is a string
+new_git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+current_git_url has a value which is a string
+new_git_url has a value which is a string
 
 
 =end text

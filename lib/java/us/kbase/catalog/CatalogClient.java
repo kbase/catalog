@@ -377,6 +377,25 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: migrate_module_to_new_git_url</p>
+     * <pre>
+     * admin method to move the git url for a module, should only be used if the exact same code has migrated to
+     * a new URL.  It should not be used as a way to change ownership, get updates from a new source, or get a new
+     * module name for an existing git url because old versions are retained and git commits saved will no longer
+     * be correct.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.UpdateGitUrlParams UpdateGitUrlParams}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void migrateModuleToNewGitUrl(UpdateGitUrlParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.migrate_module_to_new_git_url", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
      * <p>Original spec-file function name: set_to_active</p>
      * <pre>
      * admin methods to turn on/off modules
