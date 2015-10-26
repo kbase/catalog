@@ -233,7 +233,7 @@ class Catalog:
     def set_to_inactive(self, ctx, params):
         # ctx is the context object
         #BEGIN set_to_inactive
-        self.cc.set_module_inactive_state(False, params, ctx['user_id'])
+        self.cc.set_module_active_state(False, params, ctx['user_id'])
         #END set_to_inactive
         pass
 

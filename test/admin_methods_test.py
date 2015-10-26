@@ -131,6 +131,40 @@ class AdminMethodsTest(unittest.TestCase):
         self.assertEqual(info['language'],'python')
 
 
+    def test_active_inactive_setting(self):
+
+        # next make sure we get an error if we are not an admin
+        params = { 'module_name':"release_history" }
+        with self.assertRaises(ValueError):
+            self.catalog.set_to_active(self.cUtil.user_ctx(),params)
+        with self.assertRaises(ValueError):
+            self.catalog.set_to_inactive(self.cUtil.user_ctx(),params)
+
+        # release_history module is active, but it should be fine to set it again
+        self.catalog.set_to_active(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.admin_ctx(),params)[0]
+        self.assertEqual(state['active'],1l)
+
+        # make it inactive (calling twice should be ok and shouldn't change anything)
+        self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
+        self.assertEqual(state['active'],0l)
+
+        self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
+        self.assertEqual(state['active'],0l)
+
+        # these still shouldn't work
+        with self.assertRaises(ValueError):
+            self.catalog.set_to_active(self.cUtil.user_ctx(),params)
+        with self.assertRaises(ValueError):
+            self.catalog.set_to_inactive(self.cUtil.user_ctx(),params)
+
+        # make it active one more time for kicks
+        self.catalog.set_to_active(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),params)[0]
+        self.assertEqual(state['active'],1l)
+
 
 
     @classmethod
