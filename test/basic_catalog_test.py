@@ -14,7 +14,7 @@ class BasicCatalogTest(unittest.TestCase):
 
 
     def test_version(self):
-        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['0.0.3'])
+        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['0.0.4'])
 
 
     def test_is_registered(self):
@@ -136,7 +136,6 @@ class BasicCatalogTest(unittest.TestCase):
         module_names = []
         for m in shortlist:
             module_names.append(m['module_name'])
-        pprint(module_names)
         self.assertEqual(
             ",".join(sorted(module_names)),
             ",".join([])
@@ -146,7 +145,6 @@ class BasicCatalogTest(unittest.TestCase):
         module_names = []
         for m in shortlist:
             module_names.append(m['module_name'])
-        pprint(module_names)
         self.assertEqual(
             ",".join(sorted(module_names)),
             ",".join(['pending_first_release'])
@@ -156,7 +154,6 @@ class BasicCatalogTest(unittest.TestCase):
         module_names = []
         for m in shortlist:
             module_names.append(m['module_name'])
-        pprint(module_names)
         self.assertEqual(
             ",".join(sorted(module_names)),
             ",".join(['denied_release','onerepotest','pending_first_release','pending_second_release','registration_error','registration_in_progress'])

@@ -1220,6 +1220,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleState is a reference to a hash where the following keys are defined:
 	active has a value which is a Catalog.boolean
+	released has a value which is a Catalog.boolean
 	release_approval has a value which is a string
 	review_message has a value which is a string
 	registration has a value which is a string
@@ -1239,6 +1240,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleState is a reference to a hash where the following keys are defined:
 	active has a value which is a Catalog.boolean
+	released has a value which is a Catalog.boolean
 	release_approval has a value which is a string
 	review_message has a value which is a string
 	registration has a value which is a string
@@ -1250,7 +1252,7 @@ boolean is an int
 
 =item Description
 
-Get repo state (one of 'pending', 'ready', 'building', 'testing', 'disabled').
+
 
 =back
 
@@ -2322,14 +2324,6 @@ version has a value which is a string
 
 
 
-=item Description
-
-Describes how to find repository details.
-module_name - name of module defined in kbase.yaml file;
-multiple state fields? (approvalState, buildState, versionState)
-state - one of 'pending', 'ready', 'building', 'testing', 'disabled'.
-
-
 =item Definition
 
 =begin html
@@ -2382,6 +2376,7 @@ error_message: str (optional)
 <pre>
 a reference to a hash where the following keys are defined:
 active has a value which is a Catalog.boolean
+released has a value which is a Catalog.boolean
 release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string
@@ -2395,6 +2390,7 @@ error_message has a value which is a string
 
 a reference to a hash where the following keys are defined:
 active has a value which is a Catalog.boolean
+released has a value which is a Catalog.boolean
 release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string

@@ -13,12 +13,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: SetRegistrationStateParams</p>
- * <pre>
- * Describes how to find repository details.
- * module_name - name of module defined in kbase.yaml file;
- * multiple state fields? (approvalState, buildState, versionState)
- * state - one of 'pending', 'ready', 'building', 'testing', 'disabled'.
- * </pre>
+ * 
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)

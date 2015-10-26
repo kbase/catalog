@@ -143,12 +143,7 @@ module Catalog {
 
     funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
 
-    /*
-        Describes how to find repository details.
-        module_name - name of module defined in kbase.yaml file;
-        multiple state fields? (approvalState, buildState, versionState)
-        state - one of 'pending', 'ready', 'building', 'testing', 'disabled'.
-    */
+
     typedef structure {
         string module_name;
         string git_url;
@@ -167,15 +162,14 @@ module Catalog {
     */
     typedef structure {
         boolean active;
+        boolean released;
         string release_approval;
         string review_message;
         string registration;
         string error_message;
     } ModuleState;
 
-    /*
-        Get repo state (one of 'pending', 'ready', 'building', 'testing', 'disabled').
-    */
+    /* */
     funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
     /*

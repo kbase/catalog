@@ -33,10 +33,11 @@ class CatalogTestUtil:
             self.test_cfg[entry[0]] = entry[1]
         self.log('test.cfg parse\n'+pformat(self.test_cfg))
 
+        # passwords not needed in tests yet
         self.test_user_1 = self.test_cfg['test-user-1']
-        self.test_user_psswd_1 = self.test_cfg['test-user-psswd-1']
+        #self.test_user_psswd_1 = self.test_cfg['test-user-psswd-1']
         self.test_user_2 = self.test_cfg['test-user-2']
-        self.test_user_psswd_2 = self.test_cfg['test-user-psswd-2']
+        #self.test_user_psswd_2 = self.test_cfg['test-user-psswd-2']
 
         # 2 check that db exists and collections are empty
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])

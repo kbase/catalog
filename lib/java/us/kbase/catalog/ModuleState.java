@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "active",
+    "released",
     "release_approval",
     "review_message",
     "registration",
@@ -35,6 +36,8 @@ public class ModuleState {
 
     @JsonProperty("active")
     private Long active;
+    @JsonProperty("released")
+    private Long released;
     @JsonProperty("release_approval")
     private String releaseApproval;
     @JsonProperty("review_message")
@@ -57,6 +60,21 @@ public class ModuleState {
 
     public ModuleState withActive(Long active) {
         this.active = active;
+        return this;
+    }
+
+    @JsonProperty("released")
+    public Long getReleased() {
+        return released;
+    }
+
+    @JsonProperty("released")
+    public void setReleased(Long released) {
+        this.released = released;
+    }
+
+    public ModuleState withReleased(Long released) {
+        this.released = released;
         return this;
     }
 
@@ -132,7 +150,7 @@ public class ModuleState {
 
     @Override
     public String toString() {
-        return ((((((((((((("ModuleState"+" [active=")+ active)+", releaseApproval=")+ releaseApproval)+", reviewMessage=")+ reviewMessage)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("ModuleState"+" [active=")+ active)+", released=")+ released)+", releaseApproval=")+ releaseApproval)+", reviewMessage=")+ reviewMessage)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

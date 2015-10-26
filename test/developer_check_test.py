@@ -10,7 +10,7 @@ from biokbase.catalog.Impl import Catalog
 
 
 # tests all the basic get methods
-class BasicCatalogTest(unittest.TestCase):
+class DeveloperAddRemoveTest(unittest.TestCase):
 
 
     # assumes no developers have been added yet

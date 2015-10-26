@@ -4,12 +4,12 @@
 
 [catalog-test]
 
-# KBase user accounts for testing (should be different accounts)
+# user accounts for testing (should be different accounts)
 test-user-1 = 
 test-user-2 = 
 
 # Example repos for testing
-test-module-repo-1 = https://github.com/kbaseIncubator/onerepotest
+test-module-repo-1 = https://github.com/kbaseIncubator/catalog_test_module
 
 # host where mongo lives, e.g. localhost:27017, for tests there should be not authentication required
 mongodb-host = localhost:27017

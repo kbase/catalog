@@ -81,21 +81,24 @@ class Registrar:
             ##############################
             # 3 docker build - in progress
             # perhaps make this a self attr?
-            dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=360)
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
-            image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
-            # look for docker image
-            # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
-            #self.log(str(dockerclient.inspect_image(repo_name)))
-            # if image does not exist, build and set state
-            self.set_build_step('building the docker image')
-            # imageId is not yet populated properly
-            imageId = self.build_docker_image(dockerclient,image_name,basedir)
+            self.image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
+            if not Registrar._TEST_WITHOUT_DOCKER:
+                dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=360)
+                # look for docker image
+                # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
+                #self.log(str(dockerclient.inspect_image(repo_name)))
+                # if image does not exist, build and set state
+                self.set_build_step('building the docker image')
+                # imageId is not yet populated properly
+                imageId = self.build_docker_image(dockerclient,self.image_name,basedir)
 
-            self.set_build_step('pushing docker image to registry')
-            self.push_docker_image(dockerclient,image_name)
+                self.set_build_step('pushing docker image to registry')
+                self.push_docker_image(dockerclient,self.image_name)
 
-            #self.log(str(dockerClient.containers()));
+                #self.log(str(dockerClient.containers()));
+            else:
+                self.log('IN TEST MODE!! SKIPPING DOCKER BUILD AND DOCKER REGISTRY UPDATE!!')
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
@@ -110,48 +113,6 @@ class Registrar:
             self.log('BUILD_ERROR: '+str(e))
         finally:
             self.logfile.close();
-
-
-    # def build_image(self, repo, basedir, kb_yaml, dockerClient):
-
-    #     # get the basic info that we need
-    #     module_name = self.get_required_field_as_string(kb_yaml,'module-name')
-    #     commit_hash = repo.head.commit.hexsha
-
-    #     #module=os.getcwd().split('/')[-1] 
-    #     #version=mod['module-version']
-    #     #c = Client(base_url='unix://var/run/docker.sock')
-    #     tag='temp/%s:%s'%(module_name,commit_hash)
-    #     last=''
-    #     for line in dockerClient.build( path=basedir, rm=True, decode=True, tag=tag):
-    #       if 'errorDetail' in line:
-    #         sys.exit(1)
-    #       last=line
-    #     if 'stream' in last and last['stream'][:19]=='Successfully built ':
-    #       return dockerClient.inspect_image(tag)['Id']
-
-
-
-    # def test_image(self, image, dockerClient):
-    #     #c = Client(base_url='unix://var/run/docker.sock')
-    #     # TODO: need to add some of these to config?
-    #     self.log('I do not do tests yet.')
-    #     pass;
-    #     env={"TEST_USER":config['test_user'],"TEST_TOKEN":config['test_token'],"TEST_WSURL":config['test_wsurl']}
-        
-    #     container = dockerClient.create_container(image=image,command="test",environment=env)
-    #     id=container.get('Id')
-    #     response=dockerClient.start(container=id)
-    #     status=dict()
-    #     status['Running']=True
-    #     while status['Running']==True:
-    #       status=dockerClient.inspect_container(id)['State']
-    #       time.sleep(1)
-    #     c.remove_container(container=id)
-    #     if status['Running']==False:
-    #       self.log("Exited with %d"%(status['ExitCode']))
-    #       self.log(status['ExitCode'])
-    #     return retval
 
 
 
@@ -263,7 +224,8 @@ class Registrar:
             'version' : version,
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
-            'narrative_methods': narrative_methods
+            'narrative_methods': narrative_methods,
+            'docker_img_name': self.image_name
         }
         self.log('new dev version object: '+pprint.pformat(new_version))
         error = self.db.update_dev_version(new_version, git_url=self.git_url)
@@ -271,6 +233,9 @@ class Registrar:
             raise ValueError('Unable to update dev version - there was an internal database error: '+error)
 
         #push to NMS
+        if Registrar._TEST_WITHOUT_NMS:
+            self.log('IN TEST MODE!! SKIPPING NMS UPDATE!!')
+            return
         nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
         nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
 
@@ -316,6 +281,7 @@ class Registrar:
         self.log(str(response_stream[-1]))
         # to do: examine stream to determine success/failure of build
         self.log('done build_docker_image ' + image_name)
+        return imageId
 
     def push_docker_image(self, docker_client, image_name):
         self.log('pushing docker image to registry for ' + image_name);
@@ -325,3 +291,13 @@ class Registrar:
         self.log(str(response_stream))
         # to do: examine stream to determine success/failure of build
         self.log('done pushing docker image to registry for ' + image_name);
+
+
+    # Temporary flags to test everything except docker or NMS connections
+    # we should remove once the test rig can fully support docker and an NMS
+    _TEST_WITHOUT_DOCKER = False
+    _TEST_WITHOUT_NMS = False
+
+
+
+

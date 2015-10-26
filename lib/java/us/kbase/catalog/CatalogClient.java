@@ -344,7 +344,6 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_module_state</p>
      * <pre>
-     * Get repo state (one of 'pending', 'ready', 'building', 'testing', 'disabled').
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.SelectOneModuleParams SelectOneModuleParams}
      * @return   parameter "state" of type {@link us.kbase.catalog.ModuleState ModuleState}
