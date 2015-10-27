@@ -1,4 +1,4 @@
 pymongo
 docker-py
 gitpython
-yaml
+pyyaml
