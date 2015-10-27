@@ -25,7 +25,14 @@ DIR = $(shell pwd)
 
 LIB_DIR = lib
 
-default: compile-kb-module
+PATH := kb_sdk/bin:$(PATH)
+
+default: init compile-kb-module
+
+init:
+	git submodule init
+	git submodule update
+	cd kb_sdk; make
 
 compile-kb-module:
 	kb-mobu compile $(SPEC_FILE) \
@@ -92,19 +99,12 @@ deploy-server-control-scripts:
 TESTLIB = tests/pylib
 
 setup-tests:
-	git submodule init
-	git submodule update
 	mkdir -p $(TESTLIB)/biokbase
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
 	rsync -av auth/python-libs/biokbase/* $(TESTLIB)/biokbase/.
 	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
-	cd kb_sdk
-	make
-	cd ..
 	rsync -av kb_sdk/lib/biokbase/* $(TESTLIB)/biokbase/.
-	cd narrative_method_store
-	make
-	cd ..
+	cd narrative_method_store; make
 	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
 
 
