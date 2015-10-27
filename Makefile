@@ -89,7 +89,27 @@ deploy-server-control-scripts:
 	echo $(TAGS) >> $(TARGET)/services/$(SERVICE)/$(SERVICE).version
 
 
-test:
+TESTLIB = tests/pylib
+
+setup-tests:
+	git submodule init
+	git submodule update
+	mkdir -p $(TESTLIB)/biokbase
+	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
+	rsync -av auth/python-libs/biokbase/* $(TESTLIB)/biokbase/.
+	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
+	cd kb_sdk
+	make
+	cd ..
+	rsync -av kb_sdk/lib/biokbase/* $(TESTLIB)/biokbase/.
+	cd narrative_method_store
+	make
+	cd ..
+	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
+
+
+
+test: setup-tests
 	@echo 'no tests yet'
 
 
