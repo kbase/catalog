@@ -7,7 +7,15 @@ services:
   - mongodb
 
 install:
-    pip install -r requirements.txt
+    - pip install -r requirements.txt
+    - cd ..
+    - git clone https://github.com/kbase/jars
+    - git clone https://github.com/kbaseIncubator/kb_sdk
+    - cd kb_sdk
+    - make
+    - export PATH=$(pwd)/bin:$PATH
+    - cd ../catalog
+    - make
 
 script: 
     - make test
