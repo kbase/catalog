@@ -103,7 +103,6 @@ setup-tests:
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
 	rsync -av auth/python-libs/biokbase/* $(TESTLIB)/biokbase/.
 	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
-	rsync -av kb_sdk/lib/biokbase/* $(TESTLIB)/biokbase/.
 	cd narrative_method_store; make
 	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
 
