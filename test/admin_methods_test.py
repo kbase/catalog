@@ -22,7 +22,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.assertEqual(is_approved,[])
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
             ['somebody','otherperson'])[0]
-        self.assertEqual(is_approved,[0l,0l])
+        self.assertEqual(is_approved,[0,0])
 
         # add somebody fails without admin user
         with self.assertRaises(ValueError):
@@ -40,7 +40,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.assertEqual(devs,['alice','bob','eve']) # should be sorted
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
             ['somebody','alice','otherperson','bob','bob'])[0]
-        self.assertEqual(is_approved,[0l,1l,0l,1l,1l])
+        self.assertEqual(is_approved,[0,1,0,1,1])
 
         # remove some
         with self.assertRaises(ValueError):
@@ -59,7 +59,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.assertEqual(devs,['bob','eve']) # should be sorted
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
             ['somebody','alice','otherperson','bob','bob'])[0]
-        self.assertEqual(is_approved,[0l,0l,0l,1l,1l])
+        self.assertEqual(is_approved,[0,0,0,1,1])
 
         # should block registration for non-developers
         with self.assertRaises(ValueError):
@@ -143,16 +143,16 @@ class AdminMethodsTest(unittest.TestCase):
         # release_history module is active, but it should be fine to set it again
         self.catalog.set_to_active(self.cUtil.admin_ctx(),params)
         state = self.catalog.get_module_state(self.cUtil.admin_ctx(),params)[0]
-        self.assertEqual(state['active'],1l)
+        self.assertEqual(state['active'],1)
 
         # make it inactive (calling twice should be ok and shouldn't change anything)
         self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
         state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
-        self.assertEqual(state['active'],0l)
+        self.assertEqual(state['active'],0)
 
         self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
         state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
-        self.assertEqual(state['active'],0l)
+        self.assertEqual(state['active'],0)
 
         # these still shouldn't work
         with self.assertRaises(ValueError):
@@ -163,7 +163,7 @@ class AdminMethodsTest(unittest.TestCase):
         # make it active one more time for kicks
         self.catalog.set_to_active(self.cUtil.admin_ctx(),params)
         state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),params)[0]
-        self.assertEqual(state['active'],1l)
+        self.assertEqual(state['active'],1)
 
 
 

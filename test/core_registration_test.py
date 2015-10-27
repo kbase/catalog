@@ -92,7 +92,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 found=True
         self.assertFalse(found,'found new release request that should have been removed')
         state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
-        self.assertEqual(state['released'],0l)
+        self.assertEqual(state['released'],0)
         self.assertEqual(state['registration'],'complete')
         self.assertEqual(state['release_approval'],'denied')
         self.assertEqual(state['review_message'],'ask later')
@@ -117,7 +117,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 found=True
         self.assertFalse(found,'found new release request that should have been removed')
         state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
-        self.assertEqual(state['released'],1l)
+        self.assertEqual(state['released'],1)
         self.assertEqual(state['registration'],'complete')
         self.assertEqual(state['release_approval'],'approved')
         self.assertEqual(state['review_message'],'')

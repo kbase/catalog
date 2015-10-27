@@ -32,7 +32,6 @@ default: init compile-kb-module
 init:
 	git submodule init
 	git submodule update
-	cd kb_sdk; make
 
 compile-kb-module:
 	kb-mobu compile $(SPEC_FILE) \
