@@ -31,12 +31,12 @@ def get_service_name():
 
 
 def get_config():
-    if not get_config_file() or not get_service_name():
+    if not get_config_file():
         return None
     retconfig = {}
     config = ConfigParser()
     config.read(get_config_file())
-    for nameval in config.items(get_service_name()):
+    for nameval in config.items(get_service_name() or 'Catalog'):
         retconfig[nameval[0]] = nameval[1]
     return retconfig
 
@@ -582,7 +582,7 @@ class Application(object):
                                 respond = {'version': '1.1', 'result': [job_state], 'id': req['id']}
                                 rpc_result = json.dumps(respond, cls=JSONObjectEncoder)
                                 status = '200 OK'
-                    elif method_name in sync_methods:
+                    elif method_name in sync_methods or (method_name + '_async') not in async_run_methods:
                         self.log(log.INFO, ctx, 'start method')
                         rpc_result = self.rpc_service.call(ctx, req)
                         self.log(log.INFO, ctx, 'end method')

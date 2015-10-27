@@ -96,7 +96,7 @@ deploy-server-control-scripts:
 	echo $(TAGS) >> $(TARGET)/services/$(SERVICE)/$(SERVICE).version
 
 
-TESTLIB = tests/pylib
+TESTLIB = test/pylib
 
 setup-tests:
 	mkdir -p $(TESTLIB)/biokbase
@@ -110,7 +110,8 @@ setup-tests:
 
 
 test: setup-tests
-	@echo 'no tests yet'
+	-cp -n test/test.cfg.example test/test.cfg
+	cd test; ./run_tests.sh
 
 
 clean:

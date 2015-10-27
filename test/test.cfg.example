@@ -1,23 +1,23 @@
 
 
-
-
 [catalog-test]
 
 # user accounts for testing (should be different accounts)
-test-user-1 = 
-test-user-2 = 
+test-user-1 = wstester1
+test-user-2 = wstester2
 
 # Example repos for testing
 test-module-repo-1 = https://github.com/kbaseIncubator/catalog_test_module
 
 # host where mongo lives, e.g. localhost:27017, for tests there should be not authentication required
 mongodb-host = localhost:27017
+
+# docker registry host endpoint
 docker-registry-host = dockerhub-ci.kbase.us
 
-# name of the workspace mongo database
-# WARNING: this gets wiped at the end, although should be safe because will error if collections are not 
-#          emtpy at startup
+# name of the mongo database
+# WARNING: this gets wiped at the end, although should be safe because will error if
+#          collections are not emtpy at startup
 mongodb-database = catalog-test
 
 # Path to docker socket/host
