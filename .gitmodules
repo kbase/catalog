@@ -1,6 +1,3 @@
-[submodule "kb_sdk"]
-	path = kb_sdk
-	url = https://github.com/kbase/kb_sdk
 [submodule "jars"]
 	path = jars
 	url = https://github.com/kbase/jars
