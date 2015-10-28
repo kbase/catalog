@@ -281,14 +281,14 @@ class Registrar:
         #self.log(str(response_stream[-1]))
 
         # examine stream to determine success/failure of build
+        last=''
         for line in docker_client.build(path=basedir,rm=True,tag=image_name):
             self.log(str(line))
             if 'errorDetail' in line:
                 raise ValueError('Docker build failed.')
             last=line
-            if 'stream' in last and last['stream'][:19]=='Successfully built ':
-                imageId = docker_client.inspect_image(image_name)['Id']
-                break
+        if 'stream' in last and last['stream'][:19]=='Successfully built ':
+            imageId = docker_client.inspect_image(image_name)['Id']
 
         self.log('Docker build successful. Image Id:' + imageId)
         self.log('done build_docker_image ' + image_name)
