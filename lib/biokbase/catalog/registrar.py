@@ -275,11 +275,22 @@ class Registrar:
 
     def build_docker_image(self, docker_client, image_name, basedir):
         self.log('building the docker image for ' + image_name);
-        response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
-        response_stream = response
-        imageId = response_stream[-1]
-        self.log(str(response_stream[-1]))
-        # to do: examine stream to determine success/failure of build
+        #response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
+        #response_stream = response
+        #imageId = response_stream[-1]
+        #self.log(str(response_stream[-1]))
+
+        # examine stream to determine success/failure of build
+        for line in docker_client.build(path=basedir,rm=True,tag=image_name):
+            self.log(str(line))
+            if 'errorDetail' in line:
+                raise ValueError('Docker build failed.')
+            last=line
+            if 'stream' in last and last['stream'][:19]=='Successfully built ':
+                imageId = docker_client.inspect_image(image_name)['Id']
+                break
+
+        self.log('Docker build successful. Image Id:' + imageId)
         self.log('done build_docker_image ' + image_name)
         return imageId
 
