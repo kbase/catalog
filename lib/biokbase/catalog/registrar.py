@@ -237,8 +237,13 @@ class Registrar:
         if Registrar._TEST_WITHOUT_NMS:
             self.log('IN TEST MODE!! SKIPPING NMS UPDATE!!')
             return
+
+        self.log('registering specs with NMS')
         nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
         nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
+
+
+        self.log('\ndone')
 
         # done!!!
 
