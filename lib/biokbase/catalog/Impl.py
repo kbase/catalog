@@ -189,8 +189,11 @@ class Catalog:
             state['active']=1
         else:
             state['active']=0
-        if state['released']:
-            state['released']=1
+        if 'released' in state:
+            if state['released']:
+                state['released']=1
+            else:
+                state['released']=0
         else:
             state['released']=0
         #END get_module_state

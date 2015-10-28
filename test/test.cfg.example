@@ -1,4 +1,5 @@
-
+#Note for running tests, if on the same dev machine as the narrative, you may have to remove the biokbase egg
+#created by the narrative (rm -rf /usr/local/lib/python2.7/site-packages/biokbase-0.0.1-py2.7.egg)
 
 [catalog-test]
 
