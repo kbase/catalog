@@ -283,12 +283,17 @@ class Registrar:
         # examine stream to determine success/failure of build
         last=''
         for line in docker_client.build(path=basedir,rm=True,tag=image_name):
-            self.log(str(line))
+            if 'stream' in line:
+                self.log(line['stream'])
             if 'errorDetail' in line:
-                raise ValueError('Docker build failed.')
+                self.log(str(line))
+                raise ValueError('Docker build failed: '+line['errorDetail'])
             last=line
-        if 'stream' in last and last['stream'][:19]=='Successfully built ':
-            imageId = docker_client.inspect_image(image_name)['Id']
+        
+        #if 'stream' in last and last['stream'][:19]=='Successfully built ':
+        # if we got here, then I assume it was successful- the check above fails in kb environment with error:
+        # 
+        imageId = docker_client.inspect_image(image_name)['Id']
 
         self.log('Docker build successful. Image Id:' + imageId)
         self.log('done build_docker_image ' + image_name)
