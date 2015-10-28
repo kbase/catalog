@@ -261,8 +261,11 @@ class Registrar:
         return value
 
 
-    def log(self, message):
-        self.logfile.write(message+'\n')
+    def log(self, message, no_end_line=False):
+        if no_end_line:
+            self.logfile.write(message)
+        else:
+            self.logfile.write(message+'\n')
         self.logfile.flush()
 
     def set_build_step(self, step):
@@ -275,7 +278,7 @@ class Registrar:
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
 
     def build_docker_image(self, docker_client, image_name, basedir):
-        self.log('building the docker image for ' + image_name);
+        self.log('\nBuilding the docker image for ' + image_name);
         #response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
         #response_stream = response
         #imageId = response_stream[-1]
@@ -287,27 +290,46 @@ class Registrar:
         for line in docker_client.build(path=basedir,rm=True,tag=image_name):
             line_parse = json.loads(line)
             if 'stream' in line_parse:
-                self.log(line_parse['stream'])
+                self.log(line_parse['stream'],no_end_line=True)
             if 'errorDetail' in line_parse:
-                self.log(str(line_parse))
+                self.log(str(line_parse),no_end_line=True)
                 raise ValueError('Docker build failed: '+line_parse['errorDetail'])
             last=line_parse
         
         if 'stream' in last and last['stream'][:19]=='Successfully built ':
             imageId = docker_client.inspect_image(image_name)['Id']
 
-        self.log('Docker build successful. Image Id:' + imageId)
-        self.log('done build_docker_image ' + image_name)
+        self.log('Docker build successful.')
+        self.log('    Image Id:   ' + imageId)
+        self.log('    Image Name: ' + image_name+'\n\n')
         return imageId
 
     def push_docker_image(self, docker_client, image_name):
-        self.log('pushing docker image to registry for ' + image_name);
+        self.log('\nPushing docker image to registry for ' + image_name);
         (image,tag)=image_name.split(':')
-        response = [ line for line in docker_client.push(image, tag=tag, stream=True) ]
-        response_stream = response
-        self.log(str(response_stream))
+        #response = [ line for line in docker_client.push(image, tag=tag, stream=True) ]
+        #response_stream = response
+        #self.log(str(response_stream))
+
         # to do: examine stream to determine success/failure of build
-        self.log('done pushing docker image to registry for ' + image_name);
+        for line in docker_client.push(image, tag=tag, stream=True):
+            # example line:
+            #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
+            line_parse = json.loads(line)
+            if 'id' in line_parse:
+                self.log(line_parse['id']+' - ',no_end_line=True)
+            if 'status' in line_parse:
+                self.log(line_parse['status'],no_end_line=True)
+            if 'progress' in line_parse:
+                self.log(' - ' + line_parse['progress'],no_end_line=True)
+            #if 'progressDetail' in line_parse:
+            #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
+            self.log('') # add an endline
+
+        # check for errors here somehow!
+
+        
+        self.log('done pushing docker image to registry for ' + image_name+'\n');
 
 
     # Temporary flags to test everything except docker or NMS connections
