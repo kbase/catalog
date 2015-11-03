@@ -234,14 +234,9 @@ class Registrar:
             raise ValueError('Unable to update dev version - there was an internal database error: '+error)
 
         #push to NMS
-        if Registrar._TEST_WITHOUT_NMS:
-            self.log('IN TEST MODE!! SKIPPING NMS UPDATE!!')
-            return
-
         self.log('registering specs with NMS')
         nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
         nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
-
 
         self.log('\ndone')
 
@@ -337,10 +332,9 @@ class Registrar:
         self.log('done pushing docker image to registry for ' + image_name+'\n');
 
 
-    # Temporary flags to test everything except docker or NMS connections
+    # Temporary flags to test everything except docker
     # we should remove once the test rig can fully support docker and an NMS
     _TEST_WITHOUT_DOCKER = False
-    _TEST_WITHOUT_NMS = False
 
 
 

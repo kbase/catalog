@@ -29,8 +29,11 @@ class CatalogTestUtil:
         config = ConfigParser()
         config.read(os.path.join(self.test_dir,'test.cfg'))
         self.test_cfg = {}
+        self.nms_test_cfg = {}
         for entry in config.items('catalog-test'):
             self.test_cfg[entry[0]] = entry[1]
+        for entry in config.items('NarrativeMethodStore'):
+            self.nms_test_cfg[entry[0]] = entry[1]
         self.log('test.cfg parse\n'+pformat(self.test_cfg))
 
         # passwords not needed in tests yet
@@ -118,8 +121,12 @@ class CatalogTestUtil:
         self.log("tearDown()")
         self.modules.drop()
         self.developers.drop()
+        # make sure NMS is clean after each test
+        self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])
+
 
     def log(self, mssg):
+        # uncomment to debug test rig- warning: on travis this may print any passwords in your config
         #print("CATALOG_TEST_UTIL: "+mssg)
         pass
 
