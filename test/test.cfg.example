@@ -24,8 +24,7 @@ mongodb-host = localhost:27017
 docker-registry-host = dockerhub-ci.kbase.us
 
 # name of the mongo database
-# WARNING: this gets wiped at the end, although should be safe because will error if
-#          collections are not emtpy at startup
+# WARNING: this will get wiped!  Don't run tests against something that you may want to keep!
 mongodb-database = catalog-test
 
 # Path to docker socket/host

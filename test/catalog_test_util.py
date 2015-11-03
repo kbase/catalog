@@ -47,8 +47,11 @@ class CatalogTestUtil:
         db = self.mongo[self.test_cfg['mongodb-database']]
         self.modules = db[MongoCatalogDBI._MODULES]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
-        if self.modules.count() > 0 :
-            raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
+        # just drop the test db
+        self.modules.drop()
+        self.developers.drop()
+        #if self.modules.count() > 0 :
+        #    raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
 
         self.initialize_mongo()
 
