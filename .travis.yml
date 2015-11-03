@@ -15,7 +15,7 @@ install:
     - make
 script:
     - cp -n test/test.cfg.example test/test.cfg
-    - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg.example
+    - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg
     - cat test/test.cfg
     - make test
 env:
