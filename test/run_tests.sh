@@ -22,6 +22,4 @@ echo '\nstarting tests'
 export PYTHONPATH=pylib:$PYTHONPATH
 python -m unittest discover -p "*_test.py"
 
-echo $NMS_PID
-
 kill -9 $NMS_PID
