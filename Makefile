@@ -99,6 +99,7 @@ TESTLIB = test/pylib
 
 setup-tests:
 	mkdir -p $(TESTLIB)/biokbase
+	mkdir -p $(TESTLIB)/nms
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
 	rsync -av auth/python-libs/biokbase/* $(TESTLIB)/biokbase/.
 	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
