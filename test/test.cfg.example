@@ -1,6 +1,13 @@
 #Note for running tests, if on the same dev machine as the narrative, you may have to remove the biokbase egg
 #created by the narrative (rm -rf /usr/local/lib/python2.7/site-packages/biokbase-0.0.1-py2.7.egg)
 
+# TO RUN TESTS:
+#  1) copy this file to test.cfg
+#  2) fill in the mongodb-host url in both [catalog-test] and [NarrativeMethodStore]
+#  3) set the nms-admin-user and nms-admin-password to a kb user that matches the 
+#      method-spec-admin-users list in [NarrativeMethodStore section]
+# 
+
 [catalog-test]
 
 # user accounts for testing (should be different accounts)
@@ -26,6 +33,25 @@ docker-base-url = unix://var/run/docker.sock
 # for tcp: "tcp://host:port"
 
 #Narrative Method Store configuration
-nms-url = 
-nms-admin-user =
+nms-url = http://localhost:7125
+nms-admin-user = wstester4
 nms-admin-psswd = 
+
+
+
+[NarrativeMethodStore]
+
+method-spec-mongo-host = localhost:27017
+method-spec-admin-users = wstester4
+
+method-spec-git-repo-local-dir = nms/local_narrative_method_specs
+method-spec-temp-dir = nms/scratch
+
+method-spec-git-repo = https://github.com/kbase/narrative_method_specs
+method-spec-git-repo-branch = dev
+method-spec-git-repo-refresh-rate = 2000
+method-spec-cache-size = 5000
+method-spec-mongo-dbname = method_store_repo_db
+
+
+
