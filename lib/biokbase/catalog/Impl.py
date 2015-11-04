@@ -27,7 +27,11 @@ class Catalog:
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         print('Starting the Catalog service.  Service configuration:')
-        pprint(config)
+        for c in config:
+            if c == 'nms-admin-psswd':
+                print('  '+c+'=****')
+                continue
+            print('  '+c+'='+config[c])
         print('Initializing the Catalog Controller...')
         self.cc = CatalogController(config);
         print('Initialization complete.')

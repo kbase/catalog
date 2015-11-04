@@ -95,21 +95,23 @@ deploy-server-control-scripts:
 	echo $(TAGS) >> $(TARGET)/services/$(SERVICE)/$(SERVICE).version
 
 
+TESTDIR = test
 TESTLIB = test/pylib
 
 setup-tests:
 	mkdir -p $(TESTLIB)/biokbase
+	mkdir -p $(TESTDIR)/nms
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
 	rsync -av auth/python-libs/biokbase/* $(TESTLIB)/biokbase/.
 	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
-	cd narrative_method_store; make
+	cd narrative_method_store; make; make build-classpath-list;
 	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
 
 
 
 test: setup-tests
-	-cp -n test/test.cfg.example test/test.cfg
-	cd test; ./run_tests.sh
+	-cp -n $(TESTDIR)/test.cfg.example $(TESTDIR)/test.cfg
+	cd $(TESTDIR); ./run_tests.sh
 
 
 clean:

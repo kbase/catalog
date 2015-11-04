@@ -8,6 +8,7 @@ from time import time
 
 from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
+from biokbase.narrative_method_store.client import NarrativeMethodStore
 
 
 # tests all the basic get methods
@@ -51,6 +52,29 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['timestamp'],timestamp)
         self.assertEqual(info['dev']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
 
+        # the method should appear in the NMS under the dev tag
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS')
+        # but should not appear under beta or release
+        method_list = self.nms.list_methods({'tag':'beta'})
+        methMissing = True
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                methMissing = False
+        self.assertTrue(methMissing,'Make sure we did not find the method in NMS under the beta tag')
+        # but should not appear under beta or release
+        method_list = self.nms.list_methods({'tag':'release'})
+        methMissing = True
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                methMissing = False
+        self.assertTrue(methMissing,'Make sure we did not find the method in NMS under the release tag')
+
+
         #(4) update beta
         self.catalog.push_dev_to_beta(self.cUtil.user_ctx(),{'module_name':module_name})
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
@@ -69,6 +93,29 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
         self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+
+        # the method should appear in the NMS under the dev or beta tag
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS')
+        # but should not appear under beta or release
+        method_list = self.nms.list_methods({'tag':'beta'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS under the beta tag')
+        # but should not appear under beta or release
+        method_list = self.nms.list_methods({'tag':'release'})
+        methMissing = True
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                methMissing = False
+        self.assertTrue(methMissing,'Make sure we did not find the method in NMS under the release tag')
+
 
         #(5) request release
         self.catalog.request_release(self.cUtil.user_ctx(),{'module_name':info['module_name']})
@@ -158,6 +205,28 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(versions[0]['timestamp'],timestamp)
         self.assertEqual(versions[0]['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
 
+        # the method should appear in the NMS under the dev/beta/release
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS')
+        # but should not appear under beta or release
+        method_list = self.nms.list_methods({'tag':'beta'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS under the beta tag')
+        # but should not appear under beta or release
+        method_list = self.nms.list_methods({'tag':'release'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']==module_name+'/test_method_1' and meth['namespace']==module_name:
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS under the release tag')
+
 
         #(9) register again, dev is updated, beta and release are not
         githash2 = '599d796c6b7c30a47b3a8a496346d8f49c29a064' # branch simple_good_repo
@@ -200,6 +269,28 @@ class CoreRegistrationTest(unittest.TestCase):
 
 
 
+    def test_module_with_bad_spec(self):
+
+        # (1) register the test repo
+        giturl = self.cUtil.get_test_repo_1()
+        githash = 'ca3d7ae05af24cd1c5d21ec9e0e4c52c52695300' # branch fail_method_spec_1
+        timestamp = self.catalog.register_repo(self.cUtil.user_ctx(),
+            {'git_url':giturl, 'git_commit_hash':githash})[0]
+
+        # (2) check state until error or complete, must be error, and make sure this was relatively fast
+        start = time()
+        timeout = 60 #seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
+            if state['registration'] in ['complete','error']:
+                break
+            self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
+        self.assertEqual(state['registration'],'error')
+        self.assertTrue('Invalid narrative method specification (test_method_2)' in state['error_message'])
+        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),timestamp)[0]
+        self.assertTrue(log is not None)
+        self.assertTrue('param0_that_is_not_defined_in_yaml' in log)
+
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
         self.assertEqual(info['git_url'],giturl)
@@ -230,7 +321,6 @@ class CoreRegistrationTest(unittest.TestCase):
         # hack for testing!! remove when docker and NMS components can be tested
         from biokbase.catalog.registrar import Registrar
         Registrar._TEST_WITHOUT_DOCKER = True
-        Registrar._TEST_WITHOUT_NMS = True
 
         cls.cUtil = CatalogTestUtil('.') # TODO: pass in test directory from outside
         cls.cUtil.setUp()
@@ -238,6 +328,8 @@ class CoreRegistrationTest(unittest.TestCase):
         # approve developers we will use
         cls.catalog.approve_developer(cls.cUtil.admin_ctx(),cls.cUtil.admin_ctx()['user_id'])
         cls.catalog.approve_developer(cls.cUtil.admin_ctx(),cls.cUtil.user_ctx()['user_id'])
+
+        cls.nms = NarrativeMethodStore(cls.cUtil.getCatalogConfig()['nms-url'])
 
         
 

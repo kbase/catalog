@@ -13,9 +13,7 @@ from datetime import datetime
 from urlparse import urlparse
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.catalog.registrar import Registrar
-
-
-
+from biokbase.narrative_method_store.client import NarrativeMethodStore
 
 
 
@@ -86,6 +84,8 @@ class CatalogController:
         if 'nms-admin-psswd' not in config:
             raise ValueError('"nms-admin-psswd" config variable must be defined to start a CatalogController!')
         self.nms_admin_psswd = config['nms-admin-psswd']
+
+        self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
 
 
     def register_repo(self, params, username, token):
@@ -191,6 +191,7 @@ class CatalogController:
         if module_details['state']['release_approval'] == 'under_review':
             raise ValueError('Cannot push dev to beta- last release request of beta is still pending.')
         # ok, do it.
+        self.nms.push_repo_to_tag({'module_name':module_details['module_name'], 'tag':'beta'})
         error = self.db.push_dev_to_beta(module_name=params['module_name'],git_url=params['git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
@@ -283,7 +284,9 @@ class CatalogController:
         # here because if this is done twice (for instance, before the release_state is set to approved in
         # the document in the next call) there won't be any problems.)  I like nested parentheses.
         if review['decision']=='approved':
+            self.nms.push_repo_to_tag({'module_name':module_details['module_name'], 'tag':'release'})
             error = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
+
 
         # Now we can update the release state state...
         error = self.db.set_module_release_state(
