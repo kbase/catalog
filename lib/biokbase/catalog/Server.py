@@ -447,7 +447,7 @@ class Application(object):
         self.method_authentication['Catalog.get_module_state'] = 'none'
         self.rpc_service.add(impl_Catalog.get_build_log,
                              name='Catalog.get_build_log',
-                             types=[int])
+                             types=[basestring])
         self.method_authentication['Catalog.get_build_log'] = 'none'
         self.rpc_service.add(impl_Catalog.migrate_module_to_new_git_url,
                              name='Catalog.migrate_module_to_new_git_url',

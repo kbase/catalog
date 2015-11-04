@@ -23,8 +23,9 @@ class CoreRegistrationTest(unittest.TestCase):
         # (1) register the test repo
         giturl = self.cUtil.get_test_repo_1()
         githash = '4ada53f318f69a38276e82d0e841e685aa0c2362' # branch simple_good_repo
-        timestamp = self.catalog.register_repo(self.cUtil.user_ctx(),
+        registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
             {'git_url':giturl, 'git_commit_hash':githash})[0]
+        timestamp = int(registration_id.split('_')[0])
 
         # (2) check state until error or complete, must be complete, and make sure this was relatively fast
         start = time()
@@ -35,7 +36,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
-        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),timestamp)
+        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)
         self.assertTrue(log is not None)
 
         # (3) get module info
@@ -230,8 +231,9 @@ class CoreRegistrationTest(unittest.TestCase):
 
         #(9) register again, dev is updated, beta and release are not
         githash2 = '599d796c6b7c30a47b3a8a496346d8f49c29a064' # branch simple_good_repo
-        timestamp2 = self.catalog.register_repo(self.cUtil.user_ctx(),
+        registration_id2 = self.catalog.register_repo(self.cUtil.user_ctx(),
             {'git_url':giturl, 'git_commit_hash':githash2})[0]
+        timestamp2 = int(registration_id2.split('_')[0])
         start = time()
         timeout = 60 #seconds
         while True:

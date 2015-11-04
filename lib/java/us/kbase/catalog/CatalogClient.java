@@ -183,15 +183,15 @@ public class CatalogClient {
      * version from the repo) and start a build.
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.RegisterRepoParams RegisterRepoParams}
-     * @return   parameter "timestamp" of Long
+     * @return   parameter "registration_id" of String
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public Long registerRepo(RegisterRepoParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public String registerRepo(RegisterRepoParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
-        TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
-        List<Long> res = caller.jsonrpcCall("Catalog.register_repo", args, retType, true, true, jsonRpcContext);
+        TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
+        List<String> res = caller.jsonrpcCall("Catalog.register_repo", args, retType, true, true, jsonRpcContext);
         return res.get(0);
     }
 
@@ -361,16 +361,16 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_build_log</p>
      * <pre>
-     * given the timestamp returned from the register method, you can check the build log with this method
+     * given the registration_id returned from the register method, you can check the build log with this method
      * </pre>
-     * @param   timestamp   instance of Long
+     * @param   registrationId   instance of String
      * @return   instance of String
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public String getBuildLog(Long timestamp, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public String getBuildLog(String registrationId, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
-        args.add(timestamp);
+        args.add(registrationId);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
         List<String> res = caller.jsonrpcCall("Catalog.get_build_log", args, retType, true, false, jsonRpcContext);
         return res.get(0);

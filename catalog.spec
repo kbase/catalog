@@ -35,7 +35,7 @@ module Catalog {
     dev version of the module (old dev versions are not stored, but you can always reregister an old
     version from the repo) and start a build.
     */
-    funcdef register_repo(RegisterRepoParams params) returns (int timestamp) authentication required;
+    funcdef register_repo(RegisterRepoParams params) returns (string registration_id) authentication required;
 
     /* immediately updates the beta tag to what is currently in dev, whatever is currently in beta
     is discarded.  Will fail if a release request is active and has not been approved/denied */
@@ -49,7 +49,7 @@ module Catalog {
         string git_url;
         string git_commit_hash;
         string git_commit_message;
-        string timestamp;
+        int timestamp;
         list <string> owners;
     } RequestedReleaseInfo;
 
@@ -174,9 +174,9 @@ module Catalog {
     funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
     /*
-        given the timestamp returned from the register method, you can check the build log with this method
+        given the registration_id returned from the register method, you can check the build log with this method
     */
-    funcdef get_build_log(int timestamp) returns (string);
+    funcdef get_build_log(string registration_id) returns (string);
 
 
 
