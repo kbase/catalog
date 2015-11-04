@@ -252,17 +252,23 @@ class Registrar:
                 if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
                     self.log('    - validating method: '+m)
                     # first grab the spec and display files, which are required
-                    if not os.path.isfile(os.path.join(basedir,'ui','narrative','methods',m,'spec.json')):
+                    method_path = os.path.join(basedir,'ui','narrative','methods',m)
+                    if not os.path.isfile(os.path.join(method_path,'spec.json')):
                         raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
-                    if not os.path.isfile(os.path.join(basedir,'ui','narrative','methods',m,'display.yaml')):
+                    if not os.path.isfile(os.path.join(method_path,'display.yaml')):
                         raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
-                    with open(os.path.join(basedir,'ui','narrative','methods',m,'spec.json')) as spec_json_file:
+                    with open(os.path.join(method_path,'spec.json')) as spec_json_file:
                         spec_json = spec_json_file.read()
-                    with open(os.path.join(basedir,'ui','narrative','methods',m,'display.yaml')) as display_yaml_file:
+                    with open(os.path.join(method_path,'display.yaml')) as display_yaml_file:
                         display_yaml = display_yaml_file.read()
 
-                    # gather any extra files
+                    # gather any extra html files
                     extraFiles = {}
+                    for extra_file_name in os.listdir(os.path.join(method_path)):
+                        if not os.path.isfile(os.path.join(method_path,extra_file_name)): break
+                        if not extra_file_name.endswith('.html'): break
+                        with open(os.path.join(method_path,extra_file_name)) as extra_file:
+                            extrafiles[extra_file_name] = extra_file.read()
 
                     # validate against the NMS target endpoint
                     result = self.nms.validate_method({'id':m, 'spec_json':spec_json, 'display_yaml':display_yaml, 'extra_files':extraFiles});
