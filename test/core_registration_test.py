@@ -269,6 +269,28 @@ class CoreRegistrationTest(unittest.TestCase):
 
 
 
+    def test_module_with_bad_spec(self):
+
+        # (1) register the test repo
+        giturl = self.cUtil.get_test_repo_1()
+        githash = 'ca3d7ae05af24cd1c5d21ec9e0e4c52c52695300' # branch fail_method_spec_1
+        timestamp = self.catalog.register_repo(self.cUtil.user_ctx(),
+            {'git_url':giturl, 'git_commit_hash':githash})[0]
+
+        # (2) check state until error or complete, must be error, and make sure this was relatively fast
+        start = time()
+        timeout = 60 #seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
+            if state['registration'] in ['complete','error']:
+                break
+            self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
+        self.assertEqual(state['registration'],'error')
+        self.assertTrue('Invalid narrative method specification (test_method_2)' in state['error_message'])
+        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),timestamp)[0]
+        self.assertTrue(log is not None)
+        self.assertTrue('param0_that_is_not_defined_in_yaml' in log)
+
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
         self.assertEqual(info['git_url'],giturl)

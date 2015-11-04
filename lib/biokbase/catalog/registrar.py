@@ -41,6 +41,8 @@ class Registrar:
         self.nms_admin_user = nms_admin_user
         self.nms_admin_psswd = nms_admin_psswd
 
+        self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
 
@@ -155,7 +157,8 @@ class Registrar:
         # OPTIONAL TODO: check if all the users are on the owners list?  not necessarily required, because we
         # do a check during registration of the person who started the registration...
 
-        # TODO: check for directory structure, method spec format, documentation, version 
+        # TODO: check for directory structure, method spec format, documentation, version
+        self.validate_method_specs(basedir)
 
         # return the parse so we can figure things out later
         return self.kb_yaml
@@ -235,12 +238,58 @@ class Registrar:
 
         #push to NMS
         self.log('registering specs with NMS')
-        nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
-        nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
+        self.nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
 
         self.log('\ndone')
 
         # done!!!
+
+
+    def validate_method_specs(self, basedir):
+        self.log('validating narrative method specifications')
+        if os.path.isdir(os.path.join(basedir,'ui','narrative','methods')) :
+            for m in os.listdir(os.path.join(basedir,'ui','narrative','methods')):
+                if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
+                    self.log('    - validating method: '+m)
+                    # first grab the spec and display files, which are required
+                    if not os.path.isfile(os.path.join(basedir,'ui','narrative','methods',m,'spec.json')):
+                        raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
+                    if not os.path.isfile(os.path.join(basedir,'ui','narrative','methods',m,'display.yaml')):
+                        raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
+                    with open(os.path.join(basedir,'ui','narrative','methods',m,'spec.json')) as spec_json_file:
+                        spec_json = spec_json_file.read()
+                    with open(os.path.join(basedir,'ui','narrative','methods',m,'display.yaml')) as display_yaml_file:
+                        display_yaml = display_yaml_file.read()
+
+                    # gather any extra files
+                    extraFiles = {}
+
+                    # validate against the NMS target endpoint
+                    result = self.nms.validate_method({'id':m, 'spec_json':spec_json, 'display_yaml':display_yaml, 'extra_files':extraFiles});
+    
+                    # inspect results
+                    if result['is_valid']>0:
+                        self.log('        - valid!')
+                        if 'warnings' in result:
+                            if result['warnings']:
+                                for w in result['warnings']:
+                                    self.log('        - warning: '+w)
+                    else:
+                        self.log('        - not valid!')
+                        if 'errors' in result:
+                            if result['errors']:
+                                for e in result['errors']:
+                                    self.log('        - error: '+e)
+                        else:
+                            self.log('        - error is undefined!'+e)
+
+                        raise ValueError('Invalid narrative method specification ('+m+')')
+
+        else:
+            self.log('    - no ui/narrative/methods directory found, so no narrative methods will be deployed')
+
+
+
 
 
 
