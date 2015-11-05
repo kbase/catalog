@@ -265,6 +265,12 @@ class Catalog(object):
                           [registration_id], json_rpc_context)
         return resp[0]
   
+    def delete_module(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method delete_module: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.delete_module',
+                   [params], json_rpc_context)
+  
     def migrate_module_to_new_git_url(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method migrate_module_to_new_git_url: argument json_rpc_context is not type dict as required.')

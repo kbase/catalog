@@ -187,6 +187,10 @@ module Catalog {
         string new_git_url;
     } UpdateGitUrlParams;
 
+
+    /* admin method to delete a module, will only work if the module has not been released */
+    funcdef delete_module(SelectOneModuleParams params) returns () authentication required;
+
     /* admin method to move the git url for a module, should only be used if the exact same code has migrated to
     a new URL.  It should not be used as a way to change ownership, get updates from a new source, or get a new
     module name for an existing git url because old versions are retained and git commits saved will no longer

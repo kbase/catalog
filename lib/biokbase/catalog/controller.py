@@ -502,6 +502,18 @@ class CatalogController:
             log = '[log not found - registration_id is invalid or the log has been deleted]'
         return log
 
+
+    def delete_module(self,params,username):
+        if not self.is_admin(username):
+            raise ValueError('Only Admin users can migrate module git urls.')
+        if 'module_name' not in params and 'git_url' not in params:
+            raise ValueError('You must specify the "module_name" or "git_url" of the module to delete.')
+        params = self.filter_module_or_repo_selection(params)
+        error = self.db.delete_module(module_name=params['module_name'], git_url=params['git_url'])
+        if error is not None:
+            raise ValueError('Delete operation failed - some unknown database error: '+error)
+
+
     def migrate_module_to_new_git_url(self, params, username):
         if not self.is_admin(username):
             raise ValueError('Only Admin users can migrate module git urls.')

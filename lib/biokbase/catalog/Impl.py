@@ -223,6 +223,13 @@ class Catalog:
         # return the results
         return [returnVal]
 
+    def delete_module(self, ctx, params):
+        # ctx is the context object
+        #BEGIN delete_module
+        self.cc.delete_module(params,ctx['user_id'])
+        #END delete_module
+        pass
+
     def migrate_module_to_new_git_url(self, ctx, params):
         # ctx is the context object
         #BEGIN migrate_module_to_new_git_url

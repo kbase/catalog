@@ -377,6 +377,22 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: delete_module</p>
+     * <pre>
+     * admin method to delete a module, will only work if the module has not been released
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.SelectOneModuleParams SelectOneModuleParams}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void deleteModule(SelectOneModuleParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.delete_module", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
      * <p>Original spec-file function name: migrate_module_to_new_git_url</p>
      * <pre>
      * admin method to move the git url for a module, should only be used if the exact same code has migrated to

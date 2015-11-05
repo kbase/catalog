@@ -301,6 +301,22 @@ class MongoCatalogDBI:
         result = self.modules.update(query, {'$set':{'git_url':new_git_url.strip()}})
         return self._check_update_result(result)
 
+    def delete_module(self,module_name, git_url):
+        if not module_name and not git_url:
+            raise ValueError('Module name or git url is required to delete a module.')
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
+        module_details = self.modules.find_one(query)
+        if not module_details:
+            raise ValueError('No module matches this selection criteria')
+
+        if module_details['current_versions']['release']:
+            raise ValueError('Cannot delete module that has been released.  Make it inactive instead.')
+
+        if module_details['release_versions']:
+            raise ValueError('Cannot delete module that has released versions.  Make it inactive instead.')
+
+        result = self.modules.remove({'_id':module_details['_id']})
+        return self._check_update_result(result)
 
     #### utility methods
     def _get_mongo_query(self, module_name='', git_url=''):

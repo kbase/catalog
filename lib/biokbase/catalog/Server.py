@@ -102,6 +102,9 @@ sync_methods['Catalog.get_module_state'] = True
 async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
 async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
 sync_methods['Catalog.get_build_log'] = True
+async_run_methods['Catalog.delete_module_async'] = ['Catalog', 'delete_module']
+async_check_methods['Catalog.delete_module_check'] = ['Catalog', 'delete_module']
+sync_methods['Catalog.delete_module'] = True
 async_run_methods['Catalog.migrate_module_to_new_git_url_async'] = ['Catalog', 'migrate_module_to_new_git_url']
 async_check_methods['Catalog.migrate_module_to_new_git_url_check'] = ['Catalog', 'migrate_module_to_new_git_url']
 sync_methods['Catalog.migrate_module_to_new_git_url'] = True
@@ -449,6 +452,10 @@ class Application(object):
                              name='Catalog.get_build_log',
                              types=[basestring])
         self.method_authentication['Catalog.get_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.delete_module,
+                             name='Catalog.delete_module',
+                             types=[dict])
+        self.method_authentication['Catalog.delete_module'] = 'required'
         self.rpc_service.add(impl_Catalog.migrate_module_to_new_git_url,
                              name='Catalog.migrate_module_to_new_git_url',
                              types=[dict])
