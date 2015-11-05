@@ -56,9 +56,9 @@ class CatalogTestUtil:
         self.initialize_mongo()
 
         # 3 setup the scratch space
-        self.scratch_dir = os.path.join(self.test_dir,str(datetime.now()))
+        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',str(datetime.now()))
         self.log("scratch directory="+self.scratch_dir)
-        os.mkdir(self.scratch_dir)
+        os.makedirs(self.scratch_dir)
 
 
         # 4 startup any dependencies (nms, docker registry?)

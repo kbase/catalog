@@ -5,6 +5,7 @@ import threading
 import time
 import copy
 import os
+import random
 
 import biokbase.catalog.version
 
@@ -95,7 +96,24 @@ class CatalogController:
         git_url = params['git_url']
         if not bool(urlparse(git_url).netloc):
             raise ValueError('The git url provided is not a valid URL.')
+        # generate a unique registration ID based on a timestamp in ms + 4 random digits
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+        registration_id = str(timestamp)+'_'+str(random.randint(1000,9999))
+        tries = 20
+        for t in range(20):
+            try:
+                # keep trying to make the directory until it works
+                os.mkdir(os.path.join(self.temp_dir,registration_id))
+                break
+            except:
+                # if we fail, wait a bit and try again
+                time.sleep(0.002)
+                timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+                registration_id = str(timestamp)+'_'+random.randint(1000,9999)
+
+        # if we couldn't reserve a spot for this registration, then quit
+        if not os.path.isdir(os.path.join(self.temp_dir,registration_id)):
+            raise ValueError('Unable to allocate a directory for building.  Try again, and if the problem persists contact us.')
 
         # 0) Make sure the submitter is on the list
         if not self.is_approved_developer([username])[0]:
@@ -137,12 +155,12 @@ class CatalogController:
 
         # first set the dev current_release timestamp
 
-        t = threading.Thread(target=_start_registration, args=(params,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
+        t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
             self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
         t.start()
 
         # 4) provide the timestamp 
-        return timestamp
+        return registration_id
 
 
 
@@ -476,13 +494,25 @@ class CatalogController:
         return sorted(simple_kbase_dev_list)
 
 
-    def get_build_log(self, timestamp):
+    def get_build_log(self, registration_id):
         try:
-            with open(self.temp_dir+'/registration.log.'+str(timestamp)) as log_file:
+            with open(self.temp_dir+'/registration.log.'+str(registration_id)) as log_file:
                 log = log_file.read()
         except:
-            log = '[log not found - timestamp is invalid or the log has been deleted]'
+            log = '[log not found - registration_id is invalid or the log has been deleted]'
         return log
+
+
+    def delete_module(self,params,username):
+        if not self.is_admin(username):
+            raise ValueError('Only Admin users can migrate module git urls.')
+        if 'module_name' not in params and 'git_url' not in params:
+            raise ValueError('You must specify the "module_name" or "git_url" of the module to delete.')
+        params = self.filter_module_or_repo_selection(params)
+        error = self.db.delete_module(module_name=params['module_name'], git_url=params['git_url'])
+        if error is not None:
+            raise ValueError('Delete operation failed - some unknown database error: '+error)
+
 
     def migrate_module_to_new_git_url(self, params, username):
         if not self.is_admin(username):
@@ -533,8 +563,8 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
-    registrar = Registrar(params, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
+def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+    registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
                             nms_url, nms_admin_user, nms_admin_psswd, module_details)
     registrar.start_registration()
 

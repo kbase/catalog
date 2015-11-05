@@ -38,7 +38,7 @@ public class RequestedReleaseInfo {
     @JsonProperty("git_commit_message")
     private java.lang.String gitCommitMessage;
     @JsonProperty("timestamp")
-    private java.lang.String timestamp;
+    private Long timestamp;
     @JsonProperty("owners")
     private List<String> owners;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
@@ -104,16 +104,16 @@ public class RequestedReleaseInfo {
     }
 
     @JsonProperty("timestamp")
-    public java.lang.String getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
     @JsonProperty("timestamp")
-    public void setTimestamp(java.lang.String timestamp) {
+    public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public RequestedReleaseInfo withTimestamp(java.lang.String timestamp) {
+    public RequestedReleaseInfo withTimestamp(Long timestamp) {
         this.timestamp = timestamp;
         return this;
     }

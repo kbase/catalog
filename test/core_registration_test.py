@@ -23,8 +23,9 @@ class CoreRegistrationTest(unittest.TestCase):
         # (1) register the test repo
         giturl = self.cUtil.get_test_repo_1()
         githash = '4ada53f318f69a38276e82d0e841e685aa0c2362' # branch simple_good_repo
-        timestamp = self.catalog.register_repo(self.cUtil.user_ctx(),
+        registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
             {'git_url':giturl, 'git_commit_hash':githash})[0]
+        timestamp = int(registration_id.split('_')[0])
 
         # (2) check state until error or complete, must be complete, and make sure this was relatively fast
         start = time()
@@ -35,7 +36,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
-        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),timestamp)
+        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)
         self.assertTrue(log is not None)
 
         # (3) get module info
@@ -230,8 +231,9 @@ class CoreRegistrationTest(unittest.TestCase):
 
         #(9) register again, dev is updated, beta and release are not
         githash2 = '599d796c6b7c30a47b3a8a496346d8f49c29a064' # branch simple_good_repo
-        timestamp2 = self.catalog.register_repo(self.cUtil.user_ctx(),
+        registration_id2 = self.catalog.register_repo(self.cUtil.user_ctx(),
             {'git_url':giturl, 'git_commit_hash':githash2})[0]
+        timestamp2 = int(registration_id2.split('_')[0])
         start = time()
         timeout = 60 #seconds
         while True:
@@ -267,6 +269,25 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['release']['timestamp'],timestamp)
         self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
 
+    def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
+        self.assertEqual(info['git_url'],giturl)
+        self.assertEqual(info['module_name'],module_name)
+        self.assertEqual(info['owners'],owners)
+        self.assertEqual(info['language'],'python')
+        self.assertEqual(info['description'],'A test module')
+
+#{'beta': None,
+# 'description': u'A test module',
+# 'dev': {u'git_commit_hash': u'4ada53f318f69a38276e82d0e841e685aa0c2362',
+#         u'git_commit_message': u'added some basic things\n',
+#         u'narrative_methods': [u'test_method_1'],
+#         u'timestamp': 1445888811416L,
+#         u'version': u'0.0.1'},
+# 'git_url': u'https://github.com/kbaseIncubator/catalog_test_module',
+# 'language': u'python',
+# 'module_name': u'CatalogTestModule',
+# 'owners': [u'wstester1'],
+# 'release': None}
 
 
     def test_module_with_bad_spec(self):
@@ -292,26 +313,32 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertTrue('param0_that_is_not_defined_in_yaml' in log)
 
 
-    def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
-        self.assertEqual(info['git_url'],giturl)
-        self.assertEqual(info['module_name'],module_name)
-        self.assertEqual(info['owners'],owners)
-        self.assertEqual(info['language'],'python')
-        self.assertEqual(info['description'],'A test module')
 
-#{'beta': None,
-# 'description': u'A test module',
-# 'dev': {u'git_commit_hash': u'4ada53f318f69a38276e82d0e841e685aa0c2362',
-#         u'git_commit_message': u'added some basic things\n',
-#         u'narrative_methods': [u'test_method_1'],
-#         u'timestamp': 1445888811416L,
-#         u'version': u'0.0.1'},
-# 'git_url': u'https://github.com/kbaseIncubator/catalog_test_module',
-# 'language': u'python',
-# 'module_name': u'CatalogTestModule',
-# 'owners': [u'wstester1'],
-# 'release': None}
+    def test_remove_module(self):
 
+        # we cannot delete modules unles we are an admin user
+        with self.assertRaises(ValueError):
+            self.catalog.delete_module(self.cUtil.user_ctx(),
+                {'module_name':'registration_error'})
+
+        # this should work
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'registration_error'})[0],1)
+        self.catalog.delete_module(self.cUtil.admin_ctx(),
+                {'module_name':'registration_error'})
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'registration_error'})[0],0)
+
+        # we cannot remove modules that have been released
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
+        with self.assertRaises(ValueError):
+            self.catalog.delete_module(self.cUtil.admin_ctx(),
+                {'module_name':'onerepotest'})
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
+
+        self.assertEqual(self.catalog.is_registered({},{'git_url':'https://github.com/kbaseIncubator/release_history'})[0],1)
+        with self.assertRaises(ValueError):
+            self.catalog.delete_module(self.cUtil.admin_ctx(),
+                {'git_url':'https://github.com/kbaseIncubator/release_history'})
+        self.assertEqual(self.catalog.is_registered({},{'git_url':'https://github.com/kbaseIncubator/release_history'})[0],1)
 
 
 

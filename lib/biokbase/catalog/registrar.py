@@ -22,13 +22,14 @@ class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
-    def __init__(self, params, timestamp, username, token, db, temp_dir, docker_base_url, 
+    def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
                     docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
         self.git_url = params['git_url']
 
+        self.registration_id = registration_id
         self.timestamp = timestamp
         self.username = username
         self.token = token
@@ -48,22 +49,20 @@ class Registrar:
 
     def start_registration(self):
         try:
-            self.logfile = open(self.temp_dir+'/registration.log.'+str(self.timestamp), 'w')
+            self.logfile = open(self.temp_dir+'/registration.log.'+self.registration_id, 'w')
             self.log('Registration started on '+ str(datetime.datetime.now()) + ' by '+self.username)
+            self.log('Registration ID: '+str(self.registration_id));
             self.log('Registration Parameters: '+str(self.params));
 
             ##############################
-            # 1 - clone the repo
+            # 1 - clone the repo into the temp directory that should already be reserved for us
             self.set_build_step('cloning git repo')
-            parsed_url=urlparse(self.git_url)
-            self.log(str(parsed_url.path));
-            #note: can't really use join here because parsed path starts with leading slash, so join would throw out
-            # the first arg.  We could cut that out, but I think we actually will need something better here because
-            # not all modules will have urls in the github tradition (eg there might not be any path in the url)
-            basedir = self.temp_dir+str(parsed_url.path)
-            # quick fix- if directory exists, then remove it.  should do something smarter
-            if os.path.isdir(basedir):
-                shutil.rmtree(basedir)
+            if not os.path.isdir(os.path.join(self.temp_dir,self.registration_id)):
+                raise('Directory for the git clone was not allocated!  This is an internal catalog server error, please report this problem.')
+
+            basedir = os.path.join(self.temp_dir,self.registration_id,'module_repo')
+
+            self.log('Attempting to clone into: '+basedir);
             self.log('git clone ' + self.git_url)
             repo = git.Repo.clone_from(self.git_url, basedir)
             # try to get hash from repo
@@ -116,6 +115,7 @@ class Registrar:
             self.log('BUILD_ERROR: '+str(e))
         finally:
             self.logfile.close();
+            self.cleanup();
 
 
 
@@ -331,6 +331,10 @@ class Registrar:
 
     def build_is_complete(self):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
+
+    def cleanup(self):
+        if os.path.isdir(os.path.join(self.temp_dir,self.registration_id)):
+            shutil.rmtree(os.path.join(self.temp_dir,self.registration_id))
 
     def build_docker_image(self, docker_client, image_name, basedir):
         self.log('\nBuilding the docker image for ' + image_name);

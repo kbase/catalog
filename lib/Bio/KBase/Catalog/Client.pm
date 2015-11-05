@@ -260,7 +260,7 @@ boolean is an int
 
 =head2 register_repo
 
-  $timestamp = $obj->register_repo($params)
+  $registration_id = $obj->register_repo($params)
 
 =over 4
 
@@ -270,7 +270,7 @@ boolean is an int
 
 <pre>
 $params is a Catalog.RegisterRepoParams
-$timestamp is an int
+$registration_id is a string
 RegisterRepoParams is a reference to a hash where the following keys are defined:
 	git_url has a value which is a string
 	git_commit_hash has a value which is a string
@@ -282,7 +282,7 @@ RegisterRepoParams is a reference to a hash where the following keys are defined
 =begin text
 
 $params is a Catalog.RegisterRepoParams
-$timestamp is an int
+$registration_id is a string
 RegisterRepoParams is a reference to a hash where the following keys are defined:
 	git_url has a value which is a string
 	git_commit_hash has a value which is a string
@@ -539,7 +539,7 @@ RequestedReleaseInfo is a reference to a hash where the following keys are defin
 	git_url has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
-	timestamp has a value which is a string
+	timestamp has a value which is an int
 	owners has a value which is a reference to a list where each element is a string
 
 </pre>
@@ -554,7 +554,7 @@ RequestedReleaseInfo is a reference to a hash where the following keys are defin
 	git_url has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
-	timestamp has a value which is a string
+	timestamp has a value which is an int
 	owners has a value which is a reference to a list where each element is a string
 
 
@@ -1313,7 +1313,7 @@ boolean is an int
 
 =head2 get_build_log
 
-  $return = $obj->get_build_log($timestamp)
+  $return = $obj->get_build_log($registration_id)
 
 =over 4
 
@@ -1322,7 +1322,7 @@ boolean is an int
 =begin html
 
 <pre>
-$timestamp is an int
+$registration_id is a string
 $return is a string
 
 </pre>
@@ -1331,7 +1331,7 @@ $return is a string
 
 =begin text
 
-$timestamp is an int
+$registration_id is a string
 $return is a string
 
 
@@ -1339,7 +1339,7 @@ $return is a string
 
 =item Description
 
-given the timestamp returned from the register method, you can check the build log with this method
+given the registration_id returned from the register method, you can check the build log with this method
 
 =back
 
@@ -1357,10 +1357,10 @@ given the timestamp returned from the register method, you can check the build l
 							       "Invalid argument count for function get_build_log (received $n, expecting 1)");
     }
     {
-	my($timestamp) = @args;
+	my($registration_id) = @args;
 
 	my @_bad_arguments;
-        (!ref($timestamp)) or push(@_bad_arguments, "Invalid type for argument 1 \"timestamp\" (value was \"$timestamp\")");
+        (!ref($registration_id)) or push(@_bad_arguments, "Invalid type for argument 1 \"registration_id\" (value was \"$registration_id\")");
         if (@_bad_arguments) {
 	    my $msg = "Invalid arguments passed to get_build_log:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
@@ -1386,6 +1386,91 @@ given the timestamp returned from the register method, you can check the build l
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_build_log",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'get_build_log',
+				       );
+    }
+}
+ 
+
+
+=head2 delete_module
+
+  $obj->delete_module($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.SelectOneModuleParams
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.SelectOneModuleParams
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+admin method to delete a module, will only work if the module has not been released
+
+=back
+
+=cut
+
+ sub delete_module
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function delete_module (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to delete_module:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'delete_module');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.delete_module",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'delete_module',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method delete_module",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'delete_module',
 				       );
     }
 }
@@ -2136,7 +2221,7 @@ module_name has a value which is a string
 git_url has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
-timestamp has a value which is a string
+timestamp has a value which is an int
 owners has a value which is a reference to a list where each element is a string
 
 </pre>
@@ -2150,7 +2235,7 @@ module_name has a value which is a string
 git_url has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
-timestamp has a value which is a string
+timestamp has a value which is an int
 owners has a value which is a reference to a list where each element is a string
 
 

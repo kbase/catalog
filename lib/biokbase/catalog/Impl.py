@@ -71,17 +71,17 @@ class Catalog:
 
     def register_repo(self, ctx, params):
         # ctx is the context object
-        # return variables are: timestamp
+        # return variables are: registration_id
         #BEGIN register_repo
-        timestamp = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
+        registration_id = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
         #END register_repo
 
         # At some point might do deeper type checking...
-        if not isinstance(timestamp, int):
+        if not isinstance(registration_id, basestring):
             raise ValueError('Method register_repo return value ' +
-                             'timestamp is not type int as required.')
+                             'registration_id is not type basestring as required.')
         # return the results
-        return [timestamp]
+        return [registration_id]
 
     def push_dev_to_beta(self, ctx, params):
         # ctx is the context object
@@ -209,11 +209,11 @@ class Catalog:
         # return the results
         return [state]
 
-    def get_build_log(self, ctx, timestamp):
+    def get_build_log(self, ctx, registration_id):
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN get_build_log
-        returnVal = self.cc.get_build_log(timestamp)
+        returnVal = self.cc.get_build_log(registration_id)
         #END get_build_log
 
         # At some point might do deeper type checking...
@@ -222,6 +222,13 @@ class Catalog:
                              'returnVal is not type basestring as required.')
         # return the results
         return [returnVal]
+
+    def delete_module(self, ctx, params):
+        # ctx is the context object
+        #BEGIN delete_module
+        self.cc.delete_module(params,ctx['user_id'])
+        #END delete_module
+        pass
 
     def migrate_module_to_new_git_url(self, ctx, params):
         # ctx is the context object
