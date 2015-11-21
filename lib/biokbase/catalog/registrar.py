@@ -79,6 +79,13 @@ class Registrar:
             self.set_build_step('reading files and performing basic checks')
             self.sanity_checks_and_parse(repo, basedir)
 
+            ##############################
+            # 2.5 - waiting for one minute at most until git releases .git/config.lock
+            timeout = time.time() + 60
+            git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
+            while os.path.exists(git_config_lock_file) and time.time() <= timeout:
+                self.log('Waiting for .git/config.lock file release...')
+                time.sleep(5)
 
             ##############################
             # 3 docker build - in progress
