@@ -74,6 +74,9 @@ class Registrar:
                     repo.git.checkout(self.params['git_commit_hash'].strip())
                     git_commit_hash = self.params['git_commit_hash'].strip()
 
+            # we *think* this will solve the pesky intermittent git.lock issue by releasing everything
+            repo.git.clear_cache()
+
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('reading files and performing basic checks')
