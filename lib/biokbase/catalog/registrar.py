@@ -75,7 +75,8 @@ class Registrar:
                     git_commit_hash = self.params['git_commit_hash'].strip()
 
             # we *think* this will solve the pesky intermittent git.lock issue by releasing everything
-            repo.git.clear_cache()
+            #repo.git.clear_cache()
+            # it doesn't work
 
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
@@ -87,7 +88,8 @@ class Registrar:
             timeout = time.time() + 60
             git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
             while os.path.exists(git_config_lock_file) and time.time() <= timeout:
-                self.log('Waiting for .git/config.lock file release...')
+                self.log('Trying to remove .git/config.lock file release...')
+                os.remove(git_config_lock_file)
                 time.sleep(5)
 
             ##############################
