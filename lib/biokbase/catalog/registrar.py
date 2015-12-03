@@ -364,7 +364,7 @@ class Registrar:
                 self.log(line_parse['stream'],no_end_line=True)
             if 'errorDetail' in line_parse:
                 self.log(str(line_parse),no_end_line=True)
-                raise ValueError('Docker build failed: '+line_parse['errorDetail'])
+                raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
             last=line_parse
         
         if 'stream' in last and last['stream'][:19]=='Successfully built ':
