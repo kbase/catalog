@@ -17,7 +17,7 @@ from docker import Client as DockerClient
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.narrative_method_store.client import NarrativeMethodStore
 
-
+    
 class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
@@ -98,7 +98,8 @@ class Registrar:
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
             self.image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
             if not Registrar._TEST_WITHOUT_DOCKER:
-                dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=360)
+                # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
+                dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=1800)
                 # look for docker image
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 #self.log(str(dockerclient.inspect_image(repo_name)))
