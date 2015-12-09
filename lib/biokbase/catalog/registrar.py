@@ -359,7 +359,7 @@ class Registrar:
         # examine stream to determine success/failure of build
         imageId=None
         last={}
-        for line in docker_client.build(path=basedir,rm=False,tag=image_name):
+        for line in docker_client.build(path=basedir,rm=True,tag=image_name):
             line_parse = json.loads(line)
             if 'stream' in line_parse:
                 self.log(line_parse['stream'],no_end_line=True)
