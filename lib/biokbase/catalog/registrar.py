@@ -99,7 +99,31 @@ class Registrar:
             self.image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
-                dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=1800)
+                dockerclient = None
+                docker_timeout = 1800
+                if len(str(self.docker_base_url)) > 0:
+                    dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=docker_timeout)
+                else:
+                    docker_host = os.environ['DOCKER_HOST']
+                    if docker_host is None or len(docker_host) == 0:
+                        raise ValueError('Docker host should be defined either in configuration '
+                                         '(docker-base-url property) or in DOCKER_HOST environment variable')
+                    docker_tls_verify = os.environ['DOCKER_TLS_VERIFY']
+                    if docker_host.startswith('tcp://'):
+                        docker_protocol = "http"
+                        if (docker_tls_verify is not None) and docker_tls_verify == '1':
+                            docker_protocol = "https"
+                        docker_host = docker_host.replace('tcp://', docker_protocol + '://')
+                    docker_cert_path = os.environ['DOCKER_CERT_PATH']
+                    docker_tls = False
+                    if (docker_cert_path is not None) and len(docker_cert_path) > 0:
+                        docker_tls = DockerTLSConfig(verify=False, 
+                                                     client_cert=(docker_cert_path + '/cert.pem', 
+                                                                  docker_cert_path + '/key.pem'))
+                    self.log("Docker settings from environment variables are used: docker-host = " + docker_host + 
+                             ", docker_cert_path = " + str(docker_cert_path))
+                    dockerclient = DockerClient(base_url = docker_host,timeout=docker_timeout,
+                            version='auto', tls=docker_tls)
                 # look for docker image
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 #self.log(str(dockerclient.inspect_image(repo_name)))
@@ -378,7 +402,9 @@ class Registrar:
 
     def push_docker_image(self, docker_client, image_name):
         self.log('\nPushing docker image to registry for ' + image_name);
-        (image,tag)=image_name.split(':')
+        colon_pos = image_name.rfind(':')  # This logic supports images with "host:port/" prefix for private registry 
+        image=image_name[:colon_pos]
+        tag=image_name[colon_pos+1:]
         #response = [ line for line in docker_client.push(image, tag=tag, stream=True) ]
         #response_stream = response
         #self.log(str(response_stream))
