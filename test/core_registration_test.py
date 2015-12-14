@@ -345,6 +345,8 @@ class CoreRegistrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
+        print('++++++++++++ RUNNING core_registration_test.py +++++++++++')
+
         # hack for testing!! remove when docker and NMS components can be tested
         from biokbase.catalog.registrar import Registrar
         Registrar._TEST_WITHOUT_DOCKER = True

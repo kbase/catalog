@@ -38,28 +38,33 @@ Module Document:
             release_approval: approved | denied | under_review | not_requested, (all releases require approval)
             review_message: str, (optional)
             registration: building | complete | error,
-            error_message: str (optional)
+            error_message: str (optional),
+            registration_id: str used to identify the build log,
             released: true | false (set to true if released, false or missing otherwise)
         },
 
         current_versions: {
             release: {
                 timestamp:'',
-                commit:''
+                commit:'',
+                registration_id:''
             },
             beta: {
                 timestamp:'',
-                commit:''
+                commit:'',
+                registration_id:''
             },
             dev: {
                 timestamp:'',
-                commit:''
+                commit:'',
+                registration_id:''
             }
         }
 
         release_versions: {
             timestamp : {
-                commit:''
+                commit:'',
+                registration_id:''
             }
         }
     }
@@ -104,6 +109,8 @@ class MongoCatalogDBI:
 
         self.build_logs.ensure_index('registration_id',unique=True)
         self.build_logs.ensure_index('module_name_lc')
+        self.build_logs.ensure_index('timestamp')
+        self.build_logs.ensure_index('registration')
         self.build_logs.ensure_index('git_url')
 
 
@@ -127,27 +134,49 @@ class MongoCatalogDBI:
 
 
     #### SET methods
-    def save_new_build_log(self, registration_id, module_name_lc, git_url, log):
+    def create_new_build_log(self, registration_id, timestamp, registration_state, git_url):
         build_log = {
             'registration_id':registration_id,
-            'module_name_lc' : module_name_lc,
+            'timestamp':timestamp,
             'git_url':git_url,
-            'log':log
+            'registration':registration_state,
+            'error_message':'',
+            'log':[]
         }
-        self.build_logs.insert(module)
+        self.build_logs.insert(build_log)
 
-    def update_build_log(self,registration_id, log):
+    def delete_build_log(self, registration_id):
+        self.build_logs.remove({'registration_id':registration_id})
+
+    # new_lines is a list to objects, each representing a line
+    # the object structure is : {'content':... 'error':True/False}
+    def append_to_build_log(self,registration_id, new_lines):
         result = self.build_logs.update({'registration_id':registration_id}, 
-            { '$set':{'log':log} })
+            { '$push':{ 'log':{'$each':new_lines} } })
         return self._check_update_result(result)
+
+    def set_build_log_state(self, registration_id, registration_state, error_message=''):
+        result = self.build_logs.update({'registration_id':registration_id}, 
+                    {'$set':{'registration':registration_state, 'error_message':error_message}})
+        return self._check_update_result(result)
+
+
+    def set_build_log_module_name(self, registration_id, module_name):
+        result = self.build_logs.update({'registration_id':registration_id}, 
+                    {'$set':{'module_name_lc':module_name.lower()}})
+        return self._check_update_result(result)
+
+
 
     def list_build_logs(self,module_name_lc='',git_url=''):
         pass
 
     def get_build_log(self,registration_id):
-        pass
+        return self.build_logs.find({'registration_id':registration_id},{'module_name':1,'git_url':1,'current_versions':1,'owners':1,'_id':0})
 
-    def register_new_module(self, git_url, username, timestamp):
+
+
+    def register_new_module(self, git_url, username, timestamp, registration_state, registration_id):
         # get current time since epoch in ms in utc
         module = {
             'info':{},
@@ -157,13 +186,16 @@ class MongoCatalogDBI:
                 'active': True,
                 'released': False,
                 'release_approval': 'not_requested',
-                'registration': 'building'
+                'registration_id' : registration_id,
+                'registration': registration_state,
+                'error_message' : '',
             },
             'current_versions': {
                 'release':None,
                 'beta':None,
                 'dev': {
-                    'timestamp' : timestamp
+                    'timestamp' : timestamp,
+                    'registration_id' : registration_id
                 }
             },
             'release_versions': { }

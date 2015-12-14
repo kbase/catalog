@@ -64,15 +64,14 @@ class AdminMethodsTest(unittest.TestCase):
         # should block registration for non-developers
         with self.assertRaises(ValueError):
             self.catalog.register_repo(self.cUtil.user_ctx(),
-                {'git_url':'https://madeupurl.com'})
+                {'git_url':self.cUtil.get_test_repo_1()})
 
         # after the developer is added, should be allowed to start now (give a bogus url so if finishes registration
         # right away with an error
         self.catalog.approve_developer(self.cUtil.admin_ctx(),self.cUtil.test_user_1)
-        self.catalog.register_repo(self.cUtil.user_ctx(),{'git_url':'https://madeupurl.com'})
+        self.catalog.register_repo(self.cUtil.user_ctx(),{'git_url':self.cUtil.get_test_repo_1(),'commit_hash':'0760f1927f74a'})
         while True:
-            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':'https://madeupurl.com'})[0]
-            #pprint(state)
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':self.cUtil.get_test_repo_1()})[0]
             if state['registration'] in ['complete','error']:
                 break
 
@@ -208,9 +207,11 @@ class AdminMethodsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print('++++++++++++ RUNNING admin_methods_test.py +++++++++++')
         cls.cUtil = CatalogTestUtil('.') # TODO: pass in test directory from outside
         cls.cUtil.setUp()
         cls.catalog = Catalog(cls.cUtil.getCatalogConfig())
+        print('ready')
 
     @classmethod
     def tearDownClass(cls):

@@ -446,6 +446,7 @@ class BasicCatalogTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print('++++++++++++ RUNNING basic_catalog_test.py +++++++++++')
         cls.cUtil = CatalogTestUtil('.') # TODO: pass in test directory from outside
         cls.cUtil.setUp()
         cls.catalog = Catalog(cls.cUtil.getCatalogConfig())

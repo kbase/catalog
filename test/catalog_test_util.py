@@ -47,9 +47,12 @@ class CatalogTestUtil:
         db = self.mongo[self.test_cfg['mongodb-database']]
         self.modules = db[MongoCatalogDBI._MODULES]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
+        self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
         # just drop the test db
         self.modules.drop()
         self.developers.drop()
+        self.build_logs.drop()
+
         #if self.modules.count() > 0 :
         #    raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
 
@@ -124,6 +127,7 @@ class CatalogTestUtil:
         self.log("tearDown()")
         self.modules.drop()
         self.developers.drop()
+        self.build_logs.drop()
         # make sure NMS is clean after each test
         self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])
 
