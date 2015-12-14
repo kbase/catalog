@@ -1,5 +1,5 @@
 /*
-    Service for managing, registering, and building KBase Modules.
+    Service for managing, registering, and building KBase Modules using the KBase SDK.
 */
 module Catalog {
 
@@ -10,7 +10,7 @@ module Catalog {
     funcdef version() returns (string version);
 
     /*
-        Describes how to find module/repository.
+        Describes how to find a single module/repository.
         module_name - name of module defined in kbase.yaml file;
         git_url - the url used to register the module
     */
@@ -19,7 +19,7 @@ module Catalog {
         string git_url;
     } SelectOneModuleParams;
 
-
+    /* returns true (1) if the module exists, false (2) otherwise */
     funcdef is_registered(SelectOneModuleParams params) returns (boolean);
 
     typedef structure {
@@ -158,7 +158,7 @@ module Catalog {
         active: True | False,
         release_approval: approved | denied | under_review | not_requested, (all releases require approval)
         review_message: str, (optional)
-        registration: building | complete | error,
+        registration: complete | error | (build state status),
         error_message: str (optional)
     */
     typedef structure {
@@ -167,18 +167,69 @@ module Catalog {
         string release_approval;
         string review_message;
         string registration;
+        string last_registration_id;
         string error_message;
     } ModuleState;
 
     /* */
     funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
+
+    typedef structure {
+        string registration_id;
+        int line_start;
+        int line_end;
+    } GetBuildLogParams;
+
+    typedef structure {
+        string content;
+        boolean error;
+    } BuildLogLine;
+
+    typedef structure {
+        list <BuildLogLine> log;
+    } BuildLog;
+
+
+    funcdef get_build_log(string registration_id) returns (string);
+
     /*
         given the registration_id returned from the register method, you can check the build log with this method
     */
-    funcdef get_build_log(string registration_id) returns (string);
+    funcdef get_build_log2(GetBuildLogParams params) returns (BuildLog build_log);
 
 
+    typedef structure {
+        string registration_id;
+        string registration;
+        string error_message;
+        string module_name;
+        string git_url;
+    } BuildInfo;
+
+    /*
+
+        Always sorted by time, oldest builds are last.
+
+        only_running - if true, only show running builds
+        only_error - if true, only show builds that ended in an error
+
+    */
+    typedef structure {
+        boolean only_runnning;
+        boolean only_error;
+        boolean only_complete;
+
+        int skip;
+        int limit;
+
+        list <SelectOneModuleParams> modules;
+
+    } ListBuildParams;
+
+    funcdef list_builds(ListBuildParams params) returns (list<BuildInfo> builds);
+
+    
 
     /* all fields are required to make sure you update the right one */
     typedef structure {
@@ -207,7 +258,6 @@ module Catalog {
     funcdef list_approved_developers() returns (list<string> usernames);
     funcdef approve_developer(string username) returns () authentication required;
     funcdef revoke_developer(string username) returns () authentication required;
-
 
 
 };
