@@ -177,18 +177,18 @@ class CatalogController:
         if params['registration_state'] == 'error':
             if 'error_message' not in params:
                 raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
-            if params['error_message']:
+            if not params['error_message']:
                 raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
             error_message = params['error_message']
-        else:
-            # then we update the state
-            error = self.db.set_module_registration_state(
-                        git_url=params['git_url'],
-                        module_name=params['module_name'],
-                        new_state=params['registration_state'],
-                        error_message=error_message)
-            if error is not None:
-                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
+        
+        # then we update the state
+        error = self.db.set_module_registration_state(
+                    git_url=params['git_url'],
+                    module_name=params['module_name'],
+                    new_state=params['registration_state'],
+                    error_message=error_message)
+        if error is not None:
+            raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
 
 
     def push_dev_to_beta(self, params, username):

@@ -167,6 +167,45 @@ class AdminMethodsTest(unittest.TestCase):
 
 
 
+    def test_set_registration_state(self):
+
+        # first make sure the state is what we expect
+        repoSelectionParam = { 'module_name' : 'registration_in_progress' }
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),repoSelectionParam)[0]
+        self.assertEqual(state['registration'],'building: doing stuff')
+        self.assertEqual(state['error_message'],'')
+
+        # throw an error- users should not be able to update state
+        params = { 'module_name' : 'registration_in_progress', 'registration_state':'complete' }
+        with self.assertRaises(ValueError):
+            self.catalog.set_registration_state(self.cUtil.user_ctx(),params)
+
+        # state should still be the same
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),repoSelectionParam)[0]
+        self.assertEqual(state['registration'],'building: doing stuff')
+        self.assertEqual(state['error_message'],'')
+
+        # admin can update the registration state to complete
+        self.catalog.set_registration_state(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),repoSelectionParam)[0]
+        self.assertEqual(state['registration'],'complete')
+        self.assertEqual(state['error_message'],'')
+
+        # admin cannot set the state to error without an error message
+        params = { 'module_name' : 'registration_in_progress', 'registration_state':'error' }
+        with self.assertRaises(ValueError):
+            self.catalog.set_registration_state(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),repoSelectionParam)[0]
+        self.assertEqual(state['registration'],'complete')
+        self.assertEqual(state['error_message'],'')
+
+        params = { 'module_name' : 'registration_in_progress', 'registration_state':'error', 'error_message':'something' }
+        self.catalog.set_registration_state(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),repoSelectionParam)[0]
+        self.assertEqual(state['registration'],'error')
+        self.assertEqual(state['error_message'],'something')
+
+
     @classmethod
     def setUpClass(cls):
         cls.cUtil = CatalogTestUtil('.') # TODO: pass in test directory from outside
