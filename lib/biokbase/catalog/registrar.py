@@ -103,7 +103,6 @@ class Registrar:
             # 3 docker build - in progress
             # perhaps make this a self attr?
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
-            self.db.set_build_log_module_name(self.registration_id, module_name_lc)
             self.image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
@@ -196,6 +195,10 @@ class Registrar:
             # This must be the first registration, so the module must not exist yet
             self.check_that_module_name_is_valid(module_name);
 
+        # associate the module_name with the log file for easier searching (if we fail sooner, then the module name
+        # cannot be used to lookup this log)
+        self.db.set_build_log_module_name(self.registration_id, module_name)
+
         # you can't remove yourself from the owners list, or register something that you are not an owner of
         if self.username not in owners:
             raise ValueError('Your kbase username ('+self.username+') must be in the owners list in the kbase.yaml file.')
@@ -271,6 +274,7 @@ class Registrar:
 
         new_version = {
             'timestamp':self.timestamp,
+            'registration_id':self.registration_id,
             'version' : version,
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
@@ -404,10 +408,6 @@ class Registrar:
 
     def build_docker_image(self, docker_client, image_name, basedir):
         self.log('\nBuilding the docker image for ' + image_name);
-        #response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
-        #response_stream = response
-        #imageId = response_stream[-1]
-        #self.log(str(response_stream[-1]))
 
         # examine stream to determine success/failure of build
         imageId=None
