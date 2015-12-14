@@ -64,6 +64,10 @@ Module Document:
         }
     }
 
+
+
+
+
 '''
 class MongoCatalogDBI:
 
@@ -71,6 +75,7 @@ class MongoCatalogDBI:
 
     _MODULES='modules'
     _DEVELOPERS='developers'
+    _BUILD_LOGS='build_logs'
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
 
@@ -85,6 +90,7 @@ class MongoCatalogDBI:
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
+        self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
 
         # Make sure we have an index on module and git_repo_url
         self.modules.ensure_index('module_name', unique=True, sparse=True)
@@ -95,6 +101,10 @@ class MongoCatalogDBI:
         self.modules.ensure_index('owners.kb_username')
 
         self.developers.ensure_index('kb_username', unique=True)
+
+        self.build_logs.ensure_index('registration_id',unique=True)
+        self.build_logs.ensure_index('module_name_lc')
+        self.build_logs.ensure_index('git_url')
 
 
 
@@ -117,6 +127,25 @@ class MongoCatalogDBI:
 
 
     #### SET methods
+    def save_new_build_log(self, registration_id, module_name_lc, git_url, log):
+        build_log = {
+            'registration_id':registration_id,
+            'module_name_lc' : module_name_lc,
+            'git_url':git_url,
+            'log':log
+        }
+        self.build_logs.insert(module)
+
+    def update_build_log(self,registration_id, log):
+        result = self.build_logs.update({'registration_id':registration_id}, 
+            { '$set':{'log':log} })
+        return self._check_update_result(result)
+
+    def list_build_logs(self,module_name_lc='',git_url=''):
+        pass
+
+    def get_build_log(self,registration_id):
+        pass
 
     def register_new_module(self, git_url, username, timestamp):
         # get current time since epoch in ms in utc
