@@ -2,6 +2,8 @@
 import json
 import pprint
 from pymongo import MongoClient
+from pymongo import ASCENDING
+from pymongo import DESCENDING
 
 '''
 
@@ -38,31 +40,40 @@ Module Document:
             release_approval: approved | denied | under_review | not_requested, (all releases require approval)
             review_message: str, (optional)
             registration: building | complete | error,
-            error_message: str (optional)
+            error_message: str (optional),
+            registration_id: str used to identify the build log,
             released: true | false (set to true if released, false or missing otherwise)
         },
 
         current_versions: {
             release: {
                 timestamp:'',
-                commit:''
+                commit:'',
+                registration_id:''
             },
             beta: {
                 timestamp:'',
-                commit:''
+                commit:'',
+                registration_id:''
             },
             dev: {
                 timestamp:'',
-                commit:''
+                commit:'',
+                registration_id:''
             }
         }
 
         release_versions: {
             timestamp : {
-                commit:''
+                commit:'',
+                registration_id:''
             }
         }
     }
+
+
+
+
 
 '''
 class MongoCatalogDBI:
@@ -71,6 +82,7 @@ class MongoCatalogDBI:
 
     _MODULES='modules'
     _DEVELOPERS='developers'
+    _BUILD_LOGS='build_logs'
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
 
@@ -85,6 +97,7 @@ class MongoCatalogDBI:
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
+        self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
 
         # Make sure we have an index on module and git_repo_url
         self.modules.ensure_index('module_name', unique=True, sparse=True)
@@ -95,6 +108,12 @@ class MongoCatalogDBI:
         self.modules.ensure_index('owners.kb_username')
 
         self.developers.ensure_index('kb_username', unique=True)
+
+        self.build_logs.ensure_index('registration_id',unique=True)
+        self.build_logs.ensure_index('module_name_lc')
+        self.build_logs.ensure_index('timestamp')
+        self.build_logs.ensure_index('registration')
+        self.build_logs.ensure_index('git_url')
 
 
 
@@ -117,8 +136,103 @@ class MongoCatalogDBI:
 
 
     #### SET methods
+    def create_new_build_log(self, registration_id, timestamp, registration_state, git_url):
+        build_log = {
+            'registration_id':registration_id,
+            'timestamp':timestamp,
+            'git_url':git_url,
+            'registration':registration_state,
+            'error_message':'',
+            'log':[]
+        }
+        self.build_logs.insert(build_log)
 
-    def register_new_module(self, git_url, username, timestamp):
+    def delete_build_log(self, registration_id):
+        self.build_logs.remove({'registration_id':registration_id})
+
+    # new_lines is a list to objects, each representing a line
+    # the object structure is : {'content':... 'error':True/False}
+    def append_to_build_log(self,registration_id, new_lines):
+        result = self.build_logs.update({'registration_id':registration_id}, 
+            { '$push':{ 'log':{'$each':new_lines} } })
+        return self._check_update_result(result)
+
+    def set_build_log_state(self, registration_id, registration_state, error_message=''):
+        result = self.build_logs.update({'registration_id':registration_id}, 
+                    {'$set':{'registration':registration_state, 'error_message':error_message}})
+        return self._check_update_result(result)
+
+
+    def set_build_log_module_name(self, registration_id, module_name):
+        result = self.build_logs.update({'registration_id':registration_id}, 
+                    {'$set':{'module_name_lc':module_name.lower()}})
+        return self._check_update_result(result)
+
+
+    def list_builds(self, 
+                skip = 0,
+                limit = 1000,
+                module_name_lcs = [],
+                git_urls = [],
+                only_running = False,
+                only_error = False,
+                only_complete = False):
+
+        query = {}
+
+        registration_match = None
+        if only_running:
+            registration_match = { '$nin': ['complete', 'error'] }
+        elif only_error:
+            registration_match = 'error'
+        elif only_complete:
+            registration_match = 'complete'
+
+        if registration_match:
+            query['registration'] = registration_match
+
+        if len(module_name_lcs)>0:
+            query['module_name_lc'] = { '$in':module_name_lcs }
+        if len(git_urls)>0:
+            query['git_urls'] = { '$in':git_urls }
+
+        selection = {
+                        'registration_id':1,
+                        'timestamp':1,
+                        'git_url':1,
+                        'module_name_lc':1,
+                        'registration':1,
+                        'error_message':1,
+                        '_id':0
+                    }
+
+        return list(self.build_logs.find(
+                        query,selection,
+                        skip=skip,
+                        limit=limit,
+                        sort=[['timestamp',DESCENDING]]))
+
+
+    # slice arg is used in the mongo query for getting lines.  It is either a
+    # pos int (get first n lines), neg int (last n lines), or array [skip, limit]
+    def get_parsed_build_log(self,registration_id, slice_arg=None):
+        selection = {
+                        'registration_id':1,
+                        'timestamp':1,
+                        'git_url':1,
+                        'module_name_lc':1,
+                        'registration':1,
+                        'error_message':1,
+                        'log':1,
+                        '_id':0
+                    }
+        if slice_arg:
+            selection['log'] = {'$slice':slice_arg}
+
+        return self.build_logs.find_one({'registration_id':registration_id},selection)
+
+
+    def register_new_module(self, git_url, username, timestamp, registration_state, registration_id):
         # get current time since epoch in ms in utc
         module = {
             'info':{},
@@ -128,13 +242,15 @@ class MongoCatalogDBI:
                 'active': True,
                 'released': False,
                 'release_approval': 'not_requested',
-                'registration': 'building'
+                'registration': registration_state,
+                'error_message' : '',
             },
             'current_versions': {
                 'release':None,
                 'beta':None,
                 'dev': {
-                    'timestamp' : timestamp
+                    'timestamp' : timestamp,
+                    'registration_id' : registration_id
                 }
             },
             'release_versions': { }

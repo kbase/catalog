@@ -1,0 +1,26 @@
+{   
+    "error_message" : "",
+    "git_url" : "https://github.com/kbaseIncubator/registration_error",
+    "log" : [
+        {
+            "content" : "did stuff line 1",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 2",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 3",
+            "error" : false
+        },
+        {
+            "content" : "some error didn't happen",
+            "error" : false
+        }
+    ],
+    "module_name_lc" : "registration_error",
+    "registration" : "complete",
+    "registration_id" : "1445023985597_7881",
+    "timestamp" : 1445023985597
+}

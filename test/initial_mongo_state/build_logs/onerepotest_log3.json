@@ -1,0 +1,26 @@
+{   
+    "error_message" : "",
+    "git_url" : "https://github.com/kbaseIncubator/onerepotest",
+    "log" : [
+        {
+            "content" : "did stuff line 1",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 2",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 3",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 4",
+            "error" : false
+        }
+    ],
+    "module_name_lc" : "onerepotest",
+    "registration" : "complete",
+    "registration_id" : "1445022818884_1245",
+    "timestamp" : 1445022818884
+}

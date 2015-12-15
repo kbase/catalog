@@ -96,7 +96,10 @@ class CatalogController:
         git_url = params['git_url']
         if not bool(urlparse(git_url).netloc):
             raise ValueError('The git url provided is not a valid URL.')
-        # generate a unique registration ID based on a timestamp in ms + 4 random digits
+
+        # generate a unique registration ID based on a timestamp in ms + 4 random digits, then make sure we
+        # can write here by trying up to 20 times.  We should quickly have a guaranteed unique id in a nice format
+        # without having to use UUIDs (would need to switch or use a db if we have distributed registrations...)
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
         registration_id = str(timestamp)+'_'+str(random.randint(1000,9999))
         tries = 20
@@ -106,7 +109,7 @@ class CatalogController:
                 os.mkdir(os.path.join(self.temp_dir,registration_id))
                 break
             except:
-                # if we fail, wait a bit and try again
+                # if we fail, wait a bit, get a new registration id and try again
                 time.sleep(0.002)
                 timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
                 registration_id = str(timestamp)+'_'+random.randint(1000,9999)
@@ -121,7 +124,7 @@ class CatalogController:
 
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
-            self.db.register_new_module(git_url, username, timestamp)
+            self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
             module_details = self.db.get_module_details(git_url=git_url)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
@@ -141,11 +144,14 @@ class CatalogController:
                         # to ensure we only ever kick off one registration thread at a time
                         raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin: '+error)
                     # we know we are the only operation working, so we can clear the dev version and upate the timestamp
-                    self.db.update_dev_version({'timestamp':timestamp}, git_url=git_url)
+                    self.db.update_dev_version({'timestamp':timestamp, 'registration_id':registration_id}, git_url=git_url)
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
                 raise ValueError('You ('+username+') are an approved developer, but do not have permission to register this repo ('+git_url+')')
+
+        # 3) Allocate a build log
+        self.db.create_new_build_log(registration_id, timestamp, 'waiting to start', git_url)
 
         # 3) Ok, kick off the registration thread
         #   - This will check out the repo, attempt to build the image, run some tests, store the image
@@ -159,7 +165,7 @@ class CatalogController:
             self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
         t.start()
 
-        # 4) provide the timestamp 
+        # 4) provide the registration_id 
         return registration_id
 
 
@@ -177,18 +183,18 @@ class CatalogController:
         if params['registration_state'] == 'error':
             if 'error_message' not in params:
                 raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
-            if params['error_message']:
+            if not params['error_message']:
                 raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
             error_message = params['error_message']
-        else:
-            # then we update the state
-            error = self.db.set_module_registration_state(
-                        git_url=params['git_url'],
-                        module_name=params['module_name'],
-                        new_state=params['registration_state'],
-                        error_message=error_message)
-            if error is not None:
-                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
+        
+        # then we update the state
+        error = self.db.set_module_registration_state(
+                    git_url=params['git_url'],
+                    module_name=params['module_name'],
+                    new_state=params['registration_state'],
+                    error_message=error_message)
+        if error is not None:
+            raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
 
 
     def push_dev_to_beta(self, params, username):
@@ -493,7 +499,7 @@ class CatalogController:
             simple_kbase_dev_list.append(d['kb_username'])
         return sorted(simple_kbase_dev_list)
 
-
+    # get the build log from file that it is being written to
     def get_build_log(self, registration_id):
         try:
             with open(self.temp_dir+'/registration.log.'+str(registration_id)) as log_file:
@@ -501,6 +507,78 @@ class CatalogController:
         except:
             log = '[log not found - registration_id is invalid or the log has been deleted]'
         return log
+
+    # get the parsed build log from mongo
+    def get_parsed_build_log(self, params):
+        if 'registration_id' not in params:
+            raise ValueError('You must specify a registration_id to retrieve a build log')
+
+        slice_arg = None
+        if 'skip' in params:
+            if 'limit' not in params:
+                raise ValueError('Cannot specify the skip argument without a limit- blame Mongo')    
+            slice_arg = [int(params['skip']),int(params['limit'])]
+
+        if 'first_n' in params:
+            if slice_arg is not None:
+                raise ValueError('Cannot combine skip/limit with first_n parameters')
+            slice_arg = int(params['first_n'])
+
+        if 'last_n' in params:
+            if slice_arg is not None:
+                raise ValueError('Cannot combine skip/limit/first_n with last_n parameters')
+            slice_arg = -int(params['last_n'])
+
+        return self.db.get_parsed_build_log(params['registration_id'], slice_arg = slice_arg)
+
+    def list_builds(self, params):
+
+        only_running = False
+        only_error = False
+        only_complete = False
+
+        if 'only_running' in params:
+            if params['only_running']:
+                only_running = True
+                #registration_match = { '$or': [{'$ne':'complete'}, {'$ne':'error'}] }
+        if 'only_error' in params:
+            if params['only_error']:
+                if only_running:
+                    raise ValueError('Cannot combine only_error=1 with only_running=1 parameters')
+                only_error = True
+                #registration_match = 'error'
+        if 'only_complete' in params:
+            if params['only_complete']:
+                if only_running or only_error:
+                    raise ValueError('Cannot combine only_complete=1 with only_running=1 or only_error=1 parameters')
+                only_complete = True
+        
+        skip = 0
+        if 'skip' in params:
+            skip = int(params['skip'])
+        limit = 1000
+        if 'limit' in params:
+            limit = int(params['limit'])
+
+        git_url_match_list = []
+        module_name_lc_match_list = []
+
+        if 'modules' in params:
+            for mod in params['modules']:
+                if 'git_url' in mod:
+                    git_url_match_list.append(mod['git_url'])
+                if 'module_name' in mod:
+                    module_name_lc_match_list.append(str(mod['module_name']).lower())
+
+        return self.db.list_builds(
+                skip = skip,
+                limit = limit,
+                module_name_lcs = module_name_lc_match_list,
+                git_urls = git_url_match_list,
+                only_running = only_running,
+                only_error = only_error,
+                only_complete = only_complete
+            )
 
 
     def delete_module(self,params,username):

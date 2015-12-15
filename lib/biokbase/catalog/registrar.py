@@ -47,6 +47,11 @@ class Registrar:
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
 
+        self.log_buffer = [];
+        self.last_log_time = time.time() # in seconds
+        self.log_interval = 1.0 # save log to mongo every second
+
+
     def start_registration(self):
         try:
             self.logfile = open(self.temp_dir+'/registration.log.'+self.registration_id, 'w')
@@ -84,13 +89,15 @@ class Registrar:
             self.sanity_checks_and_parse(repo, basedir)
 
             ##############################
-            # 2.5 - waiting for one minute at most until git releases .git/config.lock
+            # 2.5 - waiting for one minute at most until git releases .git/config.lock, if it still exists then kill it
             timeout = time.time() + 60
             git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
             while os.path.exists(git_config_lock_file) and time.time() <= timeout:
-                self.log('Trying to remove .git/config.lock file release...')
-                os.remove(git_config_lock_file)
+                self.log('.git/config.lock exists, waiting 5s for it to release')
                 time.sleep(5)
+            if os.path.exists(git_config_lock_file):
+                self.log('.git/config.lock file still there, we are just going to delete it....')
+                os.remove(git_config_lock_file)
 
             ##############################
             # 3 docker build - in progress
@@ -148,9 +155,10 @@ class Registrar:
         except Exception as e:
             # set the build state to error and log it
             self.set_build_error(str(e))
-            self.log(traceback.format_exc())
-            self.log('BUILD_ERROR: '+str(e))
+            self.log(traceback.format_exc(), is_error=True)
+            self.log('BUILD_ERROR: '+str(e), is_error=True)
         finally:
+            self.flush_log_to_db();
             self.logfile.close();
             self.cleanup();
 
@@ -186,6 +194,10 @@ class Registrar:
         else:
             # This must be the first registration, so the module must not exist yet
             self.check_that_module_name_is_valid(module_name);
+
+        # associate the module_name with the log file for easier searching (if we fail sooner, then the module name
+        # cannot be used to lookup this log)
+        self.db.set_build_log_module_name(self.registration_id, module_name)
 
         # you can't remove yourself from the owners list, or register something that you are not an owner of
         if self.username not in owners:
@@ -262,6 +274,7 @@ class Registrar:
 
         new_version = {
             'timestamp':self.timestamp,
+            'registration_id':self.registration_id,
             'version' : version,
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
@@ -318,13 +331,13 @@ class Registrar:
                                 for w in result['warnings']:
                                     self.log('        - warning: '+w)
                     else:
-                        self.log('        - not valid!')
+                        self.log('        - not valid!', is_error=True)
                         if 'errors' in result:
                             if result['errors']:
                                 for e in result['errors']:
-                                    self.log('        - error: '+e)
+                                    self.log('        - error: '+e, is_error=True)
                         else:
-                            self.log('        - error is undefined!'+e)
+                            self.log('        - error is undefined!'+e,  is_error=True)
 
                         raise ValueError('Invalid narrative method specification ('+m+')')
 
@@ -353,21 +366,41 @@ class Registrar:
         return value
 
 
-    def log(self, message, no_end_line=False):
+    def log(self, message, no_end_line=False, is_error=False):
         if no_end_line:
-            self.logfile.write(message)
+            content = message
         else:
-            self.logfile.write(message+'\n')
+            content = message + '\n'
+        self.logfile.write(content)
         self.logfile.flush()
+
+        lines = content.splitlines();
+        for l in lines:
+            # add each line to the buffer
+            self.log_buffer.append({'content':l, 'error':is_error})
+
+        # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
+        if (time.time() - self.last_log_time > self.log_interval) or (len(self.log_buffer)>1000):
+            self.flush_log_to_db();
+
+    def flush_log_to_db(self):
+        # todo: if we lose log lines, that's ok.  Make sure we handle case if log is larger than mongo doc size
+        self.db.append_to_build_log(self.registration_id, self.log_buffer)
+        self.log_buffer = [] #clear the buffer
+        self.last_log_time = time.time() # reset the log timer
+
 
     def set_build_step(self, step):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='building: '+step)
+        self.db.set_build_log_state(self.registration_id, 'building: '+step)
 
     def set_build_error(self, error_message):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='error', error_message=error_message)
+        self.db.set_build_log_state(self.registration_id, 'error', error_message=error_message)
 
     def build_is_complete(self):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
+        self.db.set_build_log_state(self.registration_id, 'complete')
 
     def cleanup(self):
         if os.path.isdir(os.path.join(self.temp_dir,self.registration_id)):
@@ -375,10 +408,6 @@ class Registrar:
 
     def build_docker_image(self, docker_client, image_name, basedir):
         self.log('\nBuilding the docker image for ' + image_name);
-        #response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
-        #response_stream = response
-        #imageId = response_stream[-1]
-        #self.log(str(response_stream[-1]))
 
         # examine stream to determine success/failure of build
         imageId=None

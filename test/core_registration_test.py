@@ -36,8 +36,78 @@ class CoreRegistrationTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
-        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)
-        self.assertTrue(log is not None)
+
+        # (3) check the log
+        parsed_log = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {'registration_id':registration_id})[0]
+        self.assertEqual(parsed_log['registration'],'complete')
+        self.assertEqual(parsed_log['registration_id'],registration_id)
+        self.assertEqual(parsed_log['git_url'],giturl)
+        self.assertEqual(parsed_log['error_message'],'')
+        self.assertIsNotNone(parsed_log['module_name_lc'])
+        self.assertTrue(len(parsed_log['log'])>0)
+
+        # get the log file directly
+        raw_log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)[0]
+        self.assertTrue(raw_log is not None)
+
+        log_lines = raw_log.splitlines();
+        self.assertTrue(log_lines, parsed_log['log'])
+
+        # check getting specific lines
+        parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {
+                                'registration_id':registration_id, 
+                                'first_n':5 
+                            })[0]
+        self.assertEqual(len(parsed_log_subset['log']),5)
+        self.assertEqual(parsed_log['log'][0],parsed_log_subset['log'][0])
+        self.assertEqual(parsed_log['log'][1],parsed_log_subset['log'][1])
+        self.assertEqual(parsed_log['log'][2],parsed_log_subset['log'][2])
+        self.assertEqual(parsed_log['log'][3],parsed_log_subset['log'][3])
+        self.assertEqual(parsed_log['log'][4],parsed_log_subset['log'][4])
+
+        parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {
+                                'registration_id':registration_id, 
+                                'last_n':5 
+                            })[0]
+        self.assertEqual(len(parsed_log_subset['log']),5)
+        self.assertEqual(parsed_log['log'][-1],parsed_log_subset['log'][4])
+        self.assertEqual(parsed_log['log'][-2],parsed_log_subset['log'][3])
+        self.assertEqual(parsed_log['log'][-3],parsed_log_subset['log'][2])
+        self.assertEqual(parsed_log['log'][-4],parsed_log_subset['log'][1])
+        self.assertEqual(parsed_log['log'][-5],parsed_log_subset['log'][0])
+
+        parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {
+                                'registration_id':registration_id, 
+                                'skip':4,
+                                'limit':2 
+                            })[0]
+        self.assertEqual(len(parsed_log_subset['log']),2)
+        self.assertEqual(parsed_log['log'][4],parsed_log_subset['log'][0])
+        self.assertEqual(parsed_log['log'][5],parsed_log_subset['log'][1])
+
+        # should show up as the top hit when we list logs
+        recent_build_list = self.catalog.list_builds(self.cUtil.anonymous_ctx(),{'limit':6})[0]
+
+        self.assertEqual(len(recent_build_list),6)
+        self.assertEqual(recent_build_list[0]['registration_id'],registration_id)
+        self.assertEqual(recent_build_list[0]['registration'],'complete')
+        self.assertEqual(recent_build_list[0]['error_message'],'')
+        self.assertIsNotNone(recent_build_list[0]['module_name_lc'])
+        self.assertEqual(recent_build_list[0]['git_url'],giturl)
+
+
+        # check some bad parameters
+        with self.assertRaises(ValueError):
+            parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {'registration_id':registration_id, 'skip':4 })[0]
+        with self.assertRaises(ValueError):
+            parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {'registration_id':registration_id, 'first_n':4, 'last_n':2 })[0]
+
 
         # (3) get module info
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
@@ -344,6 +414,8 @@ class CoreRegistrationTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+
+        print('++++++++++++ RUNNING core_registration_test.py +++++++++++')
 
         # hack for testing!! remove when docker and NMS components can be tested
         from biokbase.catalog.registrar import Registrar

@@ -26,7 +26,7 @@ Bio::KBase::Catalog::Client
 =head1 DESCRIPTION
 
 
-Service for managing, registering, and building KBase Modules.
+Service for managing, registering, and building KBase Modules using the KBase SDK.
 
 
 =cut
@@ -205,7 +205,7 @@ boolean is an int
 
 =item Description
 
-
+returns true (1) if the module exists, false (2) otherwise
 
 =back
 
@@ -819,6 +819,7 @@ ModuleInfo is a reference to a hash where the following keys are defined:
 	dev has a value which is a Catalog.ModuleVersionInfo
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -847,6 +848,7 @@ ModuleInfo is a reference to a hash where the following keys are defined:
 	dev has a value which is a Catalog.ModuleVersionInfo
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -932,6 +934,7 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	version has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -954,6 +957,7 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	version has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -1036,6 +1040,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -1055,6 +1060,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -1339,7 +1345,7 @@ $return is a string
 
 =item Description
 
-given the registration_id returned from the register method, you can check the build log with this method
+
 
 =back
 
@@ -1386,6 +1392,238 @@ given the registration_id returned from the register method, you can check the b
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_build_log",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'get_build_log',
+				       );
+    }
+}
+ 
+
+
+=head2 get_parsed_build_log
+
+  $build_log = $obj->get_parsed_build_log($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetBuildLogParams
+$build_log is a Catalog.BuildLog
+GetBuildLogParams is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	skip has a value which is an int
+	limit has a value which is an int
+	first_n has a value which is an int
+	last_n has a value which is an int
+BuildLog is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	timestamp has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+	error has a value which is a string
+	registration has a value which is a string
+	log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+BuildLogLine is a reference to a hash where the following keys are defined:
+	content has a value which is a string
+	error has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetBuildLogParams
+$build_log is a Catalog.BuildLog
+GetBuildLogParams is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	skip has a value which is an int
+	limit has a value which is an int
+	first_n has a value which is an int
+	last_n has a value which is an int
+BuildLog is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	timestamp has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+	error has a value which is a string
+	registration has a value which is a string
+	log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+BuildLogLine is a reference to a hash where the following keys are defined:
+	content has a value which is a string
+	error has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+given the registration_id returned from the register method, you can check the build log with this method
+
+=back
+
+=cut
+
+ sub get_parsed_build_log
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_parsed_build_log (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_parsed_build_log:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_parsed_build_log');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_parsed_build_log",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_parsed_build_log',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_parsed_build_log",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_parsed_build_log',
+				       );
+    }
+}
+ 
+
+
+=head2 list_builds
+
+  $builds = $obj->list_builds($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ListBuildParams
+$builds is a reference to a list where each element is a Catalog.BuildInfo
+ListBuildParams is a reference to a hash where the following keys are defined:
+	only_runnning has a value which is a Catalog.boolean
+	only_error has a value which is a Catalog.boolean
+	only_complete has a value which is a Catalog.boolean
+	skip has a value which is an int
+	limit has a value which is an int
+	modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
+boolean is an int
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+BuildInfo is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	registration has a value which is a string
+	error_message has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ListBuildParams
+$builds is a reference to a list where each element is a Catalog.BuildInfo
+ListBuildParams is a reference to a hash where the following keys are defined:
+	only_runnning has a value which is a Catalog.boolean
+	only_error has a value which is a Catalog.boolean
+	only_complete has a value which is a Catalog.boolean
+	skip has a value which is an int
+	limit has a value which is an int
+	modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
+boolean is an int
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+BuildInfo is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	registration has a value which is a string
+	error_message has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_builds
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_builds (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_builds:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_builds');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_builds",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_builds',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_builds",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_builds',
 				       );
     }
 }
@@ -2142,7 +2380,7 @@ an int
 
 =item Description
 
-Describes how to find module/repository.
+Describes how to find a single module/repository.
 module_name - name of module defined in kbase.yaml file;
 git_url - the url used to register the module
 
@@ -2376,6 +2614,7 @@ git_url has a value which is a string
 <pre>
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
+registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
@@ -2390,6 +2629,7 @@ docker_img_name has a value which is a string
 
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
+registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
@@ -2548,7 +2788,7 @@ error_message has a value which is a string
 active: True | False,
 release_approval: approved | denied | under_review | not_requested, (all releases require approval)
 review_message: str, (optional)
-registration: building | complete | error,
+registration: complete | error | (build state status),
 error_message: str (optional)
 
 
@@ -2578,6 +2818,215 @@ release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 GetBuildLogParams
+
+=over 4
+
+
+
+=item Description
+
+must specify skip & limit, or first_n, or last_n.  If none given, this gets last 5000 lines
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+skip has a value which is an int
+limit has a value which is an int
+first_n has a value which is an int
+last_n has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+skip has a value which is an int
+limit has a value which is an int
+first_n has a value which is an int
+last_n has a value which is an int
+
+
+=end text
+
+=back
+
+
+
+=head2 BuildLogLine
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+content has a value which is a string
+error has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+content has a value which is a string
+error has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 BuildLog
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+timestamp has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+error has a value which is a string
+registration has a value which is a string
+log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+timestamp has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+error has a value which is a string
+registration has a value which is a string
+log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+
+
+=end text
+
+=back
+
+
+
+=head2 BuildInfo
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+registration has a value which is a string
+error_message has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+registration has a value which is a string
+error_message has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ListBuildParams
+
+=over 4
+
+
+
+=item Description
+
+Always sorted by time, oldest builds are last.
+
+only one of these can be set to true:
+    only_running - if true, only show running builds
+    only_error - if true, only show builds that ended in an error
+    only_complete - if true, only show builds that are complete
+skip - skip these first n records, default 0
+limit - limit result to the most recent n records, default 1000
+
+modules - only include builds from these modules based on names/git_urls
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+only_runnning has a value which is a Catalog.boolean
+only_error has a value which is a Catalog.boolean
+only_complete has a value which is a Catalog.boolean
+skip has a value which is an int
+limit has a value which is an int
+modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+only_runnning has a value which is a Catalog.boolean
+only_error has a value which is a Catalog.boolean
+only_complete has a value which is a Catalog.boolean
+skip has a value which is an int
+limit has a value which is an int
+modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
 
 
 =end text

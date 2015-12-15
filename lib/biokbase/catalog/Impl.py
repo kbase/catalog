@@ -10,7 +10,7 @@ class Catalog:
     Catalog
 
     Module Description:
-    Service for managing, registering, and building KBase Modules.
+    Service for managing, registering, and building KBase Modules using the KBase SDK.
     '''
 
     ######## WARNING FOR GEVENT USERS #######
@@ -222,6 +222,34 @@ class Catalog:
                              'returnVal is not type basestring as required.')
         # return the results
         return [returnVal]
+
+    def get_parsed_build_log(self, ctx, params):
+        # ctx is the context object
+        # return variables are: build_log
+        #BEGIN get_parsed_build_log
+        build_log = self.cc.get_parsed_build_log(params)
+        #END get_parsed_build_log
+
+        # At some point might do deeper type checking...
+        if not isinstance(build_log, dict):
+            raise ValueError('Method get_parsed_build_log return value ' +
+                             'build_log is not type dict as required.')
+        # return the results
+        return [build_log]
+
+    def list_builds(self, ctx, params):
+        # ctx is the context object
+        # return variables are: builds
+        #BEGIN list_builds
+        builds = self.cc.list_builds(params)
+        #END list_builds
+
+        # At some point might do deeper type checking...
+        if not isinstance(builds, list):
+            raise ValueError('Method list_builds return value ' +
+                             'builds is not type list as required.')
+        # return the results
+        return [builds]
 
     def delete_module(self, ctx, params):
         # ctx is the context object
