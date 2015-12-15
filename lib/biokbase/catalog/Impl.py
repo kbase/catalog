@@ -223,15 +223,16 @@ class Catalog:
         # return the results
         return [returnVal]
 
-    def get_build_log2(self, ctx, params):
+    def get_parsed_build_log(self, ctx, params):
         # ctx is the context object
         # return variables are: build_log
-        #BEGIN get_build_log2
-        #END get_build_log2
+        #BEGIN get_parsed_build_log
+        build_log = self.cc.get_parsed_build_log(params)
+        #END get_parsed_build_log
 
         # At some point might do deeper type checking...
         if not isinstance(build_log, dict):
-            raise ValueError('Method get_build_log2 return value ' +
+            raise ValueError('Method get_parsed_build_log return value ' +
                              'build_log is not type dict as required.')
         # return the results
         return [build_log]

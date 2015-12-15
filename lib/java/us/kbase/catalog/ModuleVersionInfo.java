@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "timestamp",
+    "registration_id",
     "version",
     "git_commit_hash",
     "git_commit_message",
@@ -31,6 +32,8 @@ public class ModuleVersionInfo {
 
     @JsonProperty("timestamp")
     private Long timestamp;
+    @JsonProperty("registration_id")
+    private java.lang.String registrationId;
     @JsonProperty("version")
     private java.lang.String version;
     @JsonProperty("git_commit_hash")
@@ -55,6 +58,21 @@ public class ModuleVersionInfo {
 
     public ModuleVersionInfo withTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+        return this;
+    }
+
+    @JsonProperty("registration_id")
+    public java.lang.String getRegistrationId() {
+        return registrationId;
+    }
+
+    @JsonProperty("registration_id")
+    public void setRegistrationId(java.lang.String registrationId) {
+        this.registrationId = registrationId;
+    }
+
+    public ModuleVersionInfo withRegistrationId(java.lang.String registrationId) {
+        this.registrationId = registrationId;
         return this;
     }
 
@@ -145,7 +163,7 @@ public class ModuleVersionInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

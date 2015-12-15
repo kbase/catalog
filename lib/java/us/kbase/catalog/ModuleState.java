@@ -30,7 +30,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "release_approval",
     "review_message",
     "registration",
-    "last_registration_id",
     "error_message"
 })
 public class ModuleState {
@@ -45,8 +44,6 @@ public class ModuleState {
     private String reviewMessage;
     @JsonProperty("registration")
     private String registration;
-    @JsonProperty("last_registration_id")
-    private String lastRegistrationId;
     @JsonProperty("error_message")
     private String errorMessage;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -126,21 +123,6 @@ public class ModuleState {
         return this;
     }
 
-    @JsonProperty("last_registration_id")
-    public String getLastRegistrationId() {
-        return lastRegistrationId;
-    }
-
-    @JsonProperty("last_registration_id")
-    public void setLastRegistrationId(String lastRegistrationId) {
-        this.lastRegistrationId = lastRegistrationId;
-    }
-
-    public ModuleState withLastRegistrationId(String lastRegistrationId) {
-        this.lastRegistrationId = lastRegistrationId;
-        return this;
-    }
-
     @JsonProperty("error_message")
     public String getErrorMessage() {
         return errorMessage;
@@ -168,7 +150,7 @@ public class ModuleState {
 
     @Override
     public String toString() {
-        return ((((((((((((((((("ModuleState"+" [active=")+ active)+", released=")+ released)+", releaseApproval=")+ releaseApproval)+", reviewMessage=")+ reviewMessage)+", registration=")+ registration)+", lastRegistrationId=")+ lastRegistrationId)+", errorMessage=")+ errorMessage)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("ModuleState"+" [active=")+ active)+", released=")+ released)+", releaseApproval=")+ releaseApproval)+", reviewMessage=")+ reviewMessage)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

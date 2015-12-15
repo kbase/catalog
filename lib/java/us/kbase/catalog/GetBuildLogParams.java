@@ -13,24 +13,32 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: GetBuildLogParams</p>
- * 
+ * <pre>
+ * must specify skip & limit, or first_n, or last_n.  If none given, this gets last 5000 lines
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "registration_id",
-    "line_start",
-    "line_end"
+    "skip",
+    "limit",
+    "first_n",
+    "last_n"
 })
 public class GetBuildLogParams {
 
     @JsonProperty("registration_id")
     private String registrationId;
-    @JsonProperty("line_start")
-    private Long lineStart;
-    @JsonProperty("line_end")
-    private Long lineEnd;
+    @JsonProperty("skip")
+    private Long skip;
+    @JsonProperty("limit")
+    private Long limit;
+    @JsonProperty("first_n")
+    private Long firstN;
+    @JsonProperty("last_n")
+    private Long lastN;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("registration_id")
@@ -48,33 +56,63 @@ public class GetBuildLogParams {
         return this;
     }
 
-    @JsonProperty("line_start")
-    public Long getLineStart() {
-        return lineStart;
+    @JsonProperty("skip")
+    public Long getSkip() {
+        return skip;
     }
 
-    @JsonProperty("line_start")
-    public void setLineStart(Long lineStart) {
-        this.lineStart = lineStart;
+    @JsonProperty("skip")
+    public void setSkip(Long skip) {
+        this.skip = skip;
     }
 
-    public GetBuildLogParams withLineStart(Long lineStart) {
-        this.lineStart = lineStart;
+    public GetBuildLogParams withSkip(Long skip) {
+        this.skip = skip;
         return this;
     }
 
-    @JsonProperty("line_end")
-    public Long getLineEnd() {
-        return lineEnd;
+    @JsonProperty("limit")
+    public Long getLimit() {
+        return limit;
     }
 
-    @JsonProperty("line_end")
-    public void setLineEnd(Long lineEnd) {
-        this.lineEnd = lineEnd;
+    @JsonProperty("limit")
+    public void setLimit(Long limit) {
+        this.limit = limit;
     }
 
-    public GetBuildLogParams withLineEnd(Long lineEnd) {
-        this.lineEnd = lineEnd;
+    public GetBuildLogParams withLimit(Long limit) {
+        this.limit = limit;
+        return this;
+    }
+
+    @JsonProperty("first_n")
+    public Long getFirstN() {
+        return firstN;
+    }
+
+    @JsonProperty("first_n")
+    public void setFirstN(Long firstN) {
+        this.firstN = firstN;
+    }
+
+    public GetBuildLogParams withFirstN(Long firstN) {
+        this.firstN = firstN;
+        return this;
+    }
+
+    @JsonProperty("last_n")
+    public Long getLastN() {
+        return lastN;
+    }
+
+    @JsonProperty("last_n")
+    public void setLastN(Long lastN) {
+        this.lastN = lastN;
+    }
+
+    public GetBuildLogParams withLastN(Long lastN) {
+        this.lastN = lastN;
         return this;
     }
 
@@ -90,7 +128,7 @@ public class GetBuildLogParams {
 
     @Override
     public String toString() {
-        return ((((((((("GetBuildLogParams"+" [registrationId=")+ registrationId)+", lineStart=")+ lineStart)+", lineEnd=")+ lineEnd)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("GetBuildLogParams"+" [registrationId=")+ registrationId)+", skip=")+ skip)+", limit=")+ limit)+", firstN=")+ firstN)+", lastN=")+ lastN)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

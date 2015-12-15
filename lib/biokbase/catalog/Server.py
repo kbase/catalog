@@ -102,9 +102,9 @@ sync_methods['Catalog.get_module_state'] = True
 async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
 async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
 sync_methods['Catalog.get_build_log'] = True
-async_run_methods['Catalog.get_build_log2_async'] = ['Catalog', 'get_build_log2']
-async_check_methods['Catalog.get_build_log2_check'] = ['Catalog', 'get_build_log2']
-sync_methods['Catalog.get_build_log2'] = True
+async_run_methods['Catalog.get_parsed_build_log_async'] = ['Catalog', 'get_parsed_build_log']
+async_check_methods['Catalog.get_parsed_build_log_check'] = ['Catalog', 'get_parsed_build_log']
+sync_methods['Catalog.get_parsed_build_log'] = True
 async_run_methods['Catalog.list_builds_async'] = ['Catalog', 'list_builds']
 async_check_methods['Catalog.list_builds_check'] = ['Catalog', 'list_builds']
 sync_methods['Catalog.list_builds'] = True
@@ -459,10 +459,10 @@ class Application(object):
                              name='Catalog.get_build_log',
                              types=[basestring])
         self.method_authentication['Catalog.get_build_log'] = 'none'
-        self.rpc_service.add(impl_Catalog.get_build_log2,
-                             name='Catalog.get_build_log2',
+        self.rpc_service.add(impl_Catalog.get_parsed_build_log,
+                             name='Catalog.get_parsed_build_log',
                              types=[dict])
-        self.method_authentication['Catalog.get_build_log2'] = 'none'
+        self.method_authentication['Catalog.get_parsed_build_log'] = 'none'
         self.rpc_service.add(impl_Catalog.list_builds,
                              name='Catalog.list_builds',
                              types=[dict])

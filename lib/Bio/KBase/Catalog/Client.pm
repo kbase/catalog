@@ -819,6 +819,7 @@ ModuleInfo is a reference to a hash where the following keys are defined:
 	dev has a value which is a Catalog.ModuleVersionInfo
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -847,6 +848,7 @@ ModuleInfo is a reference to a hash where the following keys are defined:
 	dev has a value which is a Catalog.ModuleVersionInfo
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -932,6 +934,7 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	version has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -954,6 +957,7 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	version has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -1036,6 +1040,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -1055,6 +1060,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
@@ -1230,7 +1236,6 @@ ModuleState is a reference to a hash where the following keys are defined:
 	release_approval has a value which is a string
 	review_message has a value which is a string
 	registration has a value which is a string
-	last_registration_id has a value which is a string
 	error_message has a value which is a string
 boolean is an int
 
@@ -1251,7 +1256,6 @@ ModuleState is a reference to a hash where the following keys are defined:
 	release_approval has a value which is a string
 	review_message has a value which is a string
 	registration has a value which is a string
-	last_registration_id has a value which is a string
 	error_message has a value which is a string
 boolean is an int
 
@@ -1394,9 +1398,9 @@ $return is a string
  
 
 
-=head2 get_build_log2
+=head2 get_parsed_build_log
 
-  $build_log = $obj->get_build_log2($params)
+  $build_log = $obj->get_parsed_build_log($params)
 
 =over 4
 
@@ -1409,9 +1413,17 @@ $params is a Catalog.GetBuildLogParams
 $build_log is a Catalog.BuildLog
 GetBuildLogParams is a reference to a hash where the following keys are defined:
 	registration_id has a value which is a string
-	line_start has a value which is an int
-	line_end has a value which is an int
+	skip has a value which is an int
+	limit has a value which is an int
+	first_n has a value which is an int
+	last_n has a value which is an int
 BuildLog is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	timestamp has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+	error has a value which is a string
+	registration has a value which is a string
 	log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
 BuildLogLine is a reference to a hash where the following keys are defined:
 	content has a value which is a string
@@ -1428,9 +1440,17 @@ $params is a Catalog.GetBuildLogParams
 $build_log is a Catalog.BuildLog
 GetBuildLogParams is a reference to a hash where the following keys are defined:
 	registration_id has a value which is a string
-	line_start has a value which is an int
-	line_end has a value which is an int
+	skip has a value which is an int
+	limit has a value which is an int
+	first_n has a value which is an int
+	last_n has a value which is an int
 BuildLog is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	timestamp has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+	error has a value which is a string
+	registration has a value which is a string
 	log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
 BuildLogLine is a reference to a hash where the following keys are defined:
 	content has a value which is a string
@@ -1448,7 +1468,7 @@ given the registration_id returned from the register method, you can check the b
 
 =cut
 
- sub get_build_log2
+ sub get_parsed_build_log
 {
     my($self, @args) = @_;
 
@@ -1457,7 +1477,7 @@ given the registration_id returned from the register method, you can check the b
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function get_build_log2 (received $n, expecting 1)");
+							       "Invalid argument count for function get_parsed_build_log (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -1465,30 +1485,30 @@ given the registration_id returned from the register method, you can check the b
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to get_build_log2:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to get_parsed_build_log:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'get_build_log2');
+								   method_name => 'get_parsed_build_log');
 	}
     }
 
     my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_build_log2",
+	method => "Catalog.get_parsed_build_log",
 	params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'get_build_log2',
+					       method_name => 'get_parsed_build_log',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_build_log2",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_parsed_build_log",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'get_build_log2',
+					    method_name => 'get_parsed_build_log',
 				       );
     }
 }
@@ -2594,6 +2614,7 @@ git_url has a value which is a string
 <pre>
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
+registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
@@ -2608,6 +2629,7 @@ docker_img_name has a value which is a string
 
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
+registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
@@ -2781,7 +2803,6 @@ released has a value which is a Catalog.boolean
 release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string
-last_registration_id has a value which is a string
 error_message has a value which is a string
 
 </pre>
@@ -2796,7 +2817,6 @@ released has a value which is a Catalog.boolean
 release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string
-last_registration_id has a value which is a string
 error_message has a value which is a string
 
 
@@ -2812,6 +2832,11 @@ error_message has a value which is a string
 
 
 
+=item Description
+
+must specify skip & limit, or first_n, or last_n.  If none given, this gets last 5000 lines
+
+
 =item Definition
 
 =begin html
@@ -2819,8 +2844,10 @@ error_message has a value which is a string
 <pre>
 a reference to a hash where the following keys are defined:
 registration_id has a value which is a string
-line_start has a value which is an int
-line_end has a value which is an int
+skip has a value which is an int
+limit has a value which is an int
+first_n has a value which is an int
+last_n has a value which is an int
 
 </pre>
 
@@ -2830,8 +2857,10 @@ line_end has a value which is an int
 
 a reference to a hash where the following keys are defined:
 registration_id has a value which is a string
-line_start has a value which is an int
-line_end has a value which is an int
+skip has a value which is an int
+limit has a value which is an int
+first_n has a value which is an int
+last_n has a value which is an int
 
 
 =end text
@@ -2884,6 +2913,12 @@ error has a value which is a Catalog.boolean
 
 <pre>
 a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+timestamp has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+error has a value which is a string
+registration has a value which is a string
 log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
 
 </pre>
@@ -2893,6 +2928,12 @@ log has a value which is a reference to a list where each element is a Catalog.B
 =begin text
 
 a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+timestamp has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+error has a value which is a string
+registration has a value which is a string
 log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
 
 

@@ -265,10 +265,10 @@ class Catalog(object):
                           [registration_id], json_rpc_context)
         return resp[0]
   
-    def get_build_log2(self, params, json_rpc_context = None):
+    def get_parsed_build_log(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
-            raise ValueError('Method get_build_log2: argument json_rpc_context is not type dict as required.')
-        resp = self._call('Catalog.get_build_log2',
+            raise ValueError('Method get_parsed_build_log: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_parsed_build_log',
                           [params], json_rpc_context)
         return resp[0]
   

@@ -499,7 +499,7 @@ class CatalogController:
             simple_kbase_dev_list.append(d['kb_username'])
         return sorted(simple_kbase_dev_list)
 
-
+    # get the build log from file that it is being written to
     def get_build_log(self, registration_id):
         try:
             with open(self.temp_dir+'/registration.log.'+str(registration_id)) as log_file:
@@ -507,6 +507,29 @@ class CatalogController:
         except:
             log = '[log not found - registration_id is invalid or the log has been deleted]'
         return log
+
+    # get the parsed build log from mongo
+    def get_parsed_build_log(self, params):
+        if 'registration_id' not in params:
+            raise ValueError('You must specify a registration_id to retrieve a build log')
+
+        slice_arg = None
+        if 'skip' in params:
+            if 'limit' not in params:
+                raise ValueError('Cannot specify the skip argument without a limit- blame Mongo')    
+            slice_arg = [int(params['skip']),int(params['limit'])]
+
+        if 'first_n' in params:
+            if slice_arg is not None:
+                raise ValueError('Cannot combine skip/limit with first_n parameters')
+            slice_arg = int(params['first_n'])
+
+        if 'last_n' in params:
+            if slice_arg is not None:
+                raise ValueError('Cannot combine skip/limit/first_n with last_n parameters')
+            slice_arg = -int(params['last_n'])
+
+        return self.db.get_parsed_build_log(params['registration_id'], slice_arg = slice_arg)
 
 
     def delete_module(self,params,username):

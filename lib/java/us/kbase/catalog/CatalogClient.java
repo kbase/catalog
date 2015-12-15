@@ -377,7 +377,7 @@ public class CatalogClient {
     }
 
     /**
-     * <p>Original spec-file function name: get_build_log2</p>
+     * <p>Original spec-file function name: get_parsed_build_log</p>
      * <pre>
      * given the registration_id returned from the register method, you can check the build log with this method
      * </pre>
@@ -386,11 +386,11 @@ public class CatalogClient {
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public BuildLog getBuildLog2(GetBuildLogParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public BuildLog getParsedBuildLog(GetBuildLogParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<BuildLog>> retType = new TypeReference<List<BuildLog>>() {};
-        List<BuildLog> res = caller.jsonrpcCall("Catalog.get_build_log2", args, retType, true, false, jsonRpcContext);
+        List<BuildLog> res = caller.jsonrpcCall("Catalog.get_parsed_build_log", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 

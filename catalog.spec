@@ -94,6 +94,7 @@ module Catalog {
 
     typedef structure {
         int timestamp;
+        string registration_id;
         string version;
         string git_commit_hash;
         string git_commit_message;
@@ -167,7 +168,6 @@ module Catalog {
         string release_approval;
         string review_message;
         string registration;
-        string last_registration_id;
         string error_message;
     } ModuleState;
 
@@ -175,10 +175,13 @@ module Catalog {
     funcdef get_module_state(SelectOneModuleParams params) returns (ModuleState state);
 
 
+    /* must specify skip & limit, or first_n, or last_n.  If none given, this gets last 5000 lines */
     typedef structure {
         string registration_id;
-        int line_start;
-        int line_end;
+        int skip;
+        int limit;
+        int first_n;
+        int last_n;
     } GetBuildLogParams;
 
     typedef structure {
@@ -186,17 +189,23 @@ module Catalog {
         boolean error;
     } BuildLogLine;
 
+    
     typedef structure {
+        string registration_id;
+        string timestamp;
+        string module_name_lc;
+        string git_url;
+        string error;
+        string registration;
         list <BuildLogLine> log;
     } BuildLog;
-
 
     funcdef get_build_log(string registration_id) returns (string);
 
     /*
         given the registration_id returned from the register method, you can check the build log with this method
     */
-    funcdef get_build_log2(GetBuildLogParams params) returns (BuildLog build_log);
+    funcdef get_parsed_build_log(GetBuildLogParams params) returns (BuildLog build_log);
 
 
     typedef structure {

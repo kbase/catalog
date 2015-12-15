@@ -171,9 +171,22 @@ class MongoCatalogDBI:
     def list_build_logs(self,module_name_lc='',git_url=''):
         pass
 
-    def get_build_log(self,registration_id):
-        return self.build_logs.find({'registration_id':registration_id},{'module_name':1,'git_url':1,'current_versions':1,'owners':1,'_id':0})
+    # slice arg is used in the mongo query for getting lines.  It is either a
+    # pos int (get first n lines), neg int (last n lines), or array [skip, limit]
+    def get_parsed_build_log(self,registration_id, slice_arg=None):
+        selection = {
+                        'registration_id':1,
+                        'timestamp':1,
+                        'git_url':1,
+                        'module_name_lc':1,
+                        'registration':1,
+                        'error_message':1,
+                        'log':1
+                    }
+        if slice_arg:
+            selection['log'] = {'$slice':slice_arg}
 
+        return self.build_logs.find_one({'registration_id':registration_id},selection)
 
 
     def register_new_module(self, git_url, username, timestamp, registration_state, registration_id):
@@ -186,7 +199,6 @@ class MongoCatalogDBI:
                 'active': True,
                 'released': False,
                 'release_approval': 'not_requested',
-                'registration_id' : registration_id,
                 'registration': registration_state,
                 'error_message' : '',
             },
