@@ -2,6 +2,8 @@
 import json
 import pprint
 from pymongo import MongoClient
+from pymongo import ASCENDING
+from pymongo import DESCENDING
 
 '''
 
@@ -167,9 +169,49 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
 
+    def list_builds(self, 
+                skip = 0,
+                limit = 1000,
+                module_name_lcs = [],
+                git_urls = [],
+                only_running = False,
+                only_error = False,
+                only_complete = False):
 
-    def list_build_logs(self,module_name_lc='',git_url=''):
-        pass
+        query = {}
+
+        registration_match = None
+        if only_running:
+            registration_match = { '$nin': ['complete', 'error'] }
+        elif only_error:
+            registration_match = 'error'
+        elif only_complete:
+            registration_match = 'complete'
+
+        if registration_match:
+            query['registration'] = registration_match
+
+        if len(module_name_lcs)>0:
+            query['module_name_lc'] = { '$in':module_name_lcs }
+        if len(git_urls)>0:
+            query['git_urls'] = { '$in':git_urls }
+
+        selection = {
+                        'registration_id':1,
+                        'timestamp':1,
+                        'git_url':1,
+                        'module_name_lc':1,
+                        'registration':1,
+                        'error_message':1,
+                        '_id':0
+                    }
+
+        return list(self.build_logs.find(
+                        query,selection,
+                        skip=skip,
+                        limit=limit,
+                        sort=[['timestamp',DESCENDING]]))
+
 
     # slice arg is used in the mongo query for getting lines.  It is either a
     # pos int (get first n lines), neg int (last n lines), or array [skip, limit]
@@ -181,7 +223,8 @@ class MongoCatalogDBI:
                         'module_name_lc':1,
                         'registration':1,
                         'error_message':1,
-                        'log':1
+                        'log':1,
+                        '_id':0
                     }
         if slice_arg:
             selection['log'] = {'$slice':slice_arg}

@@ -95,6 +95,16 @@ class CatalogTestUtil:
                 self.modules.insert(parsed_document)
                 load_count+=1
 
+        logs_document_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._BUILD_LOGS)
+        for document_name in os.listdir(logs_document_dir):
+            document_path = os.path.join(logs_document_dir,document_name)
+            if os.path.isfile(document_path):
+                with open(document_path) as document_file:
+                    document = document_file.read()
+                parsed_document = json.loads(document)
+                self.build_logs.insert(parsed_document)
+                load_count+=1
+
         self.log(str(load_count)+" documents loaded")
 
 

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "registration_id",
     "registration",
     "error_message",
-    "module_name",
+    "module_name_lc",
     "git_url"
 })
 public class BuildInfo {
@@ -33,8 +33,8 @@ public class BuildInfo {
     private String registration;
     @JsonProperty("error_message")
     private String errorMessage;
-    @JsonProperty("module_name")
-    private String moduleName;
+    @JsonProperty("module_name_lc")
+    private String moduleNameLc;
     @JsonProperty("git_url")
     private String gitUrl;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -84,18 +84,18 @@ public class BuildInfo {
         return this;
     }
 
-    @JsonProperty("module_name")
-    public String getModuleName() {
-        return moduleName;
+    @JsonProperty("module_name_lc")
+    public String getModuleNameLc() {
+        return moduleNameLc;
     }
 
-    @JsonProperty("module_name")
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    @JsonProperty("module_name_lc")
+    public void setModuleNameLc(String moduleNameLc) {
+        this.moduleNameLc = moduleNameLc;
     }
 
-    public BuildInfo withModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    public BuildInfo withModuleNameLc(String moduleNameLc) {
+        this.moduleNameLc = moduleNameLc;
         return this;
     }
 
@@ -126,7 +126,7 @@ public class BuildInfo {
 
     @Override
     public String toString() {
-        return ((((((((((((("BuildInfo"+" [registrationId=")+ registrationId)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("BuildInfo"+" [registrationId=")+ registrationId)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", moduleNameLc=")+ moduleNameLc)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

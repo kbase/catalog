@@ -531,6 +531,55 @@ class CatalogController:
 
         return self.db.get_parsed_build_log(params['registration_id'], slice_arg = slice_arg)
 
+    def list_builds(self, params):
+
+        only_running = False
+        only_error = False
+        only_complete = False
+
+        if 'only_running' in params:
+            if params['only_running']:
+                only_running = True
+                #registration_match = { '$or': [{'$ne':'complete'}, {'$ne':'error'}] }
+        if 'only_error' in params:
+            if params['only_error']:
+                if only_running:
+                    raise ValueError('Cannot combine only_error=1 with only_running=1 parameters')
+                only_error = True
+                #registration_match = 'error'
+        if 'only_complete' in params:
+            if params['only_complete']:
+                if only_running or only_error:
+                    raise ValueError('Cannot combine only_complete=1 with only_running=1 or only_error=1 parameters')
+                only_complete = True
+        
+        skip = 0
+        if 'skip' in params:
+            skip = int(params['skip'])
+        limit = 1000
+        if 'limit' in params:
+            limit = int(params['limit'])
+
+        git_url_match_list = []
+        module_name_lc_match_list = []
+
+        if 'modules' in params:
+            for mod in params['modules']:
+                if 'git_url' in mod:
+                    git_url_match_list.append(mod['git_url'])
+                if 'module_name' in mod:
+                    module_name_lc_match_list.append(str(mod['module_name']).lower())
+
+        return self.db.list_builds(
+                skip = skip,
+                limit = limit,
+                module_name_lcs = module_name_lc_match_list,
+                git_urls = git_url_match_list,
+                only_running = only_running,
+                only_error = only_error,
+                only_complete = only_complete
+            )
+
 
     def delete_module(self,params,username):
         if not self.is_admin(username):

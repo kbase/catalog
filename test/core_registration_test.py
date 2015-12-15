@@ -89,6 +89,17 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(parsed_log['log'][4],parsed_log_subset['log'][0])
         self.assertEqual(parsed_log['log'][5],parsed_log_subset['log'][1])
 
+        # should show up as the top hit when we list logs
+        recent_build_list = self.catalog.list_builds(self.cUtil.anonymous_ctx(),{'limit':6})[0]
+
+        self.assertEqual(len(recent_build_list),6)
+        self.assertEqual(recent_build_list[0]['registration_id'],registration_id)
+        self.assertEqual(recent_build_list[0]['registration'],'complete')
+        self.assertEqual(recent_build_list[0]['error_message'],'')
+        self.assertIsNotNone(recent_build_list[0]['module_name_lc'])
+        self.assertEqual(recent_build_list[0]['git_url'],giturl)
+
+
         # check some bad parameters
         with self.assertRaises(ValueError):
             parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),

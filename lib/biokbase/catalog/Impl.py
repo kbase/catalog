@@ -241,6 +241,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: builds
         #BEGIN list_builds
+        builds = self.cc.list_builds(params)
         #END list_builds
 
         # At some point might do deeper type checking...

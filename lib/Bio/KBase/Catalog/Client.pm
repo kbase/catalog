@@ -1543,7 +1543,7 @@ BuildInfo is a reference to a hash where the following keys are defined:
 	registration_id has a value which is a string
 	registration has a value which is a string
 	error_message has a value which is a string
-	module_name has a value which is a string
+	module_name_lc has a value which is a string
 	git_url has a value which is a string
 
 </pre>
@@ -1569,7 +1569,7 @@ BuildInfo is a reference to a hash where the following keys are defined:
 	registration_id has a value which is a string
 	registration has a value which is a string
 	error_message has a value which is a string
-	module_name has a value which is a string
+	module_name_lc has a value which is a string
 	git_url has a value which is a string
 
 
@@ -2958,7 +2958,7 @@ a reference to a hash where the following keys are defined:
 registration_id has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string
-module_name has a value which is a string
+module_name_lc has a value which is a string
 git_url has a value which is a string
 
 </pre>
@@ -2971,7 +2971,7 @@ a reference to a hash where the following keys are defined:
 registration_id has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string
-module_name has a value which is a string
+module_name_lc has a value which is a string
 git_url has a value which is a string
 
 
@@ -2991,8 +2991,14 @@ git_url has a value which is a string
 
 Always sorted by time, oldest builds are last.
 
-        only_running - if true, only show running builds
-        only_error - if true, only show builds that ended in an error
+only one of these can be set to true:
+    only_running - if true, only show running builds
+    only_error - if true, only show builds that ended in an error
+    only_complete - if true, only show builds that are complete
+skip - skip these first n records, default 0
+limit - limit result to the most recent n records, default 1000
+
+modules - only include builds from these modules based on names/git_urls
 
 
 =item Definition

@@ -16,8 +16,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: ListBuildParams</p>
  * <pre>
  * Always sorted by time, oldest builds are last.
- *         only_running - if true, only show running builds
- *         only_error - if true, only show builds that ended in an error
+ * only one of these can be set to true:
+ *     only_running - if true, only show running builds
+ *     only_error - if true, only show builds that ended in an error
+ *     only_complete - if true, only show builds that are complete
+ * skip - skip these first n records, default 0
+ * limit - limit result to the most recent n records, default 1000
+ * modules - only include builds from these modules based on names/git_urls
  * </pre>
  * 
  */
