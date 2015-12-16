@@ -121,7 +121,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
-        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         # the method should appear in the NMS under the dev tag
         method_list = self.nms.list_methods({'tag':'dev'})
@@ -157,13 +157,12 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
 
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['beta']['docker_img_name'].split('/')[1], 'kbase:' + module_name.lower()+'.'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
         self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
 
         # the method should appear in the NMS under the dev or beta tag
         method_list = self.nms.list_methods({'tag':'dev'})
@@ -248,33 +247,31 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
+        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
         self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['release']['git_commit_hash'],githash)
         self.assertEqual(info['release']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         versions = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
         self.assertEqual(len(versions),1)
 
-        self.assertEqual(versions[0]['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(versions[0]['git_commit_hash'],githash)
         self.assertEqual(versions[0]['git_commit_message'],'added some basic things\n')
         self.assertEqual(versions[0]['narrative_methods'],['test_method_1'])
         self.assertEqual(versions[0]['version'],'0.0.1')
         self.assertEqual(versions[0]['timestamp'],timestamp)
-        self.assertEqual(versions[0]['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(versions[0]['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         # the method should appear in the NMS under the dev/beta/release
         method_list = self.nms.list_methods({'tag':'dev'})
@@ -322,22 +319,21 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1','test_method_2'])
         self.assertEqual(info['dev']['version'],'0.0.2')
         self.assertEqual(info['dev']['timestamp'],timestamp2)
+        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash2)
 
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
         self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['release']['git_commit_hash'],githash)
         self.assertEqual(info['release']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
         self.assertEqual(info['git_url'],giturl)
