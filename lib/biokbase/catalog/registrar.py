@@ -103,7 +103,7 @@ class Registrar:
             # 3 docker build - in progress
             # perhaps make this a self attr?
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
-            self.image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
+            self.image_name = self.docker_registry_host + '/kbase:' + module_name_lc + '.' + str(git_commit_hash)
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
                 dockerclient = None
