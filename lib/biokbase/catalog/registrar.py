@@ -79,10 +79,6 @@ class Registrar:
                     repo.git.checkout(self.params['git_commit_hash'].strip())
                     git_commit_hash = self.params['git_commit_hash'].strip()
 
-            # we *think* this will solve the pesky intermittent git.lock issue by releasing everything
-            #repo.git.clear_cache()
-            # it doesn't work
-
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('reading files and performing basic checks')
@@ -379,7 +375,7 @@ class Registrar:
             # add each line to the buffer
             if len(l)>10000 :
                 l = l[0:10000] + ' ... truncated to 10k characters of ' + str(len(l))
-            self.log_buffer.append({'content':l, 'error':is_error})
+            self.log_buffer.append({'content':l+'\n', 'error':is_error})
 
         # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
         if (time.time() - self.last_log_time > self.log_interval) or (len(self.log_buffer)>1000):
@@ -416,6 +412,7 @@ class Registrar:
         last={}
         for line in docker_client.build(path=basedir,rm=True,tag=image_name):
             line_parse = json.loads(line)
+            log_line = ''
             if 'stream' in line_parse:
                 self.log(line_parse['stream'],no_end_line=True)
             if 'errorDetail' in line_parse:
@@ -445,15 +442,16 @@ class Registrar:
             # example line:
             #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
             line_parse = json.loads(line)
+            log_line = ''
             if 'id' in line_parse:
-                self.log(line_parse['id']+' - ',no_end_line=True)
+                log_line += line_parse['id']+' - ';
             if 'status' in line_parse:
-                self.log(line_parse['status'],no_end_line=True)
+                log_line += line_parse['status']
             if 'progress' in line_parse:
-                self.log(' - ' + line_parse['progress'],no_end_line=True)
+                log_line += ' - ' + line_parse['progress']
             #if 'progressDetail' in line_parse:
             #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
-            self.log('') # add an endline
+            self.log(log_line)
 
         # check for errors here somehow!
 
