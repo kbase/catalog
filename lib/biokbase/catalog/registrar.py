@@ -377,6 +377,8 @@ class Registrar:
         lines = content.splitlines();
         for l in lines:
             # add each line to the buffer
+            if len(l)>10000 :
+                l = l[0:10000] + ' ... truncated to 10k characters of ' + str(len(l))
             self.log_buffer.append({'content':l, 'error':is_error})
 
         # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
