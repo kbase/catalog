@@ -387,11 +387,46 @@ class CoreRegistrationTest(unittest.TestCase):
             self.catalog.delete_module(self.cUtil.user_ctx(),
                 {'module_name':'registration_error'})
 
-        # this should work
-        self.assertEqual(self.catalog.is_registered({},{'module_name':'registration_error'})[0],1)
+
+        method_list = self.nms.list_methods({'tag':'dev'})
+
+        # this should work: register a repo, make sure it appears, delete it, and it should be gone
+        giturl = self.cUtil.get_test_repo_2()
+        githash = 'a2b66a4668548bbabc54ee937ac91f9237874a96' # branch simple_good_repo2 
+
+        registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
+            {'git_url':giturl, 'git_commit_hash':githash})[0]
+        timestamp = int(registration_id.split('_')[0])
+        start = time()
+        timeout = 60 #seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
+            if state['registration'] in ['complete','error']:
+                break
+            self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
+        self.assertEqual(state['registration'],'complete')
+
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'CatalogTestModule2'})[0],1)
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS')
+
+        # delete it.
         self.catalog.delete_module(self.cUtil.admin_ctx(),
-                {'module_name':'registration_error'})
-        self.assertEqual(self.catalog.is_registered({},{'module_name':'registration_error'})[0],0)
+                {'module_name':'CatalogTestModule2'})
+
+        # make sure it is gone
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'CatalogTestModule2'})[0],0)
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
+                foundMeth = True
+        self.assertFalse(foundMeth,'Make sure we did not find the method in NMS')
+
 
         # we cannot remove modules that have been released
         self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)

@@ -129,6 +129,8 @@ class CatalogTestUtil:
     def get_test_repo_1(self):
         return self.test_cfg['test-module-repo-1']
 
+    def get_test_repo_2(self):
+        return self.test_cfg['test-module-repo-2']
 
     def getCatalogConfig(self):
         return self.catalog_cfg

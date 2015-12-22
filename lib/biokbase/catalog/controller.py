@@ -591,6 +591,9 @@ class CatalogController:
         if error is not None:
             raise ValueError('Delete operation failed - some unknown database error: '+error)
 
+        if params['module_name']:
+            self.nms.disable_repo({'module_name':params['module_name']})
+
 
     def migrate_module_to_new_git_url(self, params, username):
         if not self.is_admin(username):
