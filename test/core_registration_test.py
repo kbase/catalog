@@ -36,8 +36,78 @@ class CoreRegistrationTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
-        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)
-        self.assertTrue(log is not None)
+
+        # (3) check the log
+        parsed_log = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {'registration_id':registration_id})[0]
+        self.assertEqual(parsed_log['registration'],'complete')
+        self.assertEqual(parsed_log['registration_id'],registration_id)
+        self.assertEqual(parsed_log['git_url'],giturl)
+        self.assertEqual(parsed_log['error_message'],'')
+        self.assertIsNotNone(parsed_log['module_name_lc'])
+        self.assertTrue(len(parsed_log['log'])>0)
+
+        # get the log file directly
+        raw_log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)[0]
+        self.assertTrue(raw_log is not None)
+
+        log_lines = raw_log.splitlines();
+        self.assertTrue(log_lines, parsed_log['log'])
+
+        # check getting specific lines
+        parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {
+                                'registration_id':registration_id, 
+                                'first_n':5 
+                            })[0]
+        self.assertEqual(len(parsed_log_subset['log']),5)
+        self.assertEqual(parsed_log['log'][0],parsed_log_subset['log'][0])
+        self.assertEqual(parsed_log['log'][1],parsed_log_subset['log'][1])
+        self.assertEqual(parsed_log['log'][2],parsed_log_subset['log'][2])
+        self.assertEqual(parsed_log['log'][3],parsed_log_subset['log'][3])
+        self.assertEqual(parsed_log['log'][4],parsed_log_subset['log'][4])
+
+        parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {
+                                'registration_id':registration_id, 
+                                'last_n':5 
+                            })[0]
+        self.assertEqual(len(parsed_log_subset['log']),5)
+        self.assertEqual(parsed_log['log'][-1],parsed_log_subset['log'][4])
+        self.assertEqual(parsed_log['log'][-2],parsed_log_subset['log'][3])
+        self.assertEqual(parsed_log['log'][-3],parsed_log_subset['log'][2])
+        self.assertEqual(parsed_log['log'][-4],parsed_log_subset['log'][1])
+        self.assertEqual(parsed_log['log'][-5],parsed_log_subset['log'][0])
+
+        parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {
+                                'registration_id':registration_id, 
+                                'skip':4,
+                                'limit':2 
+                            })[0]
+        self.assertEqual(len(parsed_log_subset['log']),2)
+        self.assertEqual(parsed_log['log'][4],parsed_log_subset['log'][0])
+        self.assertEqual(parsed_log['log'][5],parsed_log_subset['log'][1])
+
+        # should show up as the top hit when we list logs
+        recent_build_list = self.catalog.list_builds(self.cUtil.anonymous_ctx(),{'limit':6})[0]
+
+        self.assertEqual(len(recent_build_list),6)
+        self.assertEqual(recent_build_list[0]['registration_id'],registration_id)
+        self.assertEqual(recent_build_list[0]['registration'],'complete')
+        self.assertEqual(recent_build_list[0]['error_message'],'')
+        self.assertIsNotNone(recent_build_list[0]['module_name_lc'])
+        self.assertEqual(recent_build_list[0]['git_url'],giturl)
+
+
+        # check some bad parameters
+        with self.assertRaises(ValueError):
+            parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {'registration_id':registration_id, 'skip':4 })[0]
+        with self.assertRaises(ValueError):
+            parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
+                            {'registration_id':registration_id, 'first_n':4, 'last_n':2 })[0]
+
 
         # (3) get module info
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
@@ -51,7 +121,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
-        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         # the method should appear in the NMS under the dev tag
         method_list = self.nms.list_methods({'tag':'dev'})
@@ -87,13 +157,12 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
 
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['beta']['docker_img_name'].split('/')[1], 'kbase:' + module_name.lower()+'.'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
         self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
 
         # the method should appear in the NMS under the dev or beta tag
         method_list = self.nms.list_methods({'tag':'dev'})
@@ -178,33 +247,31 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
+        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
         self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['release']['git_commit_hash'],githash)
         self.assertEqual(info['release']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         versions = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
         self.assertEqual(len(versions),1)
 
-        self.assertEqual(versions[0]['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(versions[0]['git_commit_hash'],githash)
         self.assertEqual(versions[0]['git_commit_message'],'added some basic things\n')
         self.assertEqual(versions[0]['narrative_methods'],['test_method_1'])
         self.assertEqual(versions[0]['version'],'0.0.1')
         self.assertEqual(versions[0]['timestamp'],timestamp)
-        self.assertEqual(versions[0]['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(versions[0]['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         # the method should appear in the NMS under the dev/beta/release
         method_list = self.nms.list_methods({'tag':'dev'})
@@ -252,22 +319,21 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1','test_method_2'])
         self.assertEqual(info['dev']['version'],'0.0.2')
         self.assertEqual(info['dev']['timestamp'],timestamp2)
+        self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash2)
 
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
         self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
-        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['beta']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
         self.assertEqual(info['release']['git_commit_hash'],githash)
         self.assertEqual(info['release']['git_commit_message'],'added some basic things\n')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
-        self.assertEqual(info['release']['docker_img_name'].split('/')[1],module_name.lower()+':'+githash)
+        self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
         self.assertEqual(info['git_url'],giturl)
@@ -321,11 +387,46 @@ class CoreRegistrationTest(unittest.TestCase):
             self.catalog.delete_module(self.cUtil.user_ctx(),
                 {'module_name':'registration_error'})
 
-        # this should work
-        self.assertEqual(self.catalog.is_registered({},{'module_name':'registration_error'})[0],1)
+
+        method_list = self.nms.list_methods({'tag':'dev'})
+
+        # this should work: register a repo, make sure it appears, delete it, and it should be gone
+        giturl = self.cUtil.get_test_repo_2()
+        githash = 'a2b66a4668548bbabc54ee937ac91f9237874a96' # branch simple_good_repo2 
+
+        registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
+            {'git_url':giturl, 'git_commit_hash':githash})[0]
+        timestamp = int(registration_id.split('_')[0])
+        start = time()
+        timeout = 60 #seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
+            if state['registration'] in ['complete','error']:
+                break
+            self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
+        self.assertEqual(state['registration'],'complete')
+
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'CatalogTestModule2'})[0],1)
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
+                foundMeth = True
+        self.assertTrue(foundMeth,'Make sure we found the method in NMS')
+
+        # delete it.
         self.catalog.delete_module(self.cUtil.admin_ctx(),
-                {'module_name':'registration_error'})
-        self.assertEqual(self.catalog.is_registered({},{'module_name':'registration_error'})[0],0)
+                {'module_name':'CatalogTestModule2'})
+
+        # make sure it is gone
+        self.assertEqual(self.catalog.is_registered({},{'module_name':'CatalogTestModule2'})[0],0)
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
+                foundMeth = True
+        self.assertFalse(foundMeth,'Make sure we did not find the method in NMS')
+
 
         # we cannot remove modules that have been released
         self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
@@ -344,6 +445,8 @@ class CoreRegistrationTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+
+        print('++++++++++++ RUNNING core_registration_test.py +++++++++++')
 
         # hack for testing!! remove when docker and NMS components can be tested
         from biokbase.catalog.registrar import Registrar

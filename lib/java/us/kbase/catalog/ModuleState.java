@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * active: True | False,
  * release_approval: approved | denied | under_review | not_requested, (all releases require approval)
  * review_message: str, (optional)
- * registration: building | complete | error,
+ * registration: complete | error | (build state status),
  * error_message: str (optional)
  * </pre>
  * 

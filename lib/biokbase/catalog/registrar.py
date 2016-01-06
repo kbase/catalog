@@ -17,7 +17,7 @@ from docker import Client as DockerClient
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.narrative_method_store.client import NarrativeMethodStore
 
-
+    
 class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
@@ -46,6 +46,11 @@ class Registrar:
 
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
+
+        self.log_buffer = [];
+        self.last_log_time = time.time() # in seconds
+        self.log_interval = 1.0 # save log to mongo every second
+
 
     def start_registration(self):
         try:
@@ -79,14 +84,49 @@ class Registrar:
             self.set_build_step('reading files and performing basic checks')
             self.sanity_checks_and_parse(repo, basedir)
 
+            ##############################
+            # 2.5 - waiting for one minute at most until git releases .git/config.lock, if it still exists then kill it
+            timeout = time.time() + 60
+            git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
+            while os.path.exists(git_config_lock_file) and time.time() <= timeout:
+                self.log('.git/config.lock exists, waiting 5s for it to release')
+                time.sleep(5)
+            if os.path.exists(git_config_lock_file):
+                self.log('.git/config.lock file still there, we are just going to delete it....')
+                os.remove(git_config_lock_file)
 
             ##############################
             # 3 docker build - in progress
             # perhaps make this a self attr?
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
-            self.image_name = self.docker_registry_host + '/' + module_name_lc + ':' + str(git_commit_hash)
+            self.image_name = self.docker_registry_host + '/kbase:' + module_name_lc + '.' + str(git_commit_hash)
             if not Registrar._TEST_WITHOUT_DOCKER:
-                dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=360)
+                # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
+                dockerclient = None
+                docker_timeout = 1800
+                if len(str(self.docker_base_url)) > 0:
+                    dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=docker_timeout)
+                else:
+                    docker_host = os.environ['DOCKER_HOST']
+                    if docker_host is None or len(docker_host) == 0:
+                        raise ValueError('Docker host should be defined either in configuration '
+                                         '(docker-base-url property) or in DOCKER_HOST environment variable')
+                    docker_tls_verify = os.environ['DOCKER_TLS_VERIFY']
+                    if docker_host.startswith('tcp://'):
+                        docker_protocol = "http"
+                        if (docker_tls_verify is not None) and docker_tls_verify == '1':
+                            docker_protocol = "https"
+                        docker_host = docker_host.replace('tcp://', docker_protocol + '://')
+                    docker_cert_path = os.environ['DOCKER_CERT_PATH']
+                    docker_tls = False
+                    if (docker_cert_path is not None) and len(docker_cert_path) > 0:
+                        docker_tls = DockerTLSConfig(verify=False, 
+                                                     client_cert=(docker_cert_path + '/cert.pem', 
+                                                                  docker_cert_path + '/key.pem'))
+                    self.log("Docker settings from environment variables are used: docker-host = " + docker_host + 
+                             ", docker_cert_path = " + str(docker_cert_path))
+                    dockerclient = DockerClient(base_url = docker_host,timeout=docker_timeout,
+                            version='auto', tls=docker_tls)
                 # look for docker image
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 #self.log(str(dockerclient.inspect_image(repo_name)))
@@ -111,9 +151,10 @@ class Registrar:
         except Exception as e:
             # set the build state to error and log it
             self.set_build_error(str(e))
-            self.log(traceback.format_exc())
-            self.log('BUILD_ERROR: '+str(e))
+            self.log(traceback.format_exc(), is_error=True)
+            self.log('BUILD_ERROR: '+str(e), is_error=True)
         finally:
+            self.flush_log_to_db();
             self.logfile.close();
             self.cleanup();
 
@@ -149,6 +190,10 @@ class Registrar:
         else:
             # This must be the first registration, so the module must not exist yet
             self.check_that_module_name_is_valid(module_name);
+
+        # associate the module_name with the log file for easier searching (if we fail sooner, then the module name
+        # cannot be used to lookup this log)
+        self.db.set_build_log_module_name(self.registration_id, module_name)
 
         # you can't remove yourself from the owners list, or register something that you are not an owner of
         if self.username not in owners:
@@ -225,6 +270,7 @@ class Registrar:
 
         new_version = {
             'timestamp':self.timestamp,
+            'registration_id':self.registration_id,
             'version' : version,
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
@@ -281,13 +327,13 @@ class Registrar:
                                 for w in result['warnings']:
                                     self.log('        - warning: '+w)
                     else:
-                        self.log('        - not valid!')
+                        self.log('        - not valid!', is_error=True)
                         if 'errors' in result:
                             if result['errors']:
                                 for e in result['errors']:
-                                    self.log('        - error: '+e)
+                                    self.log('        - error: '+e, is_error=True)
                         else:
-                            self.log('        - error is undefined!'+e)
+                            self.log('        - error is undefined!'+e,  is_error=True)
 
                         raise ValueError('Invalid narrative method specification ('+m+')')
 
@@ -316,21 +362,43 @@ class Registrar:
         return value
 
 
-    def log(self, message, no_end_line=False):
+    def log(self, message, no_end_line=False, is_error=False):
         if no_end_line:
-            self.logfile.write(message)
+            content = message
         else:
-            self.logfile.write(message+'\n')
+            content = message + '\n'
+        self.logfile.write(content)
         self.logfile.flush()
+
+        lines = content.splitlines();
+        for l in lines:
+            # add each line to the buffer
+            if len(l)>10000 :
+                l = l[0:10000] + ' ... truncated to 10k characters of ' + str(len(l))
+            self.log_buffer.append({'content':l+'\n', 'error':is_error})
+
+        # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
+        if (time.time() - self.last_log_time > self.log_interval) or (len(self.log_buffer)>1000):
+            self.flush_log_to_db();
+
+    def flush_log_to_db(self):
+        # todo: if we lose log lines, that's ok.  Make sure we handle case if log is larger than mongo doc size
+        self.db.append_to_build_log(self.registration_id, self.log_buffer)
+        self.log_buffer = [] #clear the buffer
+        self.last_log_time = time.time() # reset the log timer
+
 
     def set_build_step(self, step):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='building: '+step)
+        self.db.set_build_log_state(self.registration_id, 'building: '+step)
 
     def set_build_error(self, error_message):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='error', error_message=error_message)
+        self.db.set_build_log_state(self.registration_id, 'error', error_message=error_message)
 
     def build_is_complete(self):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='complete')
+        self.db.set_build_log_state(self.registration_id, 'complete')
 
     def cleanup(self):
         if os.path.isdir(os.path.join(self.temp_dir,self.registration_id)):
@@ -338,21 +406,18 @@ class Registrar:
 
     def build_docker_image(self, docker_client, image_name, basedir):
         self.log('\nBuilding the docker image for ' + image_name);
-        #response = [ line for line in docker_client.build(path=basedir,rm=True,tag=image_name) ]
-        #response_stream = response
-        #imageId = response_stream[-1]
-        #self.log(str(response_stream[-1]))
 
         # examine stream to determine success/failure of build
         imageId=None
         last={}
         for line in docker_client.build(path=basedir,rm=True,tag=image_name):
             line_parse = json.loads(line)
+            log_line = ''
             if 'stream' in line_parse:
                 self.log(line_parse['stream'],no_end_line=True)
             if 'errorDetail' in line_parse:
                 self.log(str(line_parse),no_end_line=True)
-                raise ValueError('Docker build failed: '+line_parse['errorDetail'])
+                raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
             last=line_parse
         
         if 'stream' in last and last['stream'][:19]=='Successfully built ':
@@ -365,7 +430,9 @@ class Registrar:
 
     def push_docker_image(self, docker_client, image_name):
         self.log('\nPushing docker image to registry for ' + image_name);
-        (image,tag)=image_name.split(':')
+        colon_pos = image_name.rfind(':')  # This logic supports images with "host:port/" prefix for private registry 
+        image=image_name[:colon_pos]
+        tag=image_name[colon_pos+1:]
         #response = [ line for line in docker_client.push(image, tag=tag, stream=True) ]
         #response_stream = response
         #self.log(str(response_stream))
@@ -375,15 +442,16 @@ class Registrar:
             # example line:
             #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
             line_parse = json.loads(line)
+            log_line = ''
             if 'id' in line_parse:
-                self.log(line_parse['id']+' - ',no_end_line=True)
+                log_line += line_parse['id']+' - ';
             if 'status' in line_parse:
-                self.log(line_parse['status'],no_end_line=True)
+                log_line += line_parse['status']
             if 'progress' in line_parse:
-                self.log(' - ' + line_parse['progress'],no_end_line=True)
+                log_line += ' - ' + line_parse['progress']
             #if 'progressDetail' in line_parse:
             #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
-            self.log('') # add an endline
+            self.log(log_line)
 
         # check for errors here somehow!
 

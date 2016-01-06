@@ -1,0 +1,22 @@
+{   
+    "error_message" : "",
+    "git_url" : "https://github.com/kbaseIncubator/registration_in_progress",
+    "log" : [
+        {
+            "content" : "did stuff line 1",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 2",
+            "error" : false
+        },
+        {
+            "content" : "did stuff line 3",
+            "error" : false
+        }
+    ],
+    "module_name_lc" : "registration_in_progress",
+    "registration" : "building some stuff",
+    "registration_id" : "1445024094055_3333",
+    "timestamp" : 1445024094055
+}

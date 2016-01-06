@@ -102,6 +102,12 @@ sync_methods['Catalog.get_module_state'] = True
 async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
 async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
 sync_methods['Catalog.get_build_log'] = True
+async_run_methods['Catalog.get_parsed_build_log_async'] = ['Catalog', 'get_parsed_build_log']
+async_check_methods['Catalog.get_parsed_build_log_check'] = ['Catalog', 'get_parsed_build_log']
+sync_methods['Catalog.get_parsed_build_log'] = True
+async_run_methods['Catalog.list_builds_async'] = ['Catalog', 'list_builds']
+async_check_methods['Catalog.list_builds_check'] = ['Catalog', 'list_builds']
+sync_methods['Catalog.list_builds'] = True
 async_run_methods['Catalog.delete_module_async'] = ['Catalog', 'delete_module']
 async_check_methods['Catalog.delete_module_check'] = ['Catalog', 'delete_module']
 sync_methods['Catalog.delete_module'] = True
@@ -323,6 +329,7 @@ class MethodContext(dict):
         self['method'] = None
         self['call_id'] = None
         self['rpc_context'] = None
+        self['provenance'] = None
         self._debug_levels = set([7, 8, 9, 'DEBUG', 'DEBUG2', 'DEBUG3'])
         self._logger = logger
 
@@ -452,6 +459,14 @@ class Application(object):
                              name='Catalog.get_build_log',
                              types=[basestring])
         self.method_authentication['Catalog.get_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_parsed_build_log,
+                             name='Catalog.get_parsed_build_log',
+                             types=[dict])
+        self.method_authentication['Catalog.get_parsed_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_builds,
+                             name='Catalog.list_builds',
+                             types=[dict])
+        self.method_authentication['Catalog.list_builds'] = 'none'
         self.rpc_service.add(impl_Catalog.delete_module,
                              name='Catalog.delete_module',
                              types=[dict])
@@ -519,6 +534,9 @@ class Application(object):
                 ctx['module'], ctx['method'] = req['method'].split('.')
                 ctx['call_id'] = req['id']
                 ctx['rpc_context'] = {'call_stack': [{'time':self.now_in_utc(), 'method': req['method']}]}
+                prov_action = {'service': ctx['module'], 'method': ctx['method'], 
+                               'method_params': req['params']}
+                ctx['provenance'] = [prov_action]
                 try:
                     token = environ.get('HTTP_AUTHORIZATION')
                     # parse out the method being requested and check if it
@@ -742,6 +760,10 @@ def process_async_cli(input_file_path, output_file_path, token):
     if 'context' in req:
         ctx['rpc_context'] = req['context']
     ctx['CLI'] = 1
+    ctx['module'], ctx['method'] = req['method'].split('.')
+    prov_action = {'service': ctx['module'], 'method': ctx['method'], 
+                   'method_params': req['params']}
+    ctx['provenance'] = [prov_action]
     resp = None
     try:
         resp = application.rpc_service.call_py(ctx, req)

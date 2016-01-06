@@ -15,7 +15,7 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: Catalog</p>
  * <pre>
- * Service for managing, registering, and building KBase Modules.
+ * Service for managing, registering, and building KBase Modules using the KBase SDK.
  * </pre>
  */
 public class CatalogClient {
@@ -157,6 +157,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: is_registered</p>
      * <pre>
+     * returns true (1) if the module exists, false (2) otherwise
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.SelectOneModuleParams SelectOneModuleParams}
      * @return   instance of original type "boolean" (@range [0,1])
@@ -361,7 +362,6 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_build_log</p>
      * <pre>
-     * given the registration_id returned from the register method, you can check the build log with this method
      * </pre>
      * @param   registrationId   instance of String
      * @return   instance of String
@@ -373,6 +373,41 @@ public class CatalogClient {
         args.add(registrationId);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
         List<String> res = caller.jsonrpcCall("Catalog.get_build_log", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_parsed_build_log</p>
+     * <pre>
+     * given the registration_id returned from the register method, you can check the build log with this method
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetBuildLogParams GetBuildLogParams}
+     * @return   parameter "build_log" of type {@link us.kbase.catalog.BuildLog BuildLog}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public BuildLog getParsedBuildLog(GetBuildLogParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<BuildLog>> retType = new TypeReference<List<BuildLog>>() {};
+        List<BuildLog> res = caller.jsonrpcCall("Catalog.get_parsed_build_log", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_builds</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ListBuildParams ListBuildParams}
+     * @return   parameter "builds" of list of type {@link us.kbase.catalog.BuildInfo BuildInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<BuildInfo> listBuilds(ListBuildParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<BuildInfo>>> retType = new TypeReference<List<List<BuildInfo>>>() {};
+        List<List<BuildInfo>> res = caller.jsonrpcCall("Catalog.list_builds", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 

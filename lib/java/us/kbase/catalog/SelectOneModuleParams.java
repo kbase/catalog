@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: SelectOneModuleParams</p>
  * <pre>
- * Describes how to find module/repository.
+ * Describes how to find a single module/repository.
  * module_name - name of module defined in kbase.yaml file;
  * git_url - the url used to register the module
  * </pre>
