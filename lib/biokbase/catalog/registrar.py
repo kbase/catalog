@@ -451,6 +451,12 @@ class Registrar:
                 log_line += ' - ' + line_parse['progress']
             #if 'progressDetail' in line_parse:
             #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
+
+            # catch anything unexpected, we should probably throw an error here
+            for key in line_parse:
+                if key not in ['id','status','progress','progressDetail']:
+                    log_line += '['+key+'='+line_parse[key]+'] '
+
             self.log(log_line)
 
         # check for errors here somehow!
