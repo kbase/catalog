@@ -455,13 +455,14 @@ class Registrar:
             # catch anything unexpected, we should probably throw an error here
             for key in line_parse:
                 if key not in ['id','status','progress','progressDetail']:
-                    log_line += '['+key+'='+line_parse[key]+'] '
+                    log_line += '['+key+'='+str(line_parse[key])+'] '
 
             self.log(log_line)
 
-        # check for errors here somehow!
+            if 'error' in line_parse:
+                self.log(str(line_parse),no_end_line=True)
+                raise ValueError('Docker push failed: '+str(line_parse['error']))
 
-        
         self.log('done pushing docker image to registry for ' + image_name+'\n');
 
 
