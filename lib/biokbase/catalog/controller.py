@@ -75,7 +75,15 @@ class CatalogController:
             raise ValueError('"docker-registry-host" config variable must be defined to start a CatalogController!')
         self.docker_registry_host = config['docker-registry-host']
         print(self.docker_registry_host)
+        
+        if 'ref-data-base' not in config:
+            raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')
+        self.ref_data_base = config['ref-data-base']
 
+        if 'kbase-endpoint' not in config:
+            raise ValueError('"kbase-endpoint" config variable must be defined to start a CatalogController!')
+        self.kbase_endpoint = config['kbase-endpoint']
+        
         if 'nms-url' not in config:
             raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
         self.nms_url = config['nms-url']
@@ -162,7 +170,7 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
+            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint))
         t.start()
 
         # 4) provide the registration_id 
@@ -644,8 +652,9 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
+                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint):
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
-                            nms_url, nms_admin_user, nms_admin_psswd, module_details)
+                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint)
     registrar.start_registration()
 
