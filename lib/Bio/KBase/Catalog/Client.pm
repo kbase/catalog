@@ -825,6 +825,8 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
 
 </pre>
 
@@ -854,6 +856,8 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
 
 
 =end text
@@ -940,6 +944,8 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
 
 </pre>
 
@@ -963,6 +969,8 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
 
 
 =end text
@@ -1046,6 +1054,8 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
 
 </pre>
 
@@ -1066,6 +1076,8 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
 
 
 =end text
@@ -2607,6 +2619,19 @@ git_url has a value which is a string
 
 
 
+=item Description
+
+data_folder - optional field representing unique module name (like <module_name> transformed to
+    lower cases) used for reference data purposes (see description for data_version field). This
+    value will be treated as part of file system path relative to the base that comes from the 
+    config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
+data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+    key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
+    should be initialized by running docker image with "init" target from catalog. And later when
+    async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+    docker container by execution engine.
+
+
 =item Definition
 
 =begin html
@@ -2620,6 +2645,8 @@ git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
 narrative_method_ids has a value which is a reference to a list where each element is a string
 docker_img_name has a value which is a string
+data_folder has a value which is a string
+data_version has a value which is a string
 
 </pre>
 
@@ -2635,6 +2662,8 @@ git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
 narrative_method_ids has a value which is a reference to a list where each element is a string
 docker_img_name has a value which is a string
+data_folder has a value which is a string
+data_version has a value which is a string
 
 
 =end text
