@@ -104,6 +104,7 @@ class Registrar:
             # perhaps make this a self attr?
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
             self.image_name = self.docker_registry_host + '/kbase:' + module_name_lc + '.' + str(git_commit_hash)
+            ref_data_folder = None
             ref_data_ver = None
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
@@ -145,15 +146,17 @@ class Registrar:
                 if 'data-version' in self.kb_yaml:
                     ref_data_ver = str(self.kb_yaml['data-version']).strip()
                     if ref_data_ver:
-                        target_ref_data_dir = os.path.join(self.ref_data_base, module_name_lc, ref_data_ver)
+                        ref_data_folder = module_name_lc
+                        target_ref_data_dir = os.path.join(self.ref_data_base, ref_data_folder, ref_data_ver)
                         if os.path.exists(target_ref_data_dir):
-                            self.log("Reference data for " + module_name_lc + "/" + ref_data_ver + " was " +
+                            self.log("Reference data for " + ref_data_folder + "/" + ref_data_ver + " was " +
                                      "already prepared, initialization step is skipped")
-                        self.set_build_step('preparing reference data (running init entry-point), ' +
-                                            'ref-data version: ' + ref_data_ver)
-                        self.prepare_ref_data(dockerclient, self.image_name, self.ref_data_base, module_name_lc, 
-                                              ref_data_ver, basedir, self.temp_dir, self.registration_id,
-                                              self.token, self.kbase_endpoint)
+                        else:
+                            self.set_build_step('preparing reference data (running init entry-point), ' +
+                                                'ref-data version: ' + ref_data_ver)
+                            self.prepare_ref_data(dockerclient, self.image_name, self.ref_data_base, ref_data_folder, 
+                                                  ref_data_ver, basedir, self.temp_dir, self.registration_id,
+                                                  self.token, self.kbase_endpoint)
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
@@ -164,7 +167,7 @@ class Registrar:
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
-            self.update_the_catalog(repo, basedir, module_name_lc, ref_data_ver)
+            self.update_the_catalog(repo, basedir, ref_data_folder, ref_data_ver)
             
             self.build_is_complete()
 
