@@ -525,8 +525,18 @@ class Registrar:
             cnt_id = container.get('Id')
             self.log('Running init entry-point for ref-data, container Id=' + cnt_id)
             dockerclient.start(container=cnt_id)
-            for char in dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True):
-                self.log(char, no_end_line=True)
+            stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
+            line = ""
+            for char in stream:
+                if char == '\r':
+                    continue
+                if char == '\n':
+                    self.log(line)
+                    line = ""
+                else:
+                    line += char
+            if len(line) > 0:
+                    self.log(line)
             ready_file = os.path.join(temp_ref_data_dir, "__READY__")
             if os.path.exists(ready_file):
                 target_dir = os.path.join(upper_target_dir, ref_data_ver)
