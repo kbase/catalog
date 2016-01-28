@@ -284,5 +284,40 @@ module Catalog {
     funcdef approve_developer(string username) returns () authentication required;
     funcdef revoke_developer(string username) returns () authentication required;
 
+    /*
+        user_id - GlobusOnline login of invoker,
+        method_name - fully qualified method name (including module name and slash),
+        creation_time, exec_start_time and finish_time - defined in milliseconds.
+    */
+    typedef structure {
+        string user_id;
+        string method_name;
+        int creation_time;
+        int exec_start_time;
+        int finish_time;
+        boolean is_failure;
+    } LogExecutionStatsParams;
 
+    /*
+        Request from Execution Engine for adding statistics about each method run. It could be done
+        using catalog admin credentials only.
+    */
+    funcdef log_execution_stats(LogExecutionStatsParams params) returns () authentication required;
+
+    typedef structure {
+        list<string> method_names;
+    } GetMethodAggrStatsParams;
+
+    /*
+        avg_queue_time and avg_exec_time - defined in milliseconds (rounded to long)
+    */
+    typedef structure {
+        string method_name;
+        int number_of_calls;
+        int number_of_errors;
+        int avg_queue_time;
+        int avg_exec_time;
+    } MethodAggrStats;
+
+    funcdef get_method_aggr_stats(GetMethodAggrStatsParams params) returns (list<MethodAggrStats>);
 };
