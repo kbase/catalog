@@ -314,14 +314,14 @@ module Catalog {
     funcdef log_exec_stats(LogExecStatsParams params) returns () authentication required;
 
     /*
-        app_ids - list of fully qualified app IDs (including module_name prefix followed by
+        full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
             slash in case of dynamically registered repo).
-        func_names - list of fully qualified names of KIDL-spec functions (including
+        full_func_names - list of fully qualified names of KIDL-spec functions (including
             module_name prefix followed by slash in case of dynamically registered repo).
     */
     typedef structure {
-        list<string> app_ids;
-        list<string> func_names;
+        list<string> full_app_ids;
+        list<string> full_func_names;
     } GetExecAggrStatsParams;
 
     /*
