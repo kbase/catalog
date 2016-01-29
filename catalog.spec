@@ -286,38 +286,63 @@ module Catalog {
 
     /*
         user_id - GlobusOnline login of invoker,
-        method_name - fully qualified method name (including module name and slash),
-        creation_time, exec_start_time and finish_time - defined in milliseconds.
+        module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services),
+        app_id - optional method-spec id without module_name prefix (could be absent or null
+            in case original execution was started through API call without app ID defined),
+        func_name - name of function in KIDL-spec without module_name prefix,
+        git_commit_hash - optional service version (in case of dynamically registered repo),
+        creation_time, exec_start_time and finish_time - defined in milliseconds,
+        is_error - indicates whether execution was finished with error or not.
     */
     typedef structure {
         string user_id;
-        string method_name;
+        string module_name;
+        string app_id;
+        string func_name;
+        string git_commit_hash;
         int creation_time;
         int exec_start_time;
         int finish_time;
-        boolean is_failure;
-    } LogExecutionStatsParams;
+        boolean is_error;
+    } LogExecStatsParams;
 
     /*
         Request from Execution Engine for adding statistics about each method run. It could be done
         using catalog admin credentials only.
     */
-    funcdef log_execution_stats(LogExecutionStatsParams params) returns () authentication required;
-
-    typedef structure {
-        list<string> method_names;
-    } GetMethodAggrStatsParams;
+    funcdef log_exec_stats(LogExecStatsParams params) returns () authentication required;
 
     /*
-        avg_queue_time and avg_exec_time - defined in milliseconds (rounded to long)
+        app_ids - list of fully qualified app IDs (including module_name prefix followed by
+            slash in case of dynamically registered repo).
+        func_names - list of fully qualified names of KIDL-spec functions (including
+            module_name prefix followed by slash in case of dynamically registered repo).
     */
     typedef structure {
-        string method_name;
+        list<string> app_ids;
+        list<string> func_names;
+    } GetExecAggrStatsParams;
+
+    /*
+        full_app_id - optional fully qualified method-spec id including module_name prefix followed
+            by slash in case of dynamically registered repo (it could be absent or null in case
+            original execution was started through API call without app ID defined),
+        full_func_name - fully qualified name of KIDL-spec function (including module_name prefix
+            followed by slash in case of dynamically registered repo),
+        avg_queue_time - average time difference between exec_start_time and creation_time moments
+            defined in milliseconds (rounded to long),
+        avg_exec_time - average time difference between finish_time and exec_start_time moments 
+            defined in milliseconds (rounded to long).
+    */
+    typedef structure {
+        string full_app_id;
+        string full_func_name;
         int number_of_calls;
         int number_of_errors;
         int avg_queue_time;
         int avg_exec_time;
-    } MethodAggrStats;
+    } ExecAggrStats;
 
-    funcdef get_method_aggr_stats(GetMethodAggrStatsParams params) returns (list<MethodAggrStats>);
+    funcdef get_exec_aggr_stats(GetExecAggrStatsParams params) returns (list<ExecAggrStats>);
 };
