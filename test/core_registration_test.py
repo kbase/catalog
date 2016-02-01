@@ -261,6 +261,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
+        self.assertTrue(info['release']['release_timestamp']>info['release']['timestamp']);
         self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         versions = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]

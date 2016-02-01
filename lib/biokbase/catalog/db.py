@@ -114,6 +114,7 @@ class MongoCatalogDBI:
         self.build_logs.ensure_index('timestamp')
         self.build_logs.ensure_index('registration')
         self.build_logs.ensure_index('git_url')
+        self.build_logs.ensure_index('current_versions.release.release_timestamp')
 
 
 
@@ -279,12 +280,16 @@ class MongoCatalogDBI:
         return False
 
 
-    def push_beta_to_release(self, module_name='', git_url=''):
+    def push_beta_to_release(self, module_name='', git_url='', release_timestamp=None):
         current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
         beta_version = current_versions['beta']
 
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         query['current_versions.beta.timestamp'] = beta_version['timestamp']
+
+        if not release_timestamp:
+            raise ValueError('internal error- timestamp not set in push_beta_to_release')
+        beta_version['release_timestamp'] = release_timestamp
         
         # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
         result = self.modules.update(query, {'$set':{

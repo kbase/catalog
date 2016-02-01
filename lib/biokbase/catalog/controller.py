@@ -316,9 +316,12 @@ class CatalogController:
         # here because if this is done twice (for instance, before the release_state is set to approved in
         # the document in the next call) there won't be any problems.)  I like nested parentheses.
         if review['decision']=='approved':
+            release_timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
             self.nms.push_repo_to_tag({'module_name':module_details['module_name'], 'tag':'release'})
-            error = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
-
+            error = self.db.push_beta_to_release(
+                        module_name=review['module_name'],
+                        git_url=review['git_url'],
+                        release_timestamp=release_timestamp)
 
         # Now we can update the release state state...
         error = self.db.set_module_release_state(
