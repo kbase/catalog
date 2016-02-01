@@ -286,10 +286,12 @@ module Catalog {
 
     /*
         user_id - GlobusOnline login of invoker,
-        module_name - optional module name of registered repo (could be absent of null for
-            old fashioned services),
+        app_module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services) where app_id comes from,
         app_id - optional method-spec id without module_name prefix (could be absent or null
             in case original execution was started through API call without app ID defined),
+        func_module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services) where func_name comes from,
         func_name - name of function in KIDL-spec without module_name prefix,
         git_commit_hash - optional service version (in case of dynamically registered repo),
         creation_time, exec_start_time and finish_time - defined in milliseconds,
@@ -297,8 +299,9 @@ module Catalog {
     */
     typedef structure {
         string user_id;
-        string module_name;
+        string app_module_name;
         string app_id;
+        string func_module_name;
         string func_name;
         string git_commit_hash;
         int creation_time;
