@@ -16,6 +16,7 @@ test-user-2 = wstester2
 
 # Example repos for testing
 test-module-repo-1 = https://github.com/kbaseIncubator/catalog_test_module
+test-module-repo-2 = https://github.com/kbaseIncubator/catalog_test_module.git
 
 # host where mongo lives, e.g. localhost:27017, for tests there should be not authentication required
 mongodb-host = localhost:27017
