@@ -36,6 +36,9 @@ nms-url = http://localhost:7125
 nms-admin-user = wstester4
 nms-admin-psswd = 
 
+# configs for reference data
+ref-data-base = /kb/data
+kbase-endpoint = https://ci.kbase.us/services
 
 
 [NarrativeMethodStore]

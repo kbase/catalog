@@ -77,7 +77,9 @@ class CatalogTestUtil:
             'docker-registry-host':self.test_cfg['docker-registry-host'],
             'nms-url':self.test_cfg['nms-url'],
             'nms-admin-user':self.test_cfg['nms-admin-user'],
-            'nms-admin-psswd':self.test_cfg['nms-admin-psswd']
+            'nms-admin-psswd':self.test_cfg['nms-admin-psswd'],
+            'ref-data-base':self.test_cfg['ref-data-base'],
+            'kbase-endpoint':self.test_cfg['kbase-endpoint']
         }
 
 
