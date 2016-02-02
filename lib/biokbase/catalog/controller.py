@@ -493,9 +493,9 @@ class CatalogController:
         # if set to inactive, disable the repo in NMS
         if(not active):
             self.nms.disable_repo({'module_name':module_details['module_name']})
-        # if set to active, enable the repo (method does not yet exist!)
-        #else:
-        #    self.nms.enable_repo({'module_name':module_details['module_name']})
+        # if set to active, enable the repo
+        else:
+            self.nms.enable_repo({'module_name':module_details['module_name']})
 
 
     def approve_developer(self, developer, username):

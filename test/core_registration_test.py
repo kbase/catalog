@@ -533,28 +533,25 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertTrue(foundMeth,'Make sure we found the method in NMS')
 
         # make it inactive (calling twice should be ok and shouldn't change anything)
+        self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
+        self.assertEqual(state['active'],0)
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
+                foundMeth = True
+        self.assertFalse(foundMeth,'Make sure we did not find the method in NMS')
 
-        # SKIP INACTIVATE TESTS UNTIL WE HAVE AN ACTIVATE METHOD IN NMS
-
-        #self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
-        #state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
-        #self.assertEqual(state['active'],0)
-        #method_list = self.nms.list_methods({'tag':'dev'})
-        #foundMeth = False
-        #for meth in method_list:
-        #    if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
-        #        foundMeth = True
-        #self.assertFalse(foundMeth,'Make sure we did not find the method in NMS')
-
-        #self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
-        #state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
-        #self.assertEqual(state['active'],0)
-        #method_list = self.nms.list_methods({'tag':'dev'})
-        #foundMeth = False
-        #for meth in method_list:
-        #    if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
-        #        foundMeth = True
-        #self.assertFalse(foundMeth,'Make sure we did not find the method in NMS')
+        self.catalog.set_to_inactive(self.cUtil.admin_ctx(),params)
+        state = self.catalog.get_module_state(self.cUtil.user_ctx(),params)[0]
+        self.assertEqual(state['active'],0)
+        method_list = self.nms.list_methods({'tag':'dev'})
+        foundMeth = False
+        for meth in method_list:
+            if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
+                foundMeth = True
+        self.assertFalse(foundMeth,'Make sure we did not find the method in NMS again')
 
 
         # these still shouldn't work
