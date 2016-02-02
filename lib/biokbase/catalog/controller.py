@@ -603,7 +603,7 @@ class CatalogController:
 
     def delete_module(self,params,username):
         if not self.is_admin(username):
-            raise ValueError('Only Admin users can migrate module git urls.')
+            raise ValueError('Only Admin users can delete modules.')
         if 'module_name' not in params and 'git_url' not in params:
             raise ValueError('You must specify the "module_name" or "git_url" of the module to delete.')
         params = self.filter_module_or_repo_selection(params)

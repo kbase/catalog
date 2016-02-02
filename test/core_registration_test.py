@@ -101,12 +101,16 @@ class CoreRegistrationTest(unittest.TestCase):
 
 
         # check some bad parameters
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
                             {'registration_id':registration_id, 'skip':4 })[0]
-        with self.assertRaises(ValueError):
+        self.assertEqual(str(e.exception),
+            'Cannot specify the skip argument without a limit- blame Mongo');
+        with self.assertRaises(ValueError) as e:
             parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
                             {'registration_id':registration_id, 'first_n':4, 'last_n':2 })[0]
+        self.assertEqual(str(e.exception),
+            'Cannot combine skip/limit/first_n with last_n parameters');
 
 
         # (3) get module info
@@ -336,6 +340,20 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['release']['timestamp'],timestamp)
         self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
+
+        # assert fail on request release because you can't update release version if they are the same
+        with self.assertRaises(ValueError) as e:
+            self.catalog.request_release(self.cUtil.user_ctx(),{'module_name':info['module_name']});
+        self.assertEqual(str(e.exception),
+            'Cannot request release - beta version is identical to released version.');
+
+        # migrate dev to beta, release it.  Register new version, but with same version number.  Try to update, should get a semantic version not updated error
+
+
+
+
+
+
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
         self.assertEqual(info['git_url'],giturl)
         self.assertEqual(info['module_name'],module_name)
@@ -384,10 +402,11 @@ class CoreRegistrationTest(unittest.TestCase):
     def test_remove_module(self):
 
         # we cannot delete modules unles we are an admin user
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             self.catalog.delete_module(self.cUtil.user_ctx(),
                 {'module_name':'registration_error'})
-
+        self.assertEqual(str(e.exception),
+            'Only Admin users can delete modules.');
 
         method_list = self.nms.list_methods({'tag':'dev'})
 
@@ -431,16 +450,20 @@ class CoreRegistrationTest(unittest.TestCase):
 
         # we cannot remove modules that have been released
         self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             self.catalog.delete_module(self.cUtil.admin_ctx(),
                 {'module_name':'onerepotest'})
         self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
-
+        self.assertEqual(str(e.exception),
+            'Cannot delete module that has been released.  Make it inactive instead.');
         self.assertEqual(self.catalog.is_registered({},{'git_url':'https://github.com/kbaseIncubator/release_history'})[0],1)
-        with self.assertRaises(ValueError):
+
+        with self.assertRaises(ValueError) as e:
             self.catalog.delete_module(self.cUtil.admin_ctx(),
                 {'git_url':'https://github.com/kbaseIncubator/release_history'})
         self.assertEqual(self.catalog.is_registered({},{'git_url':'https://github.com/kbaseIncubator/release_history'})[0],1)
+        self.assertEqual(str(e.exception),
+            'Cannot delete module that has been released.  Make it inactive instead.');
 
 
 

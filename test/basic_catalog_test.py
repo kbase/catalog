@@ -194,21 +194,31 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(state['error_message'],'')
 
         # test various fail cases where a module does not exist
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'not_a_module'})
-        with self.assertRaises(ValueError):
+        self.assertEqual(str(e.exception),
+            'Operation failed - module/repo is not registered.');
+        with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'git_url':'not_a_giturl'})
-        with self.assertRaises(ValueError):
+        self.assertEqual(str(e.exception),
+            'Operation failed - module/repo is not registered.');
+        with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {})
-        with self.assertRaises(ValueError):
+        self.assertEqual(str(e.exception),
+            'Operation failed - module/repo is not registered.');
+        with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'not_a_module','git_url':'https://github.com/kbaseIncubator/registration_in_progress'})
-        with self.assertRaises(ValueError):
+        self.assertEqual(str(e.exception),
+            'Operation failed - module/repo is not registered.');
+        with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'onerepotest','git_url':'not_a_url'})
+        self.assertEqual(str(e.exception),
+            'Operation failed - module/repo is not registered.');
 
 
     def test_get_module_info(self):
@@ -305,31 +315,41 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(vinfo['narrative_methods'],['send_data'])
 
         # wrong version set
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                 {'module_name':'release_history', 'version':'not_a_Version'})
+        self.assertEqual(str(e.exception),
+            'invalid version selection, valid versions are: "dev" | "beta" | "release"');
         # test wrong git commit hash
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'version':'release',
                     'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128'})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
         # test wrong timestamp
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'version':'release',
                     'timestamp':1445024094055})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
         # right git commit, wrong timestamp
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'version':'release',
                     'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128',
                     'timestamp':1445024094055})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
         # right timestamp, wrong git commit hash
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'version':'release',
                     'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6',
                     'timestamp':1445022818884})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
 
         #########
         # now we test with a timestamp retrieval, first from one of the currents
@@ -350,10 +370,12 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(vinfo['version'],"0.0.3")
         self.assertEqual(vinfo['narrative_methods'],['send_data'])
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'timestamp':1445022818884,
                     'git_commit_hash':"49dc505febb8f4cccb2078c51ded0de3320534d7"})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
 
         # now with something in the history
         vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
@@ -374,15 +396,19 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(vinfo['narrative_methods'],['send_data'])
 
         # test wrong timestamp
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history',
                     'timestamp':1445024094078})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'timestamp':1445022818000, 
                     'git_commit_hash':"49dc505febb8f4cccb2078c51ded0de3320534d7"})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
 
 
 
@@ -406,10 +432,12 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(vinfo['narrative_methods'],['send_data'])
 
         # test wrong git commit hash
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 
                     'git_commit_hash':'b06c5f9daf603a4d202071787c3f6184000bf128'})[0]
+        self.assertEqual(str(e.exception),
+            'No version found that matches all your criteria!');
 
 
 
