@@ -6,6 +6,7 @@ import time
 import copy
 import os
 import random
+import semantic_version
 
 import biokbase.catalog.version
 
@@ -250,6 +251,14 @@ class CatalogController:
         if module_details['current_versions']['release']:
             if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
                 raise ValueError('Cannot request release - beta version is identical to released version.')
+            if module_details['current_versions']['beta']['version'] == module_details['current_versions']['release']['version']:
+                raise ValueError('Cannot request release - beta version has same version number to released version.')
+            # check that the version number actually increased (assume at this point we already confirmed semantic version was correct)
+            beta_sv = semantic_version.Version(module_details['current_versions']['beta']['version'])
+            release_sv = semantic_version.Version(module_details['current_versions']['release']['version'])
+            if beta_sv <= release_sv:
+                raise ValueError('Cannot request release - beta version semantic version must be greater '
+                    +'than the released version semantic version, as determined by http://semver.org')
 
         # ok, do it.
         error = self.db.set_module_release_state(

@@ -7,6 +7,7 @@ import time
 import datetime
 import pprint
 import json
+import semantic_version
 
 import git
 import yaml
@@ -202,6 +203,11 @@ class Registrar:
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name').strip()
         module_description = self.get_required_field_as_string(self.kb_yaml,'module-description').strip()
         version = self.get_required_field_as_string(self.kb_yaml,'module-version').strip()
+
+        # must be a semantic version
+        if not semantic_version.validate(version):
+            raise ValueError('Invalid version string in kbase.yaml - must be in semantic version format.  See http://semver.org')
+
         service_language = self.get_required_field_as_string(self.kb_yaml,'service-language').strip()
         owners = self.get_required_field_as_list(self.kb_yaml,'owners')
 
