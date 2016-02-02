@@ -485,9 +485,17 @@ class CatalogController:
         params = self.filter_module_or_repo_selection(params)
         if not self.is_admin(username):
             raise ValueError('Only Admin users can set a module to be active/inactive.')
+        module_details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
         error = self.db.set_module_active_state(active, module_name=params['module_name'], git_url=params['git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
+
+        # if set to inactive, disable the repo in NMS
+        if(not active):
+            self.nms.disable_repo({'module_name':module_details['module_name']})
+        # if set to active, enable the repo (method does not yet exist!)
+        #else:
+        #    self.nms.enable_repo({'module_name':module_details['module_name']})
 
 
     def approve_developer(self, developer, username):
@@ -607,12 +615,11 @@ class CatalogController:
         if 'module_name' not in params and 'git_url' not in params:
             raise ValueError('You must specify the "module_name" or "git_url" of the module to delete.')
         params = self.filter_module_or_repo_selection(params)
+        module_details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
         error = self.db.delete_module(module_name=params['module_name'], git_url=params['git_url'])
         if error is not None:
             raise ValueError('Delete operation failed - some unknown database error: '+error)
-
-        if params['module_name']:
-            self.nms.disable_repo({'module_name':params['module_name']})
+        self.nms.disable_repo({'module_name':module_details['module_name']})
 
 
     def migrate_module_to_new_git_url(self, params, username):
