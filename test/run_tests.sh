@@ -21,5 +21,9 @@ echo '\nstarting tests'
 
 export PYTHONPATH=pylib:$PYTHONPATH
 python -m unittest discover -p "*_test.py"
+TEST_RETURN_CODE=$?
+echo "unit tests returned with error code=${TEST_RETURN_CODE}"
 
 kill -9 $NMS_PID
+
+exit ${TEST_RETURN_CODE}
