@@ -1,0 +1,69 @@
+[
+{
+    "module_name_lc" : "denied_release",
+    "id":"send_data",
+    "timestamp":1445024095000,
+    "user" : "msneddon"
+},
+{
+    "module_name_lc" : "denied_release",
+    "id":"send_data",
+    "timestamp":1445024095001,
+    "user" : "kbasetest"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095003,
+    "user" : "msneddon"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095004,
+    "user" : "user1234"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095005,
+    "user" : "user44"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095006,
+    "user" : "user22"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095007,
+    "user" : "user33"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095008,
+    "user" : "user42"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data",
+    "timestamp":1445024095009,
+    "user" : "roman"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data2",
+    "timestamp":1445024095010,
+    "user" : "roman"
+},
+{
+    "module_name_lc" : "release_history",
+    "id":"send_data2",
+    "timestamp":1445024095011,
+    "user" : "msneddon"
+}
+
+]
