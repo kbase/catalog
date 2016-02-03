@@ -382,3 +382,36 @@ class Catalog:
         usernames = self.cc.revoke_developer(username, ctx['user_id'])
         #END revoke_developer
         pass
+
+    def log_exec_stats(self, ctx, params):
+        # ctx is the context object
+        #BEGIN log_exec_stats
+        admin_user_id = ctx['user_id']
+        user_id = params['user_id']
+        app_module_name = None if 'app_module_name' not in params else params['app_module_name']
+        app_id = None if 'app_id' not in params else params['app_id']
+        func_module_name = None if 'func_module_name' not in params else params['func_module_name']
+        func_name = params['func_name']
+        git_commit_hash = None if 'git_commit_hash' not in params else params['git_commit_hash']
+        creation_time = params['creation_time']
+        exec_start_time = params['exec_start_time']
+        finish_time = params['finish_time']
+        is_error = params['is_error'] != 0
+        self.cc.log_exec_stats(admin_user_id, user_id, app_module_name, app_id, func_module_name,
+                               func_name, git_commit_hash, creation_time, exec_start_time, 
+                               finish_time, is_error)
+        #END log_exec_stats
+        pass
+
+    def get_exec_aggr_stats(self, ctx, params):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN get_exec_aggr_stats
+        #END get_exec_aggr_stats
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, list):
+            raise ValueError('Method get_exec_aggr_stats return value ' +
+                             'returnVal is not type list as required.')
+        # return the results
+        return [returnVal]

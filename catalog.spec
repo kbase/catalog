@@ -333,5 +333,68 @@ module Catalog {
     funcdef approve_developer(string username) returns () authentication required;
     funcdef revoke_developer(string username) returns () authentication required;
 
+    /*
+        user_id - GlobusOnline login of invoker,
+        app_module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services) where app_id comes from,
+        app_id - optional method-spec id without module_name prefix (could be absent or null
+            in case original execution was started through API call without app ID defined),
+        func_module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services) where func_name comes from,
+        func_name - name of function in KIDL-spec without module_name prefix,
+        git_commit_hash - optional service version (in case of dynamically registered repo),
+        creation_time, exec_start_time and finish_time - defined in seconds since Epoch (POSIX),
+        is_error - indicates whether execution was finished with error or not.
+    */
+    typedef structure {
+        string user_id;
+        string app_module_name;
+        string app_id;
+        string func_module_name;
+        string func_name;
+        string git_commit_hash;
+        float creation_time;
+        float exec_start_time;
+        float finish_time;
+        boolean is_error;
+    } LogExecStatsParams;
 
+    /*
+        Request from Execution Engine for adding statistics about each method run. It could be done
+        using catalog admin credentials only.
+    */
+    funcdef log_exec_stats(LogExecStatsParams params) returns () authentication required;
+
+    /*
+        full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
+            slash in case of dynamically registered repo).
+        per_week - optional flag switching results to weekly data rather than one row per app for 
+            all time (default value is false)
+    */
+    typedef structure {
+        list<string> full_app_ids;
+        boolean per_week;
+    } GetExecAggrStatsParams;
+
+    /*
+        full_app_id - optional fully qualified method-spec id including module_name prefix followed
+            by slash in case of dynamically registered repo (it could be absent or null in case
+            original execution was started through API call without app ID defined),
+        time_range - one of supported time ranges (currently it could be either '*' for all time
+            or ISO-encoded week like "2016-W01")
+        avg_queue_time - average time difference between exec_start_time and creation_time moments
+            defined in seconds since Epoch (POSIX),
+        avg_exec_time - average time difference between finish_time and exec_start_time moments 
+            defined in seconds since Epoch (POSIX).
+    */
+    typedef structure {
+        string full_app_id;
+        string time_range;
+        int number_of_calls;
+        int number_of_errors;
+        float avg_queue_time;
+        float avg_exec_time;
+    } ExecAggrStats;
+
+    funcdef get_exec_aggr_stats(GetExecAggrStatsParams params) returns (list<ExecAggrStats>);
 };

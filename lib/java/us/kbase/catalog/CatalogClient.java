@@ -620,4 +620,38 @@ public class CatalogClient {
         TypeReference<Object> retType = new TypeReference<Object>() {};
         caller.jsonrpcCall("Catalog.revoke_developer", args, retType, false, true, jsonRpcContext);
     }
+
+    /**
+     * <p>Original spec-file function name: log_exec_stats</p>
+     * <pre>
+     * Request from Execution Engine for adding statistics about each method run. It could be done
+     * using catalog admin credentials only.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.LogExecStatsParams LogExecStatsParams}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void logExecStats(LogExecStatsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.log_exec_stats", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_exec_aggr_stats</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetExecAggrStatsParams GetExecAggrStatsParams}
+     * @return   instance of list of type {@link us.kbase.catalog.ExecAggrStats ExecAggrStats}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<ExecAggrStats> getExecAggrStats(GetExecAggrStatsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<ExecAggrStats>>> retType = new TypeReference<List<List<ExecAggrStats>>>() {};
+        List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
 }
