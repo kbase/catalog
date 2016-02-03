@@ -638,6 +638,75 @@ class CatalogController:
             raise ValueError('Update operation failed - some unknown database error: '+error)
 
 
+
+    def add_favorite(self, params, username):
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+
+        if 'module_name' not in params:
+            module_name = 'nms.legacy'
+        elif not params['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = params['module_name']
+
+        if 'id' not in params:
+            raise ValueError('Cannot add favorite- id not set')
+        if not params['id']:
+            raise ValueError('Cannot add favorite- id not set')
+        app_id = params['id']
+
+        if not username:
+            raise ValueError('Cannot add favorite- username not set')
+
+        error = self.db.add_favorite(module_name, app_id, username, timestamp)
+        if error is not None:
+            raise ValueError('Add favorite operation failed - some unknown database error: '+error)
+
+    def remove_favorite(self, params, username):
+        if 'module_name' not in params:
+            module_name = 'nms.legacy'
+        elif not params['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = params['module_name']
+
+        if 'id' not in params:
+            raise ValueError('Cannot remove favorite- id not set')
+        if not params['id']:
+            raise ValueError('Cannot remove favorite- id not set')
+        app_id = params['id']
+
+        if not username:
+            raise ValueError('Cannot remove favorite- username not set')
+
+        error = self.db.remove_favorite(module_name, app_id, username)
+        if error is not None:
+            raise ValueError('Remove favorite operation failed - some unknown database error: '+error)
+
+    def list_user_favorites(self, username):
+        return self.db.list_user_favorites(username)
+
+    def list_app_favorites(self, item):
+        if 'module_name' not in item:
+            module_name = 'nms.legacy'
+        elif not item['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = item['module_name']
+
+        if 'id' not in item:
+            raise ValueError('Cannot list app favorites- id not set')
+        if not item['id']:
+            raise ValueError('Cannot list app favorites- id not set')
+        app_id = item['id']
+
+        return self.db.list_app_favorites(module_name, app_id)
+
+    def aggregate_favorites_over_apps(self, params):
+        # no params right now, this just returns everything
+        return self.db.aggregate_favorites_over_apps()
+
+
     # Some utility methods
 
     def filter_module_or_repo_selection(self, params):

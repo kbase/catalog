@@ -100,24 +100,24 @@ module Catalog {
     typedef structure {
         string module_name;
         string git_url;
+
+    } BasicModuleInfo;
+    /*
+    To Add:
         string brief_description;
         list <string> owners;
         boolean is_released;
+    */
 
-        list<AppInfo>
-
-    } BasicModuleInfo;
-
+    /* */
     funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
 
 
     /* FAVORITES!! */
 
-    /* @optonal ver */
     typedef structure {
         string module_name;
         string id;
-        string ver;
     } FavoriteItem;
 
     funcdef add_favorite(FavoriteItem params) returns () authentication required;
@@ -127,46 +127,29 @@ module Catalog {
 
     typedef structure {
         string username;
-        string ver;
         string timestamp;
     } FavoriteUser;
-    funcdef list_favorite_users(FavoriteItem) returns(list<string> users);
+
+    funcdef list_app_favorites(FavoriteItem item) returns(list<FavoriteUser> users);
 
     /* if favorite item is given, will return stars just for that item.  If a module
     name is given, will return stars for all methods in that module.  If none of
-    those are given, then will return stars for everything (eg for an app store); */
-    typedef structure {
-        list<FavoriteItem>
+    those are given, then will return stars for every method that there is info on 
+
+    parameters to add:
+        list<FavoriteItem> items;
         list<string> module_names;
-    } ListStatsParams;
-
-    /* mrt => mean runtime */
-    typedef structure {
-        string module_name;
-        string id;
-        int favs;
-        int runs;
-        float mrt;
-    } QuickStats;
-
-    funcdef list_quick_stats(ListStatsParams params) returns (list<QuickStats> stats)
-
-
-    /* Run Counter
-    typedef structure {
-        string module_name;
-        string id;
-        string commit;
-        float runtime;
-        string ;
-    } RunInfo;
-
-    funcdef add_run_counter(RunInfo runinfo) return () requires authentication;
     */
+    typedef structure {
+    } ListFavoriteCounts;
 
+    typedef structure {
+        string module_name;
+        string app_id;
+        int count;
+    } FavoriteCount;
 
-
-
+    funcdef list_favorite_counts(ListFavoriteCounts params) returns (list<FavoriteCount> counts);
 
 
 

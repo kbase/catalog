@@ -28,7 +28,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "owners",
     "include_released",
     "include_unreleased",
-    "include_disabled"
+    "include_disabled",
+    "include_apps"
 })
 public class ListModuleParams {
 
@@ -40,6 +41,8 @@ public class ListModuleParams {
     private Long includeUnreleased;
     @JsonProperty("include_disabled")
     private Long includeDisabled;
+    @JsonProperty("include_apps")
+    private Long includeApps;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("owners")
@@ -102,6 +105,21 @@ public class ListModuleParams {
         return this;
     }
 
+    @JsonProperty("include_apps")
+    public Long getIncludeApps() {
+        return includeApps;
+    }
+
+    @JsonProperty("include_apps")
+    public void setIncludeApps(Long includeApps) {
+        this.includeApps = includeApps;
+    }
+
+    public ListModuleParams withIncludeApps(Long includeApps) {
+        this.includeApps = includeApps;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -114,7 +132,7 @@ public class ListModuleParams {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((("ListModuleParams"+" [owners=")+ owners)+", includeReleased=")+ includeReleased)+", includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("ListModuleParams"+" [owners=")+ owners)+", includeReleased=")+ includeReleased)+", includeUnreleased=")+ includeUnreleased)+", includeDisabled=")+ includeDisabled)+", includeApps=")+ includeApps)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
