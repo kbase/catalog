@@ -147,6 +147,12 @@ sync_methods['Catalog.approve_developer'] = True
 async_run_methods['Catalog.revoke_developer_async'] = ['Catalog', 'revoke_developer']
 async_check_methods['Catalog.revoke_developer_check'] = ['Catalog', 'revoke_developer']
 sync_methods['Catalog.revoke_developer'] = True
+async_run_methods['Catalog.log_exec_stats_async'] = ['Catalog', 'log_exec_stats']
+async_check_methods['Catalog.log_exec_stats_check'] = ['Catalog', 'log_exec_stats']
+sync_methods['Catalog.log_exec_stats'] = True
+async_run_methods['Catalog.get_exec_aggr_stats_async'] = ['Catalog', 'get_exec_aggr_stats']
+async_check_methods['Catalog.get_exec_aggr_stats_check'] = ['Catalog', 'get_exec_aggr_stats']
+sync_methods['Catalog.get_exec_aggr_stats'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -534,6 +540,14 @@ class Application(object):
                              name='Catalog.revoke_developer',
                              types=[basestring])
         self.method_authentication['Catalog.revoke_developer'] = 'required'
+        self.rpc_service.add(impl_Catalog.log_exec_stats,
+                             name='Catalog.log_exec_stats',
+                             types=[dict])
+        self.method_authentication['Catalog.log_exec_stats'] = 'required'
+        self.rpc_service.add(impl_Catalog.get_exec_aggr_stats,
+                             name='Catalog.get_exec_aggr_stats',
+                             types=[dict])
+        self.method_authentication['Catalog.get_exec_aggr_stats'] = 'none'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
