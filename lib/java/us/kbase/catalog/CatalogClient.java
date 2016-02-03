@@ -277,6 +277,87 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: add_favorite</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void addFavorite(FavoriteItem params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.add_favorite", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: remove_favorite</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void removeFavorite(FavoriteItem params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.remove_favorite", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_favorites</p>
+     * <pre>
+     * </pre>
+     * @param   username   instance of String
+     * @return   parameter "favorites" of list of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FavoriteItem> listFavorites(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(username);
+        TypeReference<List<List<FavoriteItem>>> retType = new TypeReference<List<List<FavoriteItem>>>() {};
+        List<List<FavoriteItem>> res = caller.jsonrpcCall("Catalog.list_favorites", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_app_favorites</p>
+     * <pre>
+     * </pre>
+     * @param   item   instance of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @return   parameter "users" of list of type {@link us.kbase.catalog.FavoriteUser FavoriteUser}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FavoriteUser> listAppFavorites(FavoriteItem item, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(item);
+        TypeReference<List<List<FavoriteUser>>> retType = new TypeReference<List<List<FavoriteUser>>>() {};
+        List<List<FavoriteUser>> res = caller.jsonrpcCall("Catalog.list_app_favorites", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_favorite_counts</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ListFavoriteCounts ListFavoriteCounts}
+     * @return   parameter "counts" of list of type {@link us.kbase.catalog.FavoriteCount FavoriteCount}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FavoriteCount> listFavoriteCounts(ListFavoriteCounts params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<FavoriteCount>>> retType = new TypeReference<List<List<FavoriteCount>>>() {};
+        List<List<FavoriteCount>> res = caller.jsonrpcCall("Catalog.list_favorite_counts", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: get_module_info</p>
      * <pre>
      * </pre>

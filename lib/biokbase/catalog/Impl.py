@@ -132,6 +132,62 @@ class Catalog:
         # return the results
         return [info_list]
 
+    def add_favorite(self, ctx, params):
+        # ctx is the context object
+        #BEGIN add_favorite
+        self.cc.add_favorite(params,ctx['user_id'])
+        #END add_favorite
+        pass
+
+    def remove_favorite(self, ctx, params):
+        # ctx is the context object
+        #BEGIN remove_favorite
+        self.cc.remove_favorite(params,ctx['user_id'])
+        #END remove_favorite
+        pass
+
+    def list_favorites(self, ctx, username):
+        # ctx is the context object
+        # return variables are: favorites
+        #BEGIN list_favorites
+        favorites = self.cc.list_user_favorites(username)
+        #END list_favorites
+
+        # At some point might do deeper type checking...
+        if not isinstance(favorites, list):
+            raise ValueError('Method list_favorites return value ' +
+                             'favorites is not type list as required.')
+        # return the results
+        return [favorites]
+
+    def list_app_favorites(self, ctx, item):
+        # ctx is the context object
+        # return variables are: users
+        #BEGIN list_app_favorites
+        users = self.cc.list_app_favorites(item)
+        #END list_app_favorites
+
+        # At some point might do deeper type checking...
+        if not isinstance(users, list):
+            raise ValueError('Method list_app_favorites return value ' +
+                             'users is not type list as required.')
+        # return the results
+        return [users]
+
+    def list_favorite_counts(self, ctx, params):
+        # ctx is the context object
+        # return variables are: counts
+        #BEGIN list_favorite_counts
+        counts = self.cc.aggregate_favorites_over_apps(params)
+        #END list_favorite_counts
+
+        # At some point might do deeper type checking...
+        if not isinstance(counts, list):
+            raise ValueError('Method list_favorite_counts return value ' +
+                             'counts is not type list as required.')
+        # return the results
+        return [counts]
+
     def get_module_info(self, ctx, selection):
         # ctx is the context object
         # return variables are: info
