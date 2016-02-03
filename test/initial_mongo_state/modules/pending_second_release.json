@@ -51,6 +51,7 @@
         },
         "release" : {
             "git_commit_hash" : "49dc505febb8f4cccb2078c58ded0de3320534d7",
+            "release_timestamp" : 1445022858884,
             "timestamp" : 1445022818884,
             "registration_id" : "1445022818884_4212",
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:pending_second_release.49dc505febb8f4cccb2078c58ded0de3320534d7",

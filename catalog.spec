@@ -86,9 +86,57 @@ module Catalog {
     typedef structure {
         string module_name;
         string git_url;
-    } BasicModuleInfo;
 
+    } BasicModuleInfo;
+    /*
+    To Add:
+        string brief_description;
+        list <string> owners;
+        boolean is_released;
+    */
+
+    /* */
     funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
+
+
+    /* FAVORITES!! */
+
+    typedef structure {
+        string module_name;
+        string id;
+    } FavoriteItem;
+
+    funcdef add_favorite(FavoriteItem params) returns () authentication required;
+    funcdef remove_favorite(FavoriteItem params) returns () authentication required;
+
+    funcdef list_favorites(string username) returns(list<FavoriteItem> favorites);
+
+    typedef structure {
+        string username;
+        string timestamp;
+    } FavoriteUser;
+
+    funcdef list_app_favorites(FavoriteItem item) returns(list<FavoriteUser> users);
+
+    /* if favorite item is given, will return stars just for that item.  If a module
+    name is given, will return stars for all methods in that module.  If none of
+    those are given, then will return stars for every method that there is info on 
+
+    parameters to add:
+        list<FavoriteItem> items;
+        list<string> module_names;
+    */
+    typedef structure {
+    } ListFavoriteCounts;
+
+    typedef structure {
+        string module_name;
+        string app_id;
+        int count;
+    } FavoriteCount;
+
+    funcdef list_favorite_counts(ListFavoriteCounts params) returns (list<FavoriteCount> counts);
+
 
 
     /*
@@ -221,6 +269,7 @@ module Catalog {
 
 
     typedef structure {
+        string timestamp;
         string registration_id;
         string registration;
         string error_message;

@@ -6,6 +6,7 @@ import time
 import copy
 import os
 import random
+import semantic_version
 
 import biokbase.catalog.version
 
@@ -250,6 +251,14 @@ class CatalogController:
         if module_details['current_versions']['release']:
             if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
                 raise ValueError('Cannot request release - beta version is identical to released version.')
+            if module_details['current_versions']['beta']['version'] == module_details['current_versions']['release']['version']:
+                raise ValueError('Cannot request release - beta version has same version number to released version.')
+            # check that the version number actually increased (assume at this point we already confirmed semantic version was correct)
+            beta_sv = semantic_version.Version(module_details['current_versions']['beta']['version'])
+            release_sv = semantic_version.Version(module_details['current_versions']['release']['version'])
+            if beta_sv <= release_sv:
+                raise ValueError('Cannot request release - beta version semantic version must be greater '
+                    +'than the released version semantic version, as determined by http://semver.org')
 
         # ok, do it.
         error = self.db.set_module_release_state(
@@ -316,9 +325,12 @@ class CatalogController:
         # here because if this is done twice (for instance, before the release_state is set to approved in
         # the document in the next call) there won't be any problems.)  I like nested parentheses.
         if review['decision']=='approved':
+            release_timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
             self.nms.push_repo_to_tag({'module_name':module_details['module_name'], 'tag':'release'})
-            error = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
-
+            error = self.db.push_beta_to_release(
+                        module_name=review['module_name'],
+                        git_url=review['git_url'],
+                        release_timestamp=release_timestamp)
 
         # Now we can update the release state state...
         error = self.db.set_module_release_state(
@@ -473,9 +485,17 @@ class CatalogController:
         params = self.filter_module_or_repo_selection(params)
         if not self.is_admin(username):
             raise ValueError('Only Admin users can set a module to be active/inactive.')
+        module_details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
         error = self.db.set_module_active_state(active, module_name=params['module_name'], git_url=params['git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
+
+        # if set to inactive, disable the repo in NMS
+        if(not active):
+            self.nms.disable_repo({'module_name':module_details['module_name']})
+        # if set to active, enable the repo
+        else:
+            self.nms.enable_repo({'module_name':module_details['module_name']})
 
 
     def approve_developer(self, developer, username):
@@ -591,16 +611,15 @@ class CatalogController:
 
     def delete_module(self,params,username):
         if not self.is_admin(username):
-            raise ValueError('Only Admin users can migrate module git urls.')
+            raise ValueError('Only Admin users can delete modules.')
         if 'module_name' not in params and 'git_url' not in params:
             raise ValueError('You must specify the "module_name" or "git_url" of the module to delete.')
         params = self.filter_module_or_repo_selection(params)
+        module_details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
         error = self.db.delete_module(module_name=params['module_name'], git_url=params['git_url'])
         if error is not None:
             raise ValueError('Delete operation failed - some unknown database error: '+error)
-
-        if params['module_name']:
-            self.nms.disable_repo({'module_name':params['module_name']})
+        self.nms.disable_repo({'module_name':module_details['module_name']})
 
 
     def migrate_module_to_new_git_url(self, params, username):
@@ -617,6 +636,75 @@ class CatalogController:
         error = self.db.migrate_module_to_new_git_url(params['module_name'],params['current_git_url'],params['new_git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
+
+
+
+    def add_favorite(self, params, username):
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+
+        if 'module_name' not in params:
+            module_name = 'nms.legacy'
+        elif not params['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = params['module_name']
+
+        if 'id' not in params:
+            raise ValueError('Cannot add favorite- id not set')
+        if not params['id']:
+            raise ValueError('Cannot add favorite- id not set')
+        app_id = params['id']
+
+        if not username:
+            raise ValueError('Cannot add favorite- username not set')
+
+        error = self.db.add_favorite(module_name, app_id, username, timestamp)
+        if error is not None:
+            raise ValueError('Add favorite operation failed - some unknown database error: '+error)
+
+    def remove_favorite(self, params, username):
+        if 'module_name' not in params:
+            module_name = 'nms.legacy'
+        elif not params['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = params['module_name']
+
+        if 'id' not in params:
+            raise ValueError('Cannot remove favorite- id not set')
+        if not params['id']:
+            raise ValueError('Cannot remove favorite- id not set')
+        app_id = params['id']
+
+        if not username:
+            raise ValueError('Cannot remove favorite- username not set')
+
+        error = self.db.remove_favorite(module_name, app_id, username)
+        if error is not None:
+            raise ValueError('Remove favorite operation failed - some unknown database error: '+error)
+
+    def list_user_favorites(self, username):
+        return self.db.list_user_favorites(username)
+
+    def list_app_favorites(self, item):
+        if 'module_name' not in item:
+            module_name = 'nms.legacy'
+        elif not item['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = item['module_name']
+
+        if 'id' not in item:
+            raise ValueError('Cannot list app favorites- id not set')
+        if not item['id']:
+            raise ValueError('Cannot list app favorites- id not set')
+        app_id = item['id']
+
+        return self.db.list_app_favorites(module_name, app_id)
+
+    def aggregate_favorites_over_apps(self, params):
+        # no params right now, this just returns everything
+        return self.db.aggregate_favorites_over_apps()
 
 
     # Some utility methods

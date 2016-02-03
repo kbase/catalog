@@ -792,6 +792,447 @@ BasicModuleInfo is a reference to a hash where the following keys are defined:
  
 
 
+=head2 add_favorite
+
+  $obj->add_favorite($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub add_favorite
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function add_favorite (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to add_favorite:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'add_favorite');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.add_favorite",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'add_favorite',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method add_favorite",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'add_favorite',
+				       );
+    }
+}
+ 
+
+
+=head2 remove_favorite
+
+  $obj->remove_favorite($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub remove_favorite
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function remove_favorite (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to remove_favorite:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'remove_favorite');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.remove_favorite",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'remove_favorite',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_favorite",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'remove_favorite',
+				       );
+    }
+}
+ 
+
+
+=head2 list_favorites
+
+  $favorites = $obj->list_favorites($username)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$username is a string
+$favorites is a reference to a list where each element is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$username is a string
+$favorites is a reference to a list where each element is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_favorites
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_favorites (received $n, expecting 1)");
+    }
+    {
+	my($username) = @args;
+
+	my @_bad_arguments;
+        (!ref($username)) or push(@_bad_arguments, "Invalid type for argument 1 \"username\" (value was \"$username\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_favorites:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_favorites');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_favorites",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_favorites',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_favorites",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_favorites',
+				       );
+    }
+}
+ 
+
+
+=head2 list_app_favorites
+
+  $users = $obj->list_app_favorites($item)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$item is a Catalog.FavoriteItem
+$users is a reference to a list where each element is a Catalog.FavoriteUser
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+FavoriteUser is a reference to a hash where the following keys are defined:
+	username has a value which is a string
+	timestamp has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$item is a Catalog.FavoriteItem
+$users is a reference to a list where each element is a Catalog.FavoriteUser
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+FavoriteUser is a reference to a hash where the following keys are defined:
+	username has a value which is a string
+	timestamp has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_app_favorites
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_app_favorites (received $n, expecting 1)");
+    }
+    {
+	my($item) = @args;
+
+	my @_bad_arguments;
+        (ref($item) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"item\" (value was \"$item\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_app_favorites:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_app_favorites');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_app_favorites",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_app_favorites',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_app_favorites",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_app_favorites',
+				       );
+    }
+}
+ 
+
+
+=head2 list_favorite_counts
+
+  $counts = $obj->list_favorite_counts($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ListFavoriteCounts
+$counts is a reference to a list where each element is a Catalog.FavoriteCount
+ListFavoriteCounts is a reference to a hash where the following keys are defined
+FavoriteCount is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	count has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ListFavoriteCounts
+$counts is a reference to a list where each element is a Catalog.FavoriteCount
+ListFavoriteCounts is a reference to a hash where the following keys are defined
+FavoriteCount is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	count has a value which is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_favorite_counts
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_favorite_counts (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_favorite_counts:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_favorite_counts');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_favorite_counts",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_favorite_counts',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_favorite_counts",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_favorite_counts',
+				       );
+    }
+}
+ 
+
+
 =head2 get_module_info
 
   $info = $obj->get_module_info($selection)
@@ -1552,6 +1993,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	module_name has a value which is a string
 	git_url has a value which is a string
 BuildInfo is a reference to a hash where the following keys are defined:
+	timestamp has a value which is a string
 	registration_id has a value which is a string
 	registration has a value which is a string
 	error_message has a value which is a string
@@ -1578,6 +2020,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	module_name has a value which is a string
 	git_url has a value which is a string
 BuildInfo is a reference to a hash where the following keys are defined:
+	timestamp has a value which is a string
 	registration_id has a value which is a string
 	registration has a value which is a string
 	error_message has a value which is a string
@@ -2820,6 +3263,146 @@ git_url has a value which is a string
 
 
 
+=head2 FavoriteItem
+
+=over 4
+
+
+
+=item Description
+
+FAVORITES!!
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+id has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 FavoriteUser
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+username has a value which is a string
+timestamp has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+username has a value which is a string
+timestamp has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ListFavoriteCounts
+
+=over 4
+
+
+
+=item Description
+
+if favorite item is given, will return stars just for that item.  If a module
+name is given, will return stars for all methods in that module.  If none of
+those are given, then will return stars for every method that there is info on 
+
+parameters to add:
+    list<FavoriteItem> items;
+    list<string> module_names;
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined
+
+=end text
+
+=back
+
+
+
+=head2 FavoriteCount
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+count has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+count has a value which is an int
+
+
+=end text
+
+=back
+
+
+
 =head2 ModuleVersionInfo
 
 =over 4
@@ -3191,6 +3774,7 @@ log has a value which is a reference to a list where each element is a Catalog.B
 
 <pre>
 a reference to a hash where the following keys are defined:
+timestamp has a value which is a string
 registration_id has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string
@@ -3204,6 +3788,7 @@ git_url has a value which is a string
 =begin text
 
 a reference to a hash where the following keys are defined:
+timestamp has a value which is a string
 registration_id has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string

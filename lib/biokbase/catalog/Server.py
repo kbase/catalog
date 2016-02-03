@@ -84,6 +84,21 @@ sync_methods['Catalog.review_release_request'] = True
 async_run_methods['Catalog.list_basic_module_info_async'] = ['Catalog', 'list_basic_module_info']
 async_check_methods['Catalog.list_basic_module_info_check'] = ['Catalog', 'list_basic_module_info']
 sync_methods['Catalog.list_basic_module_info'] = True
+async_run_methods['Catalog.add_favorite_async'] = ['Catalog', 'add_favorite']
+async_check_methods['Catalog.add_favorite_check'] = ['Catalog', 'add_favorite']
+sync_methods['Catalog.add_favorite'] = True
+async_run_methods['Catalog.remove_favorite_async'] = ['Catalog', 'remove_favorite']
+async_check_methods['Catalog.remove_favorite_check'] = ['Catalog', 'remove_favorite']
+sync_methods['Catalog.remove_favorite'] = True
+async_run_methods['Catalog.list_favorites_async'] = ['Catalog', 'list_favorites']
+async_check_methods['Catalog.list_favorites_check'] = ['Catalog', 'list_favorites']
+sync_methods['Catalog.list_favorites'] = True
+async_run_methods['Catalog.list_app_favorites_async'] = ['Catalog', 'list_app_favorites']
+async_check_methods['Catalog.list_app_favorites_check'] = ['Catalog', 'list_app_favorites']
+sync_methods['Catalog.list_app_favorites'] = True
+async_run_methods['Catalog.list_favorite_counts_async'] = ['Catalog', 'list_favorite_counts']
+async_check_methods['Catalog.list_favorite_counts_check'] = ['Catalog', 'list_favorite_counts']
+sync_methods['Catalog.list_favorite_counts'] = True
 async_run_methods['Catalog.get_module_info_async'] = ['Catalog', 'get_module_info']
 async_check_methods['Catalog.get_module_info_check'] = ['Catalog', 'get_module_info']
 sync_methods['Catalog.get_module_info'] = True
@@ -441,6 +456,26 @@ class Application(object):
                              name='Catalog.list_basic_module_info',
                              types=[dict])
         self.method_authentication['Catalog.list_basic_module_info'] = 'none'
+        self.rpc_service.add(impl_Catalog.add_favorite,
+                             name='Catalog.add_favorite',
+                             types=[dict])
+        self.method_authentication['Catalog.add_favorite'] = 'required'
+        self.rpc_service.add(impl_Catalog.remove_favorite,
+                             name='Catalog.remove_favorite',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_favorite'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_favorites,
+                             name='Catalog.list_favorites',
+                             types=[basestring])
+        self.method_authentication['Catalog.list_favorites'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_app_favorites,
+                             name='Catalog.list_app_favorites',
+                             types=[dict])
+        self.method_authentication['Catalog.list_app_favorites'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_favorite_counts,
+                             name='Catalog.list_favorite_counts',
+                             types=[dict])
+        self.method_authentication['Catalog.list_favorite_counts'] = 'none'
         self.rpc_service.add(impl_Catalog.get_module_info,
                              name='Catalog.get_module_info',
                              types=[dict])

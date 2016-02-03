@@ -71,9 +71,13 @@ Module Document:
         }
     }
 
-
-
-
+FAVORITES
+    {
+        user:
+        module_name:
+        app_id:
+        timestamp:
+    }
 
 '''
 class MongoCatalogDBI:
@@ -83,6 +87,7 @@ class MongoCatalogDBI:
     _MODULES='modules'
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
+    _FAVORITES='favorites'
     _EXEC_STATS_RAW='exec_stats_raw'
     _EXEC_STATS_APPS='exec_stats_apps'
     _EXEC_STATS_USERS='exec_stats_users'
@@ -101,6 +106,7 @@ class MongoCatalogDBI:
         self.modules = self.db[MongoCatalogDBI._MODULES]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
+        self.favorites = self.db[MongoCatalogDBI._FAVORITES]
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
@@ -120,7 +126,20 @@ class MongoCatalogDBI:
         self.build_logs.ensure_index('timestamp')
         self.build_logs.ensure_index('registration')
         self.build_logs.ensure_index('git_url')
-        
+        self.build_logs.ensure_index('current_versions.release.release_timestamp')
+
+        # for favorites
+        self.favorites.ensure_index('user')
+        self.favorites.ensure_index('module_name_lc')
+        self.favorites.ensure_index('id')
+        # you can only favorite a method once, so put a unique index on the triple
+        self.favorites.ensure_index([
+            ('user',ASCENDING),
+            ('id',ASCENDING),
+            ('module_name_lc',ASCENDING)], 
+            unique=True, sparse=False)
+
+        # execution stats
         self.exec_stats_raw.ensure_index('user_id')
         self.exec_stats_raw.ensure_index([('app_module_name', ASCENDING), 
                                           ('app_id', ASCENDING)])
@@ -132,7 +151,6 @@ class MongoCatalogDBI:
 
         self.exec_stats_users.ensure_index([('user_id', ASCENDING), 
                                             ('time_range', ASCENDING)])
-
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -297,12 +315,16 @@ class MongoCatalogDBI:
         return False
 
 
-    def push_beta_to_release(self, module_name='', git_url=''):
+    def push_beta_to_release(self, module_name='', git_url='', release_timestamp=None):
         current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
         beta_version = current_versions['beta']
 
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         query['current_versions.beta.timestamp'] = beta_version['timestamp']
+
+        if not release_timestamp:
+            raise ValueError('internal error- timestamp not set in push_beta_to_release')
+        beta_version['release_timestamp'] = release_timestamp
         
         # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
         result = self.modules.update(query, {'$set':{
@@ -452,6 +474,71 @@ class MongoCatalogDBI:
         result = self.modules.remove({'_id':module_details['_id']})
         return self._check_update_result(result)
 
+
+    def add_favorite(self, module_name, app_id, username, timestamp):
+        favoriteAddition = {
+            'user':username,
+            'module_name_lc':module_name.strip().lower(),
+            'id':app_id.strip()
+        }
+        found = self.favorites.find_one(favoriteAddition)
+        if found:
+            # already a favorite, so do nothing
+            return None;
+        # keep a timestamp
+        favoriteAddition['timestamp']= timestamp
+        self.favorites.insert(favoriteAddition)
+
+    def remove_favorite(self, module_name, app_id, username):
+        favoriteAddition = {
+            'user':username,
+            'module_name_lc':module_name.strip().lower(),
+            'id':app_id.strip()
+        }
+        found = self.favorites.find_one(favoriteAddition)
+        if not found:
+            # wasn't a favorite, so do nothing
+            return None;
+
+        result = self.favorites.remove({'_id':found['_id']})
+        return self._check_update_result(result)
+
+
+    def list_user_favorites(self, username):
+        query = {'user':username}
+        selection = {'_id':0,'module_name_lc':1,'id':1,'timestamp':1}
+        return list(self.favorites.find(
+                        query,selection,
+                        sort=[['timestamp',DESCENDING]]))
+
+    def list_app_favorites(self, module_name, app_id):
+        query = {'module_name_lc':module_name.strip().lower(), 'id':app_id.strip()}
+        selection = {'_id':0,'user':1,'timestamp':1}
+        return list(self.favorites.find(
+                        query,selection,
+                        sort=[['timestamp',DESCENDING]]))
+
+
+    def aggregate_favorites_over_apps(self):
+        ### WARNING! If we switch to Mongo 3.x, the result object will change and this will break
+        result = self.favorites.aggregate([{
+            '$group':{
+                '_id':{
+                    'm':'$module_name_lc',
+                    'a':'$id'
+                },
+                'count':{ '$sum':1 }
+            }}])
+        counts = []
+        for c in result['result']:
+            counts.append({
+                'module_name_lc':c['_id']['m'],
+                'id' : c['_id']['a'],
+                'count' : c['count']
+                })
+        return counts
+
+
     #### utility methods
     def _get_mongo_query(self, module_name='', git_url=''):
         query={}
@@ -461,6 +548,7 @@ class MongoCatalogDBI:
             query['git_url'] = git_url.strip()
         return query
 
+    # if it worked, return None.  If it didn't return something indicating an error
     def _check_update_result(self, result):
         if result:
             # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
