@@ -319,20 +319,20 @@ module Catalog {
     /*
         full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
             slash in case of dynamically registered repo).
-        full_func_names - list of fully qualified names of KIDL-spec functions (including
-            module_name prefix followed by slash in case of dynamically registered repo).
+        per_week - optional flag switching results to weekly data rather than one row per app for 
+            all time (default value is false)
     */
     typedef structure {
         list<string> full_app_ids;
-        list<string> full_func_names;
+        boolean per_week;
     } GetExecAggrStatsParams;
 
     /*
         full_app_id - optional fully qualified method-spec id including module_name prefix followed
             by slash in case of dynamically registered repo (it could be absent or null in case
             original execution was started through API call without app ID defined),
-        full_func_name - fully qualified name of KIDL-spec function (including module_name prefix
-            followed by slash in case of dynamically registered repo),
+        time_range - one of supported time ranges (currently it could be either '*' for all time
+            or ISO-encoded week like "2016-W01")
         avg_queue_time - average time difference between exec_start_time and creation_time moments
             defined in milliseconds (rounded to long),
         avg_exec_time - average time difference between finish_time and exec_start_time moments 
@@ -340,7 +340,7 @@ module Catalog {
     */
     typedef structure {
         string full_app_id;
-        string full_func_name;
+        string time_range;
         int number_of_calls;
         int number_of_errors;
         int avg_queue_time;

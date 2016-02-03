@@ -651,6 +651,27 @@ class CatalogController:
         return biokbase.catalog.version.CATALOG_VERSION
 
 
+    def log_exec_stats(self, admin_user_id, user_id, app_module_name, app_id, func_module_name,
+                       func_name, git_commit_hash, creation_time, exec_start_time, finish_time,
+                       is_error):
+        if not self.is_admin(admin_user_id):
+            raise ValueError('You do not have permission to log execution statistics.')
+        self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name, 
+                                   git_commit_hash, creation_time, exec_start_time, finish_time, 
+                                   is_error)
+        parts = datetime.fromtimestamp(creation_time / 1000.0).isocalendar()
+        week_time_range = str(parts[0]) + "-W" + str(parts[1])
+        self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, None)
+        self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, week_time_range)
+        self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, None)
+        self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, week_time_range)
+
+
+
 # NOT PART OF CLASS CATALOG!!
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
                         nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint):

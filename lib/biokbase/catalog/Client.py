@@ -328,4 +328,17 @@ class Catalog(object):
             raise ValueError('Method revoke_developer: argument json_rpc_context is not type dict as required.')
         self._call('Catalog.revoke_developer',
                    [username], json_rpc_context)
+  
+    def log_exec_stats(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method log_exec_stats: argument json_rpc_context is not type dict as required.')
+        self._call('Catalog.log_exec_stats',
+                   [params], json_rpc_context)
+  
+    def get_exec_aggr_stats(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_exec_aggr_stats: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_exec_aggr_stats',
+                          [params], json_rpc_context)
+        return resp[0]
  

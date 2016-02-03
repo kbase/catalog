@@ -83,6 +83,9 @@ class MongoCatalogDBI:
     _MODULES='modules'
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
+    _EXEC_STATS_RAW='exec_stats_raw'
+    _EXEC_STATS_APPS='exec_stats_apps'
+    _EXEC_STATS_USERS='exec_stats_users'
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
 
@@ -98,6 +101,9 @@ class MongoCatalogDBI:
         self.modules = self.db[MongoCatalogDBI._MODULES]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
+        self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
+        self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
+        self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
 
         # Make sure we have an index on module and git_repo_url
         self.modules.ensure_index('module_name', unique=True, sparse=True)
@@ -114,6 +120,18 @@ class MongoCatalogDBI:
         self.build_logs.ensure_index('timestamp')
         self.build_logs.ensure_index('registration')
         self.build_logs.ensure_index('git_url')
+        
+        self.exec_stats_raw.ensure_index('user_id')
+        self.exec_stats_raw.ensure_index([('app_module_name', ASCENDING), 
+                                          ('app_id', ASCENDING)])
+        self.exec_stats_raw.ensure_index([('func_module_name', ASCENDING),
+                                          ('func_name', ASCENDING)])
+        
+        self.exec_stats_apps.ensure_index([('full_app_id', ASCENDING), 
+                                           ('time_range', ASCENDING)])
+
+        self.exec_stats_users.ensure_index([('user_id', ASCENDING), 
+                                            ('time_range', ASCENDING)])
 
 
 
@@ -457,7 +475,56 @@ class MongoCatalogDBI:
             return None
         return '{}'
 
+    def add_exec_stats_raw(self, user_id, app_module_name, app_id, func_module_name, func_name, 
+                           git_commit_hash, creation_time, exec_start_time, finish_time, is_error):
+        stats = {
+            'user_id': user_id,
+            'app_module_name': app_module_name,
+            'app_id': app_id,
+            'func_module_name': func_module_name,
+            'func_name': func_name,
+            'git_commit_hash': git_commit_hash,
+            'creation_time': creation_time,
+            'exec_start_time': exec_start_time,
+            'finish_time': finish_time,
+            'is_error': is_error
+        }
+        self.exec_stats_raw.insert(stats)
 
+    def add_exec_stats_apps(self, app_module_name, app_id, creation_time, exec_start_time, 
+                            finish_time, is_error, time_range):
+        if not app_id:
+            return
+        full_app_id = app_id
+        if app_module_name:
+            full_app_id = app_module_name + "/" + app_id
+        if not time_range:
+            time_range = "*"
+        queue_time = exec_start_time - creation_time
+        exec_time = finish_time - exec_start_time
+        new_data = {
+            'module_name': app_module_name
+        }
+        inc_data = {
+            'number_of_calls': 1,
+            'number_of_errors': 1 if is_error else 0,
+            'avg_queue_time': queue_time,
+            'avg_exec_time': exec_time
+        }
+        self.exec_stats_apps.update({'full_app_id': full_app_id, 'time_range': time_range}, 
+                                    {'$setOnInsert': new_data, '$inc': inc_data}, upsert=True)
 
-
-
+    def add_exec_stats_users(self, user_id, creation_time, exec_start_time, 
+                             finish_time, is_error, time_range):
+        if not time_range:
+            time_range = "*"
+        queue_time = exec_start_time - creation_time
+        exec_time = finish_time - exec_start_time
+        inc_data = {
+            'number_of_calls': 1,
+            'number_of_errors': 1 if is_error else 0,
+            'avg_queue_time': queue_time,
+            'avg_exec_time': exec_time
+        }
+        self.exec_stats_users.update({'user_id': user_id, 'time_range': time_range}, 
+                                     {'$inc': inc_data}, upsert=True)

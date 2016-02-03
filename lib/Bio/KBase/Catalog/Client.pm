@@ -2294,6 +2294,213 @@ $username is a string
     }
 }
  
+
+
+=head2 log_exec_stats
+
+  $obj->log_exec_stats($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.LogExecStatsParams
+LogExecStatsParams is a reference to a hash where the following keys are defined:
+	user_id has a value which is a string
+	app_module_name has a value which is a string
+	app_id has a value which is a string
+	func_module_name has a value which is a string
+	func_name has a value which is a string
+	git_commit_hash has a value which is a string
+	creation_time has a value which is an int
+	exec_start_time has a value which is an int
+	finish_time has a value which is an int
+	is_error has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.LogExecStatsParams
+LogExecStatsParams is a reference to a hash where the following keys are defined:
+	user_id has a value which is a string
+	app_module_name has a value which is a string
+	app_id has a value which is a string
+	func_module_name has a value which is a string
+	func_name has a value which is a string
+	git_commit_hash has a value which is a string
+	creation_time has a value which is an int
+	exec_start_time has a value which is an int
+	finish_time has a value which is an int
+	is_error has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+Request from Execution Engine for adding statistics about each method run. It could be done
+using catalog admin credentials only.
+
+=back
+
+=cut
+
+ sub log_exec_stats
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function log_exec_stats (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to log_exec_stats:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'log_exec_stats');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.log_exec_stats",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'log_exec_stats',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method log_exec_stats",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'log_exec_stats',
+				       );
+    }
+}
+ 
+
+
+=head2 get_exec_aggr_stats
+
+  $return = $obj->get_exec_aggr_stats($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetExecAggrStatsParams
+$return is a reference to a list where each element is a Catalog.ExecAggrStats
+GetExecAggrStatsParams is a reference to a hash where the following keys are defined:
+	full_app_ids has a value which is a reference to a list where each element is a string
+	per_week has a value which is a Catalog.boolean
+boolean is an int
+ExecAggrStats is a reference to a hash where the following keys are defined:
+	full_app_id has a value which is a string
+	time_range has a value which is a string
+	number_of_calls has a value which is an int
+	number_of_errors has a value which is an int
+	avg_queue_time has a value which is an int
+	avg_exec_time has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetExecAggrStatsParams
+$return is a reference to a list where each element is a Catalog.ExecAggrStats
+GetExecAggrStatsParams is a reference to a hash where the following keys are defined:
+	full_app_ids has a value which is a reference to a list where each element is a string
+	per_week has a value which is a Catalog.boolean
+boolean is an int
+ExecAggrStats is a reference to a hash where the following keys are defined:
+	full_app_id has a value which is a string
+	time_range has a value which is a string
+	number_of_calls has a value which is an int
+	number_of_errors has a value which is an int
+	avg_queue_time has a value which is an int
+	avg_exec_time has a value which is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub get_exec_aggr_stats
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_exec_aggr_stats (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_exec_aggr_stats:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_exec_aggr_stats');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_exec_aggr_stats",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_exec_aggr_stats',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_exec_aggr_stats",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_exec_aggr_stats',
+				       );
+    }
+}
+ 
   
 
 sub version {
@@ -2307,16 +2514,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'revoke_developer',
+                method_name => 'get_exec_aggr_stats',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method revoke_developer",
+            error => "Error invoking method get_exec_aggr_stats",
             status_line => $self->{client}->status_line,
-            method_name => 'revoke_developer',
+            method_name => 'get_exec_aggr_stats',
         );
     }
 }
@@ -3095,6 +3302,162 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 current_git_url has a value which is a string
 new_git_url has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 LogExecStatsParams
+
+=over 4
+
+
+
+=item Description
+
+user_id - GlobusOnline login of invoker,
+app_module_name - optional module name of registered repo (could be absent of null for
+    old fashioned services) where app_id comes from,
+app_id - optional method-spec id without module_name prefix (could be absent or null
+    in case original execution was started through API call without app ID defined),
+func_module_name - optional module name of registered repo (could be absent of null for
+    old fashioned services) where func_name comes from,
+func_name - name of function in KIDL-spec without module_name prefix,
+git_commit_hash - optional service version (in case of dynamically registered repo),
+creation_time, exec_start_time and finish_time - defined in milliseconds,
+is_error - indicates whether execution was finished with error or not.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+user_id has a value which is a string
+app_module_name has a value which is a string
+app_id has a value which is a string
+func_module_name has a value which is a string
+func_name has a value which is a string
+git_commit_hash has a value which is a string
+creation_time has a value which is an int
+exec_start_time has a value which is an int
+finish_time has a value which is an int
+is_error has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+user_id has a value which is a string
+app_module_name has a value which is a string
+app_id has a value which is a string
+func_module_name has a value which is a string
+func_name has a value which is a string
+git_commit_hash has a value which is a string
+creation_time has a value which is an int
+exec_start_time has a value which is an int
+finish_time has a value which is an int
+is_error has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 GetExecAggrStatsParams
+
+=over 4
+
+
+
+=item Description
+
+full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
+    slash in case of dynamically registered repo).
+per_week - optional flag switching results to weekly data rather than one row per app for 
+    all time (default value is false)
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+full_app_ids has a value which is a reference to a list where each element is a string
+per_week has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+full_app_ids has a value which is a reference to a list where each element is a string
+per_week has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 ExecAggrStats
+
+=over 4
+
+
+
+=item Description
+
+full_app_id - optional fully qualified method-spec id including module_name prefix followed
+    by slash in case of dynamically registered repo (it could be absent or null in case
+    original execution was started through API call without app ID defined),
+time_range - one of supported time ranges (currently it could be either '*' for all time
+    or ISO-encoded week like "2016-W01")
+avg_queue_time - average time difference between exec_start_time and creation_time moments
+    defined in milliseconds (rounded to long),
+avg_exec_time - average time difference between finish_time and exec_start_time moments 
+    defined in milliseconds (rounded to long).
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+full_app_id has a value which is a string
+time_range has a value which is a string
+number_of_calls has a value which is an int
+number_of_errors has a value which is an int
+avg_queue_time has a value which is an int
+avg_exec_time has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+full_app_id has a value which is a string
+time_range has a value which is a string
+number_of_calls has a value which is an int
+number_of_errors has a value which is an int
+avg_queue_time has a value which is an int
+avg_exec_time has a value which is an int
 
 
 =end text
