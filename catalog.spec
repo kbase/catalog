@@ -70,18 +70,6 @@ module Catalog {
     funcdef review_release_request(ReleaseReview review) returns () authentication required;
 
 
-
-    typedef structure {
-        string id;
-        int stars;
-        int runs;
-    } AppInfo;
-
-
-    typedef structure {
-
-    } Icon;
-
     /*
         Describes how to filter repositories.
         include_released - optional flag indicated modules that are released are included (default:true)
@@ -93,8 +81,6 @@ module Catalog {
         boolean include_released;
         boolean include_unreleased;
         boolean include_disabled;
-        boolean include_apps;
-
     } ListModuleParams;
 
     typedef structure {

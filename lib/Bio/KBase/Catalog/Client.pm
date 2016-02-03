@@ -711,7 +711,6 @@ ListModuleParams is a reference to a hash where the following keys are defined:
 	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
-	include_apps has a value which is a Catalog.boolean
 boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
@@ -730,7 +729,6 @@ ListModuleParams is a reference to a hash where the following keys are defined:
 	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
-	include_apps has a value which is a Catalog.boolean
 boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
@@ -2982,66 +2980,6 @@ review_message has a value which is a string
 
 
 
-=head2 AppInfo
-
-=over 4
-
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a reference to a hash where the following keys are defined:
-id has a value which is a string
-stars has a value which is an int
-runs has a value which is an int
-
-</pre>
-
-=end html
-
-=begin text
-
-a reference to a hash where the following keys are defined:
-id has a value which is a string
-stars has a value which is an int
-runs has a value which is an int
-
-
-=end text
-
-=back
-
-
-
-=head2 Icon
-
-=over 4
-
-
-
-=item Definition
-
-=begin html
-
-<pre>
-a reference to a hash where the following keys are defined
-</pre>
-
-=end html
-
-=begin text
-
-a reference to a hash where the following keys are defined
-
-=end text
-
-=back
-
-
-
 =head2 ListModuleParams
 
 =over 4
@@ -3066,7 +3004,6 @@ owners has a value which is a reference to a list where each element is a string
 include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
-include_apps has a value which is a Catalog.boolean
 
 </pre>
 
@@ -3079,7 +3016,6 @@ owners has a value which is a reference to a list where each element is a string
 include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
-include_apps has a value which is a Catalog.boolean
 
 
 =end text
