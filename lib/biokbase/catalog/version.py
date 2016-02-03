@@ -1,2 +1,2 @@
 # File that simply defines version information
-CATALOG_VERSION = '0.0.9'
+CATALOG_VERSION = '0.0.10'
