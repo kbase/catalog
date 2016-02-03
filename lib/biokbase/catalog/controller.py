@@ -747,7 +747,7 @@ class CatalogController:
         self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name, 
                                    git_commit_hash, creation_time, exec_start_time, finish_time, 
                                    is_error)
-        parts = datetime.fromtimestamp(creation_time / 1000.0).isocalendar()
+        parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
                                     finish_time, is_error, None)
@@ -758,6 +758,9 @@ class CatalogController:
         self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
                                     finish_time, is_error, week_time_range)
 
+
+    def get_exec_aggr_stats(self, full_app_ids, per_week):
+        pass
 
 
 # NOT PART OF CLASS CATALOG!!

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *     old fashioned services) where func_name comes from,
  * func_name - name of function in KIDL-spec without module_name prefix,
  * git_commit_hash - optional service version (in case of dynamically registered repo),
- * creation_time, exec_start_time and finish_time - defined in milliseconds,
+ * creation_time, exec_start_time and finish_time - defined in seconds since Epoch (POSIX),
  * is_error - indicates whether execution was finished with error or not.
  * </pre>
  * 
@@ -57,11 +57,11 @@ public class LogExecStatsParams {
     @JsonProperty("git_commit_hash")
     private String gitCommitHash;
     @JsonProperty("creation_time")
-    private Long creationTime;
+    private Double creationTime;
     @JsonProperty("exec_start_time")
-    private Long execStartTime;
+    private Double execStartTime;
     @JsonProperty("finish_time")
-    private Long finishTime;
+    private Double finishTime;
     @JsonProperty("is_error")
     private Long isError;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -157,46 +157,46 @@ public class LogExecStatsParams {
     }
 
     @JsonProperty("creation_time")
-    public Long getCreationTime() {
+    public Double getCreationTime() {
         return creationTime;
     }
 
     @JsonProperty("creation_time")
-    public void setCreationTime(Long creationTime) {
+    public void setCreationTime(Double creationTime) {
         this.creationTime = creationTime;
     }
 
-    public LogExecStatsParams withCreationTime(Long creationTime) {
+    public LogExecStatsParams withCreationTime(Double creationTime) {
         this.creationTime = creationTime;
         return this;
     }
 
     @JsonProperty("exec_start_time")
-    public Long getExecStartTime() {
+    public Double getExecStartTime() {
         return execStartTime;
     }
 
     @JsonProperty("exec_start_time")
-    public void setExecStartTime(Long execStartTime) {
+    public void setExecStartTime(Double execStartTime) {
         this.execStartTime = execStartTime;
     }
 
-    public LogExecStatsParams withExecStartTime(Long execStartTime) {
+    public LogExecStatsParams withExecStartTime(Double execStartTime) {
         this.execStartTime = execStartTime;
         return this;
     }
 
     @JsonProperty("finish_time")
-    public Long getFinishTime() {
+    public Double getFinishTime() {
         return finishTime;
     }
 
     @JsonProperty("finish_time")
-    public void setFinishTime(Long finishTime) {
+    public void setFinishTime(Double finishTime) {
         this.finishTime = finishTime;
     }
 
-    public LogExecStatsParams withFinishTime(Long finishTime) {
+    public LogExecStatsParams withFinishTime(Double finishTime) {
         this.finishTime = finishTime;
         return this;
     }

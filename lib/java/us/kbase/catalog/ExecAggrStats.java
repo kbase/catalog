@@ -20,9 +20,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * time_range - one of supported time ranges (currently it could be either '*' for all time
  *     or ISO-encoded week like "2016-W01")
  * avg_queue_time - average time difference between exec_start_time and creation_time moments
- *     defined in milliseconds (rounded to long),
+ *     defined in seconds since Epoch (POSIX),
  * avg_exec_time - average time difference between finish_time and exec_start_time moments 
- *     defined in milliseconds (rounded to long).
+ *     defined in seconds since Epoch (POSIX).
  * </pre>
  * 
  */
@@ -47,9 +47,9 @@ public class ExecAggrStats {
     @JsonProperty("number_of_errors")
     private Long numberOfErrors;
     @JsonProperty("avg_queue_time")
-    private Long avgQueueTime;
+    private Double avgQueueTime;
     @JsonProperty("avg_exec_time")
-    private Long avgExecTime;
+    private Double avgExecTime;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("full_app_id")
@@ -113,31 +113,31 @@ public class ExecAggrStats {
     }
 
     @JsonProperty("avg_queue_time")
-    public Long getAvgQueueTime() {
+    public Double getAvgQueueTime() {
         return avgQueueTime;
     }
 
     @JsonProperty("avg_queue_time")
-    public void setAvgQueueTime(Long avgQueueTime) {
+    public void setAvgQueueTime(Double avgQueueTime) {
         this.avgQueueTime = avgQueueTime;
     }
 
-    public ExecAggrStats withAvgQueueTime(Long avgQueueTime) {
+    public ExecAggrStats withAvgQueueTime(Double avgQueueTime) {
         this.avgQueueTime = avgQueueTime;
         return this;
     }
 
     @JsonProperty("avg_exec_time")
-    public Long getAvgExecTime() {
+    public Double getAvgExecTime() {
         return avgExecTime;
     }
 
     @JsonProperty("avg_exec_time")
-    public void setAvgExecTime(Long avgExecTime) {
+    public void setAvgExecTime(Double avgExecTime) {
         this.avgExecTime = avgExecTime;
     }
 
-    public ExecAggrStats withAvgExecTime(Long avgExecTime) {
+    public ExecAggrStats withAvgExecTime(Double avgExecTime) {
         this.avgExecTime = avgExecTime;
         return this;
     }

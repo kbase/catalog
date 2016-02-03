@@ -343,7 +343,7 @@ module Catalog {
             old fashioned services) where func_name comes from,
         func_name - name of function in KIDL-spec without module_name prefix,
         git_commit_hash - optional service version (in case of dynamically registered repo),
-        creation_time, exec_start_time and finish_time - defined in milliseconds,
+        creation_time, exec_start_time and finish_time - defined in seconds since Epoch (POSIX),
         is_error - indicates whether execution was finished with error or not.
     */
     typedef structure {
@@ -353,9 +353,9 @@ module Catalog {
         string func_module_name;
         string func_name;
         string git_commit_hash;
-        int creation_time;
-        int exec_start_time;
-        int finish_time;
+        float creation_time;
+        float exec_start_time;
+        float finish_time;
         boolean is_error;
     } LogExecStatsParams;
 
@@ -383,17 +383,17 @@ module Catalog {
         time_range - one of supported time ranges (currently it could be either '*' for all time
             or ISO-encoded week like "2016-W01")
         avg_queue_time - average time difference between exec_start_time and creation_time moments
-            defined in milliseconds (rounded to long),
+            defined in seconds since Epoch (POSIX),
         avg_exec_time - average time difference between finish_time and exec_start_time moments 
-            defined in milliseconds (rounded to long).
+            defined in seconds since Epoch (POSIX).
     */
     typedef structure {
         string full_app_id;
         string time_range;
         int number_of_calls;
         int number_of_errors;
-        int avg_queue_time;
-        int avg_exec_time;
+        float avg_queue_time;
+        float avg_exec_time;
     } ExecAggrStats;
 
     funcdef get_exec_aggr_stats(GetExecAggrStatsParams params) returns (list<ExecAggrStats>);

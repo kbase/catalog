@@ -2758,9 +2758,9 @@ LogExecStatsParams is a reference to a hash where the following keys are defined
 	func_module_name has a value which is a string
 	func_name has a value which is a string
 	git_commit_hash has a value which is a string
-	creation_time has a value which is an int
-	exec_start_time has a value which is an int
-	finish_time has a value which is an int
+	creation_time has a value which is a float
+	exec_start_time has a value which is a float
+	finish_time has a value which is a float
 	is_error has a value which is a Catalog.boolean
 boolean is an int
 
@@ -2778,9 +2778,9 @@ LogExecStatsParams is a reference to a hash where the following keys are defined
 	func_module_name has a value which is a string
 	func_name has a value which is a string
 	git_commit_hash has a value which is a string
-	creation_time has a value which is an int
-	exec_start_time has a value which is an int
-	finish_time has a value which is an int
+	creation_time has a value which is a float
+	exec_start_time has a value which is a float
+	finish_time has a value which is a float
 	is_error has a value which is a Catalog.boolean
 boolean is an int
 
@@ -2865,8 +2865,8 @@ ExecAggrStats is a reference to a hash where the following keys are defined:
 	time_range has a value which is a string
 	number_of_calls has a value which is an int
 	number_of_errors has a value which is an int
-	avg_queue_time has a value which is an int
-	avg_exec_time has a value which is an int
+	avg_queue_time has a value which is a float
+	avg_exec_time has a value which is a float
 
 </pre>
 
@@ -2885,8 +2885,8 @@ ExecAggrStats is a reference to a hash where the following keys are defined:
 	time_range has a value which is a string
 	number_of_calls has a value which is an int
 	number_of_errors has a value which is an int
-	avg_queue_time has a value which is an int
-	avg_exec_time has a value which is an int
+	avg_queue_time has a value which is a float
+	avg_exec_time has a value which is a float
 
 
 =end text
@@ -3912,7 +3912,7 @@ func_module_name - optional module name of registered repo (could be absent of n
     old fashioned services) where func_name comes from,
 func_name - name of function in KIDL-spec without module_name prefix,
 git_commit_hash - optional service version (in case of dynamically registered repo),
-creation_time, exec_start_time and finish_time - defined in milliseconds,
+creation_time, exec_start_time and finish_time - defined in seconds since Epoch (POSIX),
 is_error - indicates whether execution was finished with error or not.
 
 
@@ -3928,9 +3928,9 @@ app_id has a value which is a string
 func_module_name has a value which is a string
 func_name has a value which is a string
 git_commit_hash has a value which is a string
-creation_time has a value which is an int
-exec_start_time has a value which is an int
-finish_time has a value which is an int
+creation_time has a value which is a float
+exec_start_time has a value which is a float
+finish_time has a value which is a float
 is_error has a value which is a Catalog.boolean
 
 </pre>
@@ -3946,9 +3946,9 @@ app_id has a value which is a string
 func_module_name has a value which is a string
 func_name has a value which is a string
 git_commit_hash has a value which is a string
-creation_time has a value which is an int
-exec_start_time has a value which is an int
-finish_time has a value which is an int
+creation_time has a value which is a float
+exec_start_time has a value which is a float
+finish_time has a value which is a float
 is_error has a value which is a Catalog.boolean
 
 
@@ -4012,9 +4012,9 @@ full_app_id - optional fully qualified method-spec id including module_name pref
 time_range - one of supported time ranges (currently it could be either '*' for all time
     or ISO-encoded week like "2016-W01")
 avg_queue_time - average time difference between exec_start_time and creation_time moments
-    defined in milliseconds (rounded to long),
+    defined in seconds since Epoch (POSIX),
 avg_exec_time - average time difference between finish_time and exec_start_time moments 
-    defined in milliseconds (rounded to long).
+    defined in seconds since Epoch (POSIX).
 
 
 =item Definition
@@ -4027,8 +4027,8 @@ full_app_id has a value which is a string
 time_range has a value which is a string
 number_of_calls has a value which is an int
 number_of_errors has a value which is an int
-avg_queue_time has a value which is an int
-avg_exec_time has a value which is an int
+avg_queue_time has a value which is a float
+avg_exec_time has a value which is a float
 
 </pre>
 
@@ -4041,8 +4041,8 @@ full_app_id has a value which is a string
 time_range has a value which is a string
 number_of_calls has a value which is an int
 number_of_errors has a value which is an int
-avg_queue_time has a value which is an int
-avg_exec_time has a value which is an int
+avg_queue_time has a value which is a float
+avg_exec_time has a value which is a float
 
 
 =end text
