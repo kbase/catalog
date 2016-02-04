@@ -763,7 +763,7 @@ class CatalogController:
     def get_exec_aggr_stats(self, full_app_ids, per_week):
         type = "w" if per_week else "a"
         time_range = None if per_week else "*"
-        return self.db.get_exec_stats_apps(full_app_ids, type, per_week)
+        return self.db.get_exec_stats_apps(full_app_ids, type, time_range)
 
 
 # NOT PART OF CLASS CATALOG!!
