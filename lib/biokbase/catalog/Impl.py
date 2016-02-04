@@ -408,7 +408,7 @@ class Catalog:
         # return variables are: returnVal
         #BEGIN get_exec_aggr_stats
         full_app_ids = None if 'full_app_ids' not in params else params['full_app_ids']
-        per_week = False if 'per_week' not in params else params['per_week'] == 1
+        per_week = False if 'per_week' not in params else params['per_week'] != 0
         returnVal = self.cc.get_exec_aggr_stats(full_app_ids, per_week)
         #END get_exec_aggr_stats
 
