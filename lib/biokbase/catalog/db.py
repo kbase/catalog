@@ -140,17 +140,29 @@ class MongoCatalogDBI:
             unique=True, sparse=False)
 
         # execution stats
-        self.exec_stats_raw.ensure_index('user_id')
+        self.exec_stats_raw.ensure_index('user_id', 
+                                         unique=False, sparse=False)
         self.exec_stats_raw.ensure_index([('app_module_name', ASCENDING), 
-                                          ('app_id', ASCENDING)])
+                                          ('app_id', ASCENDING)], 
+                                         unique=False, sparse=True)
         self.exec_stats_raw.ensure_index([('func_module_name', ASCENDING),
-                                          ('func_name', ASCENDING)])
+                                          ('func_name', ASCENDING)], 
+                                         unique=False, sparse=True)
         
-        self.exec_stats_apps.ensure_index([('full_app_id', ASCENDING), 
-                                           ('time_range', ASCENDING)])
+        self.exec_stats_apps.ensure_index('module_name', 
+                                          unique=False, sparse=True)
+        self.exec_stats_apps.ensure_index([('full_app_id', ASCENDING),
+                                           ('type', ASCENDING),
+                                           ('time_range', ASCENDING)], 
+                                          unique=True, sparse=False)
+        self.exec_stats_apps.ensure_index([('type', ASCENDING),
+                                           ('time_range', ASCENDING)], 
+                                          unique=False, sparse=False)
 
         self.exec_stats_users.ensure_index([('user_id', ASCENDING), 
-                                            ('time_range', ASCENDING)])
+                                            ('type', ASCENDING),
+                                            ('time_range', ASCENDING)], 
+                                           unique=True, sparse=False)
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -580,14 +592,12 @@ class MongoCatalogDBI:
         self.exec_stats_raw.insert(stats)
 
     def add_exec_stats_apps(self, app_module_name, app_id, creation_time, exec_start_time, 
-                            finish_time, is_error, time_range):
+                            finish_time, is_error, type, time_range):
         if not app_id:
             return
         full_app_id = app_id
         if app_module_name:
             full_app_id = app_module_name + "/" + app_id
-        if not time_range:
-            time_range = "*"
         queue_time = exec_start_time - creation_time
         exec_time = finish_time - exec_start_time
         new_data = {
@@ -599,13 +609,11 @@ class MongoCatalogDBI:
             'avg_queue_time': queue_time,
             'avg_exec_time': exec_time
         }
-        self.exec_stats_apps.update({'full_app_id': full_app_id, 'time_range': time_range}, 
+        self.exec_stats_apps.update({'full_app_id': full_app_id, 'type': type, 'time_range': time_range}, 
                                     {'$setOnInsert': new_data, '$inc': inc_data}, upsert=True)
 
     def add_exec_stats_users(self, user_id, creation_time, exec_start_time, 
-                             finish_time, is_error, time_range):
-        if not time_range:
-            time_range = "*"
+                             finish_time, is_error, type, time_range):
         queue_time = exec_start_time - creation_time
         exec_time = finish_time - exec_start_time
         inc_data = {
@@ -614,5 +622,28 @@ class MongoCatalogDBI:
             'avg_queue_time': queue_time,
             'avg_exec_time': exec_time
         }
-        self.exec_stats_users.update({'user_id': user_id, 'time_range': time_range}, 
+        self.exec_stats_users.update({'user_id': user_id, 'type': type, 'time_range': time_range}, 
                                      {'$inc': inc_data}, upsert=True)
+
+
+    def get_exec_stats_apps(self, full_app_ids, type, time_range):
+        filter = {}
+        if full_app_ids:
+            filter['full_app_id'] = {'$in': full_app_ids}
+        filter['type'] = type
+        if time_range:
+            filter['time_range'] = time_range
+        selection = {
+            "_id": 0,
+            "module_name": 1, 
+            "full_app_id": 1,
+            "type": 1, 
+            "time_range": 1,
+            "number_of_calls": 1, 
+            "number_of_errors": 1, 
+            "avg_exec_time": 1, 
+            "avg_queue_time": 1 
+        }
+        return list(self.exec_stats_apps.find(filter, selection))
+
+        

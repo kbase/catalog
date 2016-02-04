@@ -7,6 +7,7 @@ import copy
 import os
 import random
 import semantic_version
+import re
 
 import biokbase.catalog.version
 
@@ -750,17 +751,19 @@ class CatalogController:
         parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
-                                    finish_time, is_error, None)
+                                    finish_time, is_error, "a", "*")
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
-                                    finish_time, is_error, week_time_range)
+                                    finish_time, is_error, "w", week_time_range)
         self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
-                                    finish_time, is_error, None)
+                                    finish_time, is_error, "a", "*")
         self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
-                                    finish_time, is_error, week_time_range)
+                                    finish_time, is_error, "w", week_time_range)
 
 
     def get_exec_aggr_stats(self, full_app_ids, per_week):
-        pass
+        type = "w" if per_week else "a"
+        time_range = None if per_week else "*"
+        return self.db.get_exec_stats_apps(full_app_ids, type, per_week)
 
 
 # NOT PART OF CLASS CATALOG!!
