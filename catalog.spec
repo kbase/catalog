@@ -138,6 +138,17 @@ module Catalog {
     funcdef list_favorite_counts(ListFavoriteCounts params) returns (list<FavoriteCount> counts);
 
 
+    typedef structure {
+        int start_line;
+        int end_line;
+    } FunctionPlace;
+
+    typedef structure {
+        string sdk_version;
+        string sdk_git_commit;
+        string impl_file_path;
+        mapping<string, FunctionPlace> function_places;
+    } CompilationReport;
 
     /*
         data_folder - optional field representing unique module name (like <module_name> transformed to
@@ -160,6 +171,7 @@ module Catalog {
         string docker_img_name;
         string data_folder;
         string data_version;
+        CompilationReport compilation_report;
     } ModuleVersionInfo;
 
     typedef structure {
@@ -382,9 +394,9 @@ module Catalog {
             original execution was started through API call without app ID defined),
         time_range - one of supported time ranges (currently it could be either '*' for all time
             or ISO-encoded week like "2016-W01")
-        avg_queue_time - average time difference between exec_start_time and creation_time moments
+        total_queue_time - summarized time difference between exec_start_time and creation_time moments
             defined in seconds since Epoch (POSIX),
-        avg_exec_time - average time difference between finish_time and exec_start_time moments 
+        total_exec_time - summarized time difference between finish_time and exec_start_time moments 
             defined in seconds since Epoch (POSIX).
     */
     typedef structure {
@@ -392,8 +404,8 @@ module Catalog {
         string time_range;
         int number_of_calls;
         int number_of_errors;
-        float avg_queue_time;
-        float avg_exec_time;
+        float total_queue_time;
+        float total_exec_time;
     } ExecAggrStats;
 
     funcdef get_exec_aggr_stats(GetExecAggrStatsParams params) returns (list<ExecAggrStats>);

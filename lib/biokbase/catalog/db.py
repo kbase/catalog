@@ -109,7 +109,13 @@ class MongoCatalogDBI:
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
+        self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
+                                    {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
+        self.exec_stats_users.update({'avg_queue_time': {'$exists' : True}}, 
+                                    {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
 
         # Make sure we have an index on module and git_repo_url
         self.modules.ensure_index('module_name', unique=True, sparse=True)
@@ -606,8 +612,8 @@ class MongoCatalogDBI:
         inc_data = {
             'number_of_calls': 1,
             'number_of_errors': 1 if is_error else 0,
-            'avg_queue_time': queue_time,
-            'avg_exec_time': exec_time
+            'total_queue_time': queue_time,
+            'total_exec_time': exec_time
         }
         self.exec_stats_apps.update({'full_app_id': full_app_id, 'type': type, 'time_range': time_range}, 
                                     {'$setOnInsert': new_data, '$inc': inc_data}, upsert=True)
@@ -619,8 +625,8 @@ class MongoCatalogDBI:
         inc_data = {
             'number_of_calls': 1,
             'number_of_errors': 1 if is_error else 0,
-            'avg_queue_time': queue_time,
-            'avg_exec_time': exec_time
+            'total_queue_time': queue_time,
+            'total_exec_time': exec_time
         }
         self.exec_stats_users.update({'user_id': user_id, 'type': type, 'time_range': time_range}, 
                                      {'$inc': inc_data}, upsert=True)
@@ -641,8 +647,8 @@ class MongoCatalogDBI:
             "time_range": 1,
             "number_of_calls": 1, 
             "number_of_errors": 1, 
-            "avg_exec_time": 1, 
-            "avg_queue_time": 1 
+            "total_exec_time": 1, 
+            "total_queue_time": 1 
         }
         return list(self.exec_stats_apps.find(filter, selection))
 

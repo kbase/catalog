@@ -107,6 +107,7 @@ class Registrar:
             self.image_name = self.docker_registry_host + '/kbase:' + module_name_lc + '.' + str(git_commit_hash)
             ref_data_folder = None
             ref_data_ver = None
+            compilation_report = None
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
                 dockerclient = None
@@ -158,6 +159,13 @@ class Registrar:
                             self.prepare_ref_data(dockerclient, self.image_name, self.ref_data_base, ref_data_folder, 
                                                   ref_data_ver, basedir, self.temp_dir, self.registration_id,
                                                   self.token, self.kbase_endpoint)
+                
+                # Trying to extract compilation report with line numbers of funcdefs from docker image.
+                # There is "report" entry-point command responsible for that. In case there are any
+                # errors we just skip it.
+                compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
+                                                                     self.temp_dir, self.registration_id, 
+                                                                     self.token, self.kbase_endpoint)
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
@@ -168,7 +176,7 @@ class Registrar:
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
-            self.update_the_catalog(repo, basedir, ref_data_folder, ref_data_ver)
+            self.update_the_catalog(repo, basedir, ref_data_folder, ref_data_ver, compilation_report)
             
             self.build_is_complete()
 
@@ -248,7 +256,7 @@ class Registrar:
             raise ValueError('Module names must be alphanumeric characters (including underscores) only, with no spaces.')
 
 
-    def update_the_catalog(self, repo, basedir, ref_data_folder, ref_data_ver):
+    def update_the_catalog(self, repo, basedir, ref_data_folder, ref_data_ver, compilation_report):
 
         # get the basic info that we need
         commit_hash = repo.head.commit.hexsha
@@ -304,7 +312,8 @@ class Registrar:
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
             'narrative_methods': narrative_methods,
-            'docker_img_name': self.image_name
+            'docker_img_name': self.image_name,
+            'compilation_report': compilation_report
         }
         if ref_data_ver:
             new_version['data_folder'] = ref_data_folder
@@ -498,38 +507,27 @@ class Registrar:
         self.log('done pushing docker image to registry for ' + image_name+'\n');
 
 
-    def prepare_ref_data(self, dockerclient, image_name, ref_data_base, ref_data_folder, 
-                         ref_data_ver, basedir, temp_dir, registration_id, token, kbase_endpoint):
-        self.log('\nReference data: creating docker container for initialization')
-        if not os.path.exists(ref_data_base):
-            raise ValueError("Reference data network folder doesn't exist: " + ref_data_base)
-        upper_target_dir = os.path.join(ref_data_base, ref_data_folder)
-        if not os.path.exists(upper_target_dir):
-            os.mkdir(upper_target_dir)
-        temp_ref_data_dir = os.path.join(upper_target_dir, "temp_" + registration_id)
-        os.mkdir(temp_ref_data_dir)
+    def run_docker_container(self, dockerclient, image_name, token, 
+                             kbase_endpoint, binds, work_dir, command):
         cnt_id = None
         try:
-            temp_work_dir = os.path.join(temp_dir,registration_id,'ref_data_workdir')
-            os.mkdir(temp_work_dir)
-            token_file = os.path.join(temp_work_dir, "token")
+            token_file = os.path.join(work_dir, "token")
             with open(token_file, "w") as file:
                 file.write(token)
-            config_file = os.path.join(temp_work_dir, "config.properties")
+            config_file = os.path.join(work_dir, "config.properties")
             with open(config_file, "w") as file:
                 file.write("[global]\n" + 
                            "job_service_url = " + kbase_endpoint + "/userandjobstate\n" +
                            "workspace_url = " + kbase_endpoint + "/ws\n" +
                            "shock_url = " + kbase_endpoint + "/shock-api\n" +
                            "kbase_endpoint = " + kbase_endpoint + "\n")
-            repo_data_dir = os.path.join(basedir, "data")
-            binds = {temp_work_dir: {"bind": "/kb/module/work", "mode": "rw"}, 
-                     temp_ref_data_dir: {"bind": "/data", "mode": "rw"},
-                     repo_data_dir: {"bind": "/kb/module/data", "mode": "rw"}}
-            container = dockerclient.create_container(image=image_name, command='init', tty=True,
+            if not binds:
+                binds = {}
+            binds[work_dir] = {"bind": "/kb/module/work", "mode": "rw"}
+            container = dockerclient.create_container(image=image_name, command=command, tty=True,
                     host_config=dockerclient.create_host_config(binds=binds))
             cnt_id = container.get('Id')
-            self.log('Running init entry-point for ref-data, container Id=' + cnt_id)
+            self.log('Running "' + command + '" entry-point command, container Id=' + cnt_id)
             dockerclient.start(container=cnt_id)
             stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
             line = ""
@@ -542,7 +540,35 @@ class Registrar:
                 else:
                     line += char
             if len(line) > 0:
-                    self.log(line)
+                self.log(line)
+        finally:
+            # cleaning up the container
+            try:
+                if cnt_id:
+                    dockerclient.remove_container(container=cnt_id, v=True, force=True)
+                self.log("Docker container (Id=" + cnt_id + ") was cleaned up")
+            except:
+                pass
+
+
+    def prepare_ref_data(self, dockerclient, image_name, ref_data_base, ref_data_folder, 
+                         ref_data_ver, basedir, temp_dir, registration_id, token, kbase_endpoint):
+        self.log('\nReference data: creating docker container for initialization')
+        if not os.path.exists(ref_data_base):
+            raise ValueError("Reference data network folder doesn't exist: " + ref_data_base)
+        upper_target_dir = os.path.join(ref_data_base, ref_data_folder)
+        if not os.path.exists(upper_target_dir):
+            os.mkdir(upper_target_dir)
+        temp_ref_data_dir = os.path.join(upper_target_dir, "temp_" + registration_id)
+        try:
+            repo_data_dir = os.path.join(basedir, "data")
+            os.mkdir(temp_ref_data_dir)
+            binds = {temp_ref_data_dir: {"bind": "/data", "mode": "rw"},
+                     repo_data_dir: {"bind": "/kb/module/data", "mode": "rw"}}
+            temp_work_dir = os.path.join(temp_dir,registration_id,'ref_data_workdir')
+            os.mkdir(temp_work_dir)
+            self.run_docker_container(dockerclient, image_name, token, kbase_endpoint, 
+                                      binds, temp_work_dir, 'init')
             ready_file = os.path.join(temp_ref_data_dir, "__READY__")
             if os.path.exists(ready_file):
                 target_dir = os.path.join(upper_target_dir, ref_data_ver)
@@ -557,15 +583,27 @@ class Registrar:
                     shutil.rmtree(temp_ref_data_dir)
             except:
                 pass
-            # cleaning up the container
-            try:
-                if cnt_id:
-                    dockerclient.remove_container(container=cnt_id, v=True, force=True)
-                self.log("Docker container (Id=" + cnt_id + ") was cleaned up")
-            except:
-                pass
-            
-                
+
+
+    def prepare_compilation_report(self, dockerclient, image_name, basedir, temp_dir, 
+                                   registration_id, token, kbase_endpoint):
+        self.log('\nCompilation report: creating docker container')
+        try:
+            temp_work_dir = os.path.join(temp_dir,registration_id,'report_workdir')
+            os.mkdir(temp_work_dir)
+            self.run_docker_container(dockerclient, image_name, token, kbase_endpoint, 
+                                      None, temp_work_dir, 'report')
+            report_file = os.path.join(temp_work_dir, 'compile_report.json')
+            if not os.path.exists(report_file):
+                self.log("Report file doesn't exist: " + report_file)
+                return None
+            else:
+                with open(report_file) as f:    
+                    return json.load(f)
+        except Exception, e:
+            self.log("Error preparing compilation log: " + str(e))
+        return None
+
 
     # Temporary flags to test everything except docker
     # we should remove once the test rig can fully support docker and an NMS
