@@ -19,9 +19,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *     original execution was started through API call without app ID defined),
  * time_range - one of supported time ranges (currently it could be either '*' for all time
  *     or ISO-encoded week like "2016-W01")
- * avg_queue_time - average time difference between exec_start_time and creation_time moments
+ * total_queue_time - summarized time difference between exec_start_time and creation_time moments
  *     defined in seconds since Epoch (POSIX),
- * avg_exec_time - average time difference between finish_time and exec_start_time moments 
+ * total_exec_time - summarized time difference between finish_time and exec_start_time moments 
  *     defined in seconds since Epoch (POSIX).
  * </pre>
  * 
@@ -33,8 +33,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "time_range",
     "number_of_calls",
     "number_of_errors",
-    "avg_queue_time",
-    "avg_exec_time"
+    "total_queue_time",
+    "total_exec_time"
 })
 public class ExecAggrStats {
 
@@ -46,10 +46,10 @@ public class ExecAggrStats {
     private Long numberOfCalls;
     @JsonProperty("number_of_errors")
     private Long numberOfErrors;
-    @JsonProperty("avg_queue_time")
-    private Double avgQueueTime;
-    @JsonProperty("avg_exec_time")
-    private Double avgExecTime;
+    @JsonProperty("total_queue_time")
+    private Double totalQueueTime;
+    @JsonProperty("total_exec_time")
+    private Double totalExecTime;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("full_app_id")
@@ -112,33 +112,33 @@ public class ExecAggrStats {
         return this;
     }
 
-    @JsonProperty("avg_queue_time")
-    public Double getAvgQueueTime() {
-        return avgQueueTime;
+    @JsonProperty("total_queue_time")
+    public Double getTotalQueueTime() {
+        return totalQueueTime;
     }
 
-    @JsonProperty("avg_queue_time")
-    public void setAvgQueueTime(Double avgQueueTime) {
-        this.avgQueueTime = avgQueueTime;
+    @JsonProperty("total_queue_time")
+    public void setTotalQueueTime(Double totalQueueTime) {
+        this.totalQueueTime = totalQueueTime;
     }
 
-    public ExecAggrStats withAvgQueueTime(Double avgQueueTime) {
-        this.avgQueueTime = avgQueueTime;
+    public ExecAggrStats withTotalQueueTime(Double totalQueueTime) {
+        this.totalQueueTime = totalQueueTime;
         return this;
     }
 
-    @JsonProperty("avg_exec_time")
-    public Double getAvgExecTime() {
-        return avgExecTime;
+    @JsonProperty("total_exec_time")
+    public Double getTotalExecTime() {
+        return totalExecTime;
     }
 
-    @JsonProperty("avg_exec_time")
-    public void setAvgExecTime(Double avgExecTime) {
-        this.avgExecTime = avgExecTime;
+    @JsonProperty("total_exec_time")
+    public void setTotalExecTime(Double totalExecTime) {
+        this.totalExecTime = totalExecTime;
     }
 
-    public ExecAggrStats withAvgExecTime(Double avgExecTime) {
-        this.avgExecTime = avgExecTime;
+    public ExecAggrStats withTotalExecTime(Double totalExecTime) {
+        this.totalExecTime = totalExecTime;
         return this;
     }
 
@@ -154,7 +154,7 @@ public class ExecAggrStats {
 
     @Override
     public String toString() {
-        return ((((((((((((((("ExecAggrStats"+" [fullAppId=")+ fullAppId)+", timeRange=")+ timeRange)+", numberOfCalls=")+ numberOfCalls)+", numberOfErrors=")+ numberOfErrors)+", avgQueueTime=")+ avgQueueTime)+", avgExecTime=")+ avgExecTime)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("ExecAggrStats"+" [fullAppId=")+ fullAppId)+", timeRange=")+ timeRange)+", numberOfCalls=")+ numberOfCalls)+", numberOfErrors=")+ numberOfErrors)+", totalQueueTime=")+ totalQueueTime)+", totalExecTime=")+ totalExecTime)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -1268,6 +1268,15 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 </pre>
 
@@ -1299,6 +1308,15 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 
 =end text
@@ -1387,6 +1405,15 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 </pre>
 
@@ -1412,6 +1439,15 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 
 =end text
@@ -1497,6 +1533,15 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 </pre>
 
@@ -1519,6 +1564,15 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 
 =end text
@@ -2865,8 +2919,8 @@ ExecAggrStats is a reference to a hash where the following keys are defined:
 	time_range has a value which is a string
 	number_of_calls has a value which is an int
 	number_of_errors has a value which is an int
-	avg_queue_time has a value which is a float
-	avg_exec_time has a value which is a float
+	total_queue_time has a value which is a float
+	total_exec_time has a value which is a float
 
 </pre>
 
@@ -2885,8 +2939,8 @@ ExecAggrStats is a reference to a hash where the following keys are defined:
 	time_range has a value which is a string
 	number_of_calls has a value which is an int
 	number_of_errors has a value which is an int
-	avg_queue_time has a value which is a float
-	avg_exec_time has a value which is a float
+	total_queue_time has a value which is a float
+	total_exec_time has a value which is a float
 
 
 =end text
@@ -3403,6 +3457,74 @@ count has a value which is an int
 
 
 
+=head2 FunctionPlace
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+start_line has a value which is an int
+end_line has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+start_line has a value which is an int
+end_line has a value which is an int
+
+
+=end text
+
+=back
+
+
+
+=head2 CompilationReport
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+sdk_version has a value which is a string
+sdk_git_commit has a value which is a string
+impl_file_path has a value which is a string
+function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+sdk_version has a value which is a string
+sdk_git_commit has a value which is a string
+impl_file_path has a value which is a string
+function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+
+
+=end text
+
+=back
+
+
+
 =head2 ModuleVersionInfo
 
 =over 4
@@ -3437,6 +3559,7 @@ narrative_method_ids has a value which is a reference to a list where each eleme
 docker_img_name has a value which is a string
 data_folder has a value which is a string
 data_version has a value which is a string
+compilation_report has a value which is a Catalog.CompilationReport
 
 </pre>
 
@@ -3454,6 +3577,7 @@ narrative_method_ids has a value which is a reference to a list where each eleme
 docker_img_name has a value which is a string
 data_folder has a value which is a string
 data_version has a value which is a string
+compilation_report has a value which is a Catalog.CompilationReport
 
 
 =end text
@@ -4011,9 +4135,9 @@ full_app_id - optional fully qualified method-spec id including module_name pref
     original execution was started through API call without app ID defined),
 time_range - one of supported time ranges (currently it could be either '*' for all time
     or ISO-encoded week like "2016-W01")
-avg_queue_time - average time difference between exec_start_time and creation_time moments
+total_queue_time - summarized time difference between exec_start_time and creation_time moments
     defined in seconds since Epoch (POSIX),
-avg_exec_time - average time difference between finish_time and exec_start_time moments 
+total_exec_time - summarized time difference between finish_time and exec_start_time moments 
     defined in seconds since Epoch (POSIX).
 
 
@@ -4027,8 +4151,8 @@ full_app_id has a value which is a string
 time_range has a value which is a string
 number_of_calls has a value which is an int
 number_of_errors has a value which is an int
-avg_queue_time has a value which is a float
-avg_exec_time has a value which is a float
+total_queue_time has a value which is a float
+total_exec_time has a value which is a float
 
 </pre>
 
@@ -4041,8 +4165,8 @@ full_app_id has a value which is a string
 time_range has a value which is a string
 number_of_calls has a value which is an int
 number_of_errors has a value which is an int
-avg_queue_time has a value which is a float
-avg_exec_time has a value which is a float
+total_queue_time has a value which is a float
+total_exec_time has a value which is a float
 
 
 =end text

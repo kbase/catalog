@@ -38,7 +38,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "narrative_method_ids",
     "docker_img_name",
     "data_folder",
-    "data_version"
+    "data_version",
+    "compilation_report"
 })
 public class ModuleVersionInfo {
 
@@ -60,6 +61,13 @@ public class ModuleVersionInfo {
     private java.lang.String dataFolder;
     @JsonProperty("data_version")
     private java.lang.String dataVersion;
+    /**
+     * <p>Original spec-file type: CompilationReport</p>
+     * 
+     * 
+     */
+    @JsonProperty("compilation_report")
+    private CompilationReport compilationReport;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("timestamp")
@@ -197,6 +205,31 @@ public class ModuleVersionInfo {
         return this;
     }
 
+    /**
+     * <p>Original spec-file type: CompilationReport</p>
+     * 
+     * 
+     */
+    @JsonProperty("compilation_report")
+    public CompilationReport getCompilationReport() {
+        return compilationReport;
+    }
+
+    /**
+     * <p>Original spec-file type: CompilationReport</p>
+     * 
+     * 
+     */
+    @JsonProperty("compilation_report")
+    public void setCompilationReport(CompilationReport compilationReport) {
+        this.compilationReport = compilationReport;
+    }
+
+    public ModuleVersionInfo withCompilationReport(CompilationReport compilationReport) {
+        this.compilationReport = compilationReport;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -209,7 +242,7 @@ public class ModuleVersionInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", compilationReport=")+ compilationReport)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
