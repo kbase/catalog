@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
+    "timestamp",
     "registration_id",
     "registration",
     "error_message",
@@ -27,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 })
 public class BuildInfo {
 
+    @JsonProperty("timestamp")
+    private String timestamp;
     @JsonProperty("registration_id")
     private String registrationId;
     @JsonProperty("registration")
@@ -38,6 +41,21 @@ public class BuildInfo {
     @JsonProperty("git_url")
     private String gitUrl;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    @JsonProperty("timestamp")
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    @JsonProperty("timestamp")
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public BuildInfo withTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+        return this;
+    }
 
     @JsonProperty("registration_id")
     public String getRegistrationId() {
@@ -126,7 +144,7 @@ public class BuildInfo {
 
     @Override
     public String toString() {
-        return ((((((((((((("BuildInfo"+" [registrationId=")+ registrationId)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", moduleNameLc=")+ moduleNameLc)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((("BuildInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", registration=")+ registration)+", errorMessage=")+ errorMessage)+", moduleNameLc=")+ moduleNameLc)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

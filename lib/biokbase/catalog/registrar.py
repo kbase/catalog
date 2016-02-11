@@ -7,12 +7,14 @@ import time
 import datetime
 import pprint
 import json
+import semantic_version
 
 import git
 import yaml
 import requests
 from urlparse import urlparse
 from docker import Client as DockerClient
+from docker.tls import TLSConfig as DockerTLSConfig
 
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.narrative_method_store.client import NarrativeMethodStore
@@ -23,7 +25,8 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+                    docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details,
+                    ref_data_base, kbase_endpoint):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
@@ -50,6 +53,9 @@ class Registrar:
         self.log_buffer = [];
         self.last_log_time = time.time() # in seconds
         self.log_interval = 1.0 # save log to mongo every second
+        
+        self.ref_data_base = ref_data_base
+        self.kbase_endpoint = kbase_endpoint
 
 
     def start_registration(self):
@@ -85,21 +91,23 @@ class Registrar:
             self.sanity_checks_and_parse(repo, basedir)
 
             ##############################
-            # 2.5 - waiting for one minute at most until git releases .git/config.lock, if it still exists then kill it
-            timeout = time.time() + 60
+            # 2.5 - dealing with git releases .git/config.lock, if it still exists after 5s then kill it
             git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
-            while os.path.exists(git_config_lock_file) and time.time() <= timeout:
+            if os.path.exists(git_config_lock_file):
                 self.log('.git/config.lock exists, waiting 5s for it to release')
                 time.sleep(5)
-            if os.path.exists(git_config_lock_file):
-                self.log('.git/config.lock file still there, we are just going to delete it....')
-                os.remove(git_config_lock_file)
+                if os.path.exists(git_config_lock_file):
+                    self.log('.git/config.lock file still there, we are just going to delete it....')
+                    os.remove(git_config_lock_file)
 
             ##############################
             # 3 docker build - in progress
             # perhaps make this a self attr?
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,'module-name').strip().lower()
             self.image_name = self.docker_registry_host + '/kbase:' + module_name_lc + '.' + str(git_commit_hash)
+            ref_data_folder = None
+            ref_data_ver = None
+            compilation_report = None
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
                 dockerclient = None
@@ -107,6 +115,7 @@ class Registrar:
                 if len(str(self.docker_base_url)) > 0:
                     dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=docker_timeout)
                 else:
+                    # docker base URL is not set in config, let's use Docker-related env-vars in this case
                     docker_host = os.environ['DOCKER_HOST']
                     if docker_host is None or len(docker_host) == 0:
                         raise ValueError('Docker host should be defined either in configuration '
@@ -134,6 +143,29 @@ class Registrar:
                 self.set_build_step('building the docker image')
                 # imageId is not yet populated properly
                 imageId = self.build_docker_image(dockerclient,self.image_name,basedir)
+                
+                # check if reference data version is defined in kbase.yml
+                if 'data-version' in self.kb_yaml:
+                    ref_data_ver = str(self.kb_yaml['data-version']).strip()
+                    if ref_data_ver:
+                        ref_data_folder = module_name_lc
+                        target_ref_data_dir = os.path.join(self.ref_data_base, ref_data_folder, ref_data_ver)
+                        if os.path.exists(target_ref_data_dir):
+                            self.log("Reference data for " + ref_data_folder + "/" + ref_data_ver + " was " +
+                                     "already prepared, initialization step is skipped")
+                        else:
+                            self.set_build_step('preparing reference data (running init entry-point), ' +
+                                                'ref-data version: ' + ref_data_ver)
+                            self.prepare_ref_data(dockerclient, self.image_name, self.ref_data_base, ref_data_folder, 
+                                                  ref_data_ver, basedir, self.temp_dir, self.registration_id,
+                                                  self.token, self.kbase_endpoint)
+                
+                # Trying to extract compilation report with line numbers of funcdefs from docker image.
+                # There is "report" entry-point command responsible for that. In case there are any
+                # errors we just skip it.
+                compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
+                                                                     self.temp_dir, self.registration_id, 
+                                                                     self.token, self.kbase_endpoint)
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
@@ -144,7 +176,7 @@ class Registrar:
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
-            self.update_the_catalog(repo, basedir)
+            self.update_the_catalog(repo, basedir, ref_data_folder, ref_data_ver, compilation_report)
             
             self.build_is_complete()
 
@@ -179,6 +211,11 @@ class Registrar:
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name').strip()
         module_description = self.get_required_field_as_string(self.kb_yaml,'module-description').strip()
         version = self.get_required_field_as_string(self.kb_yaml,'module-version').strip()
+
+        # must be a semantic version
+        if not semantic_version.validate(version):
+            raise ValueError('Invalid version string in kbase.yaml - must be in semantic version format.  See http://semver.org')
+
         service_language = self.get_required_field_as_string(self.kb_yaml,'service-language').strip()
         owners = self.get_required_field_as_list(self.kb_yaml,'owners')
 
@@ -219,7 +256,7 @@ class Registrar:
             raise ValueError('Module names must be alphanumeric characters (including underscores) only, with no spaces.')
 
 
-    def update_the_catalog(self, repo, basedir):
+    def update_the_catalog(self, repo, basedir, ref_data_folder, ref_data_ver, compilation_report):
 
         # get the basic info that we need
         commit_hash = repo.head.commit.hexsha
@@ -275,8 +312,12 @@ class Registrar:
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
             'narrative_methods': narrative_methods,
-            'docker_img_name': self.image_name
+            'docker_img_name': self.image_name,
+            'compilation_report': compilation_report
         }
+        if ref_data_ver:
+            new_version['data_folder'] = ref_data_folder
+            new_version['data_version'] = ref_data_ver
         self.log('new dev version object: '+pprint.pformat(new_version))
         error = self.db.update_dev_version(new_version, git_url=self.git_url)
         if error is not None:
@@ -451,12 +492,117 @@ class Registrar:
                 log_line += ' - ' + line_parse['progress']
             #if 'progressDetail' in line_parse:
             #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
+
+            # catch anything unexpected, we should probably throw an error here
+            for key in line_parse:
+                if key not in ['id','status','progress','progressDetail']:
+                    log_line += '['+key+'='+str(line_parse[key])+'] '
+
             self.log(log_line)
 
-        # check for errors here somehow!
+            if 'error' in line_parse:
+                self.log(str(line_parse),no_end_line=True)
+                raise ValueError('Docker push failed: '+str(line_parse['error']))
 
-        
         self.log('done pushing docker image to registry for ' + image_name+'\n');
+
+
+    def run_docker_container(self, dockerclient, image_name, token, 
+                             kbase_endpoint, binds, work_dir, command):
+        cnt_id = None
+        try:
+            token_file = os.path.join(work_dir, "token")
+            with open(token_file, "w") as file:
+                file.write(token)
+            config_file = os.path.join(work_dir, "config.properties")
+            with open(config_file, "w") as file:
+                file.write("[global]\n" + 
+                           "job_service_url = " + kbase_endpoint + "/userandjobstate\n" +
+                           "workspace_url = " + kbase_endpoint + "/ws\n" +
+                           "shock_url = " + kbase_endpoint + "/shock-api\n" +
+                           "kbase_endpoint = " + kbase_endpoint + "\n")
+            if not binds:
+                binds = {}
+            binds[work_dir] = {"bind": "/kb/module/work", "mode": "rw"}
+            container = dockerclient.create_container(image=image_name, command=command, tty=True,
+                    host_config=dockerclient.create_host_config(binds=binds))
+            cnt_id = container.get('Id')
+            self.log('Running "' + command + '" entry-point command, container Id=' + cnt_id)
+            dockerclient.start(container=cnt_id)
+            stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
+            line = ""
+            for char in stream:
+                if char == '\r':
+                    continue
+                if char == '\n':
+                    self.log(line)
+                    line = ""
+                else:
+                    line += char
+            if len(line) > 0:
+                self.log(line)
+        finally:
+            # cleaning up the container
+            try:
+                if cnt_id:
+                    dockerclient.remove_container(container=cnt_id, v=True, force=True)
+                self.log("Docker container (Id=" + cnt_id + ") was cleaned up")
+            except:
+                pass
+
+
+    def prepare_ref_data(self, dockerclient, image_name, ref_data_base, ref_data_folder, 
+                         ref_data_ver, basedir, temp_dir, registration_id, token, kbase_endpoint):
+        self.log('\nReference data: creating docker container for initialization')
+        if not os.path.exists(ref_data_base):
+            raise ValueError("Reference data network folder doesn't exist: " + ref_data_base)
+        upper_target_dir = os.path.join(ref_data_base, ref_data_folder)
+        if not os.path.exists(upper_target_dir):
+            os.mkdir(upper_target_dir)
+        temp_ref_data_dir = os.path.join(upper_target_dir, "temp_" + registration_id)
+        try:
+            repo_data_dir = os.path.join(basedir, "data")
+            os.mkdir(temp_ref_data_dir)
+            binds = {temp_ref_data_dir: {"bind": "/data", "mode": "rw"},
+                     repo_data_dir: {"bind": "/kb/module/data", "mode": "rw"}}
+            temp_work_dir = os.path.join(temp_dir,registration_id,'ref_data_workdir')
+            os.mkdir(temp_work_dir)
+            self.run_docker_container(dockerclient, image_name, token, kbase_endpoint, 
+                                      binds, temp_work_dir, 'init')
+            ready_file = os.path.join(temp_ref_data_dir, "__READY__")
+            if os.path.exists(ready_file):
+                target_dir = os.path.join(upper_target_dir, ref_data_ver)
+                os.rename(temp_ref_data_dir, target_dir)
+                self.log("Reference data was successfully deployed into " + target_dir)
+            else:
+                raise ValueError("__READY__ file is not detected in reference data folder, produced data will be discarded")
+        finally:
+            # cleaning up temporary ref-data (if not renamed into permanent after success)
+            try:
+                if os.path.exists(temp_ref_data_dir):
+                    shutil.rmtree(temp_ref_data_dir)
+            except:
+                pass
+
+
+    def prepare_compilation_report(self, dockerclient, image_name, basedir, temp_dir, 
+                                   registration_id, token, kbase_endpoint):
+        self.log('\nCompilation report: creating docker container')
+        try:
+            temp_work_dir = os.path.join(temp_dir,registration_id,'report_workdir')
+            os.mkdir(temp_work_dir)
+            self.run_docker_container(dockerclient, image_name, token, kbase_endpoint, 
+                                      None, temp_work_dir, 'report')
+            report_file = os.path.join(temp_work_dir, 'compile_report.json')
+            if not os.path.exists(report_file):
+                self.log("Report file doesn't exist: " + report_file)
+                return None
+            else:
+                with open(report_file) as f:    
+                    return json.load(f)
+        except Exception, e:
+            self.log("Error preparing compilation log: " + str(e))
+        return None
 
 
     # Temporary flags to test everything except docker

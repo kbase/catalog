@@ -86,12 +86,81 @@ module Catalog {
     typedef structure {
         string module_name;
         string git_url;
-    } BasicModuleInfo;
 
+    } BasicModuleInfo;
+    /*
+    To Add:
+        string brief_description;
+        list <string> owners;
+        boolean is_released;
+    */
+
+    /* */
     funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
 
 
+    /* FAVORITES!! */
 
+    typedef structure {
+        string module_name;
+        string id;
+    } FavoriteItem;
+
+    funcdef add_favorite(FavoriteItem params) returns () authentication required;
+    funcdef remove_favorite(FavoriteItem params) returns () authentication required;
+
+    funcdef list_favorites(string username) returns(list<FavoriteItem> favorites);
+
+    typedef structure {
+        string username;
+        string timestamp;
+    } FavoriteUser;
+
+    funcdef list_app_favorites(FavoriteItem item) returns(list<FavoriteUser> users);
+
+    /* if favorite item is given, will return stars just for that item.  If a module
+    name is given, will return stars for all methods in that module.  If none of
+    those are given, then will return stars for every method that there is info on 
+
+    parameters to add:
+        list<FavoriteItem> items;
+    */
+    typedef structure {
+        list<string> modules;
+    } ListFavoriteCounts;
+
+    typedef structure {
+        string module_name;
+        string app_id;
+        int count;
+    } FavoriteCount;
+
+    funcdef list_favorite_counts(ListFavoriteCounts params) returns (list<FavoriteCount> counts);
+
+
+    typedef structure {
+        int start_line;
+        int end_line;
+    } FunctionPlace;
+
+    typedef structure {
+        string sdk_version;
+        string sdk_git_commit;
+        string impl_file_path;
+        mapping<string, FunctionPlace> function_places;
+    } CompilationReport;
+
+    /*
+        data_folder - optional field representing unique module name (like <module_name> transformed to
+            lower cases) used for reference data purposes (see description for data_version field). This
+            value will be treated as part of file system path relative to the base that comes from the 
+            config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
+        data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+            key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
+            should be initialized by running docker image with "init" target from catalog. And later when
+            async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+            docker container by execution engine.
+    */
     typedef structure {
         int timestamp;
         string registration_id;
@@ -100,6 +169,9 @@ module Catalog {
         string git_commit_message;
         list<string> narrative_method_ids;
         string docker_img_name;
+        string data_folder;
+        string data_version;
+        CompilationReport compilation_report;
     } ModuleVersionInfo;
 
     typedef structure {
@@ -209,6 +281,7 @@ module Catalog {
 
 
     typedef structure {
+        string timestamp;
         string registration_id;
         string registration;
         string error_message;
@@ -272,5 +345,68 @@ module Catalog {
     funcdef approve_developer(string username) returns () authentication required;
     funcdef revoke_developer(string username) returns () authentication required;
 
+    /*
+        user_id - GlobusOnline login of invoker,
+        app_module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services) where app_id comes from,
+        app_id - optional method-spec id without module_name prefix (could be absent or null
+            in case original execution was started through API call without app ID defined),
+        func_module_name - optional module name of registered repo (could be absent of null for
+            old fashioned services) where func_name comes from,
+        func_name - name of function in KIDL-spec without module_name prefix,
+        git_commit_hash - optional service version (in case of dynamically registered repo),
+        creation_time, exec_start_time and finish_time - defined in seconds since Epoch (POSIX),
+        is_error - indicates whether execution was finished with error or not.
+    */
+    typedef structure {
+        string user_id;
+        string app_module_name;
+        string app_id;
+        string func_module_name;
+        string func_name;
+        string git_commit_hash;
+        float creation_time;
+        float exec_start_time;
+        float finish_time;
+        boolean is_error;
+    } LogExecStatsParams;
 
+    /*
+        Request from Execution Engine for adding statistics about each method run. It could be done
+        using catalog admin credentials only.
+    */
+    funcdef log_exec_stats(LogExecStatsParams params) returns () authentication required;
+
+    /*
+        full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
+            slash in case of dynamically registered repo).
+        per_week - optional flag switching results to weekly data rather than one row per app for 
+            all time (default value is false)
+    */
+    typedef structure {
+        list<string> full_app_ids;
+        boolean per_week;
+    } GetExecAggrStatsParams;
+
+    /*
+        full_app_id - optional fully qualified method-spec id including module_name prefix followed
+            by slash in case of dynamically registered repo (it could be absent or null in case
+            original execution was started through API call without app ID defined),
+        time_range - one of supported time ranges (currently it could be either '*' for all time
+            or ISO-encoded week like "2016-W01")
+        total_queue_time - summarized time difference between exec_start_time and creation_time moments
+            defined in seconds since Epoch (POSIX),
+        total_exec_time - summarized time difference between finish_time and exec_start_time moments 
+            defined in seconds since Epoch (POSIX).
+    */
+    typedef structure {
+        string full_app_id;
+        string time_range;
+        int number_of_calls;
+        int number_of_errors;
+        float total_queue_time;
+        float total_exec_time;
+    } ExecAggrStats;
+
+    funcdef get_exec_aggr_stats(GetExecAggrStatsParams params) returns (list<ExecAggrStats>);
 };

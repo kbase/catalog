@@ -14,7 +14,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: ModuleVersionInfo</p>
- * 
+ * <pre>
+ * data_folder - optional field representing unique module name (like <module_name> transformed to
+ *     lower cases) used for reference data purposes (see description for data_version field). This
+ *     value will be treated as part of file system path relative to the base that comes from the 
+ *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
+ * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+ *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
+ *     should be initialized by running docker image with "init" target from catalog. And later when
+ *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+ *     docker container by execution engine.
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -26,7 +36,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "git_commit_hash",
     "git_commit_message",
     "narrative_method_ids",
-    "docker_img_name"
+    "docker_img_name",
+    "data_folder",
+    "data_version",
+    "compilation_report"
 })
 public class ModuleVersionInfo {
 
@@ -44,6 +57,17 @@ public class ModuleVersionInfo {
     private List<String> narrativeMethodIds;
     @JsonProperty("docker_img_name")
     private java.lang.String dockerImgName;
+    @JsonProperty("data_folder")
+    private java.lang.String dataFolder;
+    @JsonProperty("data_version")
+    private java.lang.String dataVersion;
+    /**
+     * <p>Original spec-file type: CompilationReport</p>
+     * 
+     * 
+     */
+    @JsonProperty("compilation_report")
+    private CompilationReport compilationReport;
     private Map<java.lang.String, Object> additionalProperties = new HashMap<java.lang.String, Object>();
 
     @JsonProperty("timestamp")
@@ -151,6 +175,61 @@ public class ModuleVersionInfo {
         return this;
     }
 
+    @JsonProperty("data_folder")
+    public java.lang.String getDataFolder() {
+        return dataFolder;
+    }
+
+    @JsonProperty("data_folder")
+    public void setDataFolder(java.lang.String dataFolder) {
+        this.dataFolder = dataFolder;
+    }
+
+    public ModuleVersionInfo withDataFolder(java.lang.String dataFolder) {
+        this.dataFolder = dataFolder;
+        return this;
+    }
+
+    @JsonProperty("data_version")
+    public java.lang.String getDataVersion() {
+        return dataVersion;
+    }
+
+    @JsonProperty("data_version")
+    public void setDataVersion(java.lang.String dataVersion) {
+        this.dataVersion = dataVersion;
+    }
+
+    public ModuleVersionInfo withDataVersion(java.lang.String dataVersion) {
+        this.dataVersion = dataVersion;
+        return this;
+    }
+
+    /**
+     * <p>Original spec-file type: CompilationReport</p>
+     * 
+     * 
+     */
+    @JsonProperty("compilation_report")
+    public CompilationReport getCompilationReport() {
+        return compilationReport;
+    }
+
+    /**
+     * <p>Original spec-file type: CompilationReport</p>
+     * 
+     * 
+     */
+    @JsonProperty("compilation_report")
+    public void setCompilationReport(CompilationReport compilationReport) {
+        this.compilationReport = compilationReport;
+    }
+
+    public ModuleVersionInfo withCompilationReport(CompilationReport compilationReport) {
+        this.compilationReport = compilationReport;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<java.lang.String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -163,7 +242,7 @@ public class ModuleVersionInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", compilationReport=")+ compilationReport)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
