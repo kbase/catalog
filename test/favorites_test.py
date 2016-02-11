@@ -100,6 +100,11 @@ class BasicCatalogTest(unittest.TestCase):
                 self.assertEqual(f['count'],2)
         self.assertTrue(found)
 
+        # get favorites only for megahit
+        fav_counts = self.catalog.list_favorite_counts({},{'modules':['megAhit']})[0]
+        for f in fav_counts:
+            self.assertEqual(f['module_name_lc'],'megahit')
+
 
     @classmethod
     def setUpClass(cls):
