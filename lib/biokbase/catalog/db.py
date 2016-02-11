@@ -537,16 +537,39 @@ class MongoCatalogDBI:
                         sort=[['timestamp',DESCENDING]]))
 
 
-    def aggregate_favorites_over_apps(self):
+    def aggregate_favorites_over_apps(self, module_names_lc):
         ### WARNING! If we switch to Mongo 3.x, the result object will change and this will break
-        result = self.favorites.aggregate([{
+
+        # setup the query
+        aggParams = None;
+        group = { 
             '$group':{
                 '_id':{
                     'm':'$module_name_lc',
                     'a':'$id'
                 },
-                'count':{ '$sum':1 }
-            }}])
+                'count':{ 
+                    '$sum':1 
+                }
+            }
+        }
+
+        if len(module_names_lc) > 0 :
+            match = { 
+                '$match': { 
+                    'module_name_lc': {
+                        '$in':module_names_lc 
+                    }
+                }
+            }
+            aggParams = [match,group]
+        else:
+            aggParams = [group]
+
+        # run the aggregation
+        result = self.favorites.aggregate(aggParams)
+
+        # figure out and return results
         counts = []
         for c in result['result']:
             counts.append({

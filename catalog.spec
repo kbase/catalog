@@ -124,9 +124,9 @@ module Catalog {
 
     parameters to add:
         list<FavoriteItem> items;
-        list<string> module_names;
     */
     typedef structure {
+        list<string> modules;
     } ListFavoriteCounts;
 
     typedef structure {

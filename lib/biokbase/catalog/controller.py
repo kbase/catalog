@@ -705,7 +705,12 @@ class CatalogController:
 
     def aggregate_favorites_over_apps(self, params):
         # no params right now, this just returns everything
-        return self.db.aggregate_favorites_over_apps()
+        module_names_lc = []
+        if 'modules' in params:
+            for i in params['modules']:
+                module_names_lc.append(i.lower())
+
+        return self.db.aggregate_favorites_over_apps(module_names_lc)
 
 
     # Some utility methods

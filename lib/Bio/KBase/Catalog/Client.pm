@@ -1155,7 +1155,8 @@ FavoriteUser is a reference to a hash where the following keys are defined:
 <pre>
 $params is a Catalog.ListFavoriteCounts
 $counts is a reference to a list where each element is a Catalog.FavoriteCount
-ListFavoriteCounts is a reference to a hash where the following keys are defined
+ListFavoriteCounts is a reference to a hash where the following keys are defined:
+	modules has a value which is a reference to a list where each element is a string
 FavoriteCount is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	app_id has a value which is a string
@@ -1169,7 +1170,8 @@ FavoriteCount is a reference to a hash where the following keys are defined:
 
 $params is a Catalog.ListFavoriteCounts
 $counts is a reference to a list where each element is a Catalog.FavoriteCount
-ListFavoriteCounts is a reference to a hash where the following keys are defined
+ListFavoriteCounts is a reference to a hash where the following keys are defined:
+	modules has a value which is a reference to a list where each element is a string
 FavoriteCount is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	app_id has a value which is a string
@@ -3400,7 +3402,6 @@ those are given, then will return stars for every method that there is info on
 
 parameters to add:
     list<FavoriteItem> items;
-    list<string> module_names;
 
 
 =item Definition
@@ -3408,14 +3409,18 @@ parameters to add:
 =begin html
 
 <pre>
-a reference to a hash where the following keys are defined
+a reference to a hash where the following keys are defined:
+modules has a value which is a reference to a list where each element is a string
+
 </pre>
 
 =end html
 
 =begin text
 
-a reference to a hash where the following keys are defined
+a reference to a hash where the following keys are defined:
+modules has a value which is a reference to a list where each element is a string
+
 
 =end text
 
