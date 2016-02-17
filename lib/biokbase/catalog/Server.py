@@ -84,6 +84,21 @@ sync_methods['Catalog.review_release_request'] = True
 async_run_methods['Catalog.list_basic_module_info_async'] = ['Catalog', 'list_basic_module_info']
 async_check_methods['Catalog.list_basic_module_info_check'] = ['Catalog', 'list_basic_module_info']
 sync_methods['Catalog.list_basic_module_info'] = True
+async_run_methods['Catalog.add_favorite_async'] = ['Catalog', 'add_favorite']
+async_check_methods['Catalog.add_favorite_check'] = ['Catalog', 'add_favorite']
+sync_methods['Catalog.add_favorite'] = True
+async_run_methods['Catalog.remove_favorite_async'] = ['Catalog', 'remove_favorite']
+async_check_methods['Catalog.remove_favorite_check'] = ['Catalog', 'remove_favorite']
+sync_methods['Catalog.remove_favorite'] = True
+async_run_methods['Catalog.list_favorites_async'] = ['Catalog', 'list_favorites']
+async_check_methods['Catalog.list_favorites_check'] = ['Catalog', 'list_favorites']
+sync_methods['Catalog.list_favorites'] = True
+async_run_methods['Catalog.list_app_favorites_async'] = ['Catalog', 'list_app_favorites']
+async_check_methods['Catalog.list_app_favorites_check'] = ['Catalog', 'list_app_favorites']
+sync_methods['Catalog.list_app_favorites'] = True
+async_run_methods['Catalog.list_favorite_counts_async'] = ['Catalog', 'list_favorite_counts']
+async_check_methods['Catalog.list_favorite_counts_check'] = ['Catalog', 'list_favorite_counts']
+sync_methods['Catalog.list_favorite_counts'] = True
 async_run_methods['Catalog.get_module_info_async'] = ['Catalog', 'get_module_info']
 async_check_methods['Catalog.get_module_info_check'] = ['Catalog', 'get_module_info']
 sync_methods['Catalog.get_module_info'] = True
@@ -102,6 +117,12 @@ sync_methods['Catalog.get_module_state'] = True
 async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
 async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
 sync_methods['Catalog.get_build_log'] = True
+async_run_methods['Catalog.get_parsed_build_log_async'] = ['Catalog', 'get_parsed_build_log']
+async_check_methods['Catalog.get_parsed_build_log_check'] = ['Catalog', 'get_parsed_build_log']
+sync_methods['Catalog.get_parsed_build_log'] = True
+async_run_methods['Catalog.list_builds_async'] = ['Catalog', 'list_builds']
+async_check_methods['Catalog.list_builds_check'] = ['Catalog', 'list_builds']
+sync_methods['Catalog.list_builds'] = True
 async_run_methods['Catalog.delete_module_async'] = ['Catalog', 'delete_module']
 async_check_methods['Catalog.delete_module_check'] = ['Catalog', 'delete_module']
 sync_methods['Catalog.delete_module'] = True
@@ -126,6 +147,12 @@ sync_methods['Catalog.approve_developer'] = True
 async_run_methods['Catalog.revoke_developer_async'] = ['Catalog', 'revoke_developer']
 async_check_methods['Catalog.revoke_developer_check'] = ['Catalog', 'revoke_developer']
 sync_methods['Catalog.revoke_developer'] = True
+async_run_methods['Catalog.log_exec_stats_async'] = ['Catalog', 'log_exec_stats']
+async_check_methods['Catalog.log_exec_stats_check'] = ['Catalog', 'log_exec_stats']
+sync_methods['Catalog.log_exec_stats'] = True
+async_run_methods['Catalog.get_exec_aggr_stats_async'] = ['Catalog', 'get_exec_aggr_stats']
+async_check_methods['Catalog.get_exec_aggr_stats_check'] = ['Catalog', 'get_exec_aggr_stats']
+sync_methods['Catalog.get_exec_aggr_stats'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -323,6 +350,7 @@ class MethodContext(dict):
         self['method'] = None
         self['call_id'] = None
         self['rpc_context'] = None
+        self['provenance'] = None
         self._debug_levels = set([7, 8, 9, 'DEBUG', 'DEBUG2', 'DEBUG3'])
         self._logger = logger
 
@@ -428,6 +456,26 @@ class Application(object):
                              name='Catalog.list_basic_module_info',
                              types=[dict])
         self.method_authentication['Catalog.list_basic_module_info'] = 'none'
+        self.rpc_service.add(impl_Catalog.add_favorite,
+                             name='Catalog.add_favorite',
+                             types=[dict])
+        self.method_authentication['Catalog.add_favorite'] = 'required'
+        self.rpc_service.add(impl_Catalog.remove_favorite,
+                             name='Catalog.remove_favorite',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_favorite'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_favorites,
+                             name='Catalog.list_favorites',
+                             types=[basestring])
+        self.method_authentication['Catalog.list_favorites'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_app_favorites,
+                             name='Catalog.list_app_favorites',
+                             types=[dict])
+        self.method_authentication['Catalog.list_app_favorites'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_favorite_counts,
+                             name='Catalog.list_favorite_counts',
+                             types=[dict])
+        self.method_authentication['Catalog.list_favorite_counts'] = 'none'
         self.rpc_service.add(impl_Catalog.get_module_info,
                              name='Catalog.get_module_info',
                              types=[dict])
@@ -452,6 +500,14 @@ class Application(object):
                              name='Catalog.get_build_log',
                              types=[basestring])
         self.method_authentication['Catalog.get_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_parsed_build_log,
+                             name='Catalog.get_parsed_build_log',
+                             types=[dict])
+        self.method_authentication['Catalog.get_parsed_build_log'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_builds,
+                             name='Catalog.list_builds',
+                             types=[dict])
+        self.method_authentication['Catalog.list_builds'] = 'none'
         self.rpc_service.add(impl_Catalog.delete_module,
                              name='Catalog.delete_module',
                              types=[dict])
@@ -484,6 +540,14 @@ class Application(object):
                              name='Catalog.revoke_developer',
                              types=[basestring])
         self.method_authentication['Catalog.revoke_developer'] = 'required'
+        self.rpc_service.add(impl_Catalog.log_exec_stats,
+                             name='Catalog.log_exec_stats',
+                             types=[dict])
+        self.method_authentication['Catalog.log_exec_stats'] = 'required'
+        self.rpc_service.add(impl_Catalog.get_exec_aggr_stats,
+                             name='Catalog.get_exec_aggr_stats',
+                             types=[dict])
+        self.method_authentication['Catalog.get_exec_aggr_stats'] = 'none'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
@@ -519,6 +583,9 @@ class Application(object):
                 ctx['module'], ctx['method'] = req['method'].split('.')
                 ctx['call_id'] = req['id']
                 ctx['rpc_context'] = {'call_stack': [{'time':self.now_in_utc(), 'method': req['method']}]}
+                prov_action = {'service': ctx['module'], 'method': ctx['method'], 
+                               'method_params': req['params']}
+                ctx['provenance'] = [prov_action]
                 try:
                     token = environ.get('HTTP_AUTHORIZATION')
                     # parse out the method being requested and check if it
@@ -742,6 +809,10 @@ def process_async_cli(input_file_path, output_file_path, token):
     if 'context' in req:
         ctx['rpc_context'] = req['context']
     ctx['CLI'] = 1
+    ctx['module'], ctx['method'] = req['method'].split('.')
+    prov_action = {'service': ctx['module'], 'method': ctx['method'], 
+                   'method_params': req['params']}
+    ctx['provenance'] = [prov_action]
     resp = None
     try:
         resp = application.rpc_service.call_py(ctx, req)

@@ -12,11 +12,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: SelectOneModuleParams</p>
+ * <p>Original spec-file type: FavoriteItem</p>
  * <pre>
- * Describes how to find a single module/repository.
- * module_name - name of module defined in kbase.yaml file;
- * git_url - the url used to register the module
+ * FAVORITES!!
  * </pre>
  * 
  */
@@ -24,14 +22,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "git_url"
+    "id"
 })
-public class SelectOneModuleParams {
+public class FavoriteItem {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("git_url")
-    private String gitUrl;
+    @JsonProperty("id")
+    private String id;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -44,23 +42,23 @@ public class SelectOneModuleParams {
         this.moduleName = moduleName;
     }
 
-    public SelectOneModuleParams withModuleName(String moduleName) {
+    public FavoriteItem withModuleName(String moduleName) {
         this.moduleName = moduleName;
         return this;
     }
 
-    @JsonProperty("git_url")
-    public String getGitUrl() {
-        return gitUrl;
+    @JsonProperty("id")
+    public String getId() {
+        return id;
     }
 
-    @JsonProperty("git_url")
-    public void setGitUrl(String gitUrl) {
-        this.gitUrl = gitUrl;
+    @JsonProperty("id")
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public SelectOneModuleParams withGitUrl(String gitUrl) {
-        this.gitUrl = gitUrl;
+    public FavoriteItem withId(String id) {
+        this.id = id;
         return this;
     }
 
@@ -76,7 +74,7 @@ public class SelectOneModuleParams {
 
     @Override
     public String toString() {
-        return ((((((("SelectOneModuleParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("FavoriteItem"+" [moduleName=")+ moduleName)+", id=")+ id)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

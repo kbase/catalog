@@ -47,9 +47,14 @@ class CatalogTestUtil:
         db = self.mongo[self.test_cfg['mongodb-database']]
         self.modules = db[MongoCatalogDBI._MODULES]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
+        self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
+        self.favorites = db[MongoCatalogDBI._FAVORITES]
         # just drop the test db
         self.modules.drop()
         self.developers.drop()
+        self.build_logs.drop()
+        self.favorites.drop()
+
         #if self.modules.count() > 0 :
         #    raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
 
@@ -74,7 +79,9 @@ class CatalogTestUtil:
             'docker-registry-host':self.test_cfg['docker-registry-host'],
             'nms-url':self.test_cfg['nms-url'],
             'nms-admin-user':self.test_cfg['nms-admin-user'],
-            'nms-admin-psswd':self.test_cfg['nms-admin-psswd']
+            'nms-admin-psswd':self.test_cfg['nms-admin-psswd'],
+            'ref-data-base':self.test_cfg['ref-data-base'],
+            'kbase-endpoint':self.test_cfg['kbase-endpoint']
         }
 
 
@@ -91,6 +98,31 @@ class CatalogTestUtil:
                 parsed_document = json.loads(document)
                 self.modules.insert(parsed_document)
                 load_count+=1
+
+        logs_document_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._BUILD_LOGS)
+        for document_name in os.listdir(logs_document_dir):
+            document_path = os.path.join(logs_document_dir,document_name)
+            if os.path.isfile(document_path):
+                with open(document_path) as document_file:
+                    document = document_file.read()
+                parsed_document = json.loads(document)
+                self.build_logs.insert(parsed_document)
+                load_count+=1
+
+        favorites_document_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._FAVORITES)
+        for document_name in os.listdir(favorites_document_dir):
+            document_path = os.path.join(favorites_document_dir,document_name)
+            if os.path.isfile(document_path):
+                with open(document_path) as document_file:
+                    document = document_file.read()
+                parsed_document = json.loads(document)
+                if isinstance(parsed_document,list):
+                    for p in parsed_document:
+                        self.favorites.insert(p)
+                        load_count+=1
+                else:
+                    self.favorites.insert(parsed_document)
+                    load_count+=1
 
         self.log(str(load_count)+" documents loaded")
 
@@ -116,6 +148,8 @@ class CatalogTestUtil:
     def get_test_repo_1(self):
         return self.test_cfg['test-module-repo-1']
 
+    def get_test_repo_2(self):
+        return self.test_cfg['test-module-repo-2']
 
     def getCatalogConfig(self):
         return self.catalog_cfg
@@ -124,6 +158,8 @@ class CatalogTestUtil:
         self.log("tearDown()")
         self.modules.drop()
         self.developers.drop()
+        self.build_logs.drop()
+        self.favorites.drop()
         # make sure NMS is clean after each test
         self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])
 

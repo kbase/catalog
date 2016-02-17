@@ -26,7 +26,7 @@ Bio::KBase::Catalog::Client
 =head1 DESCRIPTION
 
 
-Service for managing, registering, and building KBase Modules.
+Service for managing, registering, and building KBase Modules using the KBase SDK.
 
 
 =cut
@@ -205,7 +205,7 @@ boolean is an int
 
 =item Description
 
-
+returns true (1) if the module exists, false (2) otherwise
 
 =back
 
@@ -792,6 +792,449 @@ BasicModuleInfo is a reference to a hash where the following keys are defined:
  
 
 
+=head2 add_favorite
+
+  $obj->add_favorite($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub add_favorite
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function add_favorite (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to add_favorite:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'add_favorite');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.add_favorite",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'add_favorite',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method add_favorite",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'add_favorite',
+				       );
+    }
+}
+ 
+
+
+=head2 remove_favorite
+
+  $obj->remove_favorite($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub remove_favorite
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function remove_favorite (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to remove_favorite:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'remove_favorite');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.remove_favorite",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'remove_favorite',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_favorite",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'remove_favorite',
+				       );
+    }
+}
+ 
+
+
+=head2 list_favorites
+
+  $favorites = $obj->list_favorites($username)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$username is a string
+$favorites is a reference to a list where each element is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$username is a string
+$favorites is a reference to a list where each element is a Catalog.FavoriteItem
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_favorites
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_favorites (received $n, expecting 1)");
+    }
+    {
+	my($username) = @args;
+
+	my @_bad_arguments;
+        (!ref($username)) or push(@_bad_arguments, "Invalid type for argument 1 \"username\" (value was \"$username\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_favorites:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_favorites');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_favorites",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_favorites',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_favorites",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_favorites',
+				       );
+    }
+}
+ 
+
+
+=head2 list_app_favorites
+
+  $users = $obj->list_app_favorites($item)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$item is a Catalog.FavoriteItem
+$users is a reference to a list where each element is a Catalog.FavoriteUser
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+FavoriteUser is a reference to a hash where the following keys are defined:
+	username has a value which is a string
+	timestamp has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$item is a Catalog.FavoriteItem
+$users is a reference to a list where each element is a Catalog.FavoriteUser
+FavoriteItem is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	id has a value which is a string
+FavoriteUser is a reference to a hash where the following keys are defined:
+	username has a value which is a string
+	timestamp has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_app_favorites
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_app_favorites (received $n, expecting 1)");
+    }
+    {
+	my($item) = @args;
+
+	my @_bad_arguments;
+        (ref($item) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"item\" (value was \"$item\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_app_favorites:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_app_favorites');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_app_favorites",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_app_favorites',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_app_favorites",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_app_favorites',
+				       );
+    }
+}
+ 
+
+
+=head2 list_favorite_counts
+
+  $counts = $obj->list_favorite_counts($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ListFavoriteCounts
+$counts is a reference to a list where each element is a Catalog.FavoriteCount
+ListFavoriteCounts is a reference to a hash where the following keys are defined:
+	modules has a value which is a reference to a list where each element is a string
+FavoriteCount is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	count has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ListFavoriteCounts
+$counts is a reference to a list where each element is a Catalog.FavoriteCount
+ListFavoriteCounts is a reference to a hash where the following keys are defined:
+	modules has a value which is a reference to a list where each element is a string
+FavoriteCount is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	count has a value which is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_favorite_counts
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_favorite_counts (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_favorite_counts:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_favorite_counts');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_favorite_counts",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_favorite_counts',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_favorite_counts",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_favorite_counts',
+				       );
+    }
+}
+ 
+
+
 =head2 get_module_info
 
   $info = $obj->get_module_info($selection)
@@ -819,11 +1262,23 @@ ModuleInfo is a reference to a hash where the following keys are defined:
 	dev has a value which is a Catalog.ModuleVersionInfo
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 </pre>
 
@@ -847,11 +1302,23 @@ ModuleInfo is a reference to a hash where the following keys are defined:
 	dev has a value which is a Catalog.ModuleVersionInfo
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 
 =end text
@@ -932,11 +1399,23 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	version has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 </pre>
 
@@ -954,11 +1433,23 @@ SelectModuleVersionParams is a reference to a hash where the following keys are 
 	version has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 
 =end text
@@ -1036,11 +1527,23 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 </pre>
 
@@ -1055,11 +1558,23 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	timestamp has a value which is an int
+	registration_id has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
 
 
 =end text
@@ -1339,7 +1854,7 @@ $return is a string
 
 =item Description
 
-given the registration_id returned from the register method, you can check the build log with this method
+
 
 =back
 
@@ -1386,6 +1901,240 @@ given the registration_id returned from the register method, you can check the b
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_build_log",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'get_build_log',
+				       );
+    }
+}
+ 
+
+
+=head2 get_parsed_build_log
+
+  $build_log = $obj->get_parsed_build_log($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetBuildLogParams
+$build_log is a Catalog.BuildLog
+GetBuildLogParams is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	skip has a value which is an int
+	limit has a value which is an int
+	first_n has a value which is an int
+	last_n has a value which is an int
+BuildLog is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	timestamp has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+	error has a value which is a string
+	registration has a value which is a string
+	log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+BuildLogLine is a reference to a hash where the following keys are defined:
+	content has a value which is a string
+	error has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetBuildLogParams
+$build_log is a Catalog.BuildLog
+GetBuildLogParams is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	skip has a value which is an int
+	limit has a value which is an int
+	first_n has a value which is an int
+	last_n has a value which is an int
+BuildLog is a reference to a hash where the following keys are defined:
+	registration_id has a value which is a string
+	timestamp has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+	error has a value which is a string
+	registration has a value which is a string
+	log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+BuildLogLine is a reference to a hash where the following keys are defined:
+	content has a value which is a string
+	error has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+given the registration_id returned from the register method, you can check the build log with this method
+
+=back
+
+=cut
+
+ sub get_parsed_build_log
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_parsed_build_log (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_parsed_build_log:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_parsed_build_log');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_parsed_build_log",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_parsed_build_log',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_parsed_build_log",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_parsed_build_log',
+				       );
+    }
+}
+ 
+
+
+=head2 list_builds
+
+  $builds = $obj->list_builds($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ListBuildParams
+$builds is a reference to a list where each element is a Catalog.BuildInfo
+ListBuildParams is a reference to a hash where the following keys are defined:
+	only_runnning has a value which is a Catalog.boolean
+	only_error has a value which is a Catalog.boolean
+	only_complete has a value which is a Catalog.boolean
+	skip has a value which is an int
+	limit has a value which is an int
+	modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
+boolean is an int
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+BuildInfo is a reference to a hash where the following keys are defined:
+	timestamp has a value which is a string
+	registration_id has a value which is a string
+	registration has a value which is a string
+	error_message has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ListBuildParams
+$builds is a reference to a list where each element is a Catalog.BuildInfo
+ListBuildParams is a reference to a hash where the following keys are defined:
+	only_runnning has a value which is a Catalog.boolean
+	only_error has a value which is a Catalog.boolean
+	only_complete has a value which is a Catalog.boolean
+	skip has a value which is an int
+	limit has a value which is an int
+	modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
+boolean is an int
+SelectOneModuleParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+BuildInfo is a reference to a hash where the following keys are defined:
+	timestamp has a value which is a string
+	registration_id has a value which is a string
+	registration has a value which is a string
+	error_message has a value which is a string
+	module_name_lc has a value which is a string
+	git_url has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_builds
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_builds (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_builds:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_builds');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_builds",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_builds',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_builds",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_builds',
 				       );
     }
 }
@@ -2044,6 +2793,213 @@ $username is a string
     }
 }
  
+
+
+=head2 log_exec_stats
+
+  $obj->log_exec_stats($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.LogExecStatsParams
+LogExecStatsParams is a reference to a hash where the following keys are defined:
+	user_id has a value which is a string
+	app_module_name has a value which is a string
+	app_id has a value which is a string
+	func_module_name has a value which is a string
+	func_name has a value which is a string
+	git_commit_hash has a value which is a string
+	creation_time has a value which is a float
+	exec_start_time has a value which is a float
+	finish_time has a value which is a float
+	is_error has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.LogExecStatsParams
+LogExecStatsParams is a reference to a hash where the following keys are defined:
+	user_id has a value which is a string
+	app_module_name has a value which is a string
+	app_id has a value which is a string
+	func_module_name has a value which is a string
+	func_name has a value which is a string
+	git_commit_hash has a value which is a string
+	creation_time has a value which is a float
+	exec_start_time has a value which is a float
+	finish_time has a value which is a float
+	is_error has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+Request from Execution Engine for adding statistics about each method run. It could be done
+using catalog admin credentials only.
+
+=back
+
+=cut
+
+ sub log_exec_stats
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function log_exec_stats (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to log_exec_stats:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'log_exec_stats');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.log_exec_stats",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'log_exec_stats',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method log_exec_stats",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'log_exec_stats',
+				       );
+    }
+}
+ 
+
+
+=head2 get_exec_aggr_stats
+
+  $return = $obj->get_exec_aggr_stats($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetExecAggrStatsParams
+$return is a reference to a list where each element is a Catalog.ExecAggrStats
+GetExecAggrStatsParams is a reference to a hash where the following keys are defined:
+	full_app_ids has a value which is a reference to a list where each element is a string
+	per_week has a value which is a Catalog.boolean
+boolean is an int
+ExecAggrStats is a reference to a hash where the following keys are defined:
+	full_app_id has a value which is a string
+	time_range has a value which is a string
+	number_of_calls has a value which is an int
+	number_of_errors has a value which is an int
+	total_queue_time has a value which is a float
+	total_exec_time has a value which is a float
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetExecAggrStatsParams
+$return is a reference to a list where each element is a Catalog.ExecAggrStats
+GetExecAggrStatsParams is a reference to a hash where the following keys are defined:
+	full_app_ids has a value which is a reference to a list where each element is a string
+	per_week has a value which is a Catalog.boolean
+boolean is an int
+ExecAggrStats is a reference to a hash where the following keys are defined:
+	full_app_id has a value which is a string
+	time_range has a value which is a string
+	number_of_calls has a value which is an int
+	number_of_errors has a value which is an int
+	total_queue_time has a value which is a float
+	total_exec_time has a value which is a float
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub get_exec_aggr_stats
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_exec_aggr_stats (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_exec_aggr_stats:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_exec_aggr_stats');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_exec_aggr_stats",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_exec_aggr_stats',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_exec_aggr_stats",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_exec_aggr_stats',
+				       );
+    }
+}
+ 
   
 
 sub version {
@@ -2057,16 +3013,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'revoke_developer',
+                method_name => 'get_exec_aggr_stats',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method revoke_developer",
+            error => "Error invoking method get_exec_aggr_stats",
             status_line => $self->{client}->status_line,
-            method_name => 'revoke_developer',
+            method_name => 'get_exec_aggr_stats',
         );
     }
 }
@@ -2142,7 +3098,7 @@ an int
 
 =item Description
 
-Describes how to find module/repository.
+Describes how to find a single module/repository.
 module_name - name of module defined in kbase.yaml file;
 git_url - the url used to register the module
 
@@ -2363,7 +3319,44 @@ git_url has a value which is a string
 
 
 
-=head2 ModuleVersionInfo
+=head2 FavoriteItem
+
+=over 4
+
+
+
+=item Description
+
+FAVORITES!!
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+id has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+id has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 FavoriteUser
 
 =over 4
 
@@ -2375,12 +3368,203 @@ git_url has a value which is a string
 
 <pre>
 a reference to a hash where the following keys are defined:
+username has a value which is a string
+timestamp has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+username has a value which is a string
+timestamp has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ListFavoriteCounts
+
+=over 4
+
+
+
+=item Description
+
+if favorite item is given, will return stars just for that item.  If a module
+name is given, will return stars for all methods in that module.  If none of
+those are given, then will return stars for every method that there is info on 
+
+parameters to add:
+    list<FavoriteItem> items;
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+modules has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+modules has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 FavoriteCount
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+count has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+count has a value which is an int
+
+
+=end text
+
+=back
+
+
+
+=head2 FunctionPlace
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+start_line has a value which is an int
+end_line has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+start_line has a value which is an int
+end_line has a value which is an int
+
+
+=end text
+
+=back
+
+
+
+=head2 CompilationReport
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+sdk_version has a value which is a string
+sdk_git_commit has a value which is a string
+impl_file_path has a value which is a string
+function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+sdk_version has a value which is a string
+sdk_git_commit has a value which is a string
+impl_file_path has a value which is a string
+function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+
+
+=end text
+
+=back
+
+
+
+=head2 ModuleVersionInfo
+
+=over 4
+
+
+
+=item Description
+
+data_folder - optional field representing unique module name (like <module_name> transformed to
+    lower cases) used for reference data purposes (see description for data_version field). This
+    value will be treated as part of file system path relative to the base that comes from the 
+    config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
+data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+    key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
+    should be initialized by running docker image with "init" target from catalog. And later when
+    async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+    docker container by execution engine.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
+registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
 narrative_method_ids has a value which is a reference to a list where each element is a string
 docker_img_name has a value which is a string
+data_folder has a value which is a string
+data_version has a value which is a string
+compilation_report has a value which is a Catalog.CompilationReport
 
 </pre>
 
@@ -2390,11 +3574,15 @@ docker_img_name has a value which is a string
 
 a reference to a hash where the following keys are defined:
 timestamp has a value which is an int
+registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
 narrative_method_ids has a value which is a reference to a list where each element is a string
 docker_img_name has a value which is a string
+data_folder has a value which is a string
+data_version has a value which is a string
+compilation_report has a value which is a Catalog.CompilationReport
 
 
 =end text
@@ -2548,7 +3736,7 @@ error_message has a value which is a string
 active: True | False,
 release_approval: approved | denied | under_review | not_requested, (all releases require approval)
 review_message: str, (optional)
-registration: building | complete | error,
+registration: complete | error | (build state status),
 error_message: str (optional)
 
 
@@ -2578,6 +3766,217 @@ release_approval has a value which is a string
 review_message has a value which is a string
 registration has a value which is a string
 error_message has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 GetBuildLogParams
+
+=over 4
+
+
+
+=item Description
+
+must specify skip & limit, or first_n, or last_n.  If none given, this gets last 5000 lines
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+skip has a value which is an int
+limit has a value which is an int
+first_n has a value which is an int
+last_n has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+skip has a value which is an int
+limit has a value which is an int
+first_n has a value which is an int
+last_n has a value which is an int
+
+
+=end text
+
+=back
+
+
+
+=head2 BuildLogLine
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+content has a value which is a string
+error has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+content has a value which is a string
+error has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 BuildLog
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+timestamp has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+error has a value which is a string
+registration has a value which is a string
+log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+registration_id has a value which is a string
+timestamp has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+error has a value which is a string
+registration has a value which is a string
+log has a value which is a reference to a list where each element is a Catalog.BuildLogLine
+
+
+=end text
+
+=back
+
+
+
+=head2 BuildInfo
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+timestamp has a value which is a string
+registration_id has a value which is a string
+registration has a value which is a string
+error_message has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+timestamp has a value which is a string
+registration_id has a value which is a string
+registration has a value which is a string
+error_message has a value which is a string
+module_name_lc has a value which is a string
+git_url has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ListBuildParams
+
+=over 4
+
+
+
+=item Description
+
+Always sorted by time, oldest builds are last.
+
+only one of these can be set to true:
+    only_running - if true, only show running builds
+    only_error - if true, only show builds that ended in an error
+    only_complete - if true, only show builds that are complete
+skip - skip these first n records, default 0
+limit - limit result to the most recent n records, default 1000
+
+modules - only include builds from these modules based on names/git_urls
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+only_runnning has a value which is a Catalog.boolean
+only_error has a value which is a Catalog.boolean
+only_complete has a value which is a Catalog.boolean
+skip has a value which is an int
+limit has a value which is an int
+modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+only_runnning has a value which is a Catalog.boolean
+only_error has a value which is a Catalog.boolean
+only_complete has a value which is a Catalog.boolean
+skip has a value which is an int
+limit has a value which is an int
+modules has a value which is a reference to a list where each element is a Catalog.SelectOneModuleParams
 
 
 =end text
@@ -2617,6 +4016,162 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 current_git_url has a value which is a string
 new_git_url has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 LogExecStatsParams
+
+=over 4
+
+
+
+=item Description
+
+user_id - GlobusOnline login of invoker,
+app_module_name - optional module name of registered repo (could be absent of null for
+    old fashioned services) where app_id comes from,
+app_id - optional method-spec id without module_name prefix (could be absent or null
+    in case original execution was started through API call without app ID defined),
+func_module_name - optional module name of registered repo (could be absent of null for
+    old fashioned services) where func_name comes from,
+func_name - name of function in KIDL-spec without module_name prefix,
+git_commit_hash - optional service version (in case of dynamically registered repo),
+creation_time, exec_start_time and finish_time - defined in seconds since Epoch (POSIX),
+is_error - indicates whether execution was finished with error or not.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+user_id has a value which is a string
+app_module_name has a value which is a string
+app_id has a value which is a string
+func_module_name has a value which is a string
+func_name has a value which is a string
+git_commit_hash has a value which is a string
+creation_time has a value which is a float
+exec_start_time has a value which is a float
+finish_time has a value which is a float
+is_error has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+user_id has a value which is a string
+app_module_name has a value which is a string
+app_id has a value which is a string
+func_module_name has a value which is a string
+func_name has a value which is a string
+git_commit_hash has a value which is a string
+creation_time has a value which is a float
+exec_start_time has a value which is a float
+finish_time has a value which is a float
+is_error has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 GetExecAggrStatsParams
+
+=over 4
+
+
+
+=item Description
+
+full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
+    slash in case of dynamically registered repo).
+per_week - optional flag switching results to weekly data rather than one row per app for 
+    all time (default value is false)
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+full_app_ids has a value which is a reference to a list where each element is a string
+per_week has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+full_app_ids has a value which is a reference to a list where each element is a string
+per_week has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 ExecAggrStats
+
+=over 4
+
+
+
+=item Description
+
+full_app_id - optional fully qualified method-spec id including module_name prefix followed
+    by slash in case of dynamically registered repo (it could be absent or null in case
+    original execution was started through API call without app ID defined),
+time_range - one of supported time ranges (currently it could be either '*' for all time
+    or ISO-encoded week like "2016-W01")
+total_queue_time - summarized time difference between exec_start_time and creation_time moments
+    defined in seconds since Epoch (POSIX),
+total_exec_time - summarized time difference between finish_time and exec_start_time moments 
+    defined in seconds since Epoch (POSIX).
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+full_app_id has a value which is a string
+time_range has a value which is a string
+number_of_calls has a value which is an int
+number_of_errors has a value which is an int
+total_queue_time has a value which is a float
+total_exec_time has a value which is a float
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+full_app_id has a value which is a string
+time_range has a value which is a string
+number_of_calls has a value which is an int
+number_of_errors has a value which is an int
+total_queue_time has a value which is a float
+total_exec_time has a value which is a float
 
 
 =end text

@@ -6,6 +6,8 @@ import time
 import copy
 import os
 import random
+import semantic_version
+import re
 
 import biokbase.catalog.version
 
@@ -75,7 +77,15 @@ class CatalogController:
             raise ValueError('"docker-registry-host" config variable must be defined to start a CatalogController!')
         self.docker_registry_host = config['docker-registry-host']
         print(self.docker_registry_host)
+        
+        if 'ref-data-base' not in config:
+            raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')
+        self.ref_data_base = config['ref-data-base']
 
+        if 'kbase-endpoint' not in config:
+            raise ValueError('"kbase-endpoint" config variable must be defined to start a CatalogController!')
+        self.kbase_endpoint = config['kbase-endpoint']
+        
         if 'nms-url' not in config:
             raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
         self.nms_url = config['nms-url']
@@ -96,7 +106,10 @@ class CatalogController:
         git_url = params['git_url']
         if not bool(urlparse(git_url).netloc):
             raise ValueError('The git url provided is not a valid URL.')
-        # generate a unique registration ID based on a timestamp in ms + 4 random digits
+
+        # generate a unique registration ID based on a timestamp in ms + 4 random digits, then make sure we
+        # can write here by trying up to 20 times.  We should quickly have a guaranteed unique id in a nice format
+        # without having to use UUIDs (would need to switch or use a db if we have distributed registrations...)
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
         registration_id = str(timestamp)+'_'+str(random.randint(1000,9999))
         tries = 20
@@ -106,7 +119,7 @@ class CatalogController:
                 os.mkdir(os.path.join(self.temp_dir,registration_id))
                 break
             except:
-                # if we fail, wait a bit and try again
+                # if we fail, wait a bit, get a new registration id and try again
                 time.sleep(0.002)
                 timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
                 registration_id = str(timestamp)+'_'+random.randint(1000,9999)
@@ -121,7 +134,7 @@ class CatalogController:
 
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
-            self.db.register_new_module(git_url, username, timestamp)
+            self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
             module_details = self.db.get_module_details(git_url=git_url)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
@@ -141,11 +154,14 @@ class CatalogController:
                         # to ensure we only ever kick off one registration thread at a time
                         raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin: '+error)
                     # we know we are the only operation working, so we can clear the dev version and upate the timestamp
-                    self.db.update_dev_version({'timestamp':timestamp}, git_url=git_url)
+                    self.db.update_dev_version({'timestamp':timestamp, 'registration_id':registration_id}, git_url=git_url)
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
                 raise ValueError('You ('+username+') are an approved developer, but do not have permission to register this repo ('+git_url+')')
+
+        # 3) Allocate a build log
+        self.db.create_new_build_log(registration_id, timestamp, 'waiting to start', git_url)
 
         # 3) Ok, kick off the registration thread
         #   - This will check out the repo, attempt to build the image, run some tests, store the image
@@ -156,10 +172,10 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details))
+            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint))
         t.start()
 
-        # 4) provide the timestamp 
+        # 4) provide the registration_id 
         return registration_id
 
 
@@ -177,18 +193,18 @@ class CatalogController:
         if params['registration_state'] == 'error':
             if 'error_message' not in params:
                 raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
-            if params['error_message']:
+            if not params['error_message']:
                 raise ValueError('Update failed - if state is "error", you must also set an "error_message".')
             error_message = params['error_message']
-        else:
-            # then we update the state
-            error = self.db.set_module_registration_state(
-                        git_url=params['git_url'],
-                        module_name=params['module_name'],
-                        new_state=params['registration_state'],
-                        error_message=error_message)
-            if error is not None:
-                raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
+        
+        # then we update the state
+        error = self.db.set_module_registration_state(
+                    git_url=params['git_url'],
+                    module_name=params['module_name'],
+                    new_state=params['registration_state'],
+                    error_message=error_message)
+        if error is not None:
+            raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
 
 
     def push_dev_to_beta(self, params, username):
@@ -236,6 +252,14 @@ class CatalogController:
         if module_details['current_versions']['release']:
             if module_details['current_versions']['beta']['timestamp'] == module_details['current_versions']['release']['timestamp']:
                 raise ValueError('Cannot request release - beta version is identical to released version.')
+            if module_details['current_versions']['beta']['version'] == module_details['current_versions']['release']['version']:
+                raise ValueError('Cannot request release - beta version has same version number to released version.')
+            # check that the version number actually increased (assume at this point we already confirmed semantic version was correct)
+            beta_sv = semantic_version.Version(module_details['current_versions']['beta']['version'])
+            release_sv = semantic_version.Version(module_details['current_versions']['release']['version'])
+            if beta_sv <= release_sv:
+                raise ValueError('Cannot request release - beta version semantic version must be greater '
+                    +'than the released version semantic version, as determined by http://semver.org')
 
         # ok, do it.
         error = self.db.set_module_release_state(
@@ -302,9 +326,12 @@ class CatalogController:
         # here because if this is done twice (for instance, before the release_state is set to approved in
         # the document in the next call) there won't be any problems.)  I like nested parentheses.
         if review['decision']=='approved':
+            release_timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
             self.nms.push_repo_to_tag({'module_name':module_details['module_name'], 'tag':'release'})
-            error = self.db.push_beta_to_release(module_name=review['module_name'],git_url=review['git_url'])
-
+            error = self.db.push_beta_to_release(
+                        module_name=review['module_name'],
+                        git_url=review['git_url'],
+                        release_timestamp=release_timestamp)
 
         # Now we can update the release state state...
         error = self.db.set_module_release_state(
@@ -459,9 +486,17 @@ class CatalogController:
         params = self.filter_module_or_repo_selection(params)
         if not self.is_admin(username):
             raise ValueError('Only Admin users can set a module to be active/inactive.')
+        module_details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
         error = self.db.set_module_active_state(active, module_name=params['module_name'], git_url=params['git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
+
+        # if set to inactive, disable the repo in NMS
+        if(not active):
+            self.nms.disable_repo({'module_name':module_details['module_name']})
+        # if set to active, enable the repo
+        else:
+            self.nms.enable_repo({'module_name':module_details['module_name']})
 
 
     def approve_developer(self, developer, username):
@@ -493,7 +528,7 @@ class CatalogController:
             simple_kbase_dev_list.append(d['kb_username'])
         return sorted(simple_kbase_dev_list)
 
-
+    # get the build log from file that it is being written to
     def get_build_log(self, registration_id):
         try:
             with open(self.temp_dir+'/registration.log.'+str(registration_id)) as log_file:
@@ -502,16 +537,90 @@ class CatalogController:
             log = '[log not found - registration_id is invalid or the log has been deleted]'
         return log
 
+    # get the parsed build log from mongo
+    def get_parsed_build_log(self, params):
+        if 'registration_id' not in params:
+            raise ValueError('You must specify a registration_id to retrieve a build log')
+
+        slice_arg = None
+        if 'skip' in params:
+            if 'limit' not in params:
+                raise ValueError('Cannot specify the skip argument without a limit- blame Mongo')    
+            slice_arg = [int(params['skip']),int(params['limit'])]
+
+        if 'first_n' in params:
+            if slice_arg is not None:
+                raise ValueError('Cannot combine skip/limit with first_n parameters')
+            slice_arg = int(params['first_n'])
+
+        if 'last_n' in params:
+            if slice_arg is not None:
+                raise ValueError('Cannot combine skip/limit/first_n with last_n parameters')
+            slice_arg = -int(params['last_n'])
+
+        return self.db.get_parsed_build_log(params['registration_id'], slice_arg = slice_arg)
+
+    def list_builds(self, params):
+
+        only_running = False
+        only_error = False
+        only_complete = False
+
+        if 'only_running' in params:
+            if params['only_running']:
+                only_running = True
+                #registration_match = { '$or': [{'$ne':'complete'}, {'$ne':'error'}] }
+        if 'only_error' in params:
+            if params['only_error']:
+                if only_running:
+                    raise ValueError('Cannot combine only_error=1 with only_running=1 parameters')
+                only_error = True
+                #registration_match = 'error'
+        if 'only_complete' in params:
+            if params['only_complete']:
+                if only_running or only_error:
+                    raise ValueError('Cannot combine only_complete=1 with only_running=1 or only_error=1 parameters')
+                only_complete = True
+        
+        skip = 0
+        if 'skip' in params:
+            skip = int(params['skip'])
+        limit = 1000
+        if 'limit' in params:
+            limit = int(params['limit'])
+
+        git_url_match_list = []
+        module_name_lc_match_list = []
+
+        if 'modules' in params:
+            for mod in params['modules']:
+                if 'git_url' in mod:
+                    git_url_match_list.append(mod['git_url'])
+                if 'module_name' in mod:
+                    module_name_lc_match_list.append(str(mod['module_name']).lower())
+
+        return self.db.list_builds(
+                skip = skip,
+                limit = limit,
+                module_name_lcs = module_name_lc_match_list,
+                git_urls = git_url_match_list,
+                only_running = only_running,
+                only_error = only_error,
+                only_complete = only_complete
+            )
+
 
     def delete_module(self,params,username):
         if not self.is_admin(username):
-            raise ValueError('Only Admin users can migrate module git urls.')
+            raise ValueError('Only Admin users can delete modules.')
         if 'module_name' not in params and 'git_url' not in params:
             raise ValueError('You must specify the "module_name" or "git_url" of the module to delete.')
         params = self.filter_module_or_repo_selection(params)
+        module_details = self.db.get_module_details(module_name=params['module_name'], git_url=params['git_url'])
         error = self.db.delete_module(module_name=params['module_name'], git_url=params['git_url'])
         if error is not None:
             raise ValueError('Delete operation failed - some unknown database error: '+error)
+        self.nms.disable_repo({'module_name':module_details['module_name']})
 
 
     def migrate_module_to_new_git_url(self, params, username):
@@ -528,6 +637,80 @@ class CatalogController:
         error = self.db.migrate_module_to_new_git_url(params['module_name'],params['current_git_url'],params['new_git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
+
+
+
+    def add_favorite(self, params, username):
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+
+        if 'module_name' not in params:
+            module_name = 'nms.legacy'
+        elif not params['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = params['module_name']
+
+        if 'id' not in params:
+            raise ValueError('Cannot add favorite- id not set')
+        if not params['id']:
+            raise ValueError('Cannot add favorite- id not set')
+        app_id = params['id']
+
+        if not username:
+            raise ValueError('Cannot add favorite- username not set')
+
+        error = self.db.add_favorite(module_name, app_id, username, timestamp)
+        if error is not None:
+            raise ValueError('Add favorite operation failed - some unknown database error: '+error)
+
+    def remove_favorite(self, params, username):
+        if 'module_name' not in params:
+            module_name = 'nms.legacy'
+        elif not params['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = params['module_name']
+
+        if 'id' not in params:
+            raise ValueError('Cannot remove favorite- id not set')
+        if not params['id']:
+            raise ValueError('Cannot remove favorite- id not set')
+        app_id = params['id']
+
+        if not username:
+            raise ValueError('Cannot remove favorite- username not set')
+
+        error = self.db.remove_favorite(module_name, app_id, username)
+        if error is not None:
+            raise ValueError('Remove favorite operation failed - some unknown database error: '+error)
+
+    def list_user_favorites(self, username):
+        return self.db.list_user_favorites(username)
+
+    def list_app_favorites(self, item):
+        if 'module_name' not in item:
+            module_name = 'nms.legacy'
+        elif not item['module_name']:
+            module_name = 'nms.legacy'
+        else:
+            module_name = item['module_name']
+
+        if 'id' not in item:
+            raise ValueError('Cannot list app favorites- id not set')
+        if not item['id']:
+            raise ValueError('Cannot list app favorites- id not set')
+        app_id = item['id']
+
+        return self.db.list_app_favorites(module_name, app_id)
+
+    def aggregate_favorites_over_apps(self, params):
+        # no params right now, this just returns everything
+        module_names_lc = []
+        if 'modules' in params:
+            for i in params['modules']:
+                module_names_lc.append(i.lower())
+
+        return self.db.aggregate_favorites_over_apps(module_names_lc)
 
 
     # Some utility methods
@@ -562,9 +745,36 @@ class CatalogController:
         return biokbase.catalog.version.CATALOG_VERSION
 
 
+    def log_exec_stats(self, admin_user_id, user_id, app_module_name, app_id, func_module_name,
+                       func_name, git_commit_hash, creation_time, exec_start_time, finish_time,
+                       is_error):
+        if not self.is_admin(admin_user_id):
+            raise ValueError('You do not have permission to log execution statistics.')
+        self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name, 
+                                   git_commit_hash, creation_time, exec_start_time, finish_time, 
+                                   is_error)
+        parts = datetime.fromtimestamp(creation_time).isocalendar()
+        week_time_range = str(parts[0]) + "-W" + str(parts[1])
+        self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, "a", "*")
+        self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, "w", week_time_range)
+        self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, "a", "*")
+        self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
+                                    finish_time, is_error, "w", week_time_range)
+
+
+    def get_exec_aggr_stats(self, full_app_ids, per_week):
+        type = "w" if per_week else "a"
+        time_range = None if per_week else "*"
+        return self.db.get_exec_stats_apps(full_app_ids, type, time_range)
+
+
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details):
+def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
+                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint):
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
-                            nms_url, nms_admin_user, nms_admin_psswd, module_details)
+                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint)
     registrar.start_registration()
 

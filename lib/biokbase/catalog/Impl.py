@@ -10,7 +10,7 @@ class Catalog:
     Catalog
 
     Module Description:
-    Service for managing, registering, and building KBase Modules.
+    Service for managing, registering, and building KBase Modules using the KBase SDK.
     '''
 
     ######## WARNING FOR GEVENT USERS #######
@@ -132,6 +132,62 @@ class Catalog:
         # return the results
         return [info_list]
 
+    def add_favorite(self, ctx, params):
+        # ctx is the context object
+        #BEGIN add_favorite
+        self.cc.add_favorite(params,ctx['user_id'])
+        #END add_favorite
+        pass
+
+    def remove_favorite(self, ctx, params):
+        # ctx is the context object
+        #BEGIN remove_favorite
+        self.cc.remove_favorite(params,ctx['user_id'])
+        #END remove_favorite
+        pass
+
+    def list_favorites(self, ctx, username):
+        # ctx is the context object
+        # return variables are: favorites
+        #BEGIN list_favorites
+        favorites = self.cc.list_user_favorites(username)
+        #END list_favorites
+
+        # At some point might do deeper type checking...
+        if not isinstance(favorites, list):
+            raise ValueError('Method list_favorites return value ' +
+                             'favorites is not type list as required.')
+        # return the results
+        return [favorites]
+
+    def list_app_favorites(self, ctx, item):
+        # ctx is the context object
+        # return variables are: users
+        #BEGIN list_app_favorites
+        users = self.cc.list_app_favorites(item)
+        #END list_app_favorites
+
+        # At some point might do deeper type checking...
+        if not isinstance(users, list):
+            raise ValueError('Method list_app_favorites return value ' +
+                             'users is not type list as required.')
+        # return the results
+        return [users]
+
+    def list_favorite_counts(self, ctx, params):
+        # ctx is the context object
+        # return variables are: counts
+        #BEGIN list_favorite_counts
+        counts = self.cc.aggregate_favorites_over_apps(params)
+        #END list_favorite_counts
+
+        # At some point might do deeper type checking...
+        if not isinstance(counts, list):
+            raise ValueError('Method list_favorite_counts return value ' +
+                             'counts is not type list as required.')
+        # return the results
+        return [counts]
+
     def get_module_info(self, ctx, selection):
         # ctx is the context object
         # return variables are: info
@@ -223,6 +279,34 @@ class Catalog:
         # return the results
         return [returnVal]
 
+    def get_parsed_build_log(self, ctx, params):
+        # ctx is the context object
+        # return variables are: build_log
+        #BEGIN get_parsed_build_log
+        build_log = self.cc.get_parsed_build_log(params)
+        #END get_parsed_build_log
+
+        # At some point might do deeper type checking...
+        if not isinstance(build_log, dict):
+            raise ValueError('Method get_parsed_build_log return value ' +
+                             'build_log is not type dict as required.')
+        # return the results
+        return [build_log]
+
+    def list_builds(self, ctx, params):
+        # ctx is the context object
+        # return variables are: builds
+        #BEGIN list_builds
+        builds = self.cc.list_builds(params)
+        #END list_builds
+
+        # At some point might do deeper type checking...
+        if not isinstance(builds, list):
+            raise ValueError('Method list_builds return value ' +
+                             'builds is not type list as required.')
+        # return the results
+        return [builds]
+
     def delete_module(self, ctx, params):
         # ctx is the context object
         #BEGIN delete_module
@@ -298,3 +382,39 @@ class Catalog:
         usernames = self.cc.revoke_developer(username, ctx['user_id'])
         #END revoke_developer
         pass
+
+    def log_exec_stats(self, ctx, params):
+        # ctx is the context object
+        #BEGIN log_exec_stats
+        admin_user_id = ctx['user_id']
+        user_id = params['user_id']
+        app_module_name = None if 'app_module_name' not in params else params['app_module_name']
+        app_id = None if 'app_id' not in params else params['app_id']
+        func_module_name = None if 'func_module_name' not in params else params['func_module_name']
+        func_name = params['func_name']
+        git_commit_hash = None if 'git_commit_hash' not in params else params['git_commit_hash']
+        creation_time = params['creation_time']
+        exec_start_time = params['exec_start_time']
+        finish_time = params['finish_time']
+        is_error = params['is_error'] != 0
+        self.cc.log_exec_stats(admin_user_id, user_id, app_module_name, app_id, func_module_name,
+                               func_name, git_commit_hash, creation_time, exec_start_time, 
+                               finish_time, is_error)
+        #END log_exec_stats
+        pass
+
+    def get_exec_aggr_stats(self, ctx, params):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN get_exec_aggr_stats
+        full_app_ids = None if 'full_app_ids' not in params else params['full_app_ids']
+        per_week = False if 'per_week' not in params else params['per_week'] != 0
+        returnVal = self.cc.get_exec_aggr_stats(full_app_ids, per_week)
+        #END get_exec_aggr_stats
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, list):
+            raise ValueError('Method get_exec_aggr_stats return value ' +
+                             'returnVal is not type list as required.')
+        # return the results
+        return [returnVal]

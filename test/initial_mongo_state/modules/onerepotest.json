@@ -30,7 +30,9 @@
         "dev" : {
             "git_commit_hash" : "b06c5f9daf603a4d206071787c3f6184000bf128",
             "timestamp" : 1445024094055,
+            "registration_id" : "1445024094055_7215",
             "git_commit_message" : "another change",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:onerepotest.b06c5f9daf603a4d206071787c3f6184000bf128",
             "version" : "0.0.1",
             "narrative_methods" : [
                 "send_data"
@@ -39,6 +41,8 @@
         "beta" : {
             "git_commit_hash" : "b843888e962642d665a3b0bd701ee630c01835e6",
             "timestamp" : 1445023985597,
+            "registration_id" : "1445023985597_1245",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:onerepotest.b843888e962642d665a3b0bd701ee630c01835e6",
             "git_commit_message" : "update for testing",
             "version" : "0.0.1",
             "narrative_methods" : [
@@ -48,6 +52,8 @@
         "release" : {
             "git_commit_hash" : "49dc505febb8f4cccb2078c58ded0de3320534d7",
             "timestamp" : 1445022818884,
+            "registration_id" : "1445022818884_1245",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:onerepotest.49dc505febb8f4cccb2078c58ded0de3320534d7",
             "git_commit_message" : "added username for testing",
             "version" : "0.0.1",
             "narrative_methods" : [
@@ -60,6 +66,8 @@
         "1445022818884" : {
             "git_commit_hash" : "49dc505febb8f4cccb2078c58ded0de3320534d7",
             "timestamp" : 1445022818884,
+            "registration_id" : "1445022818884_1245",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:onerepotest.49dc505febb8f4cccb2078c58ded0de3320534d7",
             "git_commit_message" : "added username for testing",
             "version" : "0.0.1",
             "narrative_methods" : [

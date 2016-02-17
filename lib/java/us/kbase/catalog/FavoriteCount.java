@@ -12,26 +12,25 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: SelectOneModuleParams</p>
- * <pre>
- * Describes how to find a single module/repository.
- * module_name - name of module defined in kbase.yaml file;
- * git_url - the url used to register the module
- * </pre>
+ * <p>Original spec-file type: FavoriteCount</p>
+ * 
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "git_url"
+    "app_id",
+    "count"
 })
-public class SelectOneModuleParams {
+public class FavoriteCount {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("git_url")
-    private String gitUrl;
+    @JsonProperty("app_id")
+    private String appId;
+    @JsonProperty("count")
+    private Long count;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -44,23 +43,38 @@ public class SelectOneModuleParams {
         this.moduleName = moduleName;
     }
 
-    public SelectOneModuleParams withModuleName(String moduleName) {
+    public FavoriteCount withModuleName(String moduleName) {
         this.moduleName = moduleName;
         return this;
     }
 
-    @JsonProperty("git_url")
-    public String getGitUrl() {
-        return gitUrl;
+    @JsonProperty("app_id")
+    public String getAppId() {
+        return appId;
     }
 
-    @JsonProperty("git_url")
-    public void setGitUrl(String gitUrl) {
-        this.gitUrl = gitUrl;
+    @JsonProperty("app_id")
+    public void setAppId(String appId) {
+        this.appId = appId;
     }
 
-    public SelectOneModuleParams withGitUrl(String gitUrl) {
-        this.gitUrl = gitUrl;
+    public FavoriteCount withAppId(String appId) {
+        this.appId = appId;
+        return this;
+    }
+
+    @JsonProperty("count")
+    public Long getCount() {
+        return count;
+    }
+
+    @JsonProperty("count")
+    public void setCount(Long count) {
+        this.count = count;
+    }
+
+    public FavoriteCount withCount(Long count) {
+        this.count = count;
         return this;
     }
 
@@ -76,7 +90,7 @@ public class SelectOneModuleParams {
 
     @Override
     public String toString() {
-        return ((((((("SelectOneModuleParams"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("FavoriteCount"+" [moduleName=")+ moduleName)+", appId=")+ appId)+", count=")+ count)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

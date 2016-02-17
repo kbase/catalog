@@ -15,7 +15,7 @@ import us.kbase.common.service.UnauthorizedException;
 /**
  * <p>Original spec-file module name: Catalog</p>
  * <pre>
- * Service for managing, registering, and building KBase Modules.
+ * Service for managing, registering, and building KBase Modules using the KBase SDK.
  * </pre>
  */
 public class CatalogClient {
@@ -157,6 +157,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: is_registered</p>
      * <pre>
+     * returns true (1) if the module exists, false (2) otherwise
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.SelectOneModuleParams SelectOneModuleParams}
      * @return   instance of original type "boolean" (@range [0,1])
@@ -276,6 +277,87 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: add_favorite</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void addFavorite(FavoriteItem params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.add_favorite", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: remove_favorite</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void removeFavorite(FavoriteItem params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.remove_favorite", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_favorites</p>
+     * <pre>
+     * </pre>
+     * @param   username   instance of String
+     * @return   parameter "favorites" of list of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FavoriteItem> listFavorites(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(username);
+        TypeReference<List<List<FavoriteItem>>> retType = new TypeReference<List<List<FavoriteItem>>>() {};
+        List<List<FavoriteItem>> res = caller.jsonrpcCall("Catalog.list_favorites", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_app_favorites</p>
+     * <pre>
+     * </pre>
+     * @param   item   instance of type {@link us.kbase.catalog.FavoriteItem FavoriteItem}
+     * @return   parameter "users" of list of type {@link us.kbase.catalog.FavoriteUser FavoriteUser}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FavoriteUser> listAppFavorites(FavoriteItem item, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(item);
+        TypeReference<List<List<FavoriteUser>>> retType = new TypeReference<List<List<FavoriteUser>>>() {};
+        List<List<FavoriteUser>> res = caller.jsonrpcCall("Catalog.list_app_favorites", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_favorite_counts</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ListFavoriteCounts ListFavoriteCounts}
+     * @return   parameter "counts" of list of type {@link us.kbase.catalog.FavoriteCount FavoriteCount}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<FavoriteCount> listFavoriteCounts(ListFavoriteCounts params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<FavoriteCount>>> retType = new TypeReference<List<List<FavoriteCount>>>() {};
+        List<List<FavoriteCount>> res = caller.jsonrpcCall("Catalog.list_favorite_counts", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: get_module_info</p>
      * <pre>
      * </pre>
@@ -361,7 +443,6 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_build_log</p>
      * <pre>
-     * given the registration_id returned from the register method, you can check the build log with this method
      * </pre>
      * @param   registrationId   instance of String
      * @return   instance of String
@@ -373,6 +454,41 @@ public class CatalogClient {
         args.add(registrationId);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
         List<String> res = caller.jsonrpcCall("Catalog.get_build_log", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_parsed_build_log</p>
+     * <pre>
+     * given the registration_id returned from the register method, you can check the build log with this method
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetBuildLogParams GetBuildLogParams}
+     * @return   parameter "build_log" of type {@link us.kbase.catalog.BuildLog BuildLog}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public BuildLog getParsedBuildLog(GetBuildLogParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<BuildLog>> retType = new TypeReference<List<BuildLog>>() {};
+        List<BuildLog> res = caller.jsonrpcCall("Catalog.get_parsed_build_log", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_builds</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ListBuildParams ListBuildParams}
+     * @return   parameter "builds" of list of type {@link us.kbase.catalog.BuildInfo BuildInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<BuildInfo> listBuilds(ListBuildParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<BuildInfo>>> retType = new TypeReference<List<List<BuildInfo>>>() {};
+        List<List<BuildInfo>> res = caller.jsonrpcCall("Catalog.list_builds", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 
@@ -503,5 +619,39 @@ public class CatalogClient {
         args.add(username);
         TypeReference<Object> retType = new TypeReference<Object>() {};
         caller.jsonrpcCall("Catalog.revoke_developer", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: log_exec_stats</p>
+     * <pre>
+     * Request from Execution Engine for adding statistics about each method run. It could be done
+     * using catalog admin credentials only.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.LogExecStatsParams LogExecStatsParams}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void logExecStats(LogExecStatsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.log_exec_stats", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_exec_aggr_stats</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetExecAggrStatsParams GetExecAggrStatsParams}
+     * @return   instance of list of type {@link us.kbase.catalog.ExecAggrStats ExecAggrStats}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<ExecAggrStats> getExecAggrStats(GetExecAggrStatsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<ExecAggrStats>>> retType = new TypeReference<List<List<ExecAggrStats>>>() {};
+        List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
     }
 }
