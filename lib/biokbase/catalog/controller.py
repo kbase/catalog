@@ -144,8 +144,12 @@ class CatalogController:
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
-                # 2b) Make sure the current registration state is either 'complete' or 'error'
+                # 2b) Make sure the current registration state is either 'complete' or 'error', and the module is active
                 state = module_details['state']
+                active_state = state['active']
+                if not active_state:
+                    raise ValueError('You cannot register new versions of this module.  It is inactive.')
+
                 registration_state = state['registration']
                 if registration_state == 'complete' or registration_state == 'error':
                     error = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
