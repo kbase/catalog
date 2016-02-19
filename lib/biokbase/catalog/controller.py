@@ -788,8 +788,8 @@ class CatalogController:
             if not isinstance(params['client_groups'], list):
                 raise ValueError('client_groups parameter must be a list')
             for c in params['client_groups']:
-                if not isinstance(c, str):
-                    raise ValueError('client_groups parameter must be a list of strings')
+                #if not isinstance(c, str):
+                #    raise ValueError('client_groups parameter must be a list of strings')
                 # other client group checks should go here if needed
                 client_groups.append(c)
 
