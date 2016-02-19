@@ -418,3 +418,41 @@ class Catalog:
                              'returnVal is not type list as required.')
         # return the results
         return [returnVal]
+
+    def set_client_group(self, ctx, group):
+        # ctx is the context object
+        #BEGIN set_client_group
+        self.cc.set_client_group(ctx['user_id'], group)
+        #END set_client_group
+        pass
+
+    def get_client_groups(self, ctx, params):
+        # ctx is the context object
+        # return variables are: groups
+        #BEGIN get_client_groups
+        groups = self.cc.get_client_groups(params)
+        #END get_client_groups
+
+        # At some point might do deeper type checking...
+        if not isinstance(groups, list):
+            raise ValueError('Method get_client_groups return value ' +
+                             'groups is not type list as required.')
+        # return the results
+        return [groups]
+
+    def is_admin(self, ctx, username):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN is_admin
+        returnVal = 0
+        if username:
+            if self.cc.is_admin(username):
+                returnVal = 1
+        #END is_admin
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, int):
+            raise ValueError('Method is_admin return value ' +
+                             'returnVal is not type int as required.')
+        # return the results
+        return [returnVal]

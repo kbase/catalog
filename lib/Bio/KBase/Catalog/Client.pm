@@ -3000,6 +3000,265 @@ ExecAggrStats is a reference to a hash where the following keys are defined:
     }
 }
  
+
+
+=head2 set_client_group
+
+  $obj->set_client_group($group)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$group is a Catalog.AppClientGroup
+AppClientGroup is a reference to a hash where the following keys are defined:
+	app_id has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$group is a Catalog.AppClientGroup
+AppClientGroup is a reference to a hash where the following keys are defined:
+	app_id has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub set_client_group
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function set_client_group (received $n, expecting 1)");
+    }
+    {
+	my($group) = @args;
+
+	my @_bad_arguments;
+        (ref($group) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"group\" (value was \"$group\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to set_client_group:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'set_client_group');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.set_client_group",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'set_client_group',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_client_group",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'set_client_group',
+				       );
+    }
+}
+ 
+
+
+=head2 get_client_groups
+
+  $groups = $obj->get_client_groups($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetClientGroupParams
+$groups is a reference to a list where each element is a Catalog.AppClientGroup
+GetClientGroupParams is a reference to a hash where the following keys are defined:
+	app_ids has a value which is a reference to a list where each element is a string
+AppClientGroup is a reference to a hash where the following keys are defined:
+	app_id has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetClientGroupParams
+$groups is a reference to a list where each element is a Catalog.AppClientGroup
+GetClientGroupParams is a reference to a hash where the following keys are defined:
+	app_ids has a value which is a reference to a list where each element is a string
+AppClientGroup is a reference to a hash where the following keys are defined:
+	app_id has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub get_client_groups
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_client_groups (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_client_groups:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_client_groups');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_client_groups",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_client_groups',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_client_groups",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_client_groups',
+				       );
+    }
+}
+ 
+
+
+=head2 is_admin
+
+  $return = $obj->is_admin($username)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$username is a string
+$return is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$username is a string
+$return is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+returns true (1) if the user is an admin, false (0) otherwise
+
+=back
+
+=cut
+
+ sub is_admin
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function is_admin (received $n, expecting 1)");
+    }
+    {
+	my($username) = @args;
+
+	my @_bad_arguments;
+        (!ref($username)) or push(@_bad_arguments, "Invalid type for argument 1 \"username\" (value was \"$username\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to is_admin:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'is_admin');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.is_admin",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'is_admin',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method is_admin",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'is_admin',
+				       );
+    }
+}
+ 
   
 
 sub version {
@@ -3013,16 +3272,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'get_exec_aggr_stats',
+                method_name => 'is_admin',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method get_exec_aggr_stats",
+            error => "Error invoking method is_admin",
             status_line => $self->{client}->status_line,
-            method_name => 'get_exec_aggr_stats',
+            method_name => 'is_admin',
         );
     }
 }
@@ -4172,6 +4431,80 @@ number_of_calls has a value which is an int
 number_of_errors has a value which is an int
 total_queue_time has a value which is a float
 total_exec_time has a value which is a float
+
+
+=end text
+
+=back
+
+
+
+=head2 AppClientGroup
+
+=over 4
+
+
+
+=item Description
+
+app_id = full app id; if module name is used it will be case insensitive 
+this will overwrite all existing client groups (it won't just push what's on the list)
+If client_groups is empty or set to null, then the client_group mapping will be removed.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+app_id has a value which is a string
+client_groups has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+app_id has a value which is a string
+client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 GetClientGroupParams
+
+=over 4
+
+
+
+=item Description
+
+if app_ids is empty or null, all client groups are returned
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+app_ids has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+app_ids has a value which is a reference to a list where each element is a string
 
 
 =end text

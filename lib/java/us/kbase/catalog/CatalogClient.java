@@ -654,4 +654,54 @@ public class CatalogClient {
         List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
+
+    /**
+     * <p>Original spec-file function name: set_client_group</p>
+     * <pre>
+     * </pre>
+     * @param   group   instance of type {@link us.kbase.catalog.AppClientGroup AppClientGroup}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setClientGroup(AppClientGroup group, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(group);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_client_group", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_client_groups</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetClientGroupParams GetClientGroupParams}
+     * @return   parameter "groups" of list of type {@link us.kbase.catalog.AppClientGroup AppClientGroup}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<AppClientGroup> getClientGroups(GetClientGroupParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<AppClientGroup>>> retType = new TypeReference<List<List<AppClientGroup>>>() {};
+        List<List<AppClientGroup>> res = caller.jsonrpcCall("Catalog.get_client_groups", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: is_admin</p>
+     * <pre>
+     * returns true (1) if the user is an admin, false (0) otherwise
+     * </pre>
+     * @param   username   instance of String
+     * @return   instance of original type "boolean" (@range [0,1])
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public Long isAdmin(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(username);
+        TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
+        List<Long> res = caller.jsonrpcCall("Catalog.is_admin", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
 }

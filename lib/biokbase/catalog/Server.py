@@ -153,6 +153,15 @@ sync_methods['Catalog.log_exec_stats'] = True
 async_run_methods['Catalog.get_exec_aggr_stats_async'] = ['Catalog', 'get_exec_aggr_stats']
 async_check_methods['Catalog.get_exec_aggr_stats_check'] = ['Catalog', 'get_exec_aggr_stats']
 sync_methods['Catalog.get_exec_aggr_stats'] = True
+async_run_methods['Catalog.set_client_group_async'] = ['Catalog', 'set_client_group']
+async_check_methods['Catalog.set_client_group_check'] = ['Catalog', 'set_client_group']
+sync_methods['Catalog.set_client_group'] = True
+async_run_methods['Catalog.get_client_groups_async'] = ['Catalog', 'get_client_groups']
+async_check_methods['Catalog.get_client_groups_check'] = ['Catalog', 'get_client_groups']
+sync_methods['Catalog.get_client_groups'] = True
+async_run_methods['Catalog.is_admin_async'] = ['Catalog', 'is_admin']
+async_check_methods['Catalog.is_admin_check'] = ['Catalog', 'is_admin']
+sync_methods['Catalog.is_admin'] = True
 
 class AsyncJobServiceClient(object):
 
@@ -548,6 +557,18 @@ class Application(object):
                              name='Catalog.get_exec_aggr_stats',
                              types=[dict])
         self.method_authentication['Catalog.get_exec_aggr_stats'] = 'none'
+        self.rpc_service.add(impl_Catalog.set_client_group,
+                             name='Catalog.set_client_group',
+                             types=[dict])
+        self.method_authentication['Catalog.set_client_group'] = 'required'
+        self.rpc_service.add(impl_Catalog.get_client_groups,
+                             name='Catalog.get_client_groups',
+                             types=[dict])
+        self.method_authentication['Catalog.get_client_groups'] = 'none'
+        self.rpc_service.add(impl_Catalog.is_admin,
+                             name='Catalog.is_admin',
+                             types=[basestring])
+        self.method_authentication['Catalog.is_admin'] = 'none'
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
