@@ -12,6 +12,19 @@ from biokbase.catalog.Impl import Catalog
 class AdminMethodsTest(unittest.TestCase):
 
 
+    def test_is_admin(self):
+
+        madeUpName = 'asdfasdf'
+        userName = self.cUtil.user_ctx()['user_id']
+        adminName = self.cUtil.admin_ctx()['user_id']
+
+        ctx = self.cUtil.anonymous_ctx()
+
+        self.assertEqual(self.catalog.is_admin(ctx, madeUpName)[0],0)
+        self.assertEqual(self.catalog.is_admin(ctx, userName)[0],0)
+        self.assertEqual(self.catalog.is_admin(ctx, adminName)[0],1)
+
+
     # assumes no developers have been added yet
     def test_add_remove_developers(self):
 

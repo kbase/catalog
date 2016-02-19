@@ -88,6 +88,7 @@ class MongoCatalogDBI:
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
     _FAVORITES='favorites'
+    _CLIENT_GROUPS='client_groups'
     _EXEC_STATS_RAW='exec_stats_raw'
     _EXEC_STATS_APPS='exec_stats_apps'
     _EXEC_STATS_USERS='exec_stats_users'
@@ -107,6 +108,7 @@ class MongoCatalogDBI:
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
+        self.client_groups = self.db[MongoCatalogDBI._CLIENT_GROUPS]
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
@@ -169,6 +171,10 @@ class MongoCatalogDBI:
                                             ('type', ASCENDING),
                                             ('time_range', ASCENDING)], 
                                            unique=True, sparse=False)
+
+        # client group
+        #  app_id = [lower case module name]/[app id]
+        self.client_groups.ensure_index('app_id', unique=True, sparse=False)
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -578,6 +584,38 @@ class MongoCatalogDBI:
                 'count' : c['count']
                 })
         return counts
+
+
+    # assumes module names in app_ids are already lower 
+    def set_client_group(self, app_id, client_groups):
+        if not app_id:
+            return
+
+        if not client_groups:
+            client_groups = []
+
+        # lower case the module name on insert
+        tokens = app_id.strip().split('/')
+        if len(tokens)==2 :
+            app_id = tokens[0].lower() + '/' + tokens[1];
+
+        return self._check_update_result(self.client_groups.update(
+                {'app_id':app_id},
+                {'app_id':app_id, 'client_groups': client_groups },
+                upsert=True
+            ))
+
+    def list_client_groups(self, app_ids):
+        query = {}
+        selection = {
+            "_id": 0,
+            "app_id": 1, 
+            "client_groups": 1
+        }
+        if app_ids:
+            query['app_id'] = { '$in':app_ids }
+
+        return list(self.client_groups.find(query, selection))
 
 
     #### utility methods

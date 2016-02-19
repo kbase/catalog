@@ -775,6 +775,46 @@ class CatalogController:
         return self.db.get_exec_stats_apps(full_app_ids, type, time_range)
 
 
+    def set_client_group(self, username, params):
+
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to set execution client groups.')
+
+        if not 'app_id' in params:
+            raise ValueError('You must set the "app_id" parameter to [module_name]/[app_id]')
+
+        client_groups = []
+        if 'client_groups' in params:
+            if not isinstance(params['client_groups'], list):
+                raise ValueError('client_groups parameter must be a list')
+            for c in params['client_groups']:
+                if not isinstance(c, str):
+                    raise ValueError('client_groups parameter must be a list of strings')
+                # other client group checks should go here if needed
+                client_groups.append(c)
+
+        error = self.db.set_client_group(params['app_id'], client_groups)
+        if error is not None:
+            raise ValueError('Update probably failed, blame mongo: update operation returned: '+error)
+
+    def get_client_groups(self, params):
+        app_ids = None
+        if 'app_ids' in params:
+            if not isinstance(params['app_ids'], list):
+                raise ValueError('app_ids parameter must be a list');
+            app_ids = [];
+            for a in params['app_ids']:
+                tokens = a.strip().split('/')
+                if len(tokens)==2:
+                    a = tokens[0].lower() + '/' + tokens[1]
+                app_ids.append(a)
+            if len(app_ids) == 0 :
+                app_ids = None
+        return self.db.list_client_groups(app_ids)
+
+
+
+
 # NOT PART OF CLASS CATALOG!!
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
                         nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint):
