@@ -6,6 +6,10 @@ Build status (develop branch):
 [![Build Status](https://travis-ci.org/kbase/catalog.svg)](https://travis-ci.org/kbase/catalog)
 
 
+#### v1.0.2 - 2/18/16
+  - Allow specification of client groups
+  - Method to check for admin status
+
 #### v1.0.1 - 2/17/16
   - Prevent reregistration of inactive modules
 
