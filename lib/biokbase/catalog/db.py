@@ -726,7 +726,9 @@ class MongoCatalogDBI:
                 '_id':{
                     'u':'$user_id',
                     'm':'$app_module_name',
-                    'a':'$app_id'
+                    'a':'$app_id',
+                    'f':'$func_name',
+                    'fm':'$func_module_name'
                 },
                 'count':{
                     '$sum':1
@@ -760,9 +762,11 @@ class MongoCatalogDBI:
             if c['_id']['m']:
                 full_id = c['_id']['m'] + '/' + c['_id']['a']
             counts.append({
-                'u':c['_id']['u'],
-                'a' : full_id,
-                'n' : c['count']
+                'user':c['_id']['u'],
+                'app' : full_id,
+                'n' : c['count'],
+                'func' : c['_id']['f'],
+                'func_mod' : c['_id']['fm']
                 })
 
         return counts
