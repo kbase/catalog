@@ -156,6 +156,10 @@ class MongoCatalogDBI:
         self.exec_stats_raw.ensure_index([('func_module_name', ASCENDING),
                                           ('func_name', ASCENDING)], 
                                          unique=False, sparse=True)
+        self.exec_stats_raw.ensure_index('creation_time', 
+                                         unique=False, sparse=False)
+        self.exec_stats_raw.ensure_index('finish_time', 
+                                         unique=False, sparse=False)
         
         self.exec_stats_apps.ensure_index('module_name', 
                                           unique=False, sparse=True)
@@ -712,5 +716,51 @@ class MongoCatalogDBI:
             "total_queue_time": 1 
         }
         return list(self.exec_stats_apps.find(filter, selection))
+
+    def aggr_exec_stats_table(self, minTime, maxTime):
+
+        # setup the query
+        aggParams = None;
+        group = {
+            '$group':{
+                '_id':{
+                    'u':'$user_id',
+                    'a':'$app_id'
+                },
+                'count':{
+                    '$sum':1
+                }
+            }
+        }
+
+        # filter times based on creation times
+        creationTimeFilter = {}
+        if minTime is not None:
+            creationTimeFilter['$gt']=minTime
+        if maxTime is not None:
+            creationTimeFilter['$lt']=maxTime
+        if len(creationTimeFilter)>0:
+            match = {
+                '$match': {
+                    'creation_time': creationTimeFilter
+                }
+            }
+            aggParams = [match,group]
+        else:
+            aggParams = [group]
+
+        # run the aggregation
+        result = self.exec_stats_raw.aggregate(aggParams)
+
+        # process the result
+        counts = []
+        for c in result['result']:
+            counts.append({
+                'u':c['_id']['u'],
+                'a' : c['_id']['a'],
+                'n' : c['count']
+                })
+
+        return counts
 
         

@@ -412,6 +412,17 @@ module Catalog {
 
 
 
+    /*
+        Get aggregated usage metrics; available only to Admins.
+    */
+    typedef structure {
+        int begin;
+        int end;
+    } ExecAggrTableParams;
+
+    funcdef get_exec_aggr_table(ExecAggrTableParams params) returns (UnspecifiedObject table) authentication required;
+
+
     /* Temporary set of methods to dynamically set client groups for specific methods.  These methods
        will likely go away after the execution engine has been refactored/extended.  Only admins can
        run these methods.

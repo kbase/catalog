@@ -153,6 +153,9 @@ sync_methods['Catalog.log_exec_stats'] = True
 async_run_methods['Catalog.get_exec_aggr_stats_async'] = ['Catalog', 'get_exec_aggr_stats']
 async_check_methods['Catalog.get_exec_aggr_stats_check'] = ['Catalog', 'get_exec_aggr_stats']
 sync_methods['Catalog.get_exec_aggr_stats'] = True
+async_run_methods['Catalog.get_exec_aggr_table_async'] = ['Catalog', 'get_exec_aggr_table']
+async_check_methods['Catalog.get_exec_aggr_table_check'] = ['Catalog', 'get_exec_aggr_table']
+sync_methods['Catalog.get_exec_aggr_table'] = True
 async_run_methods['Catalog.set_client_group_async'] = ['Catalog', 'set_client_group']
 async_check_methods['Catalog.set_client_group_check'] = ['Catalog', 'set_client_group']
 sync_methods['Catalog.set_client_group'] = True
@@ -557,6 +560,10 @@ class Application(object):
                              name='Catalog.get_exec_aggr_stats',
                              types=[dict])
         self.method_authentication['Catalog.get_exec_aggr_stats'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_exec_aggr_table,
+                             name='Catalog.get_exec_aggr_table',
+                             types=[dict])
+        self.method_authentication['Catalog.get_exec_aggr_table'] = 'required'
         self.rpc_service.add(impl_Catalog.set_client_group,
                              name='Catalog.set_client_group',
                              types=[dict])

@@ -419,6 +419,20 @@ class Catalog:
         # return the results
         return [returnVal]
 
+    def get_exec_aggr_table(self, ctx, params):
+        # ctx is the context object
+        # return variables are: table
+        #BEGIN get_exec_aggr_table
+        table = self.cc.get_exec_aggr_table(ctx['user_id'], params)
+        #END get_exec_aggr_table
+
+        # At some point might do deeper type checking...
+        if not isinstance(table, object):
+            raise ValueError('Method get_exec_aggr_table return value ' +
+                             'table is not type object as required.')
+        # return the results
+        return [table]
+
     def set_client_group(self, ctx, group):
         # ctx is the context object
         #BEGIN set_client_group

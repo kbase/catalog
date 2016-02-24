@@ -10,6 +10,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
 
 /**
@@ -652,6 +653,23 @@ public class CatalogClient {
         args.add(params);
         TypeReference<List<List<ExecAggrStats>>> retType = new TypeReference<List<List<ExecAggrStats>>>() {};
         List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_exec_aggr_table</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ExecAggrTableParams ExecAggrTableParams}
+     * @return   parameter "table" of unspecified object
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public UObject getExecAggrTable(ExecAggrTableParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<UObject>> retType = new TypeReference<List<UObject>>() {};
+        List<UObject> res = caller.jsonrpcCall("Catalog.get_exec_aggr_table", args, retType, true, true, jsonRpcContext);
         return res.get(0);
     }
 
