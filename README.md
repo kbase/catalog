@@ -5,6 +5,8 @@ KBase core service to manage app and module information, registration, and relea
 Build status (develop branch):
 [![Build Status](https://travis-ci.org/kbase/catalog.svg)](https://travis-ci.org/kbase/catalog)
 
+#### v1.0.2 - 2/24/16
+  - Method to generate usage stats for admins
 
 #### v1.0.2 - 2/18/16
   - Allow specification of client groups
