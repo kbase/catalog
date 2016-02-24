@@ -725,6 +725,7 @@ class MongoCatalogDBI:
             '$group':{
                 '_id':{
                     'u':'$user_id',
+                    'm':'$app_module_name',
                     'a':'$app_id'
                 },
                 'count':{
@@ -755,9 +756,12 @@ class MongoCatalogDBI:
         # process the result
         counts = []
         for c in result['result']:
+            full_id = c['_id']['a']
+            if c['_id']['m']:
+                full_id = c['_id']['m'] + '/' + c['_id']['a']
             counts.append({
                 'u':c['_id']['u'],
-                'a' : c['_id']['a'],
+                'a' : full_id,
                 'n' : c['count']
                 })
 
