@@ -10,6 +10,7 @@ import us.kbase.auth.AuthToken;
 import us.kbase.common.service.JsonClientCaller;
 import us.kbase.common.service.JsonClientException;
 import us.kbase.common.service.RpcContext;
+import us.kbase.common.service.UObject;
 import us.kbase.common.service.UnauthorizedException;
 
 /**
@@ -652,6 +653,73 @@ public class CatalogClient {
         args.add(params);
         TypeReference<List<List<ExecAggrStats>>> retType = new TypeReference<List<List<ExecAggrStats>>>() {};
         List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_exec_aggr_table</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ExecAggrTableParams ExecAggrTableParams}
+     * @return   parameter "table" of unspecified object
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public UObject getExecAggrTable(ExecAggrTableParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<UObject>> retType = new TypeReference<List<UObject>>() {};
+        List<UObject> res = caller.jsonrpcCall("Catalog.get_exec_aggr_table", args, retType, true, true, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: set_client_group</p>
+     * <pre>
+     * </pre>
+     * @param   group   instance of type {@link us.kbase.catalog.AppClientGroup AppClientGroup}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setClientGroup(AppClientGroup group, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(group);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_client_group", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_client_groups</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetClientGroupParams GetClientGroupParams}
+     * @return   parameter "groups" of list of type {@link us.kbase.catalog.AppClientGroup AppClientGroup}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<AppClientGroup> getClientGroups(GetClientGroupParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<AppClientGroup>>> retType = new TypeReference<List<List<AppClientGroup>>>() {};
+        List<List<AppClientGroup>> res = caller.jsonrpcCall("Catalog.get_client_groups", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: is_admin</p>
+     * <pre>
+     * returns true (1) if the user is an admin, false (0) otherwise
+     * </pre>
+     * @param   username   instance of String
+     * @return   instance of original type "boolean" (@range [0,1])
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public Long isAdmin(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(username);
+        TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
+        List<Long> res = caller.jsonrpcCall("Catalog.is_admin", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 }

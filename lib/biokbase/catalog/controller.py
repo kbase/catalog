@@ -144,8 +144,12 @@ class CatalogController:
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
-                # 2b) Make sure the current registration state is either 'complete' or 'error'
+                # 2b) Make sure the current registration state is either 'complete' or 'error', and the module is active
                 state = module_details['state']
+                active_state = state['active']
+                if not active_state:
+                    raise ValueError('You cannot register new versions of this module.  It is inactive.')
+
                 registration_state = state['registration']
                 if registration_state == 'complete' or registration_state == 'error':
                     error = self.db.set_module_registration_state(git_url=git_url, new_state='started', last_state=registration_state)
@@ -769,6 +773,60 @@ class CatalogController:
         type = "w" if per_week else "a"
         time_range = None if per_week else "*"
         return self.db.get_exec_stats_apps(full_app_ids, type, time_range)
+
+
+    def get_exec_aggr_table(self, requesting_user, params):
+        if not self.is_admin(requesting_user):
+            raise ValueError('You do not have permission to view this data.')
+
+        minTime = None
+        maxTime = None
+        if 'begin' in params:
+            minTime = params['begin']
+        if 'end' in params:
+            maxTime = params['end']
+
+        return self.db.aggr_exec_stats_table(minTime, maxTime)
+
+
+    def set_client_group(self, username, params):
+
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to set execution client groups.')
+
+        if not 'app_id' in params:
+            raise ValueError('You must set the "app_id" parameter to [module_name]/[app_id]')
+
+        client_groups = []
+        if 'client_groups' in params:
+            if not isinstance(params['client_groups'], list):
+                raise ValueError('client_groups parameter must be a list')
+            for c in params['client_groups']:
+                #if not isinstance(c, str):
+                #    raise ValueError('client_groups parameter must be a list of strings')
+                # other client group checks should go here if needed
+                client_groups.append(c)
+
+        error = self.db.set_client_group(params['app_id'], client_groups)
+        if error is not None:
+            raise ValueError('Update probably failed, blame mongo: update operation returned: '+error)
+
+    def get_client_groups(self, params):
+        app_ids = None
+        if 'app_ids' in params:
+            if not isinstance(params['app_ids'], list):
+                raise ValueError('app_ids parameter must be a list');
+            app_ids = [];
+            for a in params['app_ids']:
+                tokens = a.strip().split('/')
+                if len(tokens)==2:
+                    a = tokens[0].lower() + '/' + tokens[1]
+                app_ids.append(a)
+            if len(app_ids) == 0 :
+                app_ids = None
+        return self.db.list_client_groups(app_ids)
+
+
 
 
 # NOT PART OF CLASS CATALOG!!

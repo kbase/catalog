@@ -409,4 +409,45 @@ module Catalog {
     } ExecAggrStats;
 
     funcdef get_exec_aggr_stats(GetExecAggrStatsParams params) returns (list<ExecAggrStats>);
+
+
+
+    /*
+        Get aggregated usage metrics; available only to Admins.
+    */
+    typedef structure {
+        int begin;
+        int end;
+    } ExecAggrTableParams;
+
+    funcdef get_exec_aggr_table(ExecAggrTableParams params) returns (UnspecifiedObject table) authentication required;
+
+
+    /* Temporary set of methods to dynamically set client groups for specific methods.  These methods
+       will likely go away after the execution engine has been refactored/extended.  Only admins can
+       run these methods.
+    */
+
+
+    /* app_id = full app id; if module name is used it will be case insensitive 
+        this will overwrite all existing client groups (it won't just push what's on the list)
+        If client_groups is empty or set to null, then the client_group mapping will be removed.
+    */
+    typedef structure {
+        string app_id;
+        list<string> client_groups;
+    } AppClientGroup;
+
+    funcdef set_client_group(AppClientGroup group) returns () authentication required;
+
+    /* if app_ids is empty or null, all client groups are returned */
+    typedef structure {
+        list<string> app_ids;
+    } GetClientGroupParams;
+
+    funcdef get_client_groups(GetClientGroupParams params) returns (list<AppClientGroup> groups);
+
+    /* returns true (1) if the user is an admin, false (0) otherwise */
+    funcdef is_admin(string username) returns (boolean); 
+
 };
