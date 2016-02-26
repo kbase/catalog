@@ -88,6 +88,7 @@ class MongoCatalogDBI:
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
     _FAVORITES='favorites'
+    _CLIENT_GROUPS='client_groups'
     _EXEC_STATS_RAW='exec_stats_raw'
     _EXEC_STATS_APPS='exec_stats_apps'
     _EXEC_STATS_USERS='exec_stats_users'
@@ -107,6 +108,7 @@ class MongoCatalogDBI:
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
+        self.client_groups = self.db[MongoCatalogDBI._CLIENT_GROUPS]
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
@@ -154,6 +156,10 @@ class MongoCatalogDBI:
         self.exec_stats_raw.ensure_index([('func_module_name', ASCENDING),
                                           ('func_name', ASCENDING)], 
                                          unique=False, sparse=True)
+        self.exec_stats_raw.ensure_index('creation_time', 
+                                         unique=False, sparse=False)
+        self.exec_stats_raw.ensure_index('finish_time', 
+                                         unique=False, sparse=False)
         
         self.exec_stats_apps.ensure_index('module_name', 
                                           unique=False, sparse=True)
@@ -169,6 +175,10 @@ class MongoCatalogDBI:
                                             ('type', ASCENDING),
                                             ('time_range', ASCENDING)], 
                                            unique=True, sparse=False)
+
+        # client group
+        #  app_id = [lower case module name]/[app id]
+        self.client_groups.ensure_index('app_id', unique=True, sparse=False)
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -580,6 +590,38 @@ class MongoCatalogDBI:
         return counts
 
 
+    # assumes module names in app_ids are already lower 
+    def set_client_group(self, app_id, client_groups):
+        if not app_id:
+            return
+
+        if not client_groups:
+            client_groups = []
+
+        # lower case the module name on insert
+        tokens = app_id.strip().split('/')
+        if len(tokens)==2 :
+            app_id = tokens[0].lower() + '/' + tokens[1];
+
+        return self._check_update_result(self.client_groups.update(
+                {'app_id':app_id},
+                {'app_id':app_id, 'client_groups': client_groups },
+                upsert=True
+            ))
+
+    def list_client_groups(self, app_ids):
+        query = {}
+        selection = {
+            "_id": 0,
+            "app_id": 1, 
+            "client_groups": 1
+        }
+        if app_ids:
+            query['app_id'] = { '$in':app_ids }
+
+        return list(self.client_groups.find(query, selection))
+
+
     #### utility methods
     def _get_mongo_query(self, module_name='', git_url=''):
         query={}
@@ -674,5 +716,59 @@ class MongoCatalogDBI:
             "total_queue_time": 1 
         }
         return list(self.exec_stats_apps.find(filter, selection))
+
+    def aggr_exec_stats_table(self, minTime, maxTime):
+
+        # setup the query
+        aggParams = None;
+        group = {
+            '$group':{
+                '_id':{
+                    'u':'$user_id',
+                    'm':'$app_module_name',
+                    'a':'$app_id',
+                    'f':'$func_name',
+                    'fm':'$func_module_name'
+                },
+                'count':{
+                    '$sum':1
+                }
+            }
+        }
+
+        # filter times based on creation times
+        creationTimeFilter = {}
+        if minTime is not None:
+            creationTimeFilter['$gt']=minTime
+        if maxTime is not None:
+            creationTimeFilter['$lt']=maxTime
+        if len(creationTimeFilter)>0:
+            match = {
+                '$match': {
+                    'creation_time': creationTimeFilter
+                }
+            }
+            aggParams = [match,group]
+        else:
+            aggParams = [group]
+
+        # run the aggregation
+        result = self.exec_stats_raw.aggregate(aggParams)
+
+        # process the result
+        counts = []
+        for c in result['result']:
+            full_id = c['_id']['a']
+            if c['_id']['m']:
+                full_id = c['_id']['m'] + '/' + c['_id']['a']
+            counts.append({
+                'user':c['_id']['u'],
+                'app' : full_id,
+                'n' : c['count'],
+                'func' : c['_id']['f'],
+                'func_mod' : c['_id']['fm']
+                })
+
+        return counts
 
         
