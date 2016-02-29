@@ -132,6 +132,7 @@ class CatalogController:
         if not self.is_approved_developer([username])[0]:
             raise ValueError('You are not an approved developer.  Contact us to request approval.')
 
+        prev_dev_version = None
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
@@ -141,6 +142,7 @@ class CatalogController:
         # that the module is in a state where it can be registered 
         else:
             module_details = self.db.get_module_details(git_url=git_url)
+            prev_dev_version = module_details['current_versions']['dev']
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
@@ -176,7 +178,8 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint))
+            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint,
+            prev_dev_version))
         t.start()
 
         # 4) provide the registration_id 
@@ -831,8 +834,8 @@ class CatalogController:
 
 # NOT PART OF CLASS CATALOG!!
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
-                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint):
+                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
-                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint)
+                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
     registrar.start_registration()
 

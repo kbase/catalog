@@ -26,7 +26,7 @@ class Registrar:
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
                     docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details,
-                    ref_data_base, kbase_endpoint):
+                    ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
@@ -56,6 +56,7 @@ class Registrar:
         
         self.ref_data_base = ref_data_base
         self.kbase_endpoint = kbase_endpoint
+        self.prev_dev_version = prev_dev_version
 
 
     def start_registration(self):
@@ -185,6 +186,11 @@ class Registrar:
             self.set_build_error(str(e))
             self.log(traceback.format_exc(), is_error=True)
             self.log('BUILD_ERROR: '+str(e), is_error=True)
+            if self.prev_dev_version:
+                self.log('Reverting dev version to git_commit_hash=' + self.prev_dev_version['git_commit_hash'] +
+                         ', version=' + self.prev_dev_version['version'] + ', git_commit_message=' +
+                         self.prev_dev_version['git_commit_message'])
+                self.db.update_dev_version(self.prev_dev_version, git_url=self.git_url)
         finally:
             self.flush_log_to_db();
             self.logfile.close();
