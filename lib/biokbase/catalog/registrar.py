@@ -78,8 +78,8 @@ class Registrar:
             self.log('git clone ' + self.git_url)
             repo = git.Repo.clone_from(self.git_url, basedir)
             # try to get hash from repo
-            self.log('current commit hash at HEAD:' + str(repo.heads.master.commit))
-            git_commit_hash = repo.heads.master.commit
+            git_commit_hash = str(repo.active_branch.commit)
+            self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())

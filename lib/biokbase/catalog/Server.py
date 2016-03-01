@@ -16,6 +16,7 @@ import requests as _requests
 import urlparse as _urlparse
 import random as _random
 import os
+import requests.packages.urllib3
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
@@ -869,6 +870,7 @@ def process_async_cli(input_file_path, output_file_path, token):
     return exit_code
     
 if __name__ == "__main__":
+    requests.packages.urllib3.disable_warnings()
     if len(sys.argv) >= 3 and len(sys.argv) <= 4 and os.path.isfile(sys.argv[1]):
         token = None
         if len(sys.argv) == 4:
