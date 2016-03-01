@@ -3,9 +3,6 @@ from pprint import pprint
 from biokbase.catalog.controller import CatalogController
 #END_HEADER
 
-import requests.packages.urllib3
-requests.packages.urllib3.disable_warnings()
-
 
 class Catalog:
     '''
