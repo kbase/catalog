@@ -86,7 +86,6 @@ module Catalog {
     typedef structure {
         string module_name;
         string git_url;
-
     } BasicModuleInfo;
     /*
     To Add:
@@ -216,6 +215,43 @@ module Catalog {
     funcdef get_version_info(SelectModuleVersionParams params) returns (ModuleVersionInfo version);
 
     funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
+
+
+
+
+    /*  DYNAMIC SERVICES SUPPORT Methods */
+
+    typedef structure {
+        string module_name;
+        string version;
+        string git_commit_hash;
+    } BasicModuleVersionInfo;
+
+    /*
+        module_name - required for module lookup
+        lookup - a lookup string, if empty will get the latest released module
+                    1) version tag = dev | beta | release
+                    2) semantic version match identifiier
+                    not supported yet: 3) exact commit hash
+                    not supported yet: 4) exact timestamp
+        only_service_versions - 1/0, default is 1
+    */
+    typedef structure {
+        string module_name;
+        string lookup;
+        boolean only_service_versions;
+    } ModuleVersionLookupParams;
+
+    funcdef module_version_lookup(ModuleVersionLookupParams selection) returns (BasicModuleVersionInfo);
+
+
+    typedef structure {
+        boolean all_versions;
+    } ListServiceModuleParams;
+    funcdef list_service_modules() returns (list<BasicModuleVersionInfo> service_modules);
+
+
+    /*  End Dynamic Services Support Methods */
 
 
     typedef structure {
