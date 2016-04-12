@@ -498,9 +498,6 @@ class MongoCatalogDBI:
 
 
 
-
-
-
     #### developer check methods
 
     def approve_developer(self, developer):

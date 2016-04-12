@@ -87,7 +87,6 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.d6cd1e2bd19e03a81132a23b2025920577f84e37",
             "git_commit_message" : "something else",
             "version" : "1.1.0",
-            "dynamic_service" : true,
             "narrative_methods" : [
                 "get_genomes"
             ]
@@ -100,6 +99,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.9bedf67800b2923982bdf60c89c57ce6fd2d9a1c",
             "git_commit_message" : "and another thing",
             "version" : "1.0.2",
+            "dynamic_service" : true,
             "narrative_methods" : [
                 "get_genomes"
             ]

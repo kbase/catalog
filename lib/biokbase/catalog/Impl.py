@@ -236,6 +236,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN module_version_lookup
+        returnVal = self.cc.module_version_lookup(selection)
         #END module_version_lookup
 
         # At some point might do deeper type checking...

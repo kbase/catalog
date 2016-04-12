@@ -735,6 +735,64 @@ class CatalogController:
 
 
 
+    def module_version_lookup(self, selection):
+
+        selection = self.filter_module_or_repo_selection(selection)
+
+        only_services = True
+        if 'only_service_versions' in selection:
+            only_services = selection['only_service_versions'] > 0
+
+        lookup = '>=0.0.0'
+        if 'lookup' in selection:
+            lookup = selection['lookup']
+            # if the lookup was a tag, return the exact tag
+            if selection['lookup'] in ['dev','beta','release']:
+                details = self.db.get_module_current_versions(module_name=selection['module_name'],git_url=params['git_url'])
+                version = details['current_versions'][selection['lookup']]
+
+                if only_services:
+                    if 'dynamic_service' in version:
+                        if not service['dynamic_service']:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':version['version'],
+                    'git_commit_hash':version['git_commit_hash']
+                }
+
+
+        # assume semantic versioning which only can select released versions
+        details = self.db.get_module_full_details(module_name=selection['module_name'])
+        versions = details['release_version_list']
+
+
+        spec = semantic_version.Spec(lookup)
+        svers = []
+        for v in versions:
+            if only_services:
+                if 'dynamic_service' not in v: continue
+                if not v['dynamic_service']: continue
+            svers.append(semantic_version.Version(v['version']))
+
+        theRightVersion = spec.select(svers)
+        if theRightVersion:
+            for v in versions:
+                if v['version'] == str(theRightVersion):
+                    return {
+                        'module_name': details['module_name'],
+                        'version':v['version'],
+                        'git_commit_hash':v['git_commit_hash']
+                    }
+
+            raise ValueError('No suitable version matches your lookup - but this seems wrong.')
+        else:
+            raise ValueError('No suitable version matches your lookup.')
+
+
+
+        return None
+
 
 
 
