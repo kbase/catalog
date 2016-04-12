@@ -232,6 +232,33 @@ class Catalog:
         # return the results
         return [versions]
 
+    def module_version_lookup(self, ctx, selection):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN module_version_lookup
+        #END module_version_lookup
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method module_version_lookup return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
+    def list_service_modules(self, ctx, filter):
+        # ctx is the context object
+        # return variables are: service_modules
+        #BEGIN list_service_modules
+        service_modules = self.cc.list_service_modules(filter)
+        #END list_service_modules
+
+        # At some point might do deeper type checking...
+        if not isinstance(service_modules, list):
+            raise ValueError('Method list_service_modules return value ' +
+                             'service_modules is not type list as required.')
+        # return the results
+        return [service_modules]
+
     def set_registration_state(self, ctx, params):
         # ctx is the context object
         #BEGIN set_registration_state

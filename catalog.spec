@@ -244,11 +244,15 @@ module Catalog {
 
     funcdef module_version_lookup(ModuleVersionLookupParams selection) returns (BasicModuleVersionInfo);
 
-
+    /*
+        tag = dev | beta | release
+        if tag is not set, all release versions are returned
+    */
     typedef structure {
-        boolean all_versions;
+        string tag;
     } ListServiceModuleParams;
-    funcdef list_service_modules() returns (list<BasicModuleVersionInfo> service_modules);
+
+    funcdef list_service_modules(ListServiceModuleParams filter) returns (list<BasicModuleVersionInfo> service_modules);
 
 
     /*  End Dynamic Services Support Methods */

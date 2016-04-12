@@ -410,6 +410,40 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: module_version_lookup</p>
+     * <pre>
+     * </pre>
+     * @param   selection   instance of type {@link us.kbase.catalog.ModuleVersionLookupParams ModuleVersionLookupParams}
+     * @return   instance of type {@link us.kbase.catalog.BasicModuleVersionInfo BasicModuleVersionInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public BasicModuleVersionInfo moduleVersionLookup(ModuleVersionLookupParams selection, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(selection);
+        TypeReference<List<BasicModuleVersionInfo>> retType = new TypeReference<List<BasicModuleVersionInfo>>() {};
+        List<BasicModuleVersionInfo> res = caller.jsonrpcCall("Catalog.module_version_lookup", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_service_modules</p>
+     * <pre>
+     * </pre>
+     * @param   filter   instance of type {@link us.kbase.catalog.ListServiceModuleParams ListServiceModuleParams}
+     * @return   parameter "service_modules" of list of type {@link us.kbase.catalog.BasicModuleVersionInfo BasicModuleVersionInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<BasicModuleVersionInfo> listServiceModules(ListServiceModuleParams filter, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(filter);
+        TypeReference<List<List<BasicModuleVersionInfo>>> retType = new TypeReference<List<List<BasicModuleVersionInfo>>>() {};
+        List<List<BasicModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_service_modules", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: set_registration_state</p>
      * <pre>
      * </pre>

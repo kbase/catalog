@@ -1634,6 +1634,200 @@ FunctionPlace is a reference to a hash where the following keys are defined:
  
 
 
+=head2 module_version_lookup
+
+  $return = $obj->module_version_lookup($selection)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$selection is a Catalog.ModuleVersionLookupParams
+$return is a Catalog.BasicModuleVersionInfo
+ModuleVersionLookupParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	lookup has a value which is a string
+	only_service_versions has a value which is a Catalog.boolean
+boolean is an int
+BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version has a value which is a string
+	git_commit_hash has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$selection is a Catalog.ModuleVersionLookupParams
+$return is a Catalog.BasicModuleVersionInfo
+ModuleVersionLookupParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	lookup has a value which is a string
+	only_service_versions has a value which is a Catalog.boolean
+boolean is an int
+BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version has a value which is a string
+	git_commit_hash has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub module_version_lookup
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function module_version_lookup (received $n, expecting 1)");
+    }
+    {
+	my($selection) = @args;
+
+	my @_bad_arguments;
+        (ref($selection) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"selection\" (value was \"$selection\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to module_version_lookup:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'module_version_lookup');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.module_version_lookup",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'module_version_lookup',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method module_version_lookup",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'module_version_lookup',
+				       );
+    }
+}
+ 
+
+
+=head2 list_service_modules
+
+  $service_modules = $obj->list_service_modules($filter)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$filter is a Catalog.ListServiceModuleParams
+$service_modules is a reference to a list where each element is a Catalog.BasicModuleVersionInfo
+ListServiceModuleParams is a reference to a hash where the following keys are defined:
+	all_versions has a value which is a Catalog.boolean
+boolean is an int
+BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version has a value which is a string
+	git_commit_hash has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$filter is a Catalog.ListServiceModuleParams
+$service_modules is a reference to a list where each element is a Catalog.BasicModuleVersionInfo
+ListServiceModuleParams is a reference to a hash where the following keys are defined:
+	all_versions has a value which is a Catalog.boolean
+boolean is an int
+BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version has a value which is a string
+	git_commit_hash has a value which is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_service_modules
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_service_modules (received $n, expecting 1)");
+    }
+    {
+	my($filter) = @args;
+
+	my @_bad_arguments;
+        (ref($filter) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"filter\" (value was \"$filter\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_service_modules:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_service_modules');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_service_modules",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_service_modules',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_service_modules",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_service_modules',
+				       );
+    }
+}
+ 
+
+
 =head2 set_registration_state
 
   $obj->set_registration_state($params)
@@ -4035,10 +4229,129 @@ version has a value which is a string
 
 
 
+=head2 BasicModuleVersionInfo
+
+=over 4
+
+
+
+=item Description
+
+DYNAMIC SERVICES SUPPORT Methods
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+version has a value which is a string
+git_commit_hash has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+version has a value which is a string
+git_commit_hash has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ModuleVersionLookupParams
+
+=over 4
+
+
+
+=item Description
+
+module_name - required for module lookup
+lookup - a lookup string, if empty will get the latest released module
+            1) version tag = dev | beta | release
+            2) semantic version match identifiier
+            not supported yet: 3) exact commit hash
+            not supported yet: 4) exact timestamp
+only_service_versions - 1/0, default is 1
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+lookup has a value which is a string
+only_service_versions has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+lookup has a value which is a string
+only_service_versions has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 ListServiceModuleParams
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+all_versions has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+all_versions has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
 =head2 SetRegistrationStateParams
 
 =over 4
 
+
+
+=item Description
+
+End Dynamic Services Support Methods
 
 
 =item Definition
