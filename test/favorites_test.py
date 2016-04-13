@@ -57,6 +57,7 @@ class BasicCatalogTest(unittest.TestCase):
         self.catalog.add_favorite(ctx,
             {'id':'run_fba'})
         favs3 = self.catalog.list_favorites(ctx, user)[0]
+        pprint(favs3)
         self.assertEqual(len(favs3),3)
         self.assertEqual(favs3[0]['module_name_lc'],'nms.legacy')
         self.assertEqual(favs3[0]['id'],'run_fba')
