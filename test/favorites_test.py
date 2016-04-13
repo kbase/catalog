@@ -43,6 +43,7 @@ class BasicCatalogTest(unittest.TestCase):
         self.catalog.add_favorite(ctx,
             {'module_name':'MegaHit', 'id':'run_megahit_2'})
         favs2 = self.catalog.list_favorites({}, user)[0]
+        favs2.sort(key=lambda x: x['timestamp'], reverse=True)
         self.assertEqual(len(favs2),2)
         self.assertEqual(favs2[0]['module_name_lc'],'megahit')
         self.assertEqual(favs2[0]['id'],'run_megahit_2')
@@ -57,7 +58,7 @@ class BasicCatalogTest(unittest.TestCase):
         self.catalog.add_favorite(ctx,
             {'id':'run_fba'})
         favs3 = self.catalog.list_favorites(ctx, user)[0]
-        pprint(favs3)
+        favs3.sort(key=lambda x: x['timestamp'], reverse=True)
         self.assertEqual(len(favs3),3)
         self.assertEqual(favs3[0]['module_name_lc'],'nms.legacy')
         self.assertEqual(favs3[0]['id'],'run_fba')
@@ -67,6 +68,7 @@ class BasicCatalogTest(unittest.TestCase):
         self.catalog.remove_favorite(ctx,
             {'module_name':'MegaHit', 'id':'run_megahit_2'})
         favs4 = self.catalog.list_favorites(ctx, user)[0]
+        favs4.sort(key=lambda x: x['timestamp'], reverse=True)
         self.assertEqual(len(favs4),2)
         self.assertEqual(favs4[0]['module_name_lc'],'nms.legacy')
         self.assertEqual(favs4[0]['id'],'run_fba')
