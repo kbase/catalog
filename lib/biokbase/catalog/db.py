@@ -69,6 +69,11 @@ Module Document:
                 registration_id:''
             }
         }
+
+        release_version_list: [
+
+
+        ]
     }
 
 FAVORITES
@@ -179,6 +184,9 @@ class MongoCatalogDBI:
         # client group
         #  app_id = [lower case module name]/[app id]
         self.client_groups.ensure_index('app_id', unique=True, sparse=False)
+
+
+        self.correct_release_versions_and_dynamic_services_flag()
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -317,7 +325,7 @@ class MongoCatalogDBI:
                     'registration_id' : registration_id
                 }
             },
-            'release_versions': { }
+            'release_version_list': []
         }
         self.modules.insert(module)
 
@@ -357,8 +365,10 @@ class MongoCatalogDBI:
         # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
         result = self.modules.update(query, {'$set':{
                                                 'state.released':True,
-                                                'current_versions.release':beta_version,
-                                                'release_versions.'+str(beta_version['timestamp']):beta_version
+                                                'current_versions.release':beta_version
+                                                },
+                                             '$push':{
+                                                'release_version_list':beta_version
                                                 }})
         return self._check_update_result(result)
 
@@ -445,6 +455,49 @@ class MongoCatalogDBI:
         return list(self.modules.find(query,{'module_name':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))
 
 
+
+
+
+
+    # tag should be one of dev, beta, release - do checking outside of this method
+    def list_service_module_versions_with_tag(self, tag):
+        query = {'info.dynamic_service':1, 'current_versions.'+tag+'.dynamic_service':1}
+        projection = {
+            '_id':0,
+            'module_name':1,
+            'current_versions.'+tag+'.version':1,
+            'current_versions.'+tag+'.git_commit_hash':1
+        }
+        result = []
+        for m in self.modules.find(query,projection):
+            result.append({
+                'module_name':m['module_name'],
+                'version':m['current_versions'][tag]['version'],
+                'git_commit_hash':m['current_versions'][tag]['git_commit_hash']})
+        return result
+
+
+    # all released service module versions
+    def list_all_released_service_module_versions(self):
+        result = self.modules.aggregate([
+            {'$match':{'info.dynamic_service':1}}, # make sure it is a module that has at least one dynamic service
+            {'$unwind':"$release_version_list"},      # look at all the release versions
+            {'$match':{'release_version_list.dynamic_service':1}}, # find the dynamic service released versions
+            {'$project':{
+                    'module_name':1,
+                    'version':'$release_version_list.version',
+                    'git_commit_hash':'$release_version_list.git_commit_hash',
+                    '_id':0
+                }
+            }])
+
+        return list(result['result'])
+
+
+
+
+
+
     #### developer check methods
 
     def approve_developer(self, developer):
@@ -496,7 +549,7 @@ class MongoCatalogDBI:
         if module_details['current_versions']['release']:
             raise ValueError('Cannot delete module that has been released.  Make it inactive instead.')
 
-        if module_details['release_versions']:
+        if module_details['release_version_list']:
             raise ValueError('Cannot delete module that has released versions.  Make it inactive instead.')
 
         result = self.modules.remove({'_id':module_details['_id']})
@@ -771,4 +824,52 @@ class MongoCatalogDBI:
 
         return counts
 
-        
+    
+
+
+    # release versions used to be in a map, but this makes mongo queries difficult
+    # here we switch that in an existing db to a release_version_list
+    def correct_release_versions_and_dynamic_services_flag(self):
+        for m in self.modules.find({'release_versions': {'$exists' : True}}):
+            release_version_list = []
+            for timestamp in m['release_versions']:
+                m['release_versions'][timestamp]['dynamic_service'] = 0
+                release_version_list.append(m['release_versions'][timestamp])
+
+            self.modules.update(
+                {'_id':m['_id']},
+                {
+                    '$unset':{'release_versions':''},
+                    '$set':{'release_version_list':release_version_list}
+                })
+
+            # make sure everything has the dynamic service flag
+            if not 'dynamic_service' in m['info']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'info.dynamic_service':0}})
+
+            if m['current_versions']['release']:
+                if not 'dynamic_service' in m['current_versions']['release']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.release.dynamic_service':0}})
+
+            if m['current_versions']['beta']:
+                if not 'dynamic_service' in m['current_versions']['beta']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.beta.dynamic_service':0}})
+
+            if m['current_versions']['dev']:
+                if not 'dynamic_service' in m['current_versions']['dev']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.dev.dynamic_service':0}})
+
+
+
+
+
+
+

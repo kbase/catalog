@@ -415,13 +415,13 @@ class CatalogController:
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-            all_versions = details['release_versions']
-            if str(params['timestamp']) in all_versions:
-                v = all_versions[str(params['timestamp'])]
-                if 'git_commit_hash' in params:
-                    if v['git_commit_hash'] != params['git_commit_hash'] :
-                        return None;
-                return v
+            all_versions = details['release_version_list']
+            for v in all_versions:
+                if v['timestamp'] == params['timestamp']:
+                    if 'git_commit_hash' in params:
+                        if v['git_commit_hash'] != params['git_commit_hash'] :
+                            return None;
+                    return v
             return None
 
         # if we get here, version and timestamp are not defined, so just look for the commit hash
@@ -433,8 +433,8 @@ class CatalogController:
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-            all_versions = details['release_versions']
-            for timestamp, v in all_versions.iteritems():
+            all_versions = details['release_version_list']
+            for v in all_versions:
                 if v['git_commit_hash'] == params['git_commit_hash']:
                     return v
             return None
@@ -445,7 +445,7 @@ class CatalogController:
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)
         details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-        return sorted(details['release_versions'].values(), key= lambda v: v['timestamp'])
+        return sorted(details['release_version_list'], key= lambda v: v['timestamp'])
 
 
     def is_registered(self,params):
@@ -718,6 +718,83 @@ class CatalogController:
                 module_names_lc.append(i.lower())
 
         return self.db.aggregate_favorites_over_apps(module_names_lc)
+
+
+
+
+    def list_service_modules(self, filter):
+        # if we have the tag flag, then return the specific tagged version
+        if 'tag' in filter:
+            if filter['tag'] not in ['dev', 'beta', 'release']:
+                raise ValueError('tag parameter must be either "dev", "beta", or "release".')
+            return self.db.list_service_module_versions_with_tag(filter['tag'])
+
+        # otherwise we need to go through everything that has been released
+        mods = self.db.list_all_released_service_module_versions()
+        return mods
+
+
+
+    def module_version_lookup(self, selection):
+
+        selection = self.filter_module_or_repo_selection(selection)
+
+        only_services = True
+        if 'only_service_versions' in selection:
+            only_services = selection['only_service_versions'] > 0
+
+        lookup = '>=0.0.0'
+        if 'lookup' in selection:
+            lookup = selection['lookup']
+            # if the lookup was a tag, return the exact tag
+            if selection['lookup'] in ['dev','beta','release']:
+                details = self.db.get_module_current_versions(module_name=selection['module_name'],git_url=params['git_url'])
+                version = details['current_versions'][selection['lookup']]
+
+                if only_services:
+                    if 'dynamic_service' in version:
+                        if not service['dynamic_service']:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':version['version'],
+                    'git_commit_hash':version['git_commit_hash']
+                }
+
+
+        # assume semantic versioning which only can select released versions
+        # we should optimize to fetch only the details/versions we need from mongo.
+        details = self.db.get_module_full_details(module_name=selection['module_name'])
+        versions = details['release_version_list']
+
+        spec = semantic_version.Spec(lookup)
+        svers = []
+        for v in versions:
+            if only_services:
+                if 'dynamic_service' not in v: continue
+                if not v['dynamic_service']: continue
+            svers.append(semantic_version.Version(v['version']))
+
+        theRightVersion = spec.select(svers)
+        if theRightVersion:
+            for v in versions:
+                if v['version'] == str(theRightVersion):
+                    return {
+                        'module_name': details['module_name'],
+                        'version':v['version'],
+                        'git_commit_hash':v['git_commit_hash']
+                    }
+
+            raise ValueError('No suitable version matches your lookup - but this seems wrong.')
+        else:
+            raise ValueError('No suitable version matches your lookup.')
+
+
+
+        return None
+
+
+
 
 
     # Some utility methods
