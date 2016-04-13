@@ -763,9 +763,9 @@ class CatalogController:
 
 
         # assume semantic versioning which only can select released versions
+        # we should optimize to fetch only the details/versions we need from mongo.
         details = self.db.get_module_full_details(module_name=selection['module_name'])
         versions = details['release_version_list']
-
 
         spec = semantic_version.Spec(lookup)
         svers = []

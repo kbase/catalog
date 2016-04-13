@@ -6,7 +6,7 @@
     "info" : {
         "description" : "KBase module for stuff",
         "language" : "python",
-        "dynamic_service" : true
+        "dynamic_service" : 1
     },
 
     "owners" : [
@@ -35,7 +35,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.b06c5f9daf603a4d206071787c3f6184000bf128",
             "git_commit_message" : "another change",
             "version" : "0.0.5",
-            "dynamic_service" : true,
+            "dynamic_service" : 1,
             "narrative_methods" : [
                 "send_data2"
             ]
@@ -47,7 +47,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.b843888e962642d665a3b0bd701ee630c01835e6",
             "git_commit_message" : "update for testing",
             "version" : "0.0.4",
-            "dynamic_service" : true,
+            "dynamic_service" : 1,
             "narrative_methods" : [
                 "send_data"
             ]
@@ -59,7 +59,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7",
             "git_commit_message" : "added username for testing",
             "version" : "2.1.8",
-            "dynamic_service" : true,
+            "dynamic_service" : 1,
             "narrative_methods" : [
                 "send_data"
             ]
@@ -74,7 +74,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7",
             "git_commit_message" : "added username for testing",
             "version" : "2.1.8",
-            "dynamic_service" : true,
+            "dynamic_service" : 1,
             "narrative_methods" : [
                 "get_genomes"
             ]
@@ -99,7 +99,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.9bedf67800b2923982bdf60c89c57ce6fd2d9a1c",
             "git_commit_message" : "and another thing",
             "version" : "1.0.2",
-            "dynamic_service" : true,
+            "dynamic_service" : 1,
             "narrative_methods" : [
                 "get_genomes"
             ]
@@ -112,7 +112,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.9bedf67800b2923982bdf60c89c57ce6fd2d9a1c",
             "git_commit_message" : "first thing",
             "version" : "1.0.1",
-            "dynamic_service" : true,
+            "dynamic_service" : 1,
             "narrative_methods" : [
                 "get_genomes"
             ]

@@ -400,7 +400,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(str(e.exception),
             'Cannot request release - beta version has same version number to released version.')
 
-        # Finally, try once again but with a version number that is less than the current release version
+        # Try once again but with a version number that is less than the current release version
         githash5 = '7627fa25e75515316407577e5578c2cb120ca40f' # branch simple_good_repo
         registration_id5 = self.catalog.register_repo(self.cUtil.user_ctx(),
             {'git_url':giturl, 'git_commit_hash':githash5})[0]
@@ -423,8 +423,39 @@ class CoreRegistrationTest(unittest.TestCase):
             'Cannot request release - beta version semantic version must be greater than the released version semantic version, as determined by http://semver.org')
 
 
-        # TODO test method store to be sure we can get old method specs by commit hash
+        # Register with a proper version number and indicate it is a dynamic service now
+        githash6 = '026fd0421a03f12c78fb5dbffbbaa04a254fcbe7' # branch simple_good_repo
+        registration_id6 = self.catalog.register_repo(self.cUtil.user_ctx(),
+            {'git_url':giturl, 'git_commit_hash':githash6})[0]
+        timestamp6 = int(registration_id6.split('_')[0])
+        start = time()
+        timeout = 60 #seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
+            if state['registration'] in ['complete','error']:
+                break
+            self.assertTrue(time()-start < timeout, 'simple registration build 5 exceeded timeout of '+str(timeout)+'s')
+        self.assertEqual(state['registration'],'complete')
+        log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id6)
+        self.assertTrue(log is not None)
 
+        self.catalog.push_dev_to_beta(self.cUtil.user_ctx(),{'module_name':module_name})
+
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
+        self.catalog.request_release(self.cUtil.user_ctx(),{'module_name':info['module_name']})
+        self.catalog.review_release_request(self.cUtil.admin_ctx(),
+                        {'module_name':module_name, 'decision':'approved'})
+        info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
+        self.assertEqual(info['release']['git_commit_hash'],githash6)
+        self.assertEqual(info['release']['version'],'1.0.1')
+        self.assertEqual(info['release']['timestamp'],timestamp6)
+        self.assertTrue(info['release']['release_timestamp']>timestamp6)
+        self.assertTrue('dynamic_service' in info['release'])
+        self.assertTrue(info['release']['dynamic_service'])
+
+
+        # TODO test method store to be sure we can get old method specs by commit hash
+        pprint(info)
 
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):

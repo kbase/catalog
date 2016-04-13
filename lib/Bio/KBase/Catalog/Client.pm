@@ -1266,11 +1266,13 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
+boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
@@ -1306,11 +1308,13 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
+boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
@@ -1403,11 +1407,13 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
+boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
@@ -1437,11 +1443,13 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
+boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
@@ -1531,11 +1539,13 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
+boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
@@ -1562,11 +1572,13 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
 	narrative_method_ids has a value which is a reference to a list where each element is a string
 	docker_img_name has a value which is a string
 	data_folder has a value which is a string
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
+boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
@@ -1747,8 +1759,7 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 $filter is a Catalog.ListServiceModuleParams
 $service_modules is a reference to a list where each element is a Catalog.BasicModuleVersionInfo
 ListServiceModuleParams is a reference to a hash where the following keys are defined:
-	all_versions has a value which is a Catalog.boolean
-boolean is an int
+	tag has a value which is a string
 BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version has a value which is a string
@@ -1763,8 +1774,7 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 $filter is a Catalog.ListServiceModuleParams
 $service_modules is a reference to a list where each element is a Catalog.BasicModuleVersionInfo
 ListServiceModuleParams is a reference to a hash where the following keys are defined:
-	all_versions has a value which is a Catalog.boolean
-boolean is an int
+	tag has a value which is a string
 BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version has a value which is a string
@@ -4100,6 +4110,7 @@ registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
+dynamic_service has a value which is a Catalog.boolean
 narrative_method_ids has a value which is a reference to a list where each element is a string
 docker_img_name has a value which is a string
 data_folder has a value which is a string
@@ -4118,6 +4129,7 @@ registration_id has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 git_commit_message has a value which is a string
+dynamic_service has a value which is a Catalog.boolean
 narrative_method_ids has a value which is a reference to a list where each element is a string
 docker_img_name has a value which is a string
 data_folder has a value which is a string
@@ -4319,13 +4331,19 @@ only_service_versions has a value which is a Catalog.boolean
 
 
 
+=item Description
+
+tag = dev | beta | release
+if tag is not set, all release versions are returned
+
+
 =item Definition
 
 =begin html
 
 <pre>
 a reference to a hash where the following keys are defined:
-all_versions has a value which is a Catalog.boolean
+tag has a value which is a string
 
 </pre>
 
@@ -4334,7 +4352,7 @@ all_versions has a value which is a Catalog.boolean
 =begin text
 
 a reference to a hash where the following keys are defined:
-all_versions has a value which is a Catalog.boolean
+tag has a value which is a string
 
 
 =end text

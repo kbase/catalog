@@ -186,7 +186,7 @@ class MongoCatalogDBI:
         self.client_groups.ensure_index('app_id', unique=True, sparse=False)
 
 
-        self.correct_release_versions()
+        self.correct_release_versions_and_dynamic_services_flag()
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -461,7 +461,7 @@ class MongoCatalogDBI:
 
     # tag should be one of dev, beta, release - do checking outside of this method
     def list_service_module_versions_with_tag(self, tag):
-        query = {'info.dynamic_service':True, 'current_versions.'+tag+'.dynamic_service':True}
+        query = {'info.dynamic_service':1, 'current_versions.'+tag+'.dynamic_service':1}
         projection = {
             '_id':0,
             'module_name':1,
@@ -480,9 +480,9 @@ class MongoCatalogDBI:
     # all released service module versions
     def list_all_released_service_module_versions(self):
         result = self.modules.aggregate([
-            {'$match':{'info.dynamic_service':True}}, # make sure it is a module that has at least one dynamic service
+            {'$match':{'info.dynamic_service':1}}, # make sure it is a module that has at least one dynamic service
             {'$unwind':"$release_version_list"},      # look at all the release versions
-            {'$match':{'release_version_list.dynamic_service':True}}, # find the dynamic service released versions
+            {'$match':{'release_version_list.dynamic_service':1}}, # find the dynamic service released versions
             {'$project':{
                     'module_name':1,
                     'version':'$release_version_list.version',
@@ -829,10 +829,11 @@ class MongoCatalogDBI:
 
     # release versions used to be in a map, but this makes mongo queries difficult
     # here we switch that in an existing db to a release_version_list
-    def correct_release_versions(self):
+    def correct_release_versions_and_dynamic_services_flag(self):
         for m in self.modules.find({'release_versions': {'$exists' : True}}):
             release_version_list = []
             for timestamp in m['release_versions']:
+                m['release_versions'][timestamp]['dynamic_service'] = 0
                 release_version_list.append(m['release_versions'][timestamp])
 
             self.modules.update(
@@ -841,6 +842,30 @@ class MongoCatalogDBI:
                     '$unset':{'release_versions':''},
                     '$set':{'release_version_list':release_version_list}
                 })
+
+            # make sure everything has the dynamic service flag
+            if not 'dynamic_service' in m['info']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'info.dynamic_service':0}})
+
+            if m['current_versions']['release']:
+                if not 'dynamic_service' in m['current_versions']['release']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.release.dynamic_service':0}})
+
+            if m['current_versions']['beta']:
+                if not 'dynamic_service' in m['current_versions']['beta']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.beta.dynamic_service':0}})
+
+            if m['current_versions']['dev']:
+                if not 'dynamic_service' in m['current_versions']['dev']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.dev.dynamic_service':0}})
 
 
 

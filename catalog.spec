@@ -166,6 +166,7 @@ module Catalog {
         string version;
         string git_commit_hash;
         string git_commit_message;
+        boolean dynamic_service;
         list<string> narrative_method_ids;
         string docker_img_name;
         string data_folder;

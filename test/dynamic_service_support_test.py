@@ -46,7 +46,7 @@ class DynamicServiceSupportTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        pass #cls.cUtil.tearDown()
+        cls.cUtil.tearDown()
 
 
 

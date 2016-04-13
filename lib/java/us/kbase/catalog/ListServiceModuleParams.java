@@ -13,32 +13,35 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: ListServiceModuleParams</p>
- * 
+ * <pre>
+ * tag = dev | beta | release
+ * if tag is not set, all release versions are returned
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "all_versions"
+    "tag"
 })
 public class ListServiceModuleParams {
 
-    @JsonProperty("all_versions")
-    private Long allVersions;
+    @JsonProperty("tag")
+    private String tag;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("all_versions")
-    public Long getAllVersions() {
-        return allVersions;
+    @JsonProperty("tag")
+    public String getTag() {
+        return tag;
     }
 
-    @JsonProperty("all_versions")
-    public void setAllVersions(Long allVersions) {
-        this.allVersions = allVersions;
+    @JsonProperty("tag")
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
-    public ListServiceModuleParams withAllVersions(Long allVersions) {
-        this.allVersions = allVersions;
+    public ListServiceModuleParams withTag(String tag) {
+        this.tag = tag;
         return this;
     }
 
@@ -54,7 +57,7 @@ public class ListServiceModuleParams {
 
     @Override
     public String toString() {
-        return ((((("ListServiceModuleParams"+" [allVersions=")+ allVersions)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((("ListServiceModuleParams"+" [tag=")+ tag)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
