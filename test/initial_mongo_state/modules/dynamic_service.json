@@ -47,7 +47,7 @@
             "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.b843888e962642d665a3b0bd701ee630c01835e6",
             "git_commit_message" : "update for testing",
             "version" : "0.0.4",
-            "dynamic_service" : 1,
+            "dynamic_service" : 0,
             "narrative_methods" : [
                 "send_data"
             ]
@@ -93,10 +93,10 @@
         },
 
         {
-            "git_commit_hash" : "9bedf67800b2923982bdf60c89c57ce6fd2d9a1c",
+            "git_commit_hash" : "12edf67800b2923982bdf60c89c57ce6fd2d9a1c",
             "timestamp" : 1445022815002,
             "registration_id" : "1445022815002_4123",
-            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.9bedf67800b2923982bdf60c89c57ce6fd2d9a1c",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.12edf67800b2923982bdf60c89c57ce6fd2d9a1c",
             "git_commit_message" : "and another thing",
             "version" : "1.0.2",
             "dynamic_service" : 1,
