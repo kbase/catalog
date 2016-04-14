@@ -753,7 +753,7 @@ class CatalogController:
 
                 if only_services:
                     if 'dynamic_service' in version:
-                        if not service['dynamic_service']:
+                        if not version['dynamic_service']:
                             raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
                 return {
                     'module_name': details['module_name'],

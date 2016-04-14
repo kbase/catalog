@@ -376,7 +376,11 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(state['registration'],'error')
         log = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),{'registration_id':registration_id3})
         self.assertTrue(log is not None)
-        self.assertTrue('must be in semantic version format' in log[0]['error_message'])
+        found_correct_error = False
+        for l in log:
+            if 'must be in semantic version format' in l['error_message']:
+                found_correct_error = True
+        self.assertTrue(found_correct_error, 'correct error was thrown in log for semantic version error')
 
         #Register new version, but with same version number as in the release so should fail
         githash4 = '6add31077a4982d6c8a5bc161915d30bfec3fe0c' # branch simple_good_repo
@@ -455,7 +459,7 @@ class CoreRegistrationTest(unittest.TestCase):
 
 
         # TODO test method store to be sure we can get old method specs by commit hash
-        pprint(info)
+        #pprint(info)
 
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):

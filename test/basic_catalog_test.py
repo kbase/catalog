@@ -81,7 +81,7 @@ class BasicCatalogTest(unittest.TestCase):
             module_names.append(m['module_name'])
         self.assertEqual(
             ",".join(sorted(module_names)),
-            ",".join(['DynamicService','onerepotest','pending_second_release','release_history'])
+            ",".join(['DynamicService','DynamicService2','onerepotest','pending_second_release','release_history'])
             )
 
         # all released and unreleased
@@ -92,7 +92,7 @@ class BasicCatalogTest(unittest.TestCase):
             module_names.append(m['module_name'])
         self.assertEqual(
             ",".join(sorted(module_names)),
-            ",".join(sorted(['DynamicService','denied_release','onerepotest','pending_first_release','pending_second_release',
+            ",".join(sorted(['DynamicService','DynamicService2','denied_release','onerepotest','pending_first_release','pending_second_release',
                 'registration_error','registration_in_progress','release_history']))
             )
 

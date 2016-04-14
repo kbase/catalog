@@ -1,0 +1,80 @@
+{
+    "module_name" : "DynamicService2",
+    "module_name_lc" : "dynamicservice2",
+    "git_url" : "https://github.com/kbaseIncubator/dynamic_service2",
+
+    "info" : {
+        "description" : "KBase module for stuff",
+        "language" : "python",
+        "dynamic_service" : 1
+    },
+
+    "owners" : [
+        {
+            "kb_username" : "new_user"
+        }
+    ],
+
+    "state" : {
+        "active" : true,
+        "error_message" : "",
+        "registration" : "complete",
+        "release_approval" : "approved",
+        "released" : true,
+        "review_message" : ""
+    },
+
+    "current_versions" : {
+        "dev" : {
+            "git_commit_hash" : "19dc505febb8f4cccb2078c58ded0de3320534d7",
+            "timestamp" : 1445022818872,
+            "registration_id" : "1445022818872_4123",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.19dc505febb8f4cccb2078c58ded0de3320534d7",
+            "git_commit_message" : "added",
+            "version" : "1.5.1",
+            "dynamic_service" : 0,
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+        "beta" : {
+            "git_commit_hash" : "39dc505febb8f4cccb2078c58ded0de3320534d7",
+            "timestamp" : 1445022818871,
+            "registration_id" : "1445022818871_4123",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.39dc505febb8f4cccb2078c58ded0de3320534d7",
+            "git_commit_message" : "added",
+            "version" : "1.5.1",
+            "dynamic_service" : 1,
+            "narrative_methods" : [
+                "send_data"
+            ]
+        },
+        "release" : {
+            "git_commit_hash" : "29dc505febb8f4cccb2078c58ded0de3320534d7",
+            "timestamp" : 1445022818870,
+            "registration_id" : "1445022818870_4123",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.29dc505febb8f4cccb2078c58ded0de3320534d7",
+            "git_commit_message" : "added",
+            "version" : "1.5.0",
+            "dynamic_service" : 1,
+            "narrative_methods" : [
+                "send_data"
+            ]
+        }
+    },
+
+    "release_version_list" : [
+        {
+            "git_commit_hash" : "29dc505febb8f4cccb2078c58ded0de3320534d7",
+            "timestamp" : 1445022818870,
+            "registration_id" : "1445022818870_4123",
+            "docker_img_name" : "dockerhub-ci.kbase.us/kbase:release_history.29dc505febb8f4cccb2078c58ded0de3320534d7",
+            "git_commit_message" : "added",
+            "version" : "1.5.0",
+            "dynamic_service" : 1,
+            "narrative_methods" : [
+                "get_genomes"
+            ]
+        }
+    ]
+}
