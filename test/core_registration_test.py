@@ -459,7 +459,7 @@ class CoreRegistrationTest(unittest.TestCase):
 
 
         # TODO test method store to be sure we can get old method specs by commit hash
-        pprint(info)
+        #pprint(info)
 
 
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
