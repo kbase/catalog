@@ -748,7 +748,7 @@ class CatalogController:
             lookup = selection['lookup']
             # if the lookup was a tag, return the exact tag
             if selection['lookup'] in ['dev','beta','release']:
-                details = self.db.get_module_current_versions(module_name=selection['module_name'],git_url=selection['git_url'])
+                details = self.db.get_module_details(module_name=selection['module_name'],git_url=selection['git_url'])
                 version = details['current_versions'][selection['lookup']]
 
                 if only_services:
