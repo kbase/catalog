@@ -226,6 +226,7 @@ module Catalog {
         string module_name;
         string version;
         string git_commit_hash;
+        string docker_img_name;
     } BasicModuleVersionInfo;
 
     /*

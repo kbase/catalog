@@ -23,7 +23,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "module_name",
     "version",
-    "git_commit_hash"
+    "git_commit_hash",
+    "docker_img_name"
 })
 public class BasicModuleVersionInfo {
 
@@ -33,6 +34,8 @@ public class BasicModuleVersionInfo {
     private String version;
     @JsonProperty("git_commit_hash")
     private String gitCommitHash;
+    @JsonProperty("docker_img_name")
+    private String dockerImgName;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -80,6 +83,21 @@ public class BasicModuleVersionInfo {
         return this;
     }
 
+    @JsonProperty("docker_img_name")
+    public String getDockerImgName() {
+        return dockerImgName;
+    }
+
+    @JsonProperty("docker_img_name")
+    public void setDockerImgName(String dockerImgName) {
+        this.dockerImgName = dockerImgName;
+    }
+
+    public BasicModuleVersionInfo withDockerImgName(String dockerImgName) {
+        this.dockerImgName = dockerImgName;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -92,7 +110,7 @@ public class BasicModuleVersionInfo {
 
     @Override
     public String toString() {
-        return ((((((((("BasicModuleVersionInfo"+" [moduleName=")+ moduleName)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("BasicModuleVersionInfo"+" [moduleName=")+ moduleName)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
