@@ -1668,6 +1668,7 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 	module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
+	docker_img_name has a value which is a string
 
 </pre>
 
@@ -1686,6 +1687,7 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 	module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
+	docker_img_name has a value which is a string
 
 
 =end text
@@ -1764,6 +1766,7 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 	module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
+	docker_img_name has a value which is a string
 
 </pre>
 
@@ -1779,6 +1782,7 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 	module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
+	docker_img_name has a value which is a string
 
 
 =end text
@@ -4261,6 +4265,7 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
+docker_img_name has a value which is a string
 
 </pre>
 
@@ -4272,6 +4277,7 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
+docker_img_name has a value which is a string
 
 
 =end text

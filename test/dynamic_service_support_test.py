@@ -24,18 +24,22 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['module_name'],'DynamicService')
         self.assertEqual(mods[0]['git_commit_hash'],'9bedf67800b2923982bdf60c89c57ce6fd2d9a1c')
         self.assertEqual(mods[0]['version'],'1.0.1')
+        self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.9bedf67800b2923982bdf60c89c57ce6fd2d9a1c')
 
         self.assertEqual(mods[1]['module_name'],'DynamicService')
         self.assertEqual(mods[1]['git_commit_hash'],'12edf67800b2923982bdf60c89c57ce6fd2d9a1c')
         self.assertEqual(mods[1]['version'],'1.0.2')
+        self.assertEqual(mods[1]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.12edf67800b2923982bdf60c89c57ce6fd2d9a1c')
 
         self.assertEqual(mods[2]['module_name'],'DynamicService2')
         self.assertEqual(mods[2]['git_commit_hash'],'29dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[2]['version'],'1.5.0')
+        self.assertEqual(mods[2]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice2.29dc505febb8f4cccb2078c58ded0de3320534d7')
 
         self.assertEqual(mods[3]['module_name'],'DynamicService')
         self.assertEqual(mods[3]['git_commit_hash'],'49dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[3]['version'],'2.1.8')
+        self.assertEqual(mods[3]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.49dc505febb8f4cccb2078c58ded0de3320534d7')
         
         # get all dev services
         mods = self.catalog.list_service_modules(self.cUtil.anonymous_ctx(),
@@ -44,6 +48,8 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['module_name'],'DynamicService')
         self.assertEqual(mods[0]['git_commit_hash'],'b06c5f9daf603a4d206071787c3f6184000bf128')
         self.assertEqual(mods[0]['version'],'0.0.5')
+        self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.b06c5f9daf603a4d206071787c3f6184000bf128')
+
 
         # get all beta services
         mods = self.catalog.list_service_modules(self.cUtil.anonymous_ctx(),
@@ -53,6 +59,8 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['module_name'],'DynamicService2')
         self.assertEqual(mods[0]['git_commit_hash'],'39dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[0]['version'],'1.5.1')
+        self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice2.39dc505febb8f4cccb2078c58ded0de3320534d7')
+
 
         # get all released versions
         mods = self.catalog.list_service_modules(self.cUtil.anonymous_ctx(),
@@ -63,10 +71,14 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['module_name'],'DynamicService2')
         self.assertEqual(mods[0]['git_commit_hash'],'29dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[0]['version'],'1.5.0')
+        self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice2.29dc505febb8f4cccb2078c58ded0de3320534d7')
+
 
         self.assertEqual(mods[1]['module_name'],'DynamicService')
         self.assertEqual(mods[1]['git_commit_hash'],'49dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[1]['version'],'2.1.8')
+        self.assertEqual(mods[1]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.49dc505febb8f4cccb2078c58ded0de3320534d7')
+
 
         # make sure bad tag throws an error
         with self.assertRaises(ValueError) as e:

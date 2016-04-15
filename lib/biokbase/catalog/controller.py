@@ -758,7 +758,8 @@ class CatalogController:
                 return {
                     'module_name': details['module_name'],
                     'version':version['version'],
-                    'git_commit_hash':version['git_commit_hash']
+                    'git_commit_hash':version['git_commit_hash'],
+                    'docker_img_name':version['docker_img_name']
                 }
 
 
@@ -782,7 +783,8 @@ class CatalogController:
                     return {
                         'module_name': details['module_name'],
                         'version':v['version'],
-                        'git_commit_hash':v['git_commit_hash']
+                        'git_commit_hash':v['git_commit_hash'],
+                        'docker_img_name':v['docker_img_name']
                     }
 
             raise ValueError('No suitable version matches your lookup - but this seems wrong.')

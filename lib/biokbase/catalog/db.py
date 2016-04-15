@@ -466,14 +466,16 @@ class MongoCatalogDBI:
             '_id':0,
             'module_name':1,
             'current_versions.'+tag+'.version':1,
-            'current_versions.'+tag+'.git_commit_hash':1
+            'current_versions.'+tag+'.git_commit_hash':1,
+            'current_versions.'+tag+'.docker_img_name':1
         }
         result = []
         for m in self.modules.find(query,projection):
             result.append({
                 'module_name':m['module_name'],
                 'version':m['current_versions'][tag]['version'],
-                'git_commit_hash':m['current_versions'][tag]['git_commit_hash']})
+                'git_commit_hash':m['current_versions'][tag]['git_commit_hash'],
+                'docker_img_name':m['current_versions'][tag]['docker_img_name']})
         return result
 
 
@@ -487,6 +489,7 @@ class MongoCatalogDBI:
                     'module_name':1,
                     'version':'$release_version_list.version',
                     'git_commit_hash':'$release_version_list.git_commit_hash',
+                    'docker_img_name':'$release_version_list.docker_img_name',
                     '_id':0
                 }
             }])
