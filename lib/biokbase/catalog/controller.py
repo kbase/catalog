@@ -737,6 +737,8 @@ class CatalogController:
 
     def module_version_lookup(self, selection):
 
+        # todo: speed up queries by doing more work in Mongo??
+
         selection = self.filter_module_or_repo_selection(selection)
 
         only_services = True
@@ -768,31 +770,70 @@ class CatalogController:
         details = self.db.get_module_full_details(module_name=selection['module_name'])
         versions = details['release_version_list']
 
-        spec = semantic_version.Spec(lookup)
-        svers = []
-        for v in versions:
-            if only_services:
-                if 'dynamic_service' not in v: continue
-                if not v['dynamic_service']: continue
-            svers.append(semantic_version.Version(v['version']))
-
-        theRightVersion = spec.select(svers)
-        if theRightVersion:
+        try:
+            spec = semantic_version.Spec(lookup)
+            svers = []
             for v in versions:
-                if v['version'] == str(theRightVersion):
+                if only_services:
+                    if 'dynamic_service' not in v: continue
+                    if not v['dynamic_service']: continue
+                svers.append(semantic_version.Version(v['version']))
+
+            theRightVersion = spec.select(svers)
+            if theRightVersion:
+                for v in versions:
+                    if v['version'] == str(theRightVersion):
+                        return {
+                            'module_name': details['module_name'],
+                            'version':v['version'],
+                            'git_commit_hash':v['git_commit_hash'],
+                            'docker_img_name':v['docker_img_name']
+                        }
+
+                raise ValueError('No suitable version matches your lookup - but this seems wrong.')
+            else:
+                raise ValueError('No suitable version matches your lookup.')
+        except ValueError:
+            # probably we could not parse as a semantic version, so check as a commit hash
+            for v in versions:
+                if v['git_commit_hash'] == lookup:
+                    if only_services:
+                        if 'dynamic_service' not in v:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                        if not v['dynamic_service']:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
                     return {
                         'module_name': details['module_name'],
                         'version':v['version'],
                         'git_commit_hash':v['git_commit_hash'],
                         'docker_img_name':v['docker_img_name']
                     }
+            # still didn't find it, so it may be the hash of the dev/beta version
+            details = self.db.get_module_details(module_name=selection['module_name'],git_url=selection['git_url'])
+            cv = details['current_versions']
+            if cv['dev']['git_commit_hash'] == lookup:
+                if 'dynamic_service' in cv['dev']:
+                    if not cv['dev']['dynamic_service']:
+                        raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':cv['dev']['version'],
+                    'git_commit_hash':cv['dev']['git_commit_hash'],
+                    'docker_img_name':cv['dev']['docker_img_name']
+                }
+            if cv['beta']['git_commit_hash'] == lookup:
+                if 'dynamic_service' in cv['beta']:
+                    if not cv['beta']['dynamic_service']:
+                        raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':cv['beta']['version'],
+                    'git_commit_hash':cv['beta']['git_commit_hash'],
+                    'docker_img_name':cv['beta']['docker_img_name']
+                }
 
-            raise ValueError('No suitable version matches your lookup - but this seems wrong.')
-        else:
-            raise ValueError('No suitable version matches your lookup.')
-
-
-
+        # if we got here and didn't find anything, throw an error.
+        raise ValueError('No suitable version matches your lookup.')
         return None
 
 

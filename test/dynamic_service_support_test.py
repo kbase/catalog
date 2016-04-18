@@ -187,7 +187,57 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(ver['version'],'2.1.8')
         self.assertEqual(ver['git_commit_hash'],'49dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(ver['module_name'],'DynamicService')
+
+        #lookup by commit hash
+        ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService','lookup':'49dc505febb8f4cccb2078c58ded0de3320534d7'})[0]
+        self.assertEqual(ver['version'],'2.1.8')
+        self.assertEqual(ver['git_commit_hash'],'49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(ver['module_name'],'DynamicService')
+
+        ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService','lookup':'12edf67800b2923982bdf60c89c57ce6fd2d9a1c'})[0]
+        self.assertEqual(ver['version'],'1.0.2')
+        self.assertEqual(ver['git_commit_hash'],'12edf67800b2923982bdf60c89c57ce6fd2d9a1c')
+        self.assertEqual(ver['module_name'],'DynamicService')
     
+        ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService2', 'lookup':'39dc505febb8f4cccb2078c58ded0de3320534d7'})[0]
+        self.assertEqual(ver['module_name'],'DynamicService2')
+        self.assertEqual(ver['git_commit_hash'],'39dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(ver['version'],'1.5.1')
+
+        ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService', 'lookup':'b06c5f9daf603a4d206071787c3f6184000bf128'})[0]
+        self.assertEqual(ver['module_name'],'DynamicService')
+        self.assertEqual(ver['git_commit_hash'],'b06c5f9daf603a4d206071787c3f6184000bf128')
+        self.assertEqual(ver['version'],'0.0.5')
+
+        with self.assertRaises(ValueError) as e:
+            ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService', 'lookup':'b843888e962642d665a3b0bd701ee630c01835e6'})[0]
+        self.assertEqual(str(e.exception),
+            'The "b843888e962642d665a3b0bd701ee630c01835e6" version is not marked as a Service Module.');
+
+        with self.assertRaises(ValueError) as e:
+            ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService2', 'lookup':'19dc505febb8f4cccb2078c58ded0de3320534d7'})[0]
+        self.assertEqual(str(e.exception),
+            'The "19dc505febb8f4cccb2078c58ded0de3320534d7" version is not marked as a Service Module.');
+
+        with self.assertRaises(ValueError) as e:
+            ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService', 'lookup':'d6cd1e2bd19e03a81132a23b2025920577f84e37'})[0]
+        self.assertEqual(str(e.exception),
+            'The "d6cd1e2bd19e03a81132a23b2025920577f84e37" version is not marked as a Service Module.');
+
+        ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
+                {'module_name':'DynamicService', 'lookup':'d6cd1e2bd19e03a81132a23b2025920577f84e37', 'only_service_versions':0})[0]
+        self.assertEqual(ver['module_name'],'DynamicService')
+        self.assertEqual(ver['git_commit_hash'],'d6cd1e2bd19e03a81132a23b2025920577f84e37')
+        self.assertEqual(ver['version'],'1.1.0')
+
+
 
 
     @classmethod
