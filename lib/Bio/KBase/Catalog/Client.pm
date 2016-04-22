@@ -3089,6 +3089,93 @@ ExecAggrTableParams is a reference to a hash where the following keys are define
  
 
 
+=head2 get_exec_raw_stats
+
+  $records = $obj->get_exec_raw_stats($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetExecRawStatsParams
+$records is a reference to a list where each element is an UnspecifiedObject, which can hold any non-null object
+GetExecRawStatsParams is a reference to a hash where the following keys are defined:
+	begin has a value which is an int
+	end has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetExecRawStatsParams
+$records is a reference to a list where each element is an UnspecifiedObject, which can hold any non-null object
+GetExecRawStatsParams is a reference to a hash where the following keys are defined:
+	begin has a value which is an int
+	end has a value which is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub get_exec_raw_stats
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_exec_raw_stats (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_exec_raw_stats:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_exec_raw_stats');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_exec_raw_stats",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_exec_raw_stats',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_exec_raw_stats",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_exec_raw_stats',
+				       );
+    }
+}
+ 
+
+
 =head2 set_client_group
 
   $obj->set_client_group($group)
@@ -4535,6 +4622,43 @@ total_exec_time has a value which is a float
 =item Description
 
 Get aggregated usage metrics; available only to Admins.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+begin has a value which is an int
+end has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+begin has a value which is an int
+end has a value which is an int
+
+
+=end text
+
+=back
+
+
+
+=head2 GetExecRawStatsParams
+
+=over 4
+
+
+
+=item Description
+
+Get raw usage metrics; available only to Admins.
 
 
 =item Definition

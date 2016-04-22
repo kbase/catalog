@@ -771,4 +771,19 @@ class MongoCatalogDBI:
 
         return counts
 
+    def get_exec_raw_stats(self, minTime, maxTime):
+
+        filter = {}
+        creationTimeFilter = {}
+        if minTime is not None:
+            creationTimeFilter['$gt']=minTime
+        if maxTime is not None:
+            creationTimeFilter['$lt']=maxTime
+        if len(creationTimeFilter)>0:
+            filter = {
+                'creation_time': creationTimeFilter
+            }
+
+        return list(self.exec_stats_raw.find(filter, {'_id':0}))
+
         

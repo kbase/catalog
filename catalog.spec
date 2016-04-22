@@ -423,6 +423,17 @@ module Catalog {
     funcdef get_exec_aggr_table(ExecAggrTableParams params) returns (UnspecifiedObject table) authentication required;
 
 
+    /*
+        Get raw usage metrics; available only to Admins.
+    */
+    typedef structure {
+        int begin;
+        int end;
+    } GetExecRawStatsParams;
+
+    funcdef get_exec_raw_stats(GetExecRawStatsParams params) returns (list<UnspecifiedObject> records) authentication required;
+
+
     /* Temporary set of methods to dynamically set client groups for specific methods.  These methods
        will likely go away after the execution engine has been refactored/extended.  Only admins can
        run these methods.

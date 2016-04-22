@@ -789,6 +789,22 @@ class CatalogController:
         return self.db.aggr_exec_stats_table(minTime, maxTime)
 
 
+    def get_exec_raw_stats(self, requesting_user, params):
+        if not self.is_admin(requesting_user):
+            raise ValueError('You do not have permission to view this data.')
+
+        minTime = None
+        maxTime = None
+        if 'begin' in params:
+            minTime = params['begin']
+        if 'end' in params:
+            maxTime = params['end']
+
+        return self.db.get_exec_raw_stats(minTime, maxTime)
+
+
+
+
     def set_client_group(self, username, params):
 
         if not self.is_admin(username):

@@ -16,6 +16,7 @@ import requests as _requests
 import urlparse as _urlparse
 import random as _random
 import os
+import requests.packages.urllib3
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
@@ -156,6 +157,9 @@ sync_methods['Catalog.get_exec_aggr_stats'] = True
 async_run_methods['Catalog.get_exec_aggr_table_async'] = ['Catalog', 'get_exec_aggr_table']
 async_check_methods['Catalog.get_exec_aggr_table_check'] = ['Catalog', 'get_exec_aggr_table']
 sync_methods['Catalog.get_exec_aggr_table'] = True
+async_run_methods['Catalog.get_exec_raw_stats_async'] = ['Catalog', 'get_exec_raw_stats']
+async_check_methods['Catalog.get_exec_raw_stats_check'] = ['Catalog', 'get_exec_raw_stats']
+sync_methods['Catalog.get_exec_raw_stats'] = True
 async_run_methods['Catalog.set_client_group_async'] = ['Catalog', 'set_client_group']
 async_check_methods['Catalog.set_client_group_check'] = ['Catalog', 'set_client_group']
 sync_methods['Catalog.set_client_group'] = True
@@ -564,6 +568,10 @@ class Application(object):
                              name='Catalog.get_exec_aggr_table',
                              types=[dict])
         self.method_authentication['Catalog.get_exec_aggr_table'] = 'required'
+        self.rpc_service.add(impl_Catalog.get_exec_raw_stats,
+                             name='Catalog.get_exec_raw_stats',
+                             types=[dict])
+        self.method_authentication['Catalog.get_exec_raw_stats'] = 'required'
         self.rpc_service.add(impl_Catalog.set_client_group,
                              name='Catalog.set_client_group',
                              types=[dict])
@@ -869,6 +877,7 @@ def process_async_cli(input_file_path, output_file_path, token):
     return exit_code
     
 if __name__ == "__main__":
+    requests.packages.urllib3.disable_warnings()
     if len(sys.argv) >= 3 and len(sys.argv) <= 4 and os.path.isfile(sys.argv[1]):
         token = None
         if len(sys.argv) == 4:

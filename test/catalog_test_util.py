@@ -50,12 +50,20 @@ class CatalogTestUtil:
         self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = db[MongoCatalogDBI._FAVORITES]
         self.client_groups = db[MongoCatalogDBI._CLIENT_GROUPS]
+
+        self.exec_stats_raw = db[MongoCatalogDBI._EXEC_STATS_RAW]
+        self.exec_stats_apps = db[MongoCatalogDBI._EXEC_STATS_APPS]
+        self.exec_stats_users = db[MongoCatalogDBI._EXEC_STATS_USERS]
+
         # just drop the test db
         self.modules.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()
         self.client_groups.drop()
+        self.exec_stats_raw.drop()
+        self.exec_stats_apps.drop()
+        self.exec_stats_users.drop()
 
         #if self.modules.count() > 0 :
         #    raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
@@ -163,6 +171,11 @@ class CatalogTestUtil:
         self.build_logs.drop()
         self.favorites.drop()
         self.client_groups.drop()
+
+        self.exec_stats_raw.drop()
+        self.exec_stats_apps.drop()
+        self.exec_stats_users.drop()
+        
         # make sure NMS is clean after each test
         self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])
 

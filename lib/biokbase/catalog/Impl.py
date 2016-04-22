@@ -387,6 +387,8 @@ class Catalog:
         # ctx is the context object
         #BEGIN log_exec_stats
         admin_user_id = ctx['user_id']
+        if not self.cc.is_admin(admin_user_id):
+            raise ValueError('You do not have permission to log execution statistics.')
         user_id = params['user_id']
         app_module_name = None if 'app_module_name' not in params else params['app_module_name']
         app_id = None if 'app_id' not in params else params['app_id']
@@ -432,6 +434,20 @@ class Catalog:
                              'table is not type object as required.')
         # return the results
         return [table]
+
+    def get_exec_raw_stats(self, ctx, params):
+        # ctx is the context object
+        # return variables are: records
+        #BEGIN get_exec_raw_stats
+        records = self.cc.get_exec_raw_stats(ctx['user_id'], params)
+        #END get_exec_raw_stats
+
+        # At some point might do deeper type checking...
+        if not isinstance(records, list):
+            raise ValueError('Method get_exec_raw_stats return value ' +
+                             'records is not type list as required.')
+        # return the results
+        return [records]
 
     def set_client_group(self, ctx, group):
         # ctx is the context object

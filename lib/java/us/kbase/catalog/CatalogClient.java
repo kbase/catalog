@@ -674,6 +674,23 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: get_exec_raw_stats</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetExecRawStatsParams GetExecRawStatsParams}
+     * @return   parameter "records" of list of unspecified object
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<UObject> getExecRawStats(GetExecRawStatsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<UObject>>> retType = new TypeReference<List<List<UObject>>>() {};
+        List<List<UObject>> res = caller.jsonrpcCall("Catalog.get_exec_raw_stats", args, retType, true, true, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: set_client_group</p>
      * <pre>
      * </pre>
