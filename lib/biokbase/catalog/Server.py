@@ -109,6 +109,12 @@ sync_methods['Catalog.get_version_info'] = True
 async_run_methods['Catalog.list_released_module_versions_async'] = ['Catalog', 'list_released_module_versions']
 async_check_methods['Catalog.list_released_module_versions_check'] = ['Catalog', 'list_released_module_versions']
 sync_methods['Catalog.list_released_module_versions'] = True
+async_run_methods['Catalog.module_version_lookup_async'] = ['Catalog', 'module_version_lookup']
+async_check_methods['Catalog.module_version_lookup_check'] = ['Catalog', 'module_version_lookup']
+sync_methods['Catalog.module_version_lookup'] = True
+async_run_methods['Catalog.list_service_modules_async'] = ['Catalog', 'list_service_modules']
+async_check_methods['Catalog.list_service_modules_check'] = ['Catalog', 'list_service_modules']
+sync_methods['Catalog.list_service_modules'] = True
 async_run_methods['Catalog.set_registration_state_async'] = ['Catalog', 'set_registration_state']
 async_check_methods['Catalog.set_registration_state_check'] = ['Catalog', 'set_registration_state']
 sync_methods['Catalog.set_registration_state'] = True
@@ -504,6 +510,14 @@ class Application(object):
                              name='Catalog.list_released_module_versions',
                              types=[dict])
         self.method_authentication['Catalog.list_released_module_versions'] = 'none'
+        self.rpc_service.add(impl_Catalog.module_version_lookup,
+                             name='Catalog.module_version_lookup',
+                             types=[dict])
+        self.method_authentication['Catalog.module_version_lookup'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_service_modules,
+                             name='Catalog.list_service_modules',
+                             types=[dict])
+        self.method_authentication['Catalog.list_service_modules'] = 'none'
         self.rpc_service.add(impl_Catalog.set_registration_state,
                              name='Catalog.set_registration_state',
                              types=[dict])

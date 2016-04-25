@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "version",
     "git_commit_hash",
     "git_commit_message",
+    "dynamic_service",
     "narrative_method_ids",
     "docker_img_name",
     "data_folder",
@@ -53,6 +54,8 @@ public class ModuleVersionInfo {
     private java.lang.String gitCommitHash;
     @JsonProperty("git_commit_message")
     private java.lang.String gitCommitMessage;
+    @JsonProperty("dynamic_service")
+    private Long dynamicService;
     @JsonProperty("narrative_method_ids")
     private List<String> narrativeMethodIds;
     @JsonProperty("docker_img_name")
@@ -142,6 +145,21 @@ public class ModuleVersionInfo {
 
     public ModuleVersionInfo withGitCommitMessage(java.lang.String gitCommitMessage) {
         this.gitCommitMessage = gitCommitMessage;
+        return this;
+    }
+
+    @JsonProperty("dynamic_service")
+    public Long getDynamicService() {
+        return dynamicService;
+    }
+
+    @JsonProperty("dynamic_service")
+    public void setDynamicService(Long dynamicService) {
+        this.dynamicService = dynamicService;
+    }
+
+    public ModuleVersionInfo withDynamicService(Long dynamicService) {
+        this.dynamicService = dynamicService;
         return this;
     }
 
@@ -242,7 +260,7 @@ public class ModuleVersionInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", compilationReport=")+ compilationReport)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((((("ModuleVersionInfo"+" [timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", dynamicService=")+ dynamicService)+", narrativeMethodIds=")+ narrativeMethodIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", compilationReport=")+ compilationReport)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

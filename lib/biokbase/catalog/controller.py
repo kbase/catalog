@@ -132,6 +132,7 @@ class CatalogController:
         if not self.is_approved_developer([username])[0]:
             raise ValueError('You are not an approved developer.  Contact us to request approval.')
 
+        prev_dev_version = None
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
@@ -141,6 +142,7 @@ class CatalogController:
         # that the module is in a state where it can be registered 
         else:
             module_details = self.db.get_module_details(git_url=git_url)
+            prev_dev_version = module_details['current_versions']['dev']
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
@@ -176,7 +178,8 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint))
+            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint,
+            prev_dev_version))
         t.start()
 
         # 4) provide the registration_id 
@@ -412,13 +415,13 @@ class CatalogController:
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-            all_versions = details['release_versions']
-            if str(params['timestamp']) in all_versions:
-                v = all_versions[str(params['timestamp'])]
-                if 'git_commit_hash' in params:
-                    if v['git_commit_hash'] != params['git_commit_hash'] :
-                        return None;
-                return v
+            all_versions = details['release_version_list']
+            for v in all_versions:
+                if v['timestamp'] == params['timestamp']:
+                    if 'git_commit_hash' in params:
+                        if v['git_commit_hash'] != params['git_commit_hash'] :
+                            return None;
+                    return v
             return None
 
         # if we get here, version and timestamp are not defined, so just look for the commit hash
@@ -430,8 +433,8 @@ class CatalogController:
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-            all_versions = details['release_versions']
-            for timestamp, v in all_versions.iteritems():
+            all_versions = details['release_version_list']
+            for v in all_versions:
                 if v['git_commit_hash'] == params['git_commit_hash']:
                     return v
             return None
@@ -442,7 +445,7 @@ class CatalogController:
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)
         details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
-        return sorted(details['release_versions'].values(), key= lambda v: v['timestamp'])
+        return sorted(details['release_version_list'], key= lambda v: v['timestamp'])
 
 
     def is_registered(self,params):
@@ -717,6 +720,126 @@ class CatalogController:
         return self.db.aggregate_favorites_over_apps(module_names_lc)
 
 
+
+
+    def list_service_modules(self, filter):
+        # if we have the tag flag, then return the specific tagged version
+        if 'tag' in filter:
+            if filter['tag'] not in ['dev', 'beta', 'release']:
+                raise ValueError('tag parameter must be either "dev", "beta", or "release".')
+            return self.db.list_service_module_versions_with_tag(filter['tag'])
+
+        # otherwise we need to go through everything that has been released
+        mods = self.db.list_all_released_service_module_versions()
+        return mods
+
+
+
+    def module_version_lookup(self, selection):
+
+        # todo: speed up queries by doing more work in Mongo??
+
+        selection = self.filter_module_or_repo_selection(selection)
+
+        only_services = True
+        if 'only_service_versions' in selection:
+            only_services = selection['only_service_versions'] > 0
+
+        lookup = '>=0.0.0'
+        if 'lookup' in selection:
+            lookup = selection['lookup']
+            # if the lookup was a tag, return the exact tag
+            if selection['lookup'] in ['dev','beta','release']:
+                details = self.db.get_module_details(module_name=selection['module_name'],git_url=selection['git_url'])
+                version = details['current_versions'][selection['lookup']]
+
+                if only_services:
+                    if 'dynamic_service' in version:
+                        if not version['dynamic_service']:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':version['version'],
+                    'git_commit_hash':version['git_commit_hash'],
+                    'docker_img_name':version['docker_img_name']
+                }
+
+
+        # assume semantic versioning which only can select released versions
+        # we should optimize to fetch only the details/versions we need from mongo.
+        details = self.db.get_module_full_details(module_name=selection['module_name'])
+        versions = details['release_version_list']
+
+        try:
+            spec = semantic_version.Spec(lookup)
+            svers = []
+            for v in versions:
+                if only_services:
+                    if 'dynamic_service' not in v: continue
+                    if not v['dynamic_service']: continue
+                svers.append(semantic_version.Version(v['version']))
+
+            theRightVersion = spec.select(svers)
+            if theRightVersion:
+                for v in versions:
+                    if v['version'] == str(theRightVersion):
+                        return {
+                            'module_name': details['module_name'],
+                            'version':v['version'],
+                            'git_commit_hash':v['git_commit_hash'],
+                            'docker_img_name':v['docker_img_name']
+                        }
+
+                raise ValueError('No suitable version matches your lookup - but this seems wrong.')
+            else:
+                raise ValueError('No suitable version matches your lookup.')
+        except ValueError:
+            # probably we could not parse as a semantic version, so check as a commit hash
+            for v in versions:
+                if v['git_commit_hash'] == lookup:
+                    if only_services:
+                        if 'dynamic_service' not in v:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                        if not v['dynamic_service']:
+                            raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                    return {
+                        'module_name': details['module_name'],
+                        'version':v['version'],
+                        'git_commit_hash':v['git_commit_hash'],
+                        'docker_img_name':v['docker_img_name']
+                    }
+            # still didn't find it, so it may be the hash of the dev/beta version
+            details = self.db.get_module_details(module_name=selection['module_name'],git_url=selection['git_url'])
+            cv = details['current_versions']
+            if cv['dev']['git_commit_hash'] == lookup:
+                if 'dynamic_service' in cv['dev']:
+                    if not cv['dev']['dynamic_service']:
+                        raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':cv['dev']['version'],
+                    'git_commit_hash':cv['dev']['git_commit_hash'],
+                    'docker_img_name':cv['dev']['docker_img_name']
+                }
+            if cv['beta']['git_commit_hash'] == lookup:
+                if 'dynamic_service' in cv['beta']:
+                    if not cv['beta']['dynamic_service']:
+                        raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+                return {
+                    'module_name': details['module_name'],
+                    'version':cv['beta']['version'],
+                    'git_commit_hash':cv['beta']['git_commit_hash'],
+                    'docker_img_name':cv['beta']['docker_img_name']
+                }
+
+        # if we got here and didn't find anything, throw an error.
+        raise ValueError('No suitable version matches your lookup.')
+        return None
+
+
+
+
+
     # Some utility methods
 
     def filter_module_or_repo_selection(self, params):
@@ -847,8 +970,8 @@ class CatalogController:
 
 # NOT PART OF CLASS CATALOG!!
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
-                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint):
+                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
-                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint)
+                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
     registrar.start_registration()
 

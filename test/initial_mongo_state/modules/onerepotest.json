@@ -62,8 +62,8 @@
         }
     },
 
-    "release_versions" : {
-        "1445022818884" : {
+    "release_version_list" : [
+        {
             "git_commit_hash" : "49dc505febb8f4cccb2078c58ded0de3320534d7",
             "timestamp" : 1445022818884,
             "registration_id" : "1445022818884_1245",
@@ -74,5 +74,5 @@
                 "send_data"
             ]
         }
-    }
+    ]
 }

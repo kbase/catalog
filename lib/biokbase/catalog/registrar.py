@@ -26,7 +26,7 @@ class Registrar:
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
                     docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details,
-                    ref_data_base, kbase_endpoint):
+                    ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
@@ -56,6 +56,7 @@ class Registrar:
         
         self.ref_data_base = ref_data_base
         self.kbase_endpoint = kbase_endpoint
+        self.prev_dev_version = prev_dev_version
 
 
     def start_registration(self):
@@ -77,8 +78,8 @@ class Registrar:
             self.log('git clone ' + self.git_url)
             repo = git.Repo.clone_from(self.git_url, basedir)
             # try to get hash from repo
-            self.log('current commit hash at HEAD:' + str(repo.heads.master.commit))
-            git_commit_hash = repo.heads.master.commit
+            git_commit_hash = str(repo.active_branch.commit)
+            self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())
@@ -185,6 +186,11 @@ class Registrar:
             self.set_build_error(str(e))
             self.log(traceback.format_exc(), is_error=True)
             self.log('BUILD_ERROR: '+str(e), is_error=True)
+            if self.prev_dev_version:
+                self.log('Reverting dev version to git_commit_hash=' + self.prev_dev_version['git_commit_hash'] +
+                         ', version=' + self.prev_dev_version['version'] + ', git_commit_message=' +
+                         self.prev_dev_version['git_commit_message'])
+                self.db.update_dev_version(self.prev_dev_version, git_url=self.git_url)
         finally:
             self.flush_log_to_db();
             self.logfile.close();
@@ -218,6 +224,13 @@ class Registrar:
 
         service_language = self.get_required_field_as_string(self.kb_yaml,'service-language').strip()
         owners = self.get_required_field_as_list(self.kb_yaml,'owners')
+
+        service_config = self.get_optional_field_as_dict(self.kb_yaml, 'service-config')
+        if service_config:
+            # validate service_config parameters
+            if 'dynamic-service' in service_config:
+                if not type(service_config['dynamic-service']) == type(True):
+                    raise ValueError('Invalid service-config in kbase.yaml - "dynamic-service" property must be a boolean "true" or "false".') 
 
         # module_name must match what exists (unless it is not yet defined)
         if 'module_name' in self.module_details:
@@ -267,6 +280,7 @@ class Registrar:
         version = self.get_required_field_as_string(self.kb_yaml,'module-version')
         service_language = self.get_required_field_as_string(self.kb_yaml,'service-language')
         owners = self.get_required_field_as_list(self.kb_yaml,'owners')
+        service_config = self.get_optional_field_as_dict(self.kb_yaml, 'service-config')
 
         # first update the module name, which is now permanent, if we haven't already
         if ('module_name' not in self.module_details) or ('module_name_lc' not in self.module_details):
@@ -283,6 +297,10 @@ class Registrar:
             'description': module_description,
             'language' : service_language
         }
+        if service_config and service_config['dynamic-service']:
+            info['dynamic_service'] = 1
+        else:
+            info['dynamic_service'] = 0
         self.log('new info: '+pprint.pformat(info))
         error = self.db.set_module_info(info, git_url=self.git_url)
         if error is not None:
@@ -318,6 +336,11 @@ class Registrar:
         if ref_data_ver:
             new_version['data_folder'] = ref_data_folder
             new_version['data_version'] = ref_data_ver
+        if service_config and service_config['dynamic-service']:
+            new_version['dynamic_service'] = 1
+        else:
+            new_version['dynamic_service'] = 0
+
         self.log('new dev version object: '+pprint.pformat(new_version))
         error = self.db.update_dev_version(new_version, git_url=self.git_url)
         if error is not None:
@@ -401,6 +424,15 @@ class Registrar:
         if not type(value) is list:
             raise ValueError('kbase.yaml file "'+field_name+'" required field must be a list')
         return value
+
+    def get_optional_field_as_dict(self, kb_yaml, field_name):
+        if field_name not in kb_yaml:
+            return None
+        value = kb_yaml[field_name]
+        if not type(value) is dict:
+            raise ValueError('kbase.yaml file "'+field_name+'" optional field must be a dict')
+        return value
+
 
 
     def log(self, message, no_end_line=False, is_error=False):

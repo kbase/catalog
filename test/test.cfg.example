@@ -51,7 +51,7 @@ method-spec-git-repo-local-dir = nms/local_narrative_method_specs
 method-spec-temp-dir = nms/scratch
 
 method-spec-git-repo = https://github.com/kbase/narrative_method_specs
-method-spec-git-repo-branch = dev
+method-spec-git-repo-branch = develop
 method-spec-git-repo-refresh-rate = 2000
 method-spec-cache-size = 5000
 method-spec-mongo-dbname = method_store_repo_db
