@@ -283,10 +283,10 @@ class Registrar:
         # get the basic info that we need
 ###### Replace repo with subprocess
 #        commit_hash = repo.head.commit.hexsha
-        commit_hash = str( subprocess.check_output ( ['git','log', '--pretty="%H"', '-n', '1' ], cwd=basedir ) )
+        commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) )
 ###### Replace repo with subprocess
 #        commit_message = repo.head.commit.message
-        commit_message = str( subprocess.check_output ( ['git','log', '--pretty="%B"', '-n', '1' ], cwd=basedir ) )
+        commit_message = str( subprocess.check_output ( ['git','log', '--pretty=%B', '-n', '1' ], cwd=basedir ) )
 
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name')
         module_description = self.get_required_field_as_string(self.kb_yaml,'module-description')
