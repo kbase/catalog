@@ -85,7 +85,7 @@ class Registrar:
             # try to get hash from repo
 ###### Replace with subprocess
 #            git_commit_hash = str(repo.active_branch.commit)
-            git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty="%H"', '-n', '1' ], cwd=basedir ) )
+            git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) )
             self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:

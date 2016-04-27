@@ -378,7 +378,6 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertTrue(log is not None)
         found_correct_error = False
         for l in log:
-            print l
             if 'must be in semantic version format' in l['error_message']:
                 found_correct_error = True
         self.assertTrue(found_correct_error, 'correct error was thrown in log for semantic version error')
