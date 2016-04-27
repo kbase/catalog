@@ -9,7 +9,8 @@ import pprint
 import json
 import semantic_version
 
-import git
+#import git
+import subprocess
 import yaml
 import requests
 from urlparse import urlparse
@@ -74,25 +75,34 @@ class Registrar:
 
             basedir = os.path.join(self.temp_dir,self.registration_id,'module_repo')
 
+            parsed_url=urlparse(git_url)
+
             self.log('Attempting to clone into: '+basedir);
             self.log('git clone ' + self.git_url)
-            repo = git.Repo.clone_from(self.git_url, basedir)
+###### Replace with subprocess
+#            repo = git.Repo.clone_from(self.git_url, basedir)
+            subprocess.check_call( ['git','clone',self.git_url, basedir ] )
             # try to get hash from repo
-            git_commit_hash = str(repo.active_branch.commit)
+###### Replace with subprocess
+#            git_commit_hash = str(repo.active_branch.commit)
+            git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty="%H"', '-n', '1' ], cwd=basedir ) )
             self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())
-                    repo.git.checkout(self.params['git_commit_hash'].strip())
+###### Replace with subprocess
+#                    repo.git.checkout(self.params['git_commit_hash'].strip())
+                    subprocess.check_call ( ['git', 'checkout', self.params['git_commit_hash'] ], cwd=basedir )
                     git_commit_hash = self.params['git_commit_hash'].strip()
 
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('reading files and performing basic checks')
-            self.sanity_checks_and_parse(repo, basedir)
+            self.sanity_checks_and_parse(basedir)
 
             ##############################
             # 2.5 - dealing with git releases .git/config.lock, if it still exists after 5s then kill it
+###### may no longer need this after switching to subprocess
             git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
             if os.path.exists(git_config_lock_file):
                 self.log('.git/config.lock exists, waiting 5s for it to release')
@@ -177,7 +187,7 @@ class Registrar:
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
-            self.update_the_catalog(repo, basedir, ref_data_folder, ref_data_ver, compilation_report)
+            self.update_the_catalog(basedir, ref_data_folder, ref_data_ver, compilation_report)
             
             self.build_is_complete()
 
@@ -198,7 +208,7 @@ class Registrar:
 
 
 
-    def sanity_checks_and_parse(self, repo, basedir):
+    def sanity_checks_and_parse(self, basedir):
         # check that files exist
         yaml_filename = 'kbase.yaml'
         if not os.path.isfile(os.path.join(basedir,'kbase.yaml')) :
@@ -269,11 +279,14 @@ class Registrar:
             raise ValueError('Module names must be alphanumeric characters (including underscores) only, with no spaces.')
 
 
-    def update_the_catalog(self, repo, basedir, ref_data_folder, ref_data_ver, compilation_report):
-
+    def update_the_catalog(self, basedir, ref_data_folder, ref_data_ver, compilation_report):
         # get the basic info that we need
-        commit_hash = repo.head.commit.hexsha
-        commit_message = repo.head.commit.message
+###### Replace repo with subprocess
+#        commit_hash = repo.head.commit.hexsha
+        commit_hash = str( subprocess.check_output ( ['git','log', '--pretty="%H"', '-n', '1' ], cwd=basedir ) )
+###### Replace repo with subprocess
+#        commit_message = repo.head.commit.message
+        commit_message = str( subprocess.check_output ( ['git','log', '--pretty="%B"', '-n', '1' ], cwd=basedir ) )
 
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name')
         module_description = self.get_required_field_as_string(self.kb_yaml,'module-description')
