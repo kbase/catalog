@@ -33,6 +33,7 @@ class CoreRegistrationTest(unittest.TestCase):
         while True:
             state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
             if state['registration'] in ['complete','error']:
+                print state
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
