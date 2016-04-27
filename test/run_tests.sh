@@ -12,7 +12,7 @@
 echo 'Starting NMS...'
 export KB_DEPLOYMENT_CONFIG=test.cfg
 classpath=`cat ../narrative_method_store/dist/jar.classpath.txt`
-java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 7125 > nms/error.log 2>&1 &
+java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 7125 
 NMS_PID=$!
 
 echo 'Waiting for NMS to start...'
