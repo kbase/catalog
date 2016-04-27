@@ -71,12 +71,12 @@ class CatalogController:
         if 'docker-base-url' not in config:
             raise ValueError('"docker-base-url" config variable must be defined to start a CatalogController!')
         self.docker_base_url = config['docker-base-url']
-        print(self.docker_base_url)
+        print('Docker base url config = '+ self.docker_base_url)
 
         if 'docker-registry-host' not in config:
             raise ValueError('"docker-registry-host" config variable must be defined to start a CatalogController!')
         self.docker_registry_host = config['docker-registry-host']
-        print(self.docker_registry_host)
+        print('Docker registry host config = '+ self.docker_registry_host)
         
         if 'ref-data-base' not in config:
             raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')

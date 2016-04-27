@@ -164,9 +164,11 @@ class Registrar:
                 # Trying to extract compilation report with line numbers of funcdefs from docker image.
                 # There is "report" entry-point command responsible for that. In case there are any
                 # errors we just skip it.
-                compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
-                                                                     self.temp_dir, self.registration_id, 
-                                                                     self.token, self.kbase_endpoint)
+                #compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
+                #                                                     self.temp_dir, self.registration_id, 
+                #                                                     self.token, self.kbase_endpoint)
+
+                #pprint(compilation_report)
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
