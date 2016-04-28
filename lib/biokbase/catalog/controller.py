@@ -34,7 +34,7 @@ class CatalogController:
                     self.adminList.append(t.strip())
         if not self.adminList:
             warnings.warn('no "admin-users" are set in config of CatalogController.')
-
+        print(config['nms-admin-psswd'])
         # make sure the minimal mongo settings are in place
         if 'mongodb-host' not in config:
             raise ValueError('"mongodb-host" config variable must be defined to start a CatalogController!')
