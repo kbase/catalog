@@ -29,7 +29,7 @@ docker-registry-host = localhost:5000
 mongodb-database = catalog-test
 
 # Path to docker socket/host - you can leave this blank if you have the appropriate docker env variables defined
-docker-base-url = 
+docker-base-url = unix://var/run/docker.sock
 
 #Narrative Method Store configuration
 nms-url = http://localhost:7125
