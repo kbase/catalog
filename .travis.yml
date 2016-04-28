@@ -24,7 +24,7 @@ install:
     - git clone https://github.com/kbase/kb_sdk
     - cd kb_sdk
     - make
-#    - make sdkbase
+    - make sdkbase
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
     - make
