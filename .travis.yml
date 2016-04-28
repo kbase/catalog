@@ -4,13 +4,15 @@ python:
     - '2.7'
 services:
     - docker
+    # Note that we need to install mongodb manually for now because the built-in mongo
+    # service in travis is not compatible with the image we need to run docker
 
 before_install:
     - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGODB_VERSION.tgz
     - tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
     - export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
     - mkdir -p mongodata/db
-    - mongod --dbpath=mongodata/db &
+    - mongod --dbpath=mongodata/db --fork --logpath /dev/null
     - sleep 3
     - mongo --eval "printjson(db.serverStatus())"
 
@@ -25,6 +27,7 @@ install:
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
     - make
+
 script:
     - cp -n test/test.cfg.example test/test.cfg
     - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg
