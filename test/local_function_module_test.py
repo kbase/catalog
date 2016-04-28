@@ -23,7 +23,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         # assume test user is already approved as a developer
         # (1) register the test repo
         giturl = self.cUtil.get_test_repo_1()
-        githash = '5bf2006ae55275cfe5791f0ba26d14b425442a69' # branch local_method_module
+        githash = '68c045d784142ec91142cfc76448d949604fc4df' # branch local_method_module
         registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
             {'git_url':giturl, 'git_commit_hash':githash})[0]
         timestamp = int(registration_id.split('_')[0])
@@ -50,6 +50,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
        
+        pprint(state)
         self.assertEqual(state['registration'],'complete')
 
 
