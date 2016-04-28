@@ -2,9 +2,9 @@
 
 import os
 import json
+import datetime
 
 from pprint import pprint, pformat
-from datetime import datetime
 from ConfigParser import ConfigParser
 from pymongo import MongoClient
 
@@ -71,7 +71,7 @@ class CatalogTestUtil:
         self.initialize_mongo()
 
         # 3 setup the scratch space
-        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',str(datetime.now()))
+        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',datetime.datetime.now().strftime("%Y-%m-%d-(%H-%M-%S-%f)"))
         self.log("scratch directory="+self.scratch_dir)
         os.makedirs(self.scratch_dir)
 
