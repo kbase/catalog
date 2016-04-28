@@ -5,7 +5,7 @@ import unittest
 import os
 
 from pprint import pprint
-from time import time
+from time import time, sleep
 
 from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
@@ -33,7 +33,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         timeout = 6000 #seconds
         last_line = 0;
         while True:
-            time.sleep(1)
+            sleep(1)
             state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
 
             # log line printing:
