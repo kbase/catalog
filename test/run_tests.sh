@@ -12,11 +12,11 @@
 echo 'Starting NMS...'
 export KB_DEPLOYMENT_CONFIG=test.cfg
 classpath=`cat ../narrative_method_store/dist/jar.classpath.txt`
-java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 7125 
+java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 7125 > nms/error.log 2>&1 &
 NMS_PID=$!
 
 echo 'Waiting for NMS to start...'
-sleep 45
+sleep 30
 curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125
 if [ $? -ne 0 ]; then
     kill -9 $NMS_PID
