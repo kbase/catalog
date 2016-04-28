@@ -8,6 +8,7 @@ services:
     # service in travis is not compatible with the image we need to run docker
 
 before_install:
+    - python -c 'import requests;print(requests.__version__)'
     - export MONGODB_VERSION=2.6.10
     - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGODB_VERSION.tgz
     - tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
