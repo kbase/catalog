@@ -30,9 +30,10 @@ class LocalFunctionModuleTest(unittest.TestCase):
 
         # (2) check state until error or complete, must be complete, and make sure this was relatively fast
         start = time()
-        timeout = 600 #seconds
+        timeout = 6000 #seconds
         last_line = 0;
         while True:
+            time.sleep(1)
             state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
 
             # log line printing:

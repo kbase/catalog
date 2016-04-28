@@ -19,13 +19,12 @@ before_install:
 
 install:
     - pip install -r requirements.txt
-    - python -c 'import requests;print(requests.__version__)'
     - cd ..
     - git clone https://github.com/kbase/jars
     - git clone https://github.com/kbase/kb_sdk
     - cd kb_sdk
     - make
-#    - make sdkbase
+    - make sdkbase
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
     - make
