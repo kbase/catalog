@@ -141,10 +141,13 @@ class Registrar:
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 #self.log(str(dockerclient.inspect_image(repo_name)))
                 # if image does not exist, build and set state
+                pprint.pprint(dockerclient.images())
                 self.set_build_step('building the docker image')
                 # imageId is not yet populated properly
                 imageId = self.build_docker_image(dockerclient,self.image_name,basedir)
                 
+                print('here')
+
                 # check if reference data version is defined in kbase.yml
                 if 'data-version' in self.kb_yaml:
                     ref_data_ver = str(self.kb_yaml['data-version']).strip()
@@ -161,14 +164,16 @@ class Registrar:
                                                   ref_data_ver, basedir, self.temp_dir, self.registration_id,
                                                   self.token, self.kbase_endpoint)
                 
+                print('preparing report')
+
                 # Trying to extract compilation report with line numbers of funcdefs from docker image.
                 # There is "report" entry-point command responsible for that. In case there are any
                 # errors we just skip it.
-                #compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
-                #                                                     self.temp_dir, self.registration_id, 
-                #                                                     self.token, self.kbase_endpoint)
+                compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
+                                                                     self.temp_dir, self.registration_id, 
+                                                                     self.token, self.kbase_endpoint)
 
-                #pprint(compilation_report)
+                pprint.pprint(compilation_report)
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
