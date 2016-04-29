@@ -4,7 +4,7 @@ import unittest
 import os
 
 from pprint import pprint
-from time import time
+from time import time, sleep
 
 from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
@@ -375,6 +375,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build 3 exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'error')
+        sleep(3) # sleep to make sure the catalog db gets the final log messages
         log = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),{'registration_id':registration_id3})
         self.assertTrue(log is not None)
         found_correct_error = False
