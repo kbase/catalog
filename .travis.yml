@@ -25,6 +25,7 @@ install:
     - cd kb_sdk
     - make
     - make sdkbase
+    - docker images
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
     - make
