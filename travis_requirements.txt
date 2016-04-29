@@ -1,9 +1,5 @@
 pymongo==2.8
-# docker-py on travis needs an older version to be compatible.  This
-# is fine, but introduces a couple bugs that have to be dealt with:
-# 1) build pull parameter default is incorrect: https://github.com/docker/docker-py/issues/622
-# 2) pushing images needs to support insecure option in tests: https://github.com/docker/compose/issues/563 
-docker-py==1.2.3
+docker-py
 gitpython
 pyyaml
 semantic_version
