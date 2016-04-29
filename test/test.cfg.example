@@ -32,7 +32,7 @@ mongodb-database = catalog-test
 docker-base-url = unix://var/run/docker.sock
 
 # only really required for tests so that in Travis allows the docker client to push
-# to a local registry running on http, set to 0 or 1 or comment out
+# to a local registry running on http, set to 0 or 1, but needs to be 1 in Travis
 docker-push-allow-insecure = 1
 
 #Narrative Method Store configuration

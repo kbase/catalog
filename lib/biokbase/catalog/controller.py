@@ -81,7 +81,7 @@ class CatalogController:
         self.docker_push_allow_insecure = None # none should just set this to default?
         if 'docker-push-allow-insecure' in config:
             print('Docker docker-push-allow-insecure = '+ config['docker-push-allow-insecure'])
-            if config['docker-push-allow-insecure'] == 1:
+            if config['docker-push-allow-insecure'].strip() == "1":
                 self.docker_push_allow_insecure = True;
                 print('WARNING!! - Docker push is set to allow insecure connections.  This should never be on in production.')
 
@@ -980,6 +980,8 @@ class CatalogController:
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host,
                         docker_push_allow_insecure,
                         nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
+    print('STARTING REGISTRATION')
+    print(docker_push_allow_insecure)
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
                             docker_push_allow_insecure, 
                             nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)

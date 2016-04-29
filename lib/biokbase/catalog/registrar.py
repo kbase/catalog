@@ -530,7 +530,7 @@ class Registrar:
 
         # to do: examine stream to determine success/failure of build
         if self.docker_push_allow_insecure:
-            print("Docker push: insecure_registry: "+ self.docker_push_allow_insecure)
+            print("Docker push: insecure_registry: "+ str(self.docker_push_allow_insecure))
         else:
             print("Docker push: insecure_registry: None")
         for line in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
