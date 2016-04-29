@@ -31,6 +31,10 @@ mongodb-database = catalog-test
 # Path to docker socket/host - you can leave this blank if you have the appropriate docker env variables defined
 docker-base-url = unix://var/run/docker.sock
 
+# only really required for tests so that in Travis allows the docker client to push
+# to a local registry running on http, set to 0 or 1 or comment out
+docker-push-allow-insecure = 1
+
 #Narrative Method Store configuration
 nms-url = http://localhost:7125
 nms-admin-user = wstester4

@@ -1,5 +1,0 @@
-pymongo==2.8
-docker-py==1.2.3
-gitpython
-pyyaml
-semantic_version

@@ -26,7 +26,7 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details,
+                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_user, nms_admin_psswd, module_details,
                     ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
@@ -41,6 +41,7 @@ class Registrar:
         self.temp_dir = temp_dir
         self.docker_base_url = docker_base_url
         self.docker_registry_host = docker_registry_host
+        self.docker_push_allow_insecure = docker_push_allow_insecure
 
         self.nms_url = nms_url
         self.nms_admin_user = nms_admin_user
@@ -151,13 +152,10 @@ class Registrar:
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 #self.log(str(dockerclient.inspect_image(repo_name)))
                 # if image does not exist, build and set state
-                pprint.pprint(dockerclient.images())
                 self.set_build_step('building the docker image')
                 # imageId is not yet populated properly
                 imageId = self.build_docker_image(dockerclient,self.image_name,basedir)
                 
-                print('here')
-
                 # check if reference data version is defined in kbase.yml
                 if 'data-version' in self.kb_yaml:
                     ref_data_ver = str(self.kb_yaml['data-version']).strip()
@@ -531,7 +529,11 @@ class Registrar:
         #self.log(str(response_stream))
 
         # to do: examine stream to determine success/failure of build
-        for line in docker_client.push(image, tag=tag, stream=True):
+        if self.docker_push_allow_insecure:
+            print("Docker push: insecure_registry: "+ self.docker_push_allow_insecure)
+        else:
+            print("Docker push: insecure_registry: None")
+        for line in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
             # example line:
             #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
             line_parse = json.loads(line)

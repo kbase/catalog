@@ -18,7 +18,7 @@ before_install:
     - mongo --eval "printjson(db.serverStatus())"
 
 install:
-    - pip install -r requirements.txt
+    - pip install -r travis_requirements.txt
     - cd ..
     - git clone https://github.com/kbase/jars
     - git clone https://github.com/kbase/kb_sdk
