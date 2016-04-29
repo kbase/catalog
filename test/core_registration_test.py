@@ -33,6 +33,7 @@ class CoreRegistrationTest(unittest.TestCase):
         while True:
             state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
             if state['registration'] in ['complete','error']:
+                print state
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
@@ -121,7 +122,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertIsNone(info['release'])
         self.validate_basic_test_module_info_fields(info,giturl,module_name,owners)
         self.assertEqual(info['dev']['git_commit_hash'],githash)
-        self.assertEqual(info['dev']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['dev']['git_commit_message'],'added some basic things')
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
@@ -156,14 +157,14 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertIsNone(info['release'])
         self.validate_basic_test_module_info_fields(info,giturl,module_name,owners)
         self.assertEqual(info['dev']['git_commit_hash'],githash)
-        self.assertEqual(info['dev']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['dev']['git_commit_message'],'added some basic things')
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
 
         self.assertEqual(info['beta']['docker_img_name'].split('/')[1], 'kbase:' + module_name.lower()+'.'+githash)
         self.assertEqual(info['beta']['git_commit_hash'],githash)
-        self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['beta']['git_commit_message'],'added some basic things')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
@@ -247,21 +248,21 @@ class CoreRegistrationTest(unittest.TestCase):
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
         self.validate_basic_test_module_info_fields(info,giturl,module_name,owners)
         self.assertEqual(info['dev']['git_commit_hash'],githash)
-        self.assertEqual(info['dev']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['dev']['git_commit_message'],'added some basic things')
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['dev']['version'],'0.0.1')
         self.assertEqual(info['dev']['timestamp'],timestamp)
         self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         self.assertEqual(info['beta']['git_commit_hash'],githash)
-        self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['beta']['git_commit_message'],'added some basic things')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
         self.assertEqual(info['beta']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         self.assertEqual(info['release']['git_commit_hash'],githash)
-        self.assertEqual(info['release']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['release']['git_commit_message'],'added some basic things')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
@@ -272,7 +273,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(len(versions),1)
 
         self.assertEqual(versions[0]['git_commit_hash'],githash)
-        self.assertEqual(versions[0]['git_commit_message'],'added some basic things\n')
+        self.assertEqual(versions[0]['git_commit_message'],'added some basic things')
         self.assertEqual(versions[0]['narrative_methods'],['test_method_1'])
         self.assertEqual(versions[0]['version'],'0.0.1')
         self.assertEqual(versions[0]['timestamp'],timestamp)
@@ -320,21 +321,21 @@ class CoreRegistrationTest(unittest.TestCase):
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
         self.validate_basic_test_module_info_fields(info,giturl,module_name,owners)
         self.assertEqual(info['dev']['git_commit_hash'],githash2)
-        self.assertEqual(info['dev']['git_commit_message'],'added new method\n')
+        self.assertEqual(info['dev']['git_commit_message'],'added new method')
         self.assertEqual(info['dev']['narrative_methods'],['test_method_1','test_method_2'])
         self.assertEqual(info['dev']['version'],'0.0.2')
         self.assertEqual(info['dev']['timestamp'],timestamp2)
         self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash2)
 
         self.assertEqual(info['beta']['git_commit_hash'],githash)
-        self.assertEqual(info['beta']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['beta']['git_commit_message'],'added some basic things')
         self.assertEqual(info['beta']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['beta']['version'],'0.0.1')
         self.assertEqual(info['beta']['timestamp'],timestamp)
         self.assertEqual(info['beta']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         self.assertEqual(info['release']['git_commit_hash'],githash)
-        self.assertEqual(info['release']['git_commit_message'],'added some basic things\n')
+        self.assertEqual(info['release']['git_commit_message'],'added some basic things')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
@@ -354,7 +355,7 @@ class CoreRegistrationTest(unittest.TestCase):
                         {'module_name':module_name, 'decision':'approved'})
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
         self.assertEqual(info['release']['git_commit_hash'],githash2)
-        self.assertEqual(info['release']['git_commit_message'],'added new method\n')
+        self.assertEqual(info['release']['git_commit_message'],'added new method')
         self.assertEqual(info['release']['narrative_methods'],['test_method_1','test_method_2'])
         self.assertEqual(info['release']['version'],'0.0.2')
         self.assertEqual(info['release']['timestamp'],timestamp2)
@@ -472,7 +473,7 @@ class CoreRegistrationTest(unittest.TestCase):
 #{'beta': None,
 # 'description': u'A test module',
 # 'dev': {u'git_commit_hash': u'4ada53f318f69a38276e82d0e841e685aa0c2362',
-#         u'git_commit_message': u'added some basic things\n',
+#         u'git_commit_message': u'added some basic things',
 #         u'narrative_methods': [u'test_method_1'],
 #         u'timestamp': 1445888811416L,
 #         u'version': u'0.0.1'},
