@@ -980,8 +980,6 @@ class CatalogController:
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host,
                         docker_push_allow_insecure,
                         nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
-    print('STARTING REGISTRATION')
-    print(docker_push_allow_insecure)
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
                             docker_push_allow_insecure, 
                             nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
