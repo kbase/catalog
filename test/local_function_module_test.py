@@ -44,8 +44,10 @@ class LocalFunctionModuleTest(unittest.TestCase):
                                 'limit':1000
                             })[0]
             for l in parsed_log['log']:
-                print(l['content'], end='')
                 last_line+=1
+                if('- Pushing -' in l['content']):
+                    continue
+                print(l['content'], end='')
 
             if state['registration'] in ['complete','error']:
                 break

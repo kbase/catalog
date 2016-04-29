@@ -12,6 +12,7 @@ before_install:
     - apt-cache madison docker-engine
     # upgrade docker-engine to specific version
     - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
+    - docker version
     # get and install mongodb
     - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGODB_VERSION.tgz
     - tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
@@ -20,6 +21,8 @@ before_install:
     - mongod --dbpath=mongodata/db --fork --logpath /dev/null
     - sleep 3
     - mongo --eval "printjson(db.serverStatus())"
+    - javac -version
+    - java -version
 
 install:
     - pip install -r travis_requirements.txt
@@ -35,7 +38,6 @@ install:
     - make
 
 script:
-    - docker version
     - cp -n test/test.cfg.example test/test.cfg
     - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg
     - make test
