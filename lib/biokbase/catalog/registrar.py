@@ -18,7 +18,9 @@ from docker import Client as DockerClient
 from docker.tls import TLSConfig as DockerTLSConfig
 
 from biokbase.catalog.db import MongoCatalogDBI
+from biokbase.catalog.local_function_reader import LocalFunctionReader
 from biokbase.narrative_method_store.client import NarrativeMethodStore
+
 
     
 class Registrar:
@@ -48,6 +50,8 @@ class Registrar:
         self.nms_admin_psswd = nms_admin_psswd
 
         self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+
+        self.local_function_reader = LocalFunctionReader()
 
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
@@ -99,7 +103,8 @@ class Registrar:
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('reading files and performing basic checks')
-            self.sanity_checks_and_parse(basedir)
+            self.sanity_checks_and_parse(basedir, git_commit_hash)
+
 
             ##############################
             # 2.5 - dealing with git releases .git/config.lock, if it still exists after 5s then kill it
@@ -213,7 +218,7 @@ class Registrar:
 
 
 
-    def sanity_checks_and_parse(self, basedir):
+    def sanity_checks_and_parse(self, basedir, git_commit_hash):
         # check that files exist
         yaml_filename = 'kbase.yaml'
         if not os.path.isfile(os.path.join(basedir,'kbase.yaml')) :
@@ -269,6 +274,13 @@ class Registrar:
 
         # TODO: check for directory structure, method spec format, documentation, version
         self.validate_method_specs(basedir)
+
+        # initial validation of the local function specifications
+        lf_report = self.local_function_reader.parse_and_basic_validation(basedir, self.module_details, module_name, version, git_commit_hash)
+        self.log(self.local_function_reader.report_to_string_for_log(lf_report))
+
+        if len(lf_report['functions_errored']) > 0:
+            raise ValueError('Errors exist in local function specifications.')
 
         # return the parse so we can figure things out later
         return self.kb_yaml
@@ -464,8 +476,8 @@ class Registrar:
         lines = content.splitlines();
         for l in lines:
             # add each line to the buffer
-            if len(l)>10000 :
-                l = l[0:10000] + ' ... truncated to 10k characters of ' + str(len(l))
+            if len(l)>1000 :
+                l = l[0:1000] + ' ... truncated to 1k characters of ' + str(len(l))
             self.log_buffer.append({'content':l+'\n', 'error':is_error})
 
         # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
