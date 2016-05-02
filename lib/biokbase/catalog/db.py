@@ -84,12 +84,31 @@ FAVORITES
         timestamp:
     }
 
+
+LOCAL_FUNCTIONS
+
+    {
+        module_name:
+        module_name_lc:
+        version:
+        git_commit_hash:
+        functions:
+        
+    }
+
+
+
+
+
+
+
 '''
 class MongoCatalogDBI:
 
     # Collection Names
 
     _MODULES='modules'
+    _LOCAL_FUNCTIONS='local_functions'
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
     _FAVORITES='favorites'
@@ -110,6 +129,7 @@ class MongoCatalogDBI:
         # Grab a handle to the database and collections
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
+        self.local_functions = self.db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
@@ -128,9 +148,19 @@ class MongoCatalogDBI:
         self.modules.ensure_index('module_name', unique=True, sparse=True)
         self.modules.ensure_index('module_name_lc', unique=True, sparse=True)
         self.modules.ensure_index('git_url', unique=True)
-
-        # other indecies for query performance
         self.modules.ensure_index('owners.kb_username')
+
+        # local function indecies
+        self.local_functions.ensure_index('module_name_lc')
+        self.local_functions.ensure_index('git_commit_hash')
+        self.local_functions.ensure_index('function_id')
+        self.local_functions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('function_id',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
+
+        # developers indecies
 
         self.developers.ensure_index('kb_username', unique=True)
 
@@ -389,6 +419,19 @@ class MongoCatalogDBI:
             return self._check_update_result(result)
         return False
 
+
+    def save_local_function_specs(self, local_functions):
+        # just using insert doesn't accept a list of docs in mongo 2.6, so loop for now
+        for l in local_functions:
+            matcher = {'module_name_lc':l['module_name_lc'], 'function_id':l['function_id'], 'git_commit_hash':l['git_commit_hash']}
+            # insert or update- allows us to capture the latest info if a specific commit is reregistered without adding a duplicate
+            # or throwing an error
+            result = self.local_functions.update(matcher, l, upsert=True)
+            if self._check_update_result(result):
+                error = self._check_update_result(result)
+                error['mssg'] = 'An insert/upsert did not work on ' + l['function_id']
+                return error
+        return None
 
 
     def set_module_name(self, git_url, module_name):

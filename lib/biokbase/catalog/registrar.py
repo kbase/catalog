@@ -322,6 +322,8 @@ class Registrar:
         # Combining it into one call would just mean that this update happens as a single transaction, but a partial
         # update for now that fails midstream is probably not a huge issue- we can always reregister.
 
+
+
         # next update the basic information
         info = {
             'description': module_description,
@@ -334,7 +336,7 @@ class Registrar:
         self.log('new info: '+pprint.pformat(info))
         error = self.db.set_module_info(info, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to set module info - there was an internal database error: '+error)
+            raise ValueError('Unable to set module info - there was an internal database error: '+str(error))
 
         # next update the owners
         ownersListForUpdate = []
@@ -344,7 +346,7 @@ class Registrar:
         self.log('new owners list: '+pprint.pformat(ownersListForUpdate))
         error = self.db.set_module_owners(ownersListForUpdate, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to set module owners - there was an internal database error: '+error)
+            raise ValueError('Unable to set module owners - there was an internal database error: '+str(error))
 
         # finally update the actual dev version info
         narrative_methods = []
@@ -353,6 +355,14 @@ class Registrar:
                 if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
                     narrative_methods.append(m)
 
+        local_functions = self.local_function_reader.extract_lf_records()
+        if len(local_functions) > 0:
+            self.log('Saving local function specs:')
+            self.log(pprint.pformat(local_functions))
+            error = self.db.save_local_function_specs(local_functions)
+            if error is not None:
+                raise ValueError('There was an error saving local function specs, DB says: '+str(error))
+
         new_version = {
             'timestamp':self.timestamp,
             'registration_id':self.registration_id,
@@ -360,6 +370,7 @@ class Registrar:
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
             'narrative_methods': narrative_methods,
+            'local_functions' : self.local_function_reader.extract_lf_names(),
             'docker_img_name': self.image_name,
             'compilation_report': compilation_report
         }
@@ -374,7 +385,7 @@ class Registrar:
         self.log('new dev version object: '+pprint.pformat(new_version))
         error = self.db.update_dev_version(new_version, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to update dev version - there was an internal database error: '+error)
+            raise ValueError('Unable to update dev version - there was an internal database error: '+str(error))
 
         #push to NMS
         self.log('registering specs with NMS')

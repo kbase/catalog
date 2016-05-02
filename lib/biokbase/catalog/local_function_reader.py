@@ -188,7 +188,6 @@ class LocalFunctionReader:
                         self.function_specs[function_id] = function_data
                         report['functions_parsed'].append(function_id)
                         report['n_local_functions'] += 1
-        pprint(report)
         return report
 
 
@@ -215,9 +214,6 @@ class LocalFunctionReader:
             if not isinstance(t, basestring):
                 return False
         return True
-
-
-
 
 
     def finish_validation(self, compilation_report):
