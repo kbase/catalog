@@ -7,7 +7,7 @@ from pprint import pprint
 
 from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
-
+import time
 
 # tests all the basic get methods
 class BasicCatalogTest(unittest.TestCase):
@@ -40,6 +40,7 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(favs[0]['id'],'run_megahit')
         self.assertIsNotNone(favs[0]['timestamp'])
 
+        time.sleep(1)  # force different timestamps so sort works
         self.catalog.add_favorite(ctx,
             {'module_name':'MegaHit', 'id':'run_megahit_2'})
         favs2 = self.catalog.list_favorites({}, user)[0]

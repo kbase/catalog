@@ -20,8 +20,8 @@ class Catalog:
     # the latter method is running.
     #########################################
     VERSION = "0.0.1"
-    GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "154d51c1d246cfd42ef0fe69706dfaa47607d8ae"
+    GIT_URL = "https://github.com/kbase/catalog"
+    GIT_COMMIT_HASH = "2680a67555978f68a050dc52ee7791bae2b89220"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
