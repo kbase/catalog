@@ -282,7 +282,7 @@ class JSONRPCServiceCustom(JSONRPCService):
             # Exception was raised inside the method.
             newerr = ServerError()
             newerr.trace = traceback.format_exc()
-            newerr.data = e.__str__()
+            newerr.data = e.message
             raise newerr
         return result
 
@@ -598,6 +598,9 @@ class Application(object):
                              name='Catalog.is_admin',
                              types=[basestring])
         self.method_authentication['Catalog.is_admin'] = 'none'
+        self.rpc_service.add(impl_Catalog.status,
+                             name='Catalog.status',
+                             types=[dict])
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,
