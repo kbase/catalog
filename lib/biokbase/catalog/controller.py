@@ -551,8 +551,38 @@ class CatalogController:
 
         #info_list = self.cc.list_local_functions(params)
 
+        if 'functions' not in params:
+            raise ValueError('Missing required parameter field "functions"')
 
-        return []
+        if not isinstance(params['functions'],list):
+            raise ValueError('Parameter field "functions" must be a list')
+
+        if len(params['functions']) == 0:
+            return []
+
+        for f in params['functions']:
+            if not isinstance(f,dict):
+                raise ValueError('Values of the "functions" list must be objects')
+            # must have module_name and function_id
+            if 'module_name' not in f:
+                raise ValueError('All functions specified must specify a "module_name"')
+            if not isinstance(f['module_name'],basestring):
+                raise ValueError('"module_name" in function specification must be a string')
+            if 'function_id' not in f:
+                raise ValueError('All functions specified must specify a "function_id"')
+            if not isinstance(f['function_id'],basestring):
+                raise ValueError('"function_id" in function specification must be a string')
+            # optionally, release tag or git_commit_hash must be strings
+            if 'release_tag' in f:
+                if not isinstance(f['release_tag'],basestring):
+                    raise ValueError('"release_tag" in function specification must be a string')
+                if f['release_tag'] not in ['dev','beta','release']:
+                    raise ValueError('"release_tag" must be one of dev | beta | release')
+            if 'git_commit_hash' in f:
+                if not isinstance(f['git_commit_hash'],basestring):
+                    raise ValueError('"git_commit_hash" in function specification must be a string')
+
+        return self.db.get_local_function_spec(params['functions'])
 
 
     def set_module_active_state(self, active, params, username):

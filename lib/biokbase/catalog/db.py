@@ -509,11 +509,81 @@ class MongoCatalogDBI:
 
         return local_funcs
 
-        
-    def get_local_function_spec(self, module_name='', git_commit_hash='', release_tag='', function_id=''):
-        # if no git commit hash and release tag, default to latest released
-        # if no function id, list everything in the module
-        pass
+
+    def get_local_function_spec(self, functions):
+
+        result_list = []
+
+        # first lookup all the module info so we can figure out any tags, and make a quick dict
+        module_name_lc_lookup = []
+        for f in functions:
+            module_name_lc_lookup.append(f['module_name'].lower())
+
+        mods = list(self.db.modules.find({'module_name_lc' : {'$in': module_name_lc_lookup}},
+                        {   
+                            '_id':0,
+                            'module_name_lc':1,
+                            'current_versions.dev.git_commit_hash':1,
+                            'current_versions.beta.git_commit_hash':1,
+                            'current_versions.release.git_commit_hash':1
+                        }))
+        mod_lookup = {}
+        git_hash_release_tag_lookup = {}
+        for m in mods:
+            mod_lookup[m['module_name_lc']] = m
+            for tag in ['dev','beta','release']:
+                if tag in m['current_versions']:
+                    if 'git_commit_hash' in m['current_versions'][tag]:
+                        git_hash_release_tag_lookup[m['current_versions'][tag]['git_commit_hash']] =tag
+
+        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here 
+        for f in functions:
+            query = {
+                'module_name_lc':f['module_name'].lower(),
+                'function_id':f['function_id'].lower()
+            }
+
+            if 'release_tag' in f:
+                if query['module_name_lc'] not in mod_lookup: continue
+                module = mod_lookup[query['module_name_lc']]
+                if f['release_tag'] in module['current_versions']:
+                    if 'git_commit_hash' in m['current_versions'][f['release_tag']]:
+                        query['git_commit_hash'] = m['current_versions'][f['release_tag']]['git_commit_hash']
+                else:
+                    continue
+                if 'git_commit_hash' in f:
+                    if f['git_commit_hash'] != query['git_commit_hash']:
+                        raise ValueError('For lookup: '+f['module_name']+'.'+f['function_id']+', release tag commit hash '+
+                            '('+git_commit_hash_needed+') does not match selector you gave ('+f['git_commit_hash']+')')
+            else:
+                if 'git_commit_hash' in f:
+                    query['git_commit_hash'] = f['git_commit_hash']
+                else:
+                    if query['module_name_lc'] not in mod_lookup: continue
+                    module = mod_lookup[query['module_name_lc']]
+                    if 'release' in module['current_versions']:
+                        if 'git_commit_hash' in module['current_versions']['release']:
+                            query['git_commit_hash'] = module['current_versions']['release']['git_commit_hash']
+                    if 'git_commit_hash' not in query:
+                        # no release version to return
+                        continue
+
+            # ok, finally do the query
+            function_data = self.db.local_functions.find_one(query, { '_id':0 })
+            long_description = function_data['long_description']
+            del(function_data['long_description'])
+            if 'release_tag' in f:
+                function_data['release_tag'] = f['release_tag']
+            else:
+                if function_data['git_commit_hash'] in git_hash_release_tag_lookup:
+                    function_data['release_tag'] = git_hash_release_tag_lookup[function_data['git_commit_hash']]
+
+            result_list.append({
+                'info': function_data,
+                'long_description': long_description
+            })
+
+        return result_list
 
     def set_module_name(self, git_url, module_name):
         if not module_name:

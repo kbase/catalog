@@ -73,6 +73,19 @@ class LocalFunctionModuleTest(unittest.TestCase):
 
         pprint(self.catalog.list_local_functions(self.cUtil.user_ctx(), {'module_names':['blah','GenomeTopowerpointConverter']}))
 
+        specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
+            {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome'}]})[0]
+        pprint(specs)
+
+        specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
+            {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 'release_tag':'beta'}]})[0]
+        pprint(specs)
+
+
+        specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
+            {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 'release_tag':'beta', 'git_commit_hash':'a01e1a20b9c504a0136c75323b00b1cd4c7f7970'}]})[0]
+        pprint(specs)
+
 
 
     @classmethod
