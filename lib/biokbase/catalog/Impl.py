@@ -19,6 +19,10 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
+    VERSION = "0.0.1"
+    GIT_URL = "https://github.com/kbase/catalog"
+    GIT_COMMIT_HASH = "2680a67555978f68a050dc52ee7791bae2b89220"
+    
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -37,6 +41,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
+    
 
     def version(self, ctx):
         # ctx is the context object
@@ -513,4 +518,11 @@ class Catalog:
             raise ValueError('Method is_admin return value ' +
                              'returnVal is not type int as required.')
         # return the results
+        return [returnVal]
+
+    def status(self, ctx):
+        #BEGIN_STATUS
+        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
+                     'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
+        #END_STATUS
         return [returnVal]
