@@ -168,6 +168,7 @@ module Catalog {
         string git_commit_message;
         boolean dynamic_service;
         list<string> narrative_method_ids;
+        list<string> local_function_ids;
         string docker_img_name;
         string data_folder;
         string data_version;
@@ -218,6 +219,70 @@ module Catalog {
     funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
 
 
+    /* Local Function Listing Support */
+
+
+
+    typedef structure {
+        list<string> file_types;
+        list<string> kb_types;
+    } IOTags;
+
+    typedef structure {
+        list <string> categories;
+        IOTags input;
+        IOTags output;
+    } LocalFunctionTags;
+
+    typedef structure {
+        string module_name;
+        string function_id;
+        string git_commit_hash;
+
+        string version;
+        string release_tag;
+
+        string name;
+        string short_description;
+
+        LocalFunctionTags tags;
+    } LocalFunctionInfo;
+
+
+
+    typedef structure {
+        LocalFunctionInfo info;
+        string long_description;
+    } LocalFunctionDetails;
+
+    /*
+        Allows various ways to filter.
+        Release tag = dev/beta/release
+        module_names = only include modules in the list
+    */
+    typedef structure {
+        string release_tag;
+        list<string> module_names;
+    } ListLocalFunctionParams;
+
+    funcdef list_local_functions(ListLocalFunctionParams params) returns (list<LocalFunctionInfo> info_list);
+
+
+
+    typedef structure {
+        string module_name;
+        string function_id;
+        string release_tag;
+        string git_commit_hash;
+    } SelectOneLocalFunction;
+
+    typedef structure {
+        list<SelectOneLocalFunction> functions;
+    } GetLocalFunctionDetails;
+
+    funcdef get_local_function_details(GetLocalFunctionDetails params) returns (list<LocalFunctionDetails> detail_list);
+
+    /* End local function listing support */
 
 
     /*  DYNAMIC SERVICES SUPPORT Methods */

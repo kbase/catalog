@@ -4,7 +4,7 @@ import unittest
 import os
 
 from pprint import pprint
-from time import time
+from time import time, sleep
 
 from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
@@ -322,7 +322,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.validate_basic_test_module_info_fields(info,giturl,module_name,owners)
         self.assertEqual(info['dev']['git_commit_hash'],githash2)
         self.assertEqual(info['dev']['git_commit_message'],'added new method')
-        self.assertEqual(info['dev']['narrative_methods'],['test_method_1','test_method_2'])
+        self.assertEqual(sorted(info['dev']['narrative_methods']),sorted(['test_method_1','test_method_2']))
         self.assertEqual(info['dev']['version'],'0.0.2')
         self.assertEqual(info['dev']['timestamp'],timestamp2)
         self.assertEqual(info['dev']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash2)
@@ -356,7 +356,7 @@ class CoreRegistrationTest(unittest.TestCase):
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
         self.assertEqual(info['release']['git_commit_hash'],githash2)
         self.assertEqual(info['release']['git_commit_message'],'added new method')
-        self.assertEqual(info['release']['narrative_methods'],['test_method_1','test_method_2'])
+        self.assertEqual(sorted(info['release']['narrative_methods']),sorted(['test_method_1','test_method_2']))
         self.assertEqual(info['release']['version'],'0.0.2')
         self.assertEqual(info['release']['timestamp'],timestamp2)
         self.assertTrue(info['release']['release_timestamp']>timestamp2)
@@ -375,6 +375,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build 3 exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'error')
+        sleep(3) # sleep to make sure the catalog db gets the final log messages
         log = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),{'registration_id':registration_id3})
         self.assertTrue(log is not None)
         found_correct_error = False

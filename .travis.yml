@@ -1,22 +1,49 @@
+sudo: required
 language: python
 python:
     - '2.7'
 services:
-    - mongodb
+    - docker
+    # Note that we need to install mongodb manually for now because the built-in mongo
+    # service in travis is not compatible with the image we need to run docker
+
+before_install:
+    # list docker-engine versions
+    - apt-cache madison docker-engine
+    # upgrade docker-engine to specific version
+    - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
+    - docker version
+    # get and install mongodb
+    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-$MONGODB_VERSION.tgz
+    - tar xfz mongodb-linux-x86_64-$MONGODB_VERSION.tgz
+    - export PATH=`pwd`/mongodb-linux-x86_64-$MONGODB_VERSION/bin:$PATH
+    - mkdir -p mongodata/db
+    - mongod --dbpath=mongodata/db --fork --logpath /dev/null
+    - sleep 3
+    - mongo --eval "printjson(db.serverStatus())"
+    - javac -version
+    - java -version
+
 install:
-    - pip install -r requirements.txt
+    - pip install -r travis_requirements.txt
     - cd ..
     - git clone https://github.com/kbase/jars
     - git clone https://github.com/kbase/kb_sdk
     - cd kb_sdk
     - make
+    - make sdkbase
+    - docker images
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
     - make
+
 script:
     - cp -n test/test.cfg.example test/test.cfg
     - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg
     - make test
+
 env:
   global:
-    secure: "wYp9dN9eMga877iX8TUbO6AN/oMUpsmoVmcmNhUup1D/uMrPF1g2nqqKADV9APcuM1fu7t60nV3NdjyiZByc1YpWVeBYKKLheV6xosLKw1N7T62Ksb1euFSvVAX6OEmr+eaUTTSXwtrHyYhutgL/IWeiqanJRBBH1L7p5M7SJZTOhAtmW+/RElASwmPBxVQCY6vrehUcJ+2H49RnhQPc1ZD1c+favJfl4FMJ2MuYhvD+YBEY+GRyA8yYI46EwXUXitm2/ER24xl2/yggtiwIVC15k7ZH6DjuwXiem2QsMHhZTA38Kahh3YeB+MJAb5uJ4OCIKn04vfZEg/0rNHWcW5sAveI8ogRFtgYXcm/bB1tI7idvJI/87oz9sqqesUgi8/smMyTsERywU3D87VR4Yuh5SJXGWqLpqdmXlXHZTKaUc6YAlus2CyURz2gJjzGKOLc5craNN7Bxz00DluyfcBRYRErEDB8IJldWhxXwgFEsvmlQ9bwquvZsucNg51AsR7fnTY42trY4UDOi2Zvg2G6Wf0oXrkEitxLwD7vjjOmP8lTA+C2wwrUWmgceBNd9o0wNmEEIvhMe3GDAqySznGJALbl1xnuQEXO9ChyZAluDOKi212dtT2hDEa59Mha+A1AiIsp5xmwv+as/vAXv9aOZ+lp1ncdOHr5VMH02/kE="
+    - secure: "wYp9dN9eMga877iX8TUbO6AN/oMUpsmoVmcmNhUup1D/uMrPF1g2nqqKADV9APcuM1fu7t60nV3NdjyiZByc1YpWVeBYKKLheV6xosLKw1N7T62Ksb1euFSvVAX6OEmr+eaUTTSXwtrHyYhutgL/IWeiqanJRBBH1L7p5M7SJZTOhAtmW+/RElASwmPBxVQCY6vrehUcJ+2H49RnhQPc1ZD1c+favJfl4FMJ2MuYhvD+YBEY+GRyA8yYI46EwXUXitm2/ER24xl2/yggtiwIVC15k7ZH6DjuwXiem2QsMHhZTA38Kahh3YeB+MJAb5uJ4OCIKn04vfZEg/0rNHWcW5sAveI8ogRFtgYXcm/bB1tI7idvJI/87oz9sqqesUgi8/smMyTsERywU3D87VR4Yuh5SJXGWqLpqdmXlXHZTKaUc6YAlus2CyURz2gJjzGKOLc5craNN7Bxz00DluyfcBRYRErEDB8IJldWhxXwgFEsvmlQ9bwquvZsucNg51AsR7fnTY42trY4UDOi2Zvg2G6Wf0oXrkEitxLwD7vjjOmP8lTA+C2wwrUWmgceBNd9o0wNmEEIvhMe3GDAqySznGJALbl1xnuQEXO9ChyZAluDOKi212dtT2hDEa59Mha+A1AiIsp5xmwv+as/vAXv9aOZ+lp1ncdOHr5VMH02/kE="
+    - MONGODB_VERSION=2.6.10
+    - DOCKER_VERSION=1.10.1-0~trusty

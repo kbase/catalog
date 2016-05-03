@@ -2,9 +2,9 @@
 
 import os
 import json
+import datetime
 
 from pprint import pprint, pformat
-from datetime import datetime
 from ConfigParser import ConfigParser
 from pymongo import MongoClient
 
@@ -46,6 +46,7 @@ class CatalogTestUtil:
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])
         db = self.mongo[self.test_cfg['mongodb-database']]
         self.modules = db[MongoCatalogDBI._MODULES]
+        self.local_functions = db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = db[MongoCatalogDBI._FAVORITES]
@@ -57,6 +58,7 @@ class CatalogTestUtil:
 
         # just drop the test db
         self.modules.drop()
+        self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()
@@ -71,7 +73,7 @@ class CatalogTestUtil:
         self.initialize_mongo()
 
         # 3 setup the scratch space
-        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',str(datetime.now()))
+        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',datetime.datetime.now().strftime("%Y-%m-%d-(%H-%M-%S-%f)"))
         self.log("scratch directory="+self.scratch_dir)
         os.makedirs(self.scratch_dir)
 
@@ -87,6 +89,7 @@ class CatalogTestUtil:
             'temp-dir':self.scratch_dir,
             'docker-base-url':self.test_cfg['docker-base-url'],
             'docker-registry-host':self.test_cfg['docker-registry-host'],
+            'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
             'nms-url':self.test_cfg['nms-url'],
             'nms-admin-user':self.test_cfg['nms-admin-user'],
             'nms-admin-psswd':self.test_cfg['nms-admin-psswd'],
@@ -167,6 +170,7 @@ class CatalogTestUtil:
     def tearDown(self):
         self.log("tearDown()")
         self.modules.drop()
+        self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()

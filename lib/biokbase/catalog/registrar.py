@@ -18,7 +18,9 @@ from docker import Client as DockerClient
 from docker.tls import TLSConfig as DockerTLSConfig
 
 from biokbase.catalog.db import MongoCatalogDBI
+from biokbase.catalog.local_function_reader import LocalFunctionReader
 from biokbase.narrative_method_store.client import NarrativeMethodStore
+
 
     
 class Registrar:
@@ -26,7 +28,7 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details,
+                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_user, nms_admin_psswd, module_details,
                     ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
@@ -41,12 +43,15 @@ class Registrar:
         self.temp_dir = temp_dir
         self.docker_base_url = docker_base_url
         self.docker_registry_host = docker_registry_host
+        self.docker_push_allow_insecure = docker_push_allow_insecure
 
         self.nms_url = nms_url
         self.nms_admin_user = nms_admin_user
         self.nms_admin_psswd = nms_admin_psswd
 
         self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+
+        self.local_function_reader = LocalFunctionReader()
 
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
@@ -98,7 +103,8 @@ class Registrar:
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('reading files and performing basic checks')
-            self.sanity_checks_and_parse(basedir)
+            self.sanity_checks_and_parse(basedir, git_commit_hash)
+
 
             ##############################
             # 2.5 - dealing with git releases .git/config.lock, if it still exists after 5s then kill it
@@ -171,12 +177,16 @@ class Registrar:
                                                   ref_data_ver, basedir, self.temp_dir, self.registration_id,
                                                   self.token, self.kbase_endpoint)
                 
+                print('preparing report')
+
                 # Trying to extract compilation report with line numbers of funcdefs from docker image.
                 # There is "report" entry-point command responsible for that. In case there are any
                 # errors we just skip it.
                 compilation_report = self.prepare_compilation_report(dockerclient, self.image_name, basedir, 
                                                                      self.temp_dir, self.registration_id, 
                                                                      self.token, self.kbase_endpoint)
+
+                pprint.pprint(compilation_report)
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
@@ -208,7 +218,7 @@ class Registrar:
 
 
 
-    def sanity_checks_and_parse(self, basedir):
+    def sanity_checks_and_parse(self, basedir, git_commit_hash):
         # check that files exist
         yaml_filename = 'kbase.yaml'
         if not os.path.isfile(os.path.join(basedir,'kbase.yaml')) :
@@ -265,6 +275,13 @@ class Registrar:
         # TODO: check for directory structure, method spec format, documentation, version
         self.validate_method_specs(basedir)
 
+        # initial validation of the local function specifications
+        lf_report = self.local_function_reader.parse_and_basic_validation(basedir, self.module_details, module_name, version, git_commit_hash)
+        self.log(self.local_function_reader.report_to_string_for_log(lf_report))
+
+        if len(lf_report['functions_errored']) > 0:
+            raise ValueError('Errors exist in local function specifications.')
+
         # return the parse so we can figure things out later
         return self.kb_yaml
 
@@ -305,6 +322,8 @@ class Registrar:
         # Combining it into one call would just mean that this update happens as a single transaction, but a partial
         # update for now that fails midstream is probably not a huge issue- we can always reregister.
 
+
+
         # next update the basic information
         info = {
             'description': module_description,
@@ -317,7 +336,7 @@ class Registrar:
         self.log('new info: '+pprint.pformat(info))
         error = self.db.set_module_info(info, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to set module info - there was an internal database error: '+error)
+            raise ValueError('Unable to set module info - there was an internal database error: '+str(error))
 
         # next update the owners
         ownersListForUpdate = []
@@ -327,7 +346,7 @@ class Registrar:
         self.log('new owners list: '+pprint.pformat(ownersListForUpdate))
         error = self.db.set_module_owners(ownersListForUpdate, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to set module owners - there was an internal database error: '+error)
+            raise ValueError('Unable to set module owners - there was an internal database error: '+str(error))
 
         # finally update the actual dev version info
         narrative_methods = []
@@ -336,6 +355,14 @@ class Registrar:
                 if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
                     narrative_methods.append(m)
 
+        local_functions = self.local_function_reader.extract_lf_records()
+        if len(local_functions) > 0:
+            self.log('Saving local function specs:')
+            self.log(pprint.pformat(local_functions))
+            error = self.db.save_local_function_specs(local_functions)
+            if error is not None:
+                raise ValueError('There was an error saving local function specs, DB says: '+str(error))
+
         new_version = {
             'timestamp':self.timestamp,
             'registration_id':self.registration_id,
@@ -343,6 +370,7 @@ class Registrar:
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
             'narrative_methods': narrative_methods,
+            'local_functions' : self.local_function_reader.extract_lf_names(),
             'docker_img_name': self.image_name,
             'compilation_report': compilation_report
         }
@@ -357,7 +385,7 @@ class Registrar:
         self.log('new dev version object: '+pprint.pformat(new_version))
         error = self.db.update_dev_version(new_version, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to update dev version - there was an internal database error: '+error)
+            raise ValueError('Unable to update dev version - there was an internal database error: '+str(error))
 
         #push to NMS
         self.log('registering specs with NMS')
@@ -459,8 +487,8 @@ class Registrar:
         lines = content.splitlines();
         for l in lines:
             # add each line to the buffer
-            if len(l)>10000 :
-                l = l[0:10000] + ' ... truncated to 10k characters of ' + str(len(l))
+            if len(l)>1000 :
+                l = l[0:1000] + ' ... truncated to 1k characters of ' + str(len(l))
             self.log_buffer.append({'content':l+'\n', 'error':is_error})
 
         # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
@@ -496,7 +524,7 @@ class Registrar:
         # examine stream to determine success/failure of build
         imageId=None
         last={}
-        for line in docker_client.build(path=basedir,rm=True,tag=image_name):
+        for line in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
             line_parse = json.loads(line)
             log_line = ''
             if 'stream' in line_parse:
@@ -524,7 +552,11 @@ class Registrar:
         #self.log(str(response_stream))
 
         # to do: examine stream to determine success/failure of build
-        for line in docker_client.push(image, tag=tag, stream=True):
+        if self.docker_push_allow_insecure:
+            print("Docker push: insecure_registry: "+ str(self.docker_push_allow_insecure))
+        else:
+            print("Docker push: insecure_registry: None")
+        for line in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
             # example line:
             #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
             line_parse = json.loads(line)

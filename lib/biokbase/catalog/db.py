@@ -84,12 +84,31 @@ FAVORITES
         timestamp:
     }
 
+
+LOCAL_FUNCTIONS
+
+    {
+        module_name:
+        module_name_lc:
+        version:
+        git_commit_hash:
+        functions:
+        
+    }
+
+
+
+
+
+
+
 '''
 class MongoCatalogDBI:
 
     # Collection Names
 
     _MODULES='modules'
+    _LOCAL_FUNCTIONS='local_functions'
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
     _FAVORITES='favorites'
@@ -110,6 +129,7 @@ class MongoCatalogDBI:
         # Grab a handle to the database and collections
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
+        self.local_functions = self.db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
@@ -128,9 +148,19 @@ class MongoCatalogDBI:
         self.modules.ensure_index('module_name', unique=True, sparse=True)
         self.modules.ensure_index('module_name_lc', unique=True, sparse=True)
         self.modules.ensure_index('git_url', unique=True)
-
-        # other indecies for query performance
         self.modules.ensure_index('owners.kb_username')
+
+        # local function indecies
+        self.local_functions.ensure_index('module_name_lc')
+        self.local_functions.ensure_index('git_commit_hash')
+        self.local_functions.ensure_index('function_id')
+        self.local_functions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('function_id',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
+
+        # developers indecies
 
         self.developers.ensure_index('kb_username', unique=True)
 
@@ -390,6 +420,170 @@ class MongoCatalogDBI:
         return False
 
 
+    def save_local_function_specs(self, local_functions):
+        # just using insert doesn't accept a list of docs in mongo 2.6, so loop for now
+        for l in local_functions:
+            matcher = {'module_name_lc':l['module_name_lc'], 'function_id':l['function_id'], 'git_commit_hash':l['git_commit_hash']}
+            # insert or update- allows us to capture the latest info if a specific commit is reregistered without adding a duplicate
+            # or throwing an error
+            result = self.local_functions.update(matcher, l, upsert=True)
+            if self._check_update_result(result):
+                error = self._check_update_result(result)
+                error['mssg'] = 'An insert/upsert did not work on ' + l['function_id']
+                return error
+        return None
+
+
+
+    def list_local_function_info(self, release_tag=None, module_names=[]):
+
+        git_commit_hash_list = []
+        git_commit_hash_release_tag_map = {}
+
+        # if no module names are given, then use the release tag and get all latest released functions
+        if len(module_names)==0:
+            if not release_tag:
+                raise ValueError('In catalog DB, internal error: release_tag or module_names is required.')
+            mods = list(self.db.modules.find({'current_versions.'+release_tag+'.local_functions.0': {'$exists': True}},
+                                {'_id':0, 'current_versions.'+release_tag+'.git_commit_hash':1 }))
+            for m in mods:
+                git_commit_hash_list.append(m['current_versions'][release_tag]['git_commit_hash'])
+
+        # if modules are defined, then do some more work
+        if len(module_names)>0:
+
+            module_names_lc = []
+            for name in module_names:
+                module_names_lc.append(name.lower())
+
+            # if module names and a release tag is present, then get those exactly
+            if release_tag:
+                mods = list(self.db.modules.find({
+                            'current_versions.'+release_tag+'.local_functions.0': {'$exists': True},
+                            'module_name_lc' : {'$in': module_names_lc}
+                        },{'_id':0, 'current_versions.'+release_tag+'.git_commit_hash':1 }))
+                for m in mods:
+                    git_commit_hash_list.append(m['current_versions'][release_tag]['git_commit_hash'])
+
+            # if module names but no release tag, then return all versions of the functions in those modules
+            else:
+                mods = list(self.db.modules.find({'module_name_lc' : {'$in': module_names_lc}},
+                            {   
+                                '_id':0,
+                                'current_versions.dev.git_commit_hash':1,
+                                'current_versions.beta.git_commit_hash':1,
+                                'current_versions.release.git_commit_hash':1,
+                                'release_version_list':1
+                            }))
+                # get the git commit hashes, and remember to mark the versions that are tagged dev/beta/release
+                for m in mods:
+                    for tag in ['dev', 'beta', 'release']: # need to go in order so that we get the tag listed properly
+                        if tag in m['current_versions']:
+                            if 'git_commit_hash' in m['current_versions'][tag]:
+                                git_commit_hash_list.append(m['current_versions'][tag]['git_commit_hash'])
+                                git_commit_hash_release_tag_map[m['current_versions'][tag]['git_commit_hash']] = tag
+                    for r in m['release_version_list']:
+                            git_commit_hash_list.append(r['git_commit_hash'])
+
+        included_fields = {
+            '_id':0,
+            'module_name':1,
+            'function_id':1,
+            'git_commit_hash':1,
+            'version':1,
+            'name':1,
+            'short_description':1,
+            'tags':1,
+            'authors':1
+        }
+
+        local_funcs = list(self.db.local_functions.find({'git_commit_hash':{'$in':git_commit_hash_list}}, included_fields))
+
+        # set the release_tag field
+        for l in local_funcs:
+            if release_tag:
+                l['release_tag'] = release_tag
+            else:
+                if l['git_commit_hash'] in git_commit_hash_release_tag_map:
+                    l['release_tag'] = git_commit_hash_release_tag_map[l['git_commit_hash']]
+
+        return local_funcs
+
+
+    def get_local_function_spec(self, functions):
+
+        result_list = []
+
+        # first lookup all the module info so we can figure out any tags, and make a quick dict
+        module_name_lc_lookup = []
+        for f in functions:
+            module_name_lc_lookup.append(f['module_name'].lower())
+
+        mods = list(self.db.modules.find({'module_name_lc' : {'$in': module_name_lc_lookup}},
+                        {   
+                            '_id':0,
+                            'module_name_lc':1,
+                            'current_versions.dev.git_commit_hash':1,
+                            'current_versions.beta.git_commit_hash':1,
+                            'current_versions.release.git_commit_hash':1
+                        }))
+        mod_lookup = {}
+        git_hash_release_tag_lookup = {}
+        for m in mods:
+            mod_lookup[m['module_name_lc']] = m
+            for tag in ['dev','beta','release']:
+                if tag in m['current_versions']:
+                    if 'git_commit_hash' in m['current_versions'][tag]:
+                        git_hash_release_tag_lookup[m['current_versions'][tag]['git_commit_hash']] =tag
+
+        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here 
+        for f in functions:
+            query = {
+                'module_name_lc':f['module_name'].lower(),
+                'function_id':f['function_id'].lower()
+            }
+
+            if 'release_tag' in f:
+                if query['module_name_lc'] not in mod_lookup: continue
+                module = mod_lookup[query['module_name_lc']]
+                if f['release_tag'] in module['current_versions']:
+                    if 'git_commit_hash' in m['current_versions'][f['release_tag']]:
+                        query['git_commit_hash'] = m['current_versions'][f['release_tag']]['git_commit_hash']
+                else:
+                    continue
+                if 'git_commit_hash' in f:
+                    if f['git_commit_hash'] != query['git_commit_hash']:
+                        raise ValueError('For lookup: '+f['module_name']+'.'+f['function_id']+', release tag commit hash '+
+                            '('+git_commit_hash_needed+') does not match selector you gave ('+f['git_commit_hash']+')')
+            else:
+                if 'git_commit_hash' in f:
+                    query['git_commit_hash'] = f['git_commit_hash']
+                else:
+                    if query['module_name_lc'] not in mod_lookup: continue
+                    module = mod_lookup[query['module_name_lc']]
+                    if 'release' in module['current_versions']:
+                        if 'git_commit_hash' in module['current_versions']['release']:
+                            query['git_commit_hash'] = module['current_versions']['release']['git_commit_hash']
+                    if 'git_commit_hash' not in query:
+                        # no release version to return
+                        continue
+
+            # ok, finally do the query
+            function_data = self.db.local_functions.find_one(query, { '_id':0 })
+            long_description = function_data['long_description']
+            del(function_data['long_description'])
+            if 'release_tag' in f:
+                function_data['release_tag'] = f['release_tag']
+            else:
+                if function_data['git_commit_hash'] in git_hash_release_tag_lookup:
+                    function_data['release_tag'] = git_hash_release_tag_lookup[function_data['git_commit_hash']]
+
+            result_list.append({
+                'info': function_data,
+                'long_description': long_description
+            })
+
+        return result_list
 
     def set_module_name(self, git_url, module_name):
         if not module_name:

@@ -34,7 +34,7 @@ class CatalogController:
                     self.adminList.append(t.strip())
         if not self.adminList:
             warnings.warn('no "admin-users" are set in config of CatalogController.')
-
+        
         # make sure the minimal mongo settings are in place
         if 'mongodb-host' not in config:
             raise ValueError('"mongodb-host" config variable must be defined to start a CatalogController!')
@@ -71,13 +71,21 @@ class CatalogController:
         if 'docker-base-url' not in config:
             raise ValueError('"docker-base-url" config variable must be defined to start a CatalogController!')
         self.docker_base_url = config['docker-base-url']
-        print(self.docker_base_url)
+        print('Docker base url config = '+ self.docker_base_url)
 
         if 'docker-registry-host' not in config:
             raise ValueError('"docker-registry-host" config variable must be defined to start a CatalogController!')
         self.docker_registry_host = config['docker-registry-host']
-        print(self.docker_registry_host)
+        print('Docker registry host config = '+ self.docker_registry_host)
         
+        self.docker_push_allow_insecure = None # none should just set this to default?
+        if 'docker-push-allow-insecure' in config:
+            print('Docker docker-push-allow-insecure = '+ config['docker-push-allow-insecure'])
+            if config['docker-push-allow-insecure'].strip() == "1":
+                self.docker_push_allow_insecure = True;
+                print('WARNING!! - Docker push is set to allow insecure connections.  This should never be on in production.')
+
+
         if 'ref-data-base' not in config:
             raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')
         self.ref_data_base = config['ref-data-base']
@@ -178,7 +186,7 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint,
+            self.docker_registry_host, self.docker_push_allow_insecure, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint,
             prev_dev_version))
         t.start()
 
@@ -487,6 +495,94 @@ class CatalogController:
                 query['owners.kb_username']={'$in':params['owners']}
 
         return self.db.find_basic_module_info(query)
+
+
+
+
+#    typedef structure {
+#        string release_tag;
+#        list<string> module_name;
+#    } ListLocalFunctionParams;
+
+#    funcdef list_local_functions(ListLocalFunctionParams params) returns (list<LocalFunctionInfo> info_list);
+
+
+
+#    typedef structure {
+#        string module_name;
+#        string function_id;
+#        string release_tag;
+#        string git_commit_hash;
+#    } SelectOneLocalFunction;
+
+#    typedef structure {
+#        list<SelectOneLocalFunction> functions;
+#    } GetLocalFunctionDetails;
+
+
+
+    def list_local_functions(self, params):
+
+        module_names = []
+        if 'module_names' in params:
+            if isinstance(params['module_names'], list):
+                for m in params['module_names']:
+                    if not isinstance(m,basestring):
+                        raise ValueError('module_names parameter field must be a list of module names (list of strings)')
+                module_names = params['module_names']
+            else:
+                raise ValueError('Module Names must be a list of module names')
+
+        if len(module_names)>0:
+            release_tag = None
+        else:
+            release_tag = 'release'
+        if 'release_tag' in params:
+            if not isinstance(params['release_tag'],basestring):
+                raise ValueError('release_tag parameter field must be a string (release | beta | dev)')
+            if not params['release_tag'] in ['dev','beta','release']:
+                raise ValueError('release_tag parameter field must be either: "release" | "beta" | "dev"')
+
+            release_tag = params['release_tag']
+
+        return self.db.list_local_function_info(module_names=module_names, release_tag=release_tag)
+
+    def get_local_function_details(self, params):
+
+        #info_list = self.cc.list_local_functions(params)
+
+        if 'functions' not in params:
+            raise ValueError('Missing required parameter field "functions"')
+
+        if not isinstance(params['functions'],list):
+            raise ValueError('Parameter field "functions" must be a list')
+
+        if len(params['functions']) == 0:
+            return []
+
+        for f in params['functions']:
+            if not isinstance(f,dict):
+                raise ValueError('Values of the "functions" list must be objects')
+            # must have module_name and function_id
+            if 'module_name' not in f:
+                raise ValueError('All functions specified must specify a "module_name"')
+            if not isinstance(f['module_name'],basestring):
+                raise ValueError('"module_name" in function specification must be a string')
+            if 'function_id' not in f:
+                raise ValueError('All functions specified must specify a "function_id"')
+            if not isinstance(f['function_id'],basestring):
+                raise ValueError('"function_id" in function specification must be a string')
+            # optionally, release tag or git_commit_hash must be strings
+            if 'release_tag' in f:
+                if not isinstance(f['release_tag'],basestring):
+                    raise ValueError('"release_tag" in function specification must be a string')
+                if f['release_tag'] not in ['dev','beta','release']:
+                    raise ValueError('"release_tag" must be one of dev | beta | release')
+            if 'git_commit_hash' in f:
+                if not isinstance(f['git_commit_hash'],basestring):
+                    raise ValueError('"git_commit_hash" in function specification must be a string')
+
+        return self.db.get_local_function_spec(params['functions'])
 
 
     def set_module_active_state(self, active, params, username):
@@ -969,9 +1065,11 @@ class CatalogController:
 
 
 # NOT PART OF CLASS CATALOG!!
-def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host, 
+def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host,
+                        docker_push_allow_insecure,
                         nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
-                          nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
+                            docker_push_allow_insecure, 
+                            nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
     registrar.start_registration()
 
