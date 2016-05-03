@@ -109,6 +109,12 @@ sync_methods['Catalog.get_version_info'] = True
 async_run_methods['Catalog.list_released_module_versions_async'] = ['Catalog', 'list_released_module_versions']
 async_check_methods['Catalog.list_released_module_versions_check'] = ['Catalog', 'list_released_module_versions']
 sync_methods['Catalog.list_released_module_versions'] = True
+async_run_methods['Catalog.list_local_functions_async'] = ['Catalog', 'list_local_functions']
+async_check_methods['Catalog.list_local_functions_check'] = ['Catalog', 'list_local_functions']
+sync_methods['Catalog.list_local_functions'] = True
+async_run_methods['Catalog.get_local_function_details_async'] = ['Catalog', 'get_local_function_details']
+async_check_methods['Catalog.get_local_function_details_check'] = ['Catalog', 'get_local_function_details']
+sync_methods['Catalog.get_local_function_details'] = True
 async_run_methods['Catalog.module_version_lookup_async'] = ['Catalog', 'module_version_lookup']
 async_check_methods['Catalog.module_version_lookup_check'] = ['Catalog', 'module_version_lookup']
 sync_methods['Catalog.module_version_lookup'] = True
@@ -510,6 +516,14 @@ class Application(object):
                              name='Catalog.list_released_module_versions',
                              types=[dict])
         self.method_authentication['Catalog.list_released_module_versions'] = 'none'
+        self.rpc_service.add(impl_Catalog.list_local_functions,
+                             name='Catalog.list_local_functions',
+                             types=[dict])
+        self.method_authentication['Catalog.list_local_functions'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_local_function_details,
+                             name='Catalog.get_local_function_details',
+                             types=[dict])
+        self.method_authentication['Catalog.get_local_function_details'] = 'none'
         self.rpc_service.add(impl_Catalog.module_version_lookup,
                              name='Catalog.module_version_lookup',
                              types=[dict])
@@ -598,6 +612,9 @@ class Application(object):
                              name='Catalog.is_admin',
                              types=[basestring])
         self.method_authentication['Catalog.is_admin'] = 'none'
+        self.rpc_service.add(impl_Catalog.status,
+                             name='Catalog.status',
+                             types=[dict])
         self.auth_client = biokbase.nexus.Client(
             config={'server': 'nexus.api.globusonline.org',
                     'verify_ssl': True,

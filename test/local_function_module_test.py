@@ -58,6 +58,22 @@ class LocalFunctionModuleTest(unittest.TestCase):
 
 
 
+        self.catalog.push_dev_to_beta(self.cUtil.user_ctx(),{'module_name':'GenomeToPowerpointConverter'})
+
+        pprint('release:')
+        pprint(self.catalog.list_local_functions(self.cUtil.user_ctx(),{}))
+
+        pprint('beta:')
+        pprint(self.catalog.list_local_functions(self.cUtil.user_ctx(),{'release_tag':'beta'}))
+
+        pprint('dev:')
+        pprint(self.catalog.list_local_functions(self.cUtil.user_ctx(),{'release_tag':'dev'}))
+
+        pprint(self.catalog.list_local_functions(self.cUtil.user_ctx(), {'release_tag':'dev', 'module_names':['blah','GenomeTopowerpointConverter']}))
+
+        pprint(self.catalog.list_local_functions(self.cUtil.user_ctx(), {'module_names':['blah','GenomeTopowerpointConverter']}))
+
+
 
     @classmethod
     def setUpClass(cls):

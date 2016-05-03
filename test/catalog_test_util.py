@@ -46,6 +46,7 @@ class CatalogTestUtil:
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])
         db = self.mongo[self.test_cfg['mongodb-database']]
         self.modules = db[MongoCatalogDBI._MODULES]
+        self.local_functions = db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = db[MongoCatalogDBI._FAVORITES]
@@ -57,6 +58,7 @@ class CatalogTestUtil:
 
         # just drop the test db
         self.modules.drop()
+        self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()
@@ -168,6 +170,7 @@ class CatalogTestUtil:
     def tearDown(self):
         self.log("tearDown()")
         self.modules.drop()
+        self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()

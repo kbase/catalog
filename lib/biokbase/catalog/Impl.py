@@ -19,6 +19,10 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
+    VERSION = "0.0.1"
+    GIT_URL = "git@github.com:kbase/catalog.git"
+    GIT_COMMIT_HASH = "154d51c1d246cfd42ef0fe69706dfaa47607d8ae"
+    
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -37,6 +41,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
+    
 
     def version(self, ctx):
         # ctx is the context object
@@ -231,6 +236,34 @@ class Catalog:
                              'versions is not type list as required.')
         # return the results
         return [versions]
+
+    def list_local_functions(self, ctx, params):
+        # ctx is the context object
+        # return variables are: info_list
+        #BEGIN list_local_functions
+        info_list = self.cc.list_local_functions(params)
+        #END list_local_functions
+
+        # At some point might do deeper type checking...
+        if not isinstance(info_list, list):
+            raise ValueError('Method list_local_functions return value ' +
+                             'info_list is not type list as required.')
+        # return the results
+        return [info_list]
+
+    def get_local_function_details(self, ctx, params):
+        # ctx is the context object
+        # return variables are: detail_list
+        #BEGIN get_local_function_details
+        detail_list = self.cc.get_local_function_details(params)
+        #END get_local_function_details
+
+        # At some point might do deeper type checking...
+        if not isinstance(detail_list, list):
+            raise ValueError('Method get_local_function_details return value ' +
+                             'detail_list is not type list as required.')
+        # return the results
+        return [detail_list]
 
     def module_version_lookup(self, ctx, selection):
         # ctx is the context object
@@ -513,4 +546,11 @@ class Catalog:
             raise ValueError('Method is_admin return value ' +
                              'returnVal is not type int as required.')
         # return the results
+        return [returnVal]
+
+    def status(self, ctx):
+        #BEGIN_STATUS
+        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
+                     'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
+        #END_STATUS
         return [returnVal]

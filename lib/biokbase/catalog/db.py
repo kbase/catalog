@@ -434,6 +434,87 @@ class MongoCatalogDBI:
         return None
 
 
+
+    def list_local_function_info(self, release_tag=None, module_names=[]):
+
+        git_commit_hash_list = []
+        git_commit_hash_release_tag_map = {}
+
+        # if no module names are given, then use the release tag and get all latest released functions
+        if len(module_names)==0:
+            if not release_tag:
+                raise ValueError('In catalog DB, internal error: release_tag or module_names is required.')
+            mods = list(self.db.modules.find({'current_versions.'+release_tag+'.local_functions.0': {'$exists': True}},
+                                {'_id':0, 'current_versions.'+release_tag+'.git_commit_hash':1 }))
+            for m in mods:
+                git_commit_hash_list.append(m['current_versions'][release_tag]['git_commit_hash'])
+
+        # if modules are defined, then do some more work
+        if len(module_names)>0:
+
+            module_names_lc = []
+            for name in module_names:
+                module_names_lc.append(name.lower())
+
+            # if module names and a release tag is present, then get those exactly
+            if release_tag:
+                mods = list(self.db.modules.find({
+                            'current_versions.'+release_tag+'.local_functions.0': {'$exists': True},
+                            'module_name_lc' : {'$in': module_names_lc}
+                        },{'_id':0, 'current_versions.'+release_tag+'.git_commit_hash':1 }))
+                for m in mods:
+                    git_commit_hash_list.append(m['current_versions'][release_tag]['git_commit_hash'])
+
+            # if module names but no release tag, then return all versions of the functions in those modules
+            else:
+                mods = list(self.db.modules.find({'module_name_lc' : {'$in': module_names_lc}},
+                            {   
+                                '_id':0,
+                                'current_versions.dev.git_commit_hash':1,
+                                'current_versions.beta.git_commit_hash':1,
+                                'current_versions.release.git_commit_hash':1,
+                                'release_version_list':1
+                            }))
+                # get the git commit hashes, and remember to mark the versions that are tagged dev/beta/release
+                for m in mods:
+                    for tag in ['dev', 'beta', 'release']: # need to go in order so that we get the tag listed properly
+                        if tag in m['current_versions']:
+                            if 'git_commit_hash' in m['current_versions'][tag]:
+                                git_commit_hash_list.append(m['current_versions'][tag]['git_commit_hash'])
+                                git_commit_hash_release_tag_map[m['current_versions'][tag]['git_commit_hash']] = tag
+                    for r in m['release_version_list']:
+                            git_commit_hash_list.append(r['git_commit_hash'])
+
+        included_fields = {
+            '_id':0,
+            'module_name':1,
+            'function_id':1,
+            'git_commit_hash':1,
+            'version':1,
+            'name':1,
+            'short_description':1,
+            'tags':1,
+            'authors':1
+        }
+
+        local_funcs = list(self.db.local_functions.find({'git_commit_hash':{'$in':git_commit_hash_list}}, included_fields))
+
+        # set the release_tag field
+        for l in local_funcs:
+            if release_tag:
+                l['release_tag'] = release_tag
+            else:
+                if l['git_commit_hash'] in git_commit_hash_release_tag_map:
+                    l['release_tag'] = git_commit_hash_release_tag_map[l['git_commit_hash']]
+
+        return local_funcs
+
+        
+    def get_local_function_spec(self, module_name='', git_commit_hash='', release_tag='', function_id=''):
+        # if no git commit hash and release tag, default to latest released
+        # if no function id, list everything in the module
+        pass
+
     def set_module_name(self, git_url, module_name):
         if not module_name:
             raise ValueError('module_name must be defined to set a module name')

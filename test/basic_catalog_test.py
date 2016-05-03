@@ -14,7 +14,7 @@ class BasicCatalogTest(unittest.TestCase):
 
 
     def test_version(self):
-        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['1.1.2'])
+        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['1.1.3'])
 
 
     def test_is_registered(self):

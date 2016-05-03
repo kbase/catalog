@@ -497,6 +497,64 @@ class CatalogController:
         return self.db.find_basic_module_info(query)
 
 
+
+
+#    typedef structure {
+#        string release_tag;
+#        list<string> module_name;
+#    } ListLocalFunctionParams;
+
+#    funcdef list_local_functions(ListLocalFunctionParams params) returns (list<LocalFunctionInfo> info_list);
+
+
+
+#    typedef structure {
+#        string module_name;
+#        string function_id;
+#        string release_tag;
+#        string git_commit_hash;
+#    } SelectOneLocalFunction;
+
+#    typedef structure {
+#        list<SelectOneLocalFunction> functions;
+#    } GetLocalFunctionDetails;
+
+
+
+    def list_local_functions(self, params):
+
+        module_names = []
+        if 'module_names' in params:
+            if isinstance(params['module_names'], list):
+                for m in params['module_names']:
+                    if not isinstance(m,basestring):
+                        raise ValueError('module_names parameter field must be a list of module names (list of strings)')
+                module_names = params['module_names']
+            else:
+                raise ValueError('Module Names must be a list of module names')
+
+        if len(module_names)>0:
+            release_tag = None
+        else:
+            release_tag = 'release'
+        if 'release_tag' in params:
+            if not isinstance(params['release_tag'],basestring):
+                raise ValueError('release_tag parameter field must be a string (release | beta | dev)')
+            if not params['release_tag'] in ['dev','beta','release']:
+                raise ValueError('release_tag parameter field must be either: "release" | "beta" | "dev"')
+
+            release_tag = params['release_tag']
+
+        return self.db.list_local_function_info(module_names=module_names, release_tag=release_tag)
+
+    def get_local_function_details(self, params):
+
+        #info_list = self.cc.list_local_functions(params)
+
+
+        return []
+
+
     def set_module_active_state(self, active, params, username):
         params = self.filter_module_or_repo_selection(params)
         if not self.is_admin(username):
