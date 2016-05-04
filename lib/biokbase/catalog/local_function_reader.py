@@ -38,8 +38,6 @@ class LocalFunctionReader:
     '''
     def parse_and_basic_validation(self, basedir, module_details, module_name, version, git_commit_hash):
 
-        pprint(module_details)
-
         report = { 
             'n_local_functions':0,
             'functions_parsed':[],
@@ -121,7 +119,7 @@ class LocalFunctionReader:
                                         'error': "Local Function specification optional field 'authors' must be a list of strings" })
                                     continue
 
-                            if 'input' in spec_parse:
+                            if 'input' in spec_parse['tags']:
                                 if not isinstance(spec_parse['tags']['input'],dict):
                                     report['functions_errored'].append({'filename':spec, 
                                         'error': "Local Function specification optional field 'tags.input' must be an object" })
@@ -141,7 +139,7 @@ class LocalFunctionReader:
                                         report['functions_errored'].append({'filename':spec, 
                                             'error': "Local Function specification optional field 'tags.input.file_types' must be a list of strings" })
                                         continue
-                            if 'output' in spec_parse:
+                            if 'output' in spec_parse['tags']:
                                 if not isinstance(spec_parse['tags']['output'],dict):
                                     report['functions_errored'].append({'filename':spec, 
                                         'error': "Local Function specification optional field 'tags.output' must be an object" })
