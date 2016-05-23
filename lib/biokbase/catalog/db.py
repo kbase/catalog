@@ -107,7 +107,14 @@ class MongoCatalogDBI:
 
     # Collection Names
 
+
+    _DB_VERSION='db_version' #single
+
     _MODULES='modules'
+
+    _MODULE_VERSIONS='module_versions'
+
+
     _LOCAL_FUNCTIONS='local_functions'
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
@@ -129,20 +136,21 @@ class MongoCatalogDBI:
         # Grab a handle to the database and collections
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
+        self.module_versions = self.db[MongoCatalogDBI._MODULE_VERSIONS]
+
         self.local_functions = self.db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
         self.client_groups = self.db[MongoCatalogDBI._CLIENT_GROUPS]
+
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
-        self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
-                                    {'$rename': {'avg_queue_time': 'total_queue_time',
-                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
-        self.exec_stats_users.update({'avg_queue_time': {'$exists' : True}}, 
-                                    {'$rename': {'avg_queue_time': 'total_queue_time',
-                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
+
+
+        self.check_db_schema()
+
 
         # Make sure we have an index on module and git_repo_url
         self.modules.ensure_index('module_name', unique=True, sparse=True)
@@ -215,8 +223,6 @@ class MongoCatalogDBI:
         #  app_id = [lower case module name]/[app id]
         self.client_groups.ensure_index('app_id', unique=True, sparse=False)
 
-
-        self.correct_release_versions_and_dynamic_services_flag()
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -1041,9 +1047,56 @@ class MongoCatalogDBI:
     
 
 
-    # release versions used to be in a map, but this makes mongo queries difficult
-    # here we switch that in an existing db to a release_version_list
-    def correct_release_versions_and_dynamic_services_flag(self):
+    # DB version handling
+
+    # todo: add 'in-progress' flag so if something goes done during an update, or if
+    # another server is already starting an update, we can skip or abort
+    def check_db_schema(self):
+
+        db_version = self.get_db_version()
+        print('db_version=' + str(db_version))
+
+        if db_version<2:
+            print('Updating DB schema to V2...')
+            self.update_db_1_to_2()
+            self.update_db_version(2)
+            print('done.')
+
+        if db_version<3:
+            print('Updating DB schema to V3...')
+            self.update_db_2_to_3()
+            self.update_db_version(3)
+            print('done.')
+
+
+    def get_db_version(self):
+        # version is a collection that should only have a single 
+        version_collection = self.db[MongoCatalogDBI._DB_VERSION]
+        ver = version_collection.find_one({})
+        if(ver):
+            return ver['version']
+        else:
+            # if there is no version document, then we are DB v1
+            self.update_db_version(1)
+            return 1;
+
+    def update_db_version(self, version):
+        # make sure we can't have two version documents
+        version_collection = self.db[MongoCatalogDBI._DB_VERSION]
+        version_collection.ensure_index('version_doc', unique=True, sparse=False)
+
+        # try to insert the version doc, which will fail if the version doc exists
+        # if it exists, then update
+        try:
+            version_collection.insert({'version_doc':True, 'version':version})
+        except:
+            version_collection.update({'version_doc':True}, {'$set':{'version':version}})
+
+
+
+    # version 1 kept released module versions in a map, version 2 updates that to a list
+    # and adds dynamic service tags
+    def update_db_1_to_2(self):
         for m in self.modules.find({'release_versions': {'$exists' : True}}):
             release_version_list = []
             for timestamp in m['release_versions']:
@@ -1081,7 +1134,21 @@ class MongoCatalogDBI:
                         {'_id':m['_id']},
                         {'$set':{'current_versions.dev.dynamic_service':0}})
 
+        # also ensure the execution stats fields have correct names
+        self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
+                                    {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
+        self.exec_stats_users.update({'avg_queue_time': {'$exists' : True}}, 
+                                    {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
 
+
+
+    # version 3 moves the module version information out of the module document into
+    # a separate module versions collection.  
+    def update_db_2_to_3(self):
+
+        pass;
 
 
 
