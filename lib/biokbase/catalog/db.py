@@ -405,10 +405,11 @@ class MongoCatalogDBI:
         # update the module version record with released=True, and the release_timestamp
         result = self.module_versions.update( { 'git_commit_hash':beta_tag['git_commit_hash'] }, 
                         { '$set': { 'released': True, 'release_timestamp': release_timestamp } })
-        if result is not None:
-            return result
+        if self._check_update_result(result) is not None:
+            return self._check_update_result(result)
 
         # update the tags in the module document
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         result = self.modules.update(query, {'$set':{
                                                 'state.released':True,
                                                 'current_versions.release':beta_tag
@@ -422,15 +423,32 @@ class MongoCatalogDBI:
         current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
         dev_tag = current_versions['dev']
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        result = self.modules.update(query, {'$set':{'current_versions.beta':dev_version}})
+        result = self.modules.update(query, {'$set':{'current_versions.beta':dev_tag}})
         return self._check_update_result(result)
 
 
-    def update_dev_version(self, version_info, module_name='', git_url=''):
+    def update_dev_version(self, version_info):
         if version_info:
-            query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-            result = self.modules.update(query, {'$set':{'current_versions.dev':version_info}})
-            return self._check_update_result(result)
+            if 'git_commit_hash' in version_info:
+                
+                # try to insert
+                try:
+                    self.module_versions.insert(version_info)
+                # if that doesn't work, try to update (NOTE: by now this version should only be updatable if it is a dev or orphan version, and
+                # we assume that check has already been made)
+                except:
+                    result = self.module_version.update( {
+                                                    'module_name_lc':version_info['module_name_lc'],
+                                                    'git_commit_hash':version_info['git_commit_hash']
+                                                },
+                                                version_info)
+                    if self._check_update_result(result) is not None:
+                        return self._check_update_result(result)
+                query = self._get_mongo_query(module_name=version_info['module_name_lc'])
+                result = self.modules.update(query, {'$set':{'current_versions.dev':{'git_commit_hash':version_info['git_commit_hash']}}})
+                return self._check_update_result(result)
+            else:
+                raise ValueError('git_commit_hash is required to register a new version')
         return False
 
 
@@ -651,13 +669,15 @@ class MongoCatalogDBI:
     def get_module_details(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_details = self.modules.find_one(query, fields=['module_name','module_name_lc','git_url','info','owners','state', 'current_versions'])
-        self.substitute_hashes_for_version_info([module_details])
+        if 'module_name_lc' in module_details:
+            self.substitute_hashes_for_version_info([module_details])
         return module_details
 
     def get_module_full_details(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_document = self.modules.find_one(query)
-        self.substitute_hashes_for_version_info([module_document])
+        if 'module_name_lc' in module_document:
+            self.substitute_hashes_for_version_info([module_document])
         return module_document
 
     #### LIST / SEARCH methods

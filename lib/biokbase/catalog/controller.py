@@ -8,6 +8,7 @@ import os
 import random
 import semantic_version
 import re
+import uuid
 
 import biokbase.catalog.version
 
@@ -115,24 +116,18 @@ class CatalogController:
         if not bool(urlparse(git_url).netloc):
             raise ValueError('The git url provided is not a valid URL.')
 
-        # generate a unique registration ID based on a timestamp in ms + 4 random digits, then make sure we
-        # can write here by trying up to 20 times.  We should quickly have a guaranteed unique id in a nice format
-        # without having to use UUIDs (would need to switch or use a db if we have distributed registrations...)
-        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
-        registration_id = str(timestamp)+'_'+str(random.randint(1000,9999))
-        tries = 20
-        for t in range(20):
-            try:
-                # keep trying to make the directory until it works
-                os.mkdir(os.path.join(self.temp_dir,registration_id))
-                break
-            except:
-                # if we fail, wait a bit, get a new registration id and try again
-                time.sleep(0.002)
-                timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
-                registration_id = str(timestamp)+'_'+random.randint(1000,9999)
+        # TODO: normalize github urls
+        
 
-        # if we couldn't reserve a spot for this registration, then quit
+        # generate a unique registration ID based on a timestamp in ms + a UUID
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+        registration_id = str(timestamp)+'_'+str(uuid.uuid4())
+
+        # reserve some scratch space on the server for this registration
+        try:
+            os.mkdir(os.path.join(self.temp_dir,registration_id))
+        except:
+            raise ValueError('Unable to allocate a directory for building.  Try again, and if the problem persists contact us.')
         if not os.path.isdir(os.path.join(self.temp_dir,registration_id)):
             raise ValueError('Unable to allocate a directory for building.  Try again, and if the problem persists contact us.')
 
@@ -141,16 +136,16 @@ class CatalogController:
             raise ValueError('You are not an approved developer.  Contact us to request approval.')
 
         prev_dev_version = None
+
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
-            module_details = self.db.get_module_details(git_url=git_url)
+            module_details = self.db.get_module_full_details(git_url=git_url)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
         # that the module is in a state where it can be registered 
         else:
-            module_details = self.db.get_module_details(git_url=git_url)
-            prev_dev_version = module_details['current_versions']['dev']
+            module_details = self.db.get_module_full_details(git_url=git_url)
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
@@ -168,7 +163,7 @@ class CatalogController:
                         # to ensure we only ever kick off one registration thread at a time
                         raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin: '+error)
                     # we know we are the only operation working, so we can clear the dev version and upate the timestamp
-                    self.db.update_dev_version({'timestamp':timestamp, 'registration_id':registration_id}, git_url=git_url)
+                    #self.db.update_dev_version({'timestamp':timestamp, 'registration_id':registration_id}, git_url=git_url)
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
