@@ -436,7 +436,7 @@ class CatalogController:
         if 'git_commit_hash' in params:
             # check current versions
             for version in ['dev','beta','release']:
-                if current_version[version]['git_commit_hash'] == params['git_commit_hash']:
+                if 'git_commit_hash' in current_version[version] and current_version[version]['git_commit_hash'] == params['git_commit_hash']:
                     v = current_version[version]
                     return v
             # if we get here, we have to look in full history
