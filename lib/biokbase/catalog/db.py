@@ -148,15 +148,21 @@ class MongoCatalogDBI:
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
 
-
-        self.check_db_schema()
-
-
         # Make sure we have an index on module and git_repo_url
-        self.modules.ensure_index('module_name', unique=True, sparse=True)
-        self.modules.ensure_index('module_name_lc', unique=True, sparse=True)
-        self.modules.ensure_index('git_url', unique=True)
-        self.modules.ensure_index('owners.kb_username')
+        self.module_versions.ensure_index('module_name_lc', sparse=False)
+        self.module_versions.ensure_index('git_commit_hash', sparse=False)
+        self.module_versions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
+
+        # Make sure we have a unique index on module_name_lc and git_commit_hash
+        self.local_functions.ensure_index('function_id')
+        self.local_functions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('function_id',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
 
         # local function indecies
         self.local_functions.ensure_index('module_name_lc')
@@ -222,6 +228,10 @@ class MongoCatalogDBI:
         # client group
         #  app_id = [lower case module name]/[app id]
         self.client_groups.ensure_index('app_id', unique=True, sparse=False)
+
+
+
+        self.check_db_schema()
 
 
 
@@ -1147,6 +1157,56 @@ class MongoCatalogDBI:
     # version 3 moves the module version information out of the module document into
     # a separate module versions collection.  
     def update_db_2_to_3(self):
+
+        # update all module versions
+        for m in self.modules.find({}):
+
+            # first migrate over all released versions and update the module document
+            new_release_version_list = []
+            for rVer in m['release_version_list']:
+                rVer['module_name'] = m['module_name']
+                rVer['module_name_lc'] = m['module_name_lc']
+                rVer['released'] = True
+                try:
+                    self.module_versions.insert(rVer)
+                except:
+                    print(' - Warning - '+rVer['module_name'] + '.' + rVer['git_commit_hash'] + ' already inserted, skipping.')
+                new_release_version_list.append({
+                    'git_commit_hash':rVer['git_commit_hash']
+                })
+            self.modules.update(
+                    {'_id':m['_id']},
+                    {'$set':{ 'release_version_list':new_release_version_list } }
+                )
+
+            for tag in ['release','beta','dev']: # we can skip release tags because that is already in the release_version_list
+                if m['current_versions'][tag]:
+                    modVer = m['current_versions'][tag]
+                    modVer['module_name'] = m['module_name']
+                    modVer['module_name_lc'] = m['module_name_lc']
+                    if 'git_commit_hash' in modVer and modVer['git_commit_hash'] is not None:
+                        try:
+                            self.module_versions.insert(modVer)
+                        except:
+                            # we expect this to happen for all 'release' tags and if, say, a version still tagged as dev/beta has been released
+                            print(' - Warning - '+tag+ ' ver of ' + rVer['module_name'] + '.' + rVer['git_commit_hash'] + ' already inserted, skipping.')
+                        self.modules.update(
+                            {'_id':m['_id']},
+                            {'$set':{ 'current_versions.'+tag: {'git_commit_hash':modVer['git_commit_hash']} } }
+                        )
+                    else:
+                        self.modules.update(
+                            {'_id':m['_id']},
+                            {'$set':{ 'current_versions.'+tag: None } }
+                        )
+
+
+        #for m in self.modules.find({}):
+        #    pprint.pprint(m)
+
+        #for m in self.module_versions.find({}):
+        #    pprint.pprint(m)
+
 
         pass;
 
