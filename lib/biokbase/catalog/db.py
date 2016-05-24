@@ -740,40 +740,52 @@ class MongoCatalogDBI:
 
     # tag should be one of dev, beta, release - do checking outside of this method
     def list_service_module_versions_with_tag(self, tag):
-        query = {'info.dynamic_service':1, 'current_versions.'+tag+'.dynamic_service':1}
-        projection = {
-            '_id':0,
-            'module_name':1,
-            'current_versions.'+tag+'.version':1,
-            'current_versions.'+tag+'.git_commit_hash':1,
-            'current_versions.'+tag+'.docker_img_name':1
-        }
+
+        mods = list(self.modules.find({'info.dynamic_service':1}, {'module_name_lc':1, 'module_name':1, 'current_versions.'+tag : 1 }))
+        self.substitute_hashes_for_version_info(mods)
+
         result = []
-        for m in self.modules.find(query,projection):
-            result.append({
-                'module_name':m['module_name'],
-                'version':m['current_versions'][tag]['version'],
-                'git_commit_hash':m['current_versions'][tag]['git_commit_hash'],
-                'docker_img_name':m['current_versions'][tag]['docker_img_name']})
-        return result
+        for m in mods:
+            if tag in m['current_versions'] and m['current_versions'][tag] is not None:
+                if 'dynamic_service' in m['current_versions'][tag] and m['current_versions'][tag]['dynamic_service'] == 1:
+                    result.append({
+                            'module_name':m['module_name'],
+                            'version':m['current_versions'][tag]['version'],
+                            'git_commit_hash':m['current_versions'][tag]['git_commit_hash'],
+                            'docker_img_name':m['current_versions'][tag]['docker_img_name']
+
+                        })
+        return result;
 
 
     # all released service module versions
     def list_all_released_service_module_versions(self):
-        result = self.modules.aggregate([
-            {'$match':{'info.dynamic_service':1}}, # make sure it is a module that has at least one dynamic service
-            {'$unwind':"$release_version_list"},      # look at all the release versions
-            {'$match':{'release_version_list.dynamic_service':1}}, # find the dynamic service released versions
-            {'$project':{
-                    'module_name':1,
-                    'version':'$release_version_list.version',
-                    'git_commit_hash':'$release_version_list.git_commit_hash',
-                    'docker_img_name':'$release_version_list.docker_img_name',
-                    '_id':0
-                }
-            }])
+        #result = self.modules.aggregate([
+        #    {'$match':{'info.dynamic_service':1}}, # make sure it is a module that has at least one dynamic service
+        #    {'$unwind':"$release_version_list"},      # look at all the release versions
+        #    {'$match':{'release_version_list.dynamic_service':1}}, # find the dynamic service released versions
+        #    {'$project':{
+        #            'module_name':1,
+        #            'version':'$release_version_list.version',
+        #            'git_commit_hash':'$release_version_list.git_commit_hash',
+        #            'docker_img_name':'$release_version_list.docker_img_name',
+        #            '_id':0
+        #        }
+        #    }])
 
-        return list(result['result'])
+
+        return list(self.module_versions.find(
+            {
+                'dynamic_service':1,
+                'released':True
+            },
+            {
+                'module_name':1,
+                'version':1,
+                'git_commit_hash':1,
+                'docker_img_name':1,
+                '_id':0
+            }))
 
 
 
