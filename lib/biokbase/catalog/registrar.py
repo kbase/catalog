@@ -91,7 +91,7 @@ class Registrar:
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())
-                    subprocess.check_call ( ['git', 'checkout', self.params['git_commit_hash'] ], cwd=basedir )
+                    subprocess.check_call ( ['git', 'checkout', '--quiet', self.params['git_commit_hash'] ], cwd=basedir )
                     git_commit_hash = self.params['git_commit_hash'].strip()
 
             # check if this was a git_commit_hash that was already released- if so, we abort for now (we could just update the dev tag in the future)
@@ -182,7 +182,9 @@ class Registrar:
                                                   ref_data_ver, basedir, self.temp_dir, self.registration_id,
                                                   self.token, self.kbase_endpoint)
                 
-                print('preparing report')
+
+                self.set_build_step('preparing compilation report')
+                self.log('Preparing compilation report.')
 
                 # Trying to extract compilation report with line numbers of funcdefs from docker image.
                 # There is "report" entry-point command responsible for that. In case there are any
@@ -191,7 +193,13 @@ class Registrar:
                                                                      self.temp_dir, self.registration_id, 
                                                                      self.token, self.kbase_endpoint)
 
+                if compilation_report is None:
+                    raise ValueError('Unable to generate a compilation report, which is now required, so your registration cannot continue.  ' +
+                                        'If you have been successfully registering this module already, this means that you may need to update ' +
+                                        'to the latest version of the KBase SDK and rebuild your makefile.')
+
                 pprint.pprint(compilation_report)
+                self.log('Report complete')
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)

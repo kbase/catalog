@@ -174,6 +174,7 @@ class CatalogTestUtil:
     def tearDown(self):
         self.log("tearDown()")
         self.modules.drop()
+        self.module_versions.drop()
         self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()

@@ -26,7 +26,9 @@ public class LocalFunctionDetails {
 
     /**
      * <p>Original spec-file type: LocalFunctionInfo</p>
-     * 
+     * <pre>
+     * todo: switch release_tag to release_tags
+     * </pre>
      * 
      */
     @JsonProperty("info")
@@ -37,7 +39,9 @@ public class LocalFunctionDetails {
 
     /**
      * <p>Original spec-file type: LocalFunctionInfo</p>
-     * 
+     * <pre>
+     * todo: switch release_tag to release_tags
+     * </pre>
      * 
      */
     @JsonProperty("info")
@@ -47,7 +51,9 @@ public class LocalFunctionDetails {
 
     /**
      * <p>Original spec-file type: LocalFunctionInfo</p>
-     * 
+     * <pre>
+     * todo: switch release_tag to release_tags
+     * </pre>
      * 
      */
     @JsonProperty("info")

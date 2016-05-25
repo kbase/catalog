@@ -268,8 +268,12 @@ class CatalogController:
             beta_sv = semantic_version.Version(module_details['current_versions']['beta']['version'])
             release_sv = semantic_version.Version(module_details['current_versions']['release']['version'])
             if beta_sv <= release_sv:
-                raise ValueError('Cannot request release - beta version semantic version must be greater '
-                    +'than the released version semantic version, as determined by http://semver.org')
+                raise ValueError('Cannot request release - beta semantic version ('+str(beta_sv)+') must be greater '
+                    +'than the released semantic version '+str(release_sv)+', as determined by http://semver.org')
+            # TODO: may want to make sure that only v1.0.0+ are released
+            #if beta_sv < semantic_version.Version('1.0.0'):
+            #    raise ValueError('Cannot request release - beta semantic version must be greater than 1.0.0')
+
 
         # ok, do it.
         error = self.db.set_module_release_state(
@@ -462,8 +466,6 @@ class CatalogController:
             raise ValueError('Module cannot be found based on module_name or git_url parameters.')
 
         module_name_lc = module_details['module_name_lc']
-        pprint(module_details)
-
 
         # figure out what info we actually need to fetch
         excluded_fields = []
@@ -519,55 +521,58 @@ class CatalogController:
             raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
 
 
-        # see if we 
+        # ok, didn't work.  let's try it as a semantic version, which only works on released modules.  First let's try to parse
+        spec = None
+        exact_version = None
+        try:
+            exact_version = semantic_version.Version(params['version'].strip())
+        except:
+            # wasn't a semantic version, but could still be a semantic version spec
+            try:
+                spec = semantic_version.Spec(params['version'].strip())
+            except:
+                # couldn't figure out what to do, so just return that we can't find anything
+                return None
 
+        # get the released version list with semantic versions
+        released_version_list = self.db.lookup_module_versions(
+                                    module_name_lc,
+                                    released = 1,
+                                    included_fields = ['version', 'git_commit_hash'])
 
+        # we are looking for an exact semantic version match
+        if exact_version:
+            for r in released_version_list:
+                if exact_version == semantic_version.Version(r['version']):
+                    versions = self.db.lookup_module_versions(
+                                module_name_lc,
+                                git_commit_hash = r['git_commit_hash'],
+                                excluded_fields = excluded_fields)
+                    if len(versions)==1:
+                        v = versions[0]
+                        self.prepare_version_for_return(v, module_details)
+                        return v
+                    else:
+                        raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
 
-
-
-
-# #try:
-# #            spec = semantic_version.Spec(lookup)
-# #            svers = []
-# #            for v in versions:
-# #                if only_services:
-# #                    if 'dynamic_service' not in v: continue
-# #                    if not v['dynamic_service']: continue
-#                 svers.append(semantic_version.Version(v['version']))
-
-#             theRightVersion = spec.select(svers)
-#             if theRightVersion:
-#                 for v in versions:
-#                     if v['version'] == str(theRightVersion):
-#                         return {
-#                             'module_name': details['module_name'],
-#                             'version':v['version'],
-#                             'git_commit_hash':v['git_commit_hash'],
-#                             'docker_img_name':v['docker_img_name']
-#                         }
-
-#                 raise ValueError('No suitable version matches your lookup - but this seems wrong.')
-#             else:
-#                 raise ValueError('No suitable version matches your lookup.')
-#         except ValueError:
-#             # probably we could not parse as a semantic version, so check as a commit hash
-#             for v in versions:
-#                 if v['git_commit_hash'] == lookup:
-#                     if only_services:
-#                         if 'dynamic_service' not in v:
-#                             raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
-#                         if not v['dynamic_service']:
-#                             raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
-#                     return {
-#                         'module_name': details['module_name'],
-#                         'version':v['version'],
-#                         'git_commit_hash':v['git_commit_hash'],
-#                         'docker_img_name':v['docker_img_name']
-#                     }
-
-
-
-
+        if spec:
+            svers = []
+            for r in released_version_list:
+                svers.append(semantic_version.Version(r['version']))
+            theRightVersion = spec.select(svers)
+            if theRightVersion:
+                for r in released_version_list:
+                    if theRightVersion == semantic_version.Version(r['version']):
+                        versions = self.db.lookup_module_versions(
+                                module_name_lc,
+                                git_commit_hash = r['git_commit_hash'],
+                                excluded_fields = excluded_fields)
+                        if len(versions)==1:
+                            v = versions[0]
+                            self.prepare_version_for_return(v, module_details)
+                            return v
+                        else:
+                            raise Value
 
         return None
 
@@ -593,6 +598,11 @@ class CatalogController:
                         release_tags.append(tag)
         version['release_tags'] = release_tags
 
+        if 'release_timestamp' not in version:
+            if version['released']==1:
+                version['release_timestamp'] = version['timestamp']
+            else:
+                version['release_timestamp'] = None
 
 
 
