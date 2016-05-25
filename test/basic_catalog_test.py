@@ -260,6 +260,112 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertTrue(info['release'] is None)
 
 
+
+    def test_get_module_version(self):
+
+        # fetch without version info, should return latest release version
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history'})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+
+        # get a specific tag
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'dev', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445024094055)
+        self.assertEqual(version['version'],"0.0.5")
+        self.assertEqual(version['narrative_methods'],['send_data2'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445024094055_4123')
+        self.assertEqual(version['release_tags'],['dev'])
+        self.assertEqual(version['release_timestamp'], None)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.b06c5f9daf603a4d206071787c3f6184000bf128')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"b06c5f9daf603a4d206071787c3f6184000bf128")
+        self.assertEqual(version['git_commit_message'],"another change")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+        # get by git commit hash
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'49dc505febb8f4cccb2078c58ded0de3320534d7', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+        # get by exact semantic version
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'0.0.3', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+
+        # get by semantic version spec
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'>0.0.1', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+
     def test_get_version_info(self):
 
         vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
