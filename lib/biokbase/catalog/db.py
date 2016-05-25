@@ -1251,6 +1251,14 @@ class MongoCatalogDBI:
         # update all module versions
         for m in self.modules.find({}):
 
+            # skip modules that have not been properly registered, might want to delete these later
+            if 'module_name' not in m or 'module_name_lc' not in m:
+                continue;
+
+            # skip modules that have not been properly registered, might want to delete these later
+            if 'info' not in m:
+                continue;
+
             # first migrate over all released versions and update the module document
             new_release_version_list = []
             for rVer in m['release_version_list']:
