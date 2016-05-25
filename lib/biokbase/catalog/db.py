@@ -1286,7 +1286,7 @@ class MongoCatalogDBI:
                             self.module_versions.insert(modVer)
                         except Exception as e:
                             # we expect this to happen for all 'release' tags and if, say, a version still tagged as dev/beta has been released
-                            print(' - Warning - '+tag+ ' ver of ' + rVer['module_name'] + '.' + rVer['git_commit_hash'] + ' already inserted, skipping.')
+                            print(' - Warning - '+tag+ ' ver of ' + modVer['module_name'] + '.' + modVer['git_commit_hash'] + ' already inserted, skipping.')
                         self.modules.update(
                             {'_id':m['_id']},
                             {'$set':{ 'current_versions.'+tag: {'git_commit_hash':modVer['git_commit_hash']} } }
