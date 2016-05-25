@@ -8,6 +8,7 @@ import os
 import random
 import semantic_version
 import re
+import uuid
 
 import biokbase.catalog.version
 
@@ -115,24 +116,18 @@ class CatalogController:
         if not bool(urlparse(git_url).netloc):
             raise ValueError('The git url provided is not a valid URL.')
 
-        # generate a unique registration ID based on a timestamp in ms + 4 random digits, then make sure we
-        # can write here by trying up to 20 times.  We should quickly have a guaranteed unique id in a nice format
-        # without having to use UUIDs (would need to switch or use a db if we have distributed registrations...)
-        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
-        registration_id = str(timestamp)+'_'+str(random.randint(1000,9999))
-        tries = 20
-        for t in range(20):
-            try:
-                # keep trying to make the directory until it works
-                os.mkdir(os.path.join(self.temp_dir,registration_id))
-                break
-            except:
-                # if we fail, wait a bit, get a new registration id and try again
-                time.sleep(0.002)
-                timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
-                registration_id = str(timestamp)+'_'+random.randint(1000,9999)
+        # TODO: normalize github urls
 
-        # if we couldn't reserve a spot for this registration, then quit
+
+        # generate a unique registration ID based on a timestamp in ms + a UUID
+        timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
+        registration_id = str(timestamp)+'_'+str(uuid.uuid4())
+
+        # reserve some scratch space on the server for this registration
+        try:
+            os.mkdir(os.path.join(self.temp_dir,registration_id))
+        except:
+            raise ValueError('Unable to allocate a directory for building.  Try again, and if the problem persists contact us.')
         if not os.path.isdir(os.path.join(self.temp_dir,registration_id)):
             raise ValueError('Unable to allocate a directory for building.  Try again, and if the problem persists contact us.')
 
@@ -141,16 +136,16 @@ class CatalogController:
             raise ValueError('You are not an approved developer.  Contact us to request approval.')
 
         prev_dev_version = None
+
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
         if not self.db.is_registered(git_url=git_url) : 
             self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
-            module_details = self.db.get_module_details(git_url=git_url)
+            module_details = self.db.get_module_full_details(git_url=git_url)
         
         # 2) If it has already been registered, make sure the user has permissions to update, and
         # that the module is in a state where it can be registered 
         else:
-            module_details = self.db.get_module_details(git_url=git_url)
-            prev_dev_version = module_details['current_versions']['dev']
+            module_details = self.db.get_module_full_details(git_url=git_url)
 
             # 2a) Make sure the user has permission to register this URL
             if self.has_permission(username,module_details['owners']):
@@ -168,7 +163,7 @@ class CatalogController:
                         # to ensure we only ever kick off one registration thread at a time
                         raise ValueError('Registration failed for git repo ('+git_url+') - registration state was modified before build could begin: '+error)
                     # we know we are the only operation working, so we can clear the dev version and upate the timestamp
-                    self.db.update_dev_version({'timestamp':timestamp, 'registration_id':registration_id}, git_url=git_url)
+                    #self.db.update_dev_version({'timestamp':timestamp, 'registration_id':registration_id}, git_url=git_url)
                 else:
                     raise ValueError('Registration already in progress for this git repo ('+git_url+')')
             else :
@@ -273,8 +268,12 @@ class CatalogController:
             beta_sv = semantic_version.Version(module_details['current_versions']['beta']['version'])
             release_sv = semantic_version.Version(module_details['current_versions']['release']['version'])
             if beta_sv <= release_sv:
-                raise ValueError('Cannot request release - beta version semantic version must be greater '
-                    +'than the released version semantic version, as determined by http://semver.org')
+                raise ValueError('Cannot request release - beta semantic version ('+str(beta_sv)+') must be greater '
+                    +'than the released semantic version '+str(release_sv)+', as determined by http://semver.org')
+            # TODO: may want to make sure that only v1.0.0+ are released
+            #if beta_sv < semantic_version.Version('1.0.0'):
+            #    raise ValueError('Cannot request release - beta semantic version must be greater than 1.0.0')
+
 
         # ok, do it.
         error = self.db.set_module_release_state(
@@ -436,7 +435,7 @@ class CatalogController:
         if 'git_commit_hash' in params:
             # check current versions
             for version in ['dev','beta','release']:
-                if current_version[version]['git_commit_hash'] == params['git_commit_hash']:
+                if 'git_commit_hash' in current_version[version] and current_version[version]['git_commit_hash'] == params['git_commit_hash']:
                     v = current_version[version]
                     return v
             # if we get here, we have to look in full history
@@ -449,6 +448,163 @@ class CatalogController:
 
         # didn't get nothing, so return
         return None
+
+
+    def get_module_version(self, params):
+
+        # Make sure the git_url and/or module_name are set
+        if 'git_url' not in params and 'module_name' not in params:
+            raise ValueError('Missing required fields git_url or module_name')
+        if 'git_url' not in params:
+            params['git_url'] = ''
+        if 'module_name' not in params:
+            params['module_name'] = ''
+
+        # get the module details so we can look up releases and tags
+        module_details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'], substitute_versions=False)
+        if module_details is None:
+            raise ValueError('Module cannot be found based on module_name or git_url parameters.')
+
+        module_name_lc = module_details['module_name_lc']
+
+        # figure out what info we actually need to fetch
+        excluded_fields = []
+        if not ('include_module_description' in params and str(params['include_module_description']).strip()=='1'):
+            excluded_fields.append('module_description')
+        if not ('include_compilation_report' in params and str(params['include_compilation_report']).strip()=='1'):
+            excluded_fields.append('compilation_report')
+
+
+        # no version string specified, so default to returning release, beta, or dev in that order
+        if 'version' not in params or params['version'] is None or params['version'].strip() is '':
+            for tag in ['release','beta','dev']:
+                if tag in module_details['current_versions'] and module_details['current_versions'][tag] is not None:
+                    # get the version info
+                    versions = self.db.lookup_module_versions(
+                                            module_name_lc,
+                                            git_commit_hash = module_details['current_versions'][tag]['git_commit_hash'],
+                                            excluded_fields = excluded_fields)
+                    if len(versions) != 1:
+                        raise ValueError('Catalog DB Error: could not identify proper version - version documents found: ' + str(len(versions)))
+                    v = versions[0]
+                    self.prepare_version_for_return(v, module_details)
+                    return v
+            return None
+
+        # return the specific tag specified
+        if params['version'] in ['release','beta','dev']:
+            tag = params['version']
+            if tag in module_details['current_versions'] and module_details['current_versions'][tag] is not None:
+                # get the version info
+                versions = self.db.lookup_module_versions(
+                                        module_name_lc,
+                                        git_commit_hash = module_details['current_versions'][tag]['git_commit_hash'],
+                                        excluded_fields = excluded_fields)
+                if len(versions) != 1:
+                    raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
+                v = versions[0]
+                self.prepare_version_for_return(v, module_details)
+                return v
+            return None
+
+
+        # because this is the most common option, just assume it is a git commit hash and try to fetch before we deal with semantic version logic
+        versions = self.db.lookup_module_versions(
+                                module_name_lc,
+                                git_commit_hash = params['version'],
+                                excluded_fields = excluded_fields)
+        if len(versions)==1:
+            v = versions[0]
+            self.prepare_version_for_return(v, module_details)
+            return v
+        elif len(versions)>1:
+            raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
+
+
+        # ok, didn't work.  let's try it as a semantic version, which only works on released modules.  First let's try to parse
+        spec = None
+        exact_version = None
+        try:
+            exact_version = semantic_version.Version(params['version'].strip())
+        except:
+            # wasn't a semantic version, but could still be a semantic version spec
+            try:
+                spec = semantic_version.Spec(params['version'].strip())
+            except:
+                # couldn't figure out what to do, so just return that we can't find anything
+                return None
+
+        # get the released version list with semantic versions
+        released_version_list = self.db.lookup_module_versions(
+                                    module_name_lc,
+                                    released = 1,
+                                    included_fields = ['version', 'git_commit_hash'])
+
+        # we are looking for an exact semantic version match
+        if exact_version:
+            for r in released_version_list:
+                if exact_version == semantic_version.Version(r['version']):
+                    versions = self.db.lookup_module_versions(
+                                module_name_lc,
+                                git_commit_hash = r['git_commit_hash'],
+                                excluded_fields = excluded_fields)
+                    if len(versions)==1:
+                        v = versions[0]
+                        self.prepare_version_for_return(v, module_details)
+                        return v
+                    else:
+                        raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
+
+        if spec:
+            svers = []
+            for r in released_version_list:
+                svers.append(semantic_version.Version(r['version']))
+            theRightVersion = spec.select(svers)
+            if theRightVersion:
+                for r in released_version_list:
+                    if theRightVersion == semantic_version.Version(r['version']):
+                        versions = self.db.lookup_module_versions(
+                                module_name_lc,
+                                git_commit_hash = r['git_commit_hash'],
+                                excluded_fields = excluded_fields)
+                        if len(versions)==1:
+                            v = versions[0]
+                            self.prepare_version_for_return(v, module_details)
+                            return v
+                        else:
+                            raise Value
+
+        return None
+
+
+    def prepare_version_for_return(self, version, module_details):
+
+        # remove module_name_lc if it exists (should always be there, but if it was already removed don't worry)
+        try:
+            del(version['module_name_lc'])
+        except:
+            pass
+
+        # add git_url
+        version['git_url'] = module_details['git_url']
+        version['module_name'] = module_details['module_name']
+
+        # add release tag information
+        release_tags = []
+        for tag in ['release','beta','dev']:
+            if tag in module_details['current_versions'] and module_details['current_versions'][tag] is not None:
+                if 'git_commit_hash' in module_details['current_versions'][tag]:
+                    if module_details['current_versions'][tag]['git_commit_hash'] == version['git_commit_hash']:
+                        release_tags.append(tag)
+        version['release_tags'] = release_tags
+
+        if 'release_timestamp' not in version:
+            if version['released']==1:
+                version['release_timestamp'] = version['timestamp']
+            else:
+                version['release_timestamp'] = None
+
+
 
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)

@@ -13,7 +13,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: LocalFunctionInfo</p>
- * 
+ * <pre>
+ * todo: switch release_tag to release_tags
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -1468,7 +1468,7 @@ FunctionPlace is a reference to a hash where the following keys are defined:
 
 =item Description
 
-
+DEPRECATED!!!  use get_module_version
 
 =back
 
@@ -1646,6 +1646,153 @@ FunctionPlace is a reference to a hash where the following keys are defined:
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_released_module_versions",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'list_released_module_versions',
+				       );
+    }
+}
+ 
+
+
+=head2 get_module_version
+
+  $version = $obj->get_module_version($selection)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$selection is a Catalog.SelectModuleVersion
+$version is a Catalog.ModuleVersion
+SelectModuleVersion is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	version has a value which is a string
+	include_module_description has a value which is a Catalog.boolean
+	include_compilation_report has a value which is a Catalog.boolean
+boolean is an int
+ModuleVersion is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	module_description has a value which is a string
+	git_url has a value which is a string
+	released has a value which is a Catalog.boolean
+	release_tags has a value which is a reference to a list where each element is a string
+	timestamp has a value which is an int
+	registration_id has a value which is a string
+	version has a value which is a string
+	git_commit_hash has a value which is a string
+	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
+	narrative_app_ids has a value which is a reference to a list where each element is a string
+	local_function_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$selection is a Catalog.SelectModuleVersion
+$version is a Catalog.ModuleVersion
+SelectModuleVersion is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	git_url has a value which is a string
+	version has a value which is a string
+	include_module_description has a value which is a Catalog.boolean
+	include_compilation_report has a value which is a Catalog.boolean
+boolean is an int
+ModuleVersion is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	module_description has a value which is a string
+	git_url has a value which is a string
+	released has a value which is a Catalog.boolean
+	release_tags has a value which is a reference to a list where each element is a string
+	timestamp has a value which is an int
+	registration_id has a value which is a string
+	version has a value which is a string
+	git_commit_hash has a value which is a string
+	git_commit_message has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
+	narrative_app_ids has a value which is a reference to a list where each element is a string
+	local_function_ids has a value which is a reference to a list where each element is a string
+	docker_img_name has a value which is a string
+	data_folder has a value which is a string
+	data_version has a value which is a string
+	compilation_report has a value which is a Catalog.CompilationReport
+CompilationReport is a reference to a hash where the following keys are defined:
+	sdk_version has a value which is a string
+	sdk_git_commit has a value which is a string
+	impl_file_path has a value which is a string
+	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+FunctionPlace is a reference to a hash where the following keys are defined:
+	start_line has a value which is an int
+	end_line has a value which is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub get_module_version
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_module_version (received $n, expecting 1)");
+    }
+    {
+	my($selection) = @args;
+
+	my @_bad_arguments;
+        (ref($selection) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"selection\" (value was \"$selection\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_module_version:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_module_version');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.get_module_version",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_module_version',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_module_version",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_module_version',
 				       );
     }
 }
@@ -4592,6 +4739,172 @@ version has a value which is a string
 
 
 
+=head2 ModuleVersion
+
+=over 4
+
+
+
+=item Description
+
+module_name            - the name of the module
+module_description     - (optionally returned) html description in KBase YAML of this module
+git_url                - the git url of the source for this module
+
+released               - 1 if this version has been released, 0 otherwise
+release_tags           - list of strings of: 'dev', 'beta', or 'release', or empty list
+                         this is a list because the same commit version may be the version in multiple release states
+release_timestamp      - time in ms since epoch when this module was approved and moved to release, null otherwise
+                         note that a module was released before v1.0.0, the release timestamp may not have been
+                         recorded and will default to the registration timestamp
+
+timestamp              - time in ms since epoch when the registration for this version was started
+registration_id        - id of the last registration for this version, used for fetching registration logs and state
+
+version                - validated semantic version number as indicated in the KBase YAML of this version
+                         semantic versions are unique among released versions of this module
+
+git_commit_hash        - the full git commit hash of the source for this module
+git_commit_message     - the message attached to this git commit
+
+dynamic_service        - 1 if this version is available as a web service, 0 otherwise
+
+narrative_app_ids      - list of Narrative App ids registered with this module version
+local_function_ids     - list of Local Function ids registered with this module version
+
+docker_img_name        - name of the docker image for this module created on registration
+data_folder            - name of the data folder used 
+
+compilation_report     - (optionally returned) summary of the KIDL specification compilation
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+module_description has a value which is a string
+git_url has a value which is a string
+released has a value which is a Catalog.boolean
+release_tags has a value which is a reference to a list where each element is a string
+timestamp has a value which is an int
+registration_id has a value which is a string
+version has a value which is a string
+git_commit_hash has a value which is a string
+git_commit_message has a value which is a string
+dynamic_service has a value which is a Catalog.boolean
+narrative_app_ids has a value which is a reference to a list where each element is a string
+local_function_ids has a value which is a reference to a list where each element is a string
+docker_img_name has a value which is a string
+data_folder has a value which is a string
+data_version has a value which is a string
+compilation_report has a value which is a Catalog.CompilationReport
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+module_description has a value which is a string
+git_url has a value which is a string
+released has a value which is a Catalog.boolean
+release_tags has a value which is a reference to a list where each element is a string
+timestamp has a value which is an int
+registration_id has a value which is a string
+version has a value which is a string
+git_commit_hash has a value which is a string
+git_commit_message has a value which is a string
+dynamic_service has a value which is a Catalog.boolean
+narrative_app_ids has a value which is a reference to a list where each element is a string
+local_function_ids has a value which is a reference to a list where each element is a string
+docker_img_name has a value which is a string
+data_folder has a value which is a string
+data_version has a value which is a string
+compilation_report has a value which is a Catalog.CompilationReport
+
+
+=end text
+
+=back
+
+
+
+=head2 SelectModuleVersion
+
+=over 4
+
+
+
+=item Description
+
+Get a specific module version.
+
+Requires either a module_name or git_url.  If both are provided, they both must match.
+
+If no other options are specified, then the latest 'release' version is returned.  If
+the module has not been released, then the latest 'beta' or 'dev' version is returned.
+You can check in the returned object if the version has been released (see is_released)
+and what release tags are pointing to this version (see release_tags).
+
+Optionally, a 'version' parameter can be provided that can be either:
+    1) release tag: 'dev' | 'beta' | 'release'
+
+    2) specific semantic version of a released version (you cannot pull dev/beta or other
+       unreleased versions by semantic version)
+        - e.g. 2.0.1
+
+    3) semantic version requirement specification, see: https://pypi.python.org/pypi/semantic_version/
+       which will return the latest released version that matches the criteria.  You cannot pull
+       dev/beta or other unreleased versions this way.
+        - e.g.:
+            - '>1.0.0'
+            - '>=2.1.1,<3.3.0'
+            - '!=0.2.4-alpha,<0.3.0'
+
+    4) specific full git commit hash
+
+include_module_description - set to 1 to include the module description in the YAML file of this version;
+                             default is 0
+include_compilation_report - set to 1 to include the module compilation report, default is 0
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+version has a value which is a string
+include_module_description has a value which is a Catalog.boolean
+include_compilation_report has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+git_url has a value which is a string
+version has a value which is a string
+include_module_description has a value which is a Catalog.boolean
+include_compilation_report has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
 =head2 IOTags
 
 =over 4
@@ -4667,6 +4980,11 @@ output has a value which is a Catalog.IOTags
 
 =over 4
 
+
+
+=item Description
+
+todo: switch release_tag to release_tags
 
 
 =item Definition

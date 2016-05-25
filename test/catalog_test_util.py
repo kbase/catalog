@@ -45,7 +45,9 @@ class CatalogTestUtil:
         # 2 check that db exists and collections are empty
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])
         db = self.mongo[self.test_cfg['mongodb-database']]
+        self.db_version = db[MongoCatalogDBI._DB_VERSION]
         self.modules = db[MongoCatalogDBI._MODULES]
+        self.module_versions = db[MongoCatalogDBI._MODULE_VERSIONS]
         self.local_functions = db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
@@ -57,7 +59,9 @@ class CatalogTestUtil:
         self.exec_stats_users = db[MongoCatalogDBI._EXEC_STATS_USERS]
 
         # just drop the test db
+        self.db_version.drop()
         self.modules.drop()
+        self.module_versions.drop()
         self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
@@ -170,6 +174,7 @@ class CatalogTestUtil:
     def tearDown(self):
         self.log("tearDown()")
         self.modules.drop()
+        self.module_versions.drop()
         self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()

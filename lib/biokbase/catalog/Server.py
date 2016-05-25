@@ -7,7 +7,8 @@ import datetime
 from multiprocessing import Process
 from getopt import getopt, GetoptError
 from jsonrpcbase import JSONRPCService, InvalidParamsError, KeywordError,\
-    JSONRPCError, ServerError, InvalidRequestError
+    JSONRPCError, InvalidRequestError
+from jsonrpcbase import ServerError as JSONServerError
 from os import environ
 from ConfigParser import ConfigParser
 from biokbase import log
@@ -109,6 +110,9 @@ sync_methods['Catalog.get_version_info'] = True
 async_run_methods['Catalog.list_released_module_versions_async'] = ['Catalog', 'list_released_module_versions']
 async_check_methods['Catalog.list_released_module_versions_check'] = ['Catalog', 'list_released_module_versions']
 sync_methods['Catalog.list_released_module_versions'] = True
+async_run_methods['Catalog.get_module_version_async'] = ['Catalog', 'get_module_version']
+async_check_methods['Catalog.get_module_version_check'] = ['Catalog', 'get_module_version']
+sync_methods['Catalog.get_module_version'] = True
 async_run_methods['Catalog.list_local_functions_async'] = ['Catalog', 'list_local_functions']
 async_check_methods['Catalog.list_local_functions_check'] = ['Catalog', 'list_local_functions']
 sync_methods['Catalog.list_local_functions'] = True
@@ -286,9 +290,9 @@ class JSONRPCServiceCustom(JSONRPCService):
         except Exception as e:
             # log.exception('method %s threw an exception' % request['method'])
             # Exception was raised inside the method.
-            newerr = ServerError()
+            newerr = JSONServerError()
             newerr.trace = traceback.format_exc()
-            newerr.data = e.__str__()
+            newerr.data = e.message
             raise newerr
         return result
 
@@ -412,6 +416,62 @@ class MethodContext(dict):
                                  self['user_id'], self['module'],
                                  self['method'], self['call_id'])
 
+    def provenance(self):
+        callbackURL = os.environ.get('SDK_CALLBACK_URL')
+        if callbackURL:
+            # OK, there's a callback server from which we can get provenance
+            arg_hash = {'method': 'CallbackServer.get_provenance',
+                        'params': [],
+                        'version': '1.1',
+                        'id': str(_random.random())[2:]
+                        }
+            body = json.dumps(arg_hash)
+            response = _requests.post(callbackURL, data=body,
+                                      timeout=60)
+            response.encoding = 'utf-8'
+            if response.status_code == 500:
+                if ('content-type' in response.headers and
+                        response.headers['content-type'] ==
+                        'application/json'):
+                    err = response.json()
+                    if 'error' in err:
+                        raise ServerError(**err['error'])
+                    else:
+                        raise ServerError('Unknown', 0, response.text)
+                else:
+                    raise ServerError('Unknown', 0, response.text)
+            if not response.ok:
+                response.raise_for_status()
+            resp = response.json()
+            if 'result' not in resp:
+                raise ServerError('Unknown', 0,
+                                  'An unknown server error occurred')
+            return resp['result'][0]
+        else:
+            return self.get('provenance')
+
+
+class ServerError(Exception):
+    '''
+    The call returned an error. Fields:
+    name - the name of the error.
+    code - the error code.
+    message - a human readable error message.
+    data - the server side stacktrace.
+    '''
+
+    def __init__(self, name, code, message, data=None, error=None):
+        super(Exception, self).__init__(message)
+        self.name = name
+        self.code = code
+        self.message = message if message else ''
+        self.data = data or error or ''
+        # data = JSON RPC 2.0, error = 1.1
+
+    def __str__(self):
+        return self.name + ': ' + str(self.code) + '. ' + self.message + \
+            '\n' + self.data
+
 
 def getIPAddress(environ):
     xFF = environ.get('HTTP_X_FORWARDED_FOR')
@@ -516,6 +576,10 @@ class Application(object):
                              name='Catalog.list_released_module_versions',
                              types=[dict])
         self.method_authentication['Catalog.list_released_module_versions'] = 'none'
+        self.rpc_service.add(impl_Catalog.get_module_version,
+                             name='Catalog.get_module_version',
+                             types=[dict])
+        self.method_authentication['Catalog.get_module_version'] = 'none'
         self.rpc_service.add(impl_Catalog.list_local_functions,
                              name='Catalog.list_local_functions',
                              types=[dict])
@@ -666,7 +730,7 @@ class Application(object):
                                                               "none")
                     if auth_req != "none":
                         if token is None and auth_req == 'required':
-                            err = ServerError()
+                            err = JSONServerError()
                             err.data = "Authentication required for " + \
                                 "Catalog but no authentication header was passed"
                             raise err
@@ -681,7 +745,7 @@ class Application(object):
                                 ctx['token'] = token
                             except Exception, e:
                                 if auth_req == 'required':
-                                    err = ServerError()
+                                    err = JSONServerError()
                                     err.data = \
                                         "Token validation failed: %s" % e
                                     raise err
@@ -696,7 +760,7 @@ class Application(object):
                             orig_method_pair = async_check_methods[method_name]
                         orig_method_name = orig_method_pair[0] + '.' + orig_method_pair[1]
                         if 'required' != self.method_authentication.get(orig_method_name, 'none'):
-                            err = ServerError()
+                            err = JSONServerError()
                             err.data = 'Async method ' + orig_method_name + ' should require ' + \
                                 'authentication, but it has authentication level: ' + \
                                 self.method_authentication.get(orig_method_name, 'none')
@@ -729,7 +793,7 @@ class Application(object):
                         self.log(log.INFO, ctx, 'end method')
                         status = '200 OK'
                     else:
-                        err = ServerError()
+                        err = JSONServerError()
                         err.data = 'Method ' + method_name + ' cannot be run synchronously'
                         raise err
                 except JSONRPCError as jre:

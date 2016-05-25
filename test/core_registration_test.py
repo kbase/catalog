@@ -426,7 +426,7 @@ class CoreRegistrationTest(unittest.TestCase):
         with self.assertRaises(ValueError) as e:
             self.catalog.request_release(self.cUtil.user_ctx(),{'module_name':info['module_name']})
         self.assertEqual(str(e.exception),
-            'Cannot request release - beta version semantic version must be greater than the released version semantic version, as determined by http://semver.org')
+            'Cannot request release - beta semantic version (0.0.1) must be greater than the released semantic version 0.0.2, as determined by http://semver.org')
 
 
         # Register with a proper version number and indicate it is a dynamic service now

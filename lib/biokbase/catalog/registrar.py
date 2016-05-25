@@ -84,21 +84,26 @@ class Registrar:
 
             self.log('Attempting to clone into: '+basedir);
             self.log('git clone ' + self.git_url)
-###### Replace with subprocess
-#            repo = git.Repo.clone_from(self.git_url, basedir)
             subprocess.check_call( ['git','clone',self.git_url, basedir ] )
             # try to get hash from repo
-###### Replace with subprocess
-#            git_commit_hash = str(repo.active_branch.commit)
             git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
             self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())
-###### Replace with subprocess
-#                    repo.git.checkout(self.params['git_commit_hash'].strip())
-                    subprocess.check_call ( ['git', 'checkout', self.params['git_commit_hash'] ], cwd=basedir )
+                    subprocess.check_call ( ['git', 'checkout', '--quiet', self.params['git_commit_hash'] ], cwd=basedir )
                     git_commit_hash = self.params['git_commit_hash'].strip()
+
+            # check if this was a git_commit_hash that was already released- if so, we abort for now (we could just update the dev tag in the future)
+            for r in self.module_details['release_version_list']:
+                if r['git_commit_hash'] == git_commit_hash:
+                    raise ValueError('The specified commit is already released.  You cannot reregister that commit version or image.')
+
+            # do the same for beta versions for now
+            if 'beta' in self.module_details['current_versions'] and self.module_details['current_versions']['beta'] is not None:
+                if self.module_details['current_versions']['beta']['git_commit_hash'] == git_commit_hash:
+                    raise ValueError('The specified commit is already registered and in beta.  You cannot reregister that commit version or image.')
+
 
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
@@ -108,14 +113,14 @@ class Registrar:
 
             ##############################
             # 2.5 - dealing with git releases .git/config.lock, if it still exists after 5s then kill it
-###### may no longer need this after switching to subprocess
-            git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
-            if os.path.exists(git_config_lock_file):
-                self.log('.git/config.lock exists, waiting 5s for it to release')
-                time.sleep(5)
-                if os.path.exists(git_config_lock_file):
-                    self.log('.git/config.lock file still there, we are just going to delete it....')
-                    os.remove(git_config_lock_file)
+###### should no longer need this after switching to subprocess
+#            git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
+#            if os.path.exists(git_config_lock_file):
+#                self.log('.git/config.lock exists, waiting 5s for it to release')
+#                time.sleep(5)
+#                if os.path.exists(git_config_lock_file):
+#                    self.log('.git/config.lock file still there, we are just going to delete it....')
+#                    os.remove(git_config_lock_file)
 
             ##############################
             # 3 docker build - in progress
@@ -177,7 +182,9 @@ class Registrar:
                                                   ref_data_ver, basedir, self.temp_dir, self.registration_id,
                                                   self.token, self.kbase_endpoint)
                 
-                print('preparing report')
+
+                self.set_build_step('preparing compilation report')
+                self.log('Preparing compilation report.')
 
                 # Trying to extract compilation report with line numbers of funcdefs from docker image.
                 # There is "report" entry-point command responsible for that. In case there are any
@@ -186,12 +193,18 @@ class Registrar:
                                                                      self.temp_dir, self.registration_id, 
                                                                      self.token, self.kbase_endpoint)
 
+                if compilation_report is None:
+                    raise ValueError('Unable to generate a compilation report, which is now required, so your registration cannot continue.  ' +
+                                        'If you have been successfully registering this module already, this means that you may need to update ' +
+                                        'to the latest version of the KBase SDK and rebuild your makefile.')
+
                 pprint.pprint(compilation_report)
+                self.log('Report complete')
 
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
 
-                #self.log(str(dockerClient.containers()));
+
             else:
                 self.log('IN TEST MODE!! SKIPPING DOCKER BUILD AND DOCKER REGISTRY UPDATE!!')
 
@@ -298,11 +311,7 @@ class Registrar:
 
     def update_the_catalog(self, basedir, ref_data_folder, ref_data_ver, compilation_report):
         # get the basic info that we need
-###### Replace repo with subprocess
-#        commit_hash = repo.head.commit.hexsha
         commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
-###### Replace repo with subprocess
-#        commit_message = repo.head.commit.message
         commit_message = str( subprocess.check_output ( ['git','log', '--pretty=%B', '-n', '1' ], cwd=basedir ) ).rstrip()
 
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name')
@@ -321,8 +330,6 @@ class Registrar:
         # TODO: Could optimize by combining all these things into one mongo call, but for now this is easier.
         # Combining it into one call would just mean that this update happens as a single transaction, but a partial
         # update for now that fails midstream is probably not a huge issue- we can always reregister.
-
-
 
         # next update the basic information
         info = {
@@ -364,6 +371,12 @@ class Registrar:
                 raise ValueError('There was an error saving local function specs, DB says: '+str(error))
 
         new_version = {
+            'module_name': module_name.strip(),
+            'module_name_lc': module_name.strip().lower(),
+            'module_description': module_description,
+            'released':0,
+            'released_timestamp':None,
+            'notes': '',
             'timestamp':self.timestamp,
             'registration_id':self.registration_id,
             'version' : version,
@@ -383,7 +396,7 @@ class Registrar:
             new_version['dynamic_service'] = 0
 
         self.log('new dev version object: '+pprint.pformat(new_version))
-        error = self.db.update_dev_version(new_version, git_url=self.git_url)
+        error = self.db.update_dev_version(new_version)
         if error is not None:
             raise ValueError('Unable to update dev version - there was an internal database error: '+str(error))
 

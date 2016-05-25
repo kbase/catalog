@@ -214,9 +214,122 @@ module Catalog {
         string version;
     } SelectModuleVersionParams;
 
+    /* DEPRECATED!!!  use get_module_version */
     funcdef get_version_info(SelectModuleVersionParams params) returns (ModuleVersionInfo version);
 
     funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
+
+
+
+
+
+    /*
+        module_name            - the name of the module
+        module_description     - (optionally returned) html description in KBase YAML of this module
+        git_url                - the git url of the source for this module
+
+        released               - 1 if this version has been released, 0 otherwise
+        release_tags           - list of strings of: 'dev', 'beta', or 'release', or empty list
+                                 this is a list because the same commit version may be the version in multiple release states
+        release_timestamp      - time in ms since epoch when this module was approved and moved to release, null otherwise
+                                 note that a module was released before v1.0.0, the release timestamp may not have been
+                                 recorded and will default to the registration timestamp
+
+        timestamp              - time in ms since epoch when the registration for this version was started
+        registration_id        - id of the last registration for this version, used for fetching registration logs and state
+
+        version                - validated semantic version number as indicated in the KBase YAML of this version
+                                 semantic versions are unique among released versions of this module
+
+        git_commit_hash        - the full git commit hash of the source for this module
+        git_commit_message     - the message attached to this git commit
+
+        dynamic_service        - 1 if this version is available as a web service, 0 otherwise
+
+        narrative_app_ids      - list of Narrative App ids registered with this module version
+        local_function_ids     - list of Local Function ids registered with this module version
+
+        docker_img_name        - name of the docker image for this module created on registration
+        data_folder            - name of the data folder used 
+
+        compilation_report     - (optionally returned) summary of the KIDL specification compilation
+    */
+    typedef structure {
+        string module_name;
+        string module_description;
+        string git_url;
+
+        boolean released;
+        list<string> release_tags;
+
+        int timestamp;
+        string registration_id;
+
+        string version;
+        string git_commit_hash;
+        string git_commit_message;
+
+        boolean dynamic_service;
+
+        list<string> narrative_app_ids;
+
+        list<string> local_function_ids;
+
+        string docker_img_name;
+        string data_folder;
+        string data_version;
+
+        CompilationReport compilation_report;
+
+    } ModuleVersion;
+
+
+    /*
+        Get a specific module version.
+
+        Requires either a module_name or git_url.  If both are provided, they both must match.
+
+        If no other options are specified, then the latest 'release' version is returned.  If
+        the module has not been released, then the latest 'beta' or 'dev' version is returned.
+        You can check in the returned object if the version has been released (see is_released)
+        and what release tags are pointing to this version (see release_tags).
+
+        Optionally, a 'version' parameter can be provided that can be either:
+            1) release tag: 'dev' | 'beta' | 'release'
+
+            2) specific semantic version of a released version (you cannot pull dev/beta or other
+               unreleased versions by semantic version)
+                - e.g. 2.0.1
+
+            3) semantic version requirement specification, see: https://pypi.python.org/pypi/semantic_version/
+               which will return the latest released version that matches the criteria.  You cannot pull
+               dev/beta or other unreleased versions this way.
+                - e.g.:
+                    - '>1.0.0'
+                    - '>=2.1.1,<3.3.0'
+                    - '!=0.2.4-alpha,<0.3.0'
+
+            4) specific full git commit hash
+
+        include_module_description - set to 1 to include the module description in the YAML file of this version;
+                                     default is 0
+        include_compilation_report - set to 1 to include the module compilation report, default is 0
+
+
+    */
+    typedef structure {
+        string module_name;
+        string git_url;
+
+        string version;
+
+        boolean include_module_description;
+        boolean include_compilation_report;
+    } SelectModuleVersion;
+
+    funcdef get_module_version(SelectModuleVersion selection) returns (ModuleVersion version);
+
+
 
 
     /* Local Function Listing Support */
@@ -234,6 +347,7 @@ module Catalog {
         IOTags output;
     } LocalFunctionTags;
 
+    /* todo: switch release_tag to release_tags */
     typedef structure {
         string module_name;
         string function_id;
