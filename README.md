@@ -5,6 +5,13 @@ KBase core service to manage app and module information, registration, and relea
 Build status (develop branch):
 [![Build Status](https://travis-ci.org/kbase/catalog.svg)](https://travis-ci.org/kbase/catalog)
 
+#### v2.0.0 - TBA
+  - Major release to support local functions and dynamic services
+  - All old module versions are now preserved and can be retrieved by git commit hash
+  - Module descriptions are now attached to specific module versions instead of to
+    the module itself, so are effectively versioned
+
+
 #### v1.0.4 - 2/26/16
   - Fix for bug with accessible dev-version after registration failure
 

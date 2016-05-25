@@ -21,7 +21,7 @@ class Catalog:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "f937342d295a43daf6d9795ef6cc8fced06c11c9"
+    GIT_COMMIT_HASH = "013fea039229ac9648259d22a1ffc2c47d37a189"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -236,6 +236,22 @@ class Catalog:
                              'versions is not type list as required.')
         # return the results
         return [versions]
+
+    def get_module_version(self, ctx, selection):
+        # ctx is the context object
+        # return variables are: version
+        #BEGIN get_module_version
+        version = self.cc.get_module_version(selection)
+        if version is None:
+            raise ValueError("No module version found that matches your criteria!")
+        #END get_module_version
+
+        # At some point might do deeper type checking...
+        if not isinstance(version, dict):
+            raise ValueError('Method get_module_version return value ' +
+                             'version is not type dict as required.')
+        # return the results
+        return [version]
 
     def list_local_functions(self, ctx, params):
         # ctx is the context object

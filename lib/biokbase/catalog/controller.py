@@ -117,7 +117,7 @@ class CatalogController:
             raise ValueError('The git url provided is not a valid URL.')
 
         # TODO: normalize github urls
-        
+
 
         # generate a unique registration ID based on a timestamp in ms + a UUID
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -444,6 +444,157 @@ class CatalogController:
 
         # didn't get nothing, so return
         return None
+
+
+    def get_module_version(self, params):
+
+        # Make sure the git_url and/or module_name are set
+        if 'git_url' not in params and 'module_name' not in params:
+            raise ValueError('Missing required fields git_url or module_name')
+        if 'git_url' not in params:
+            params['git_url'] = ''
+        if 'module_name' not in params:
+            params['module_name'] = ''
+
+        # get the module details so we can look up releases and tags
+        module_details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'], substitute_versions=False)
+        if module_details is None:
+            raise ValueError('Module cannot be found based on module_name or git_url parameters.')
+
+        module_name_lc = module_details['module_name_lc']
+        pprint(module_details)
+
+
+        # figure out what info we actually need to fetch
+        excluded_fields = []
+        if not ('include_module_description' in params and str(params['include_module_description']).strip()=='1'):
+            excluded_fields.append('module_description')
+        if not ('include_compilation_report' in params and str(params['include_compilation_report']).strip()=='1'):
+            excluded_fields.append('compilation_report')
+
+
+        # no version string specified, so default to returning release, beta, or dev in that order
+        if 'version' not in params or params['version'] is None or params['version'].strip() is '':
+            for tag in ['release','beta','dev']:
+                if tag in module_details['current_versions'] and module_details['current_versions'][tag] is not None:
+                    # get the version info
+                    versions = self.db.lookup_module_versions(
+                                            module_name_lc,
+                                            git_commit_hash = module_details['current_versions'][tag]['git_commit_hash'],
+                                            excluded_fields = excluded_fields)
+                    if len(versions) != 1:
+                        raise ValueError('Catalog DB Error: could not identify proper version - version documents found: ' + str(len(versions)))
+                    v = versions[0]
+                    self.prepare_version_for_return(v, module_details)
+                    return v
+            return None
+
+        # return the specific tag specified
+        if params['version'] in ['release','beta','dev']:
+            tag = params['version']
+            if tag in module_details['current_versions'] and module_details['current_versions'][tag] is not None:
+                # get the version info
+                versions = self.db.lookup_module_versions(
+                                        module_name_lc,
+                                        git_commit_hash = module_details['current_versions'][tag]['git_commit_hash'],
+                                        excluded_fields = excluded_fields)
+                if len(versions) != 1:
+                    raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
+                v = versions[0]
+                self.prepare_version_for_return(v, module_details)
+                return v
+            return None
+
+
+        # because this is the most common option, just assume it is a git commit hash and try to fetch before we deal with semantic version logic
+        versions = self.db.lookup_module_versions(
+                                module_name_lc,
+                                git_commit_hash = params['version'],
+                                excluded_fields = excluded_fields)
+        if len(versions)==1:
+            v = versions[0]
+            self.prepare_version_for_return(v, module_details)
+            return v
+        elif len(versions)>1:
+            raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
+
+
+        # see if we 
+
+
+
+
+
+
+# #try:
+# #            spec = semantic_version.Spec(lookup)
+# #            svers = []
+# #            for v in versions:
+# #                if only_services:
+# #                    if 'dynamic_service' not in v: continue
+# #                    if not v['dynamic_service']: continue
+#                 svers.append(semantic_version.Version(v['version']))
+
+#             theRightVersion = spec.select(svers)
+#             if theRightVersion:
+#                 for v in versions:
+#                     if v['version'] == str(theRightVersion):
+#                         return {
+#                             'module_name': details['module_name'],
+#                             'version':v['version'],
+#                             'git_commit_hash':v['git_commit_hash'],
+#                             'docker_img_name':v['docker_img_name']
+#                         }
+
+#                 raise ValueError('No suitable version matches your lookup - but this seems wrong.')
+#             else:
+#                 raise ValueError('No suitable version matches your lookup.')
+#         except ValueError:
+#             # probably we could not parse as a semantic version, so check as a commit hash
+#             for v in versions:
+#                 if v['git_commit_hash'] == lookup:
+#                     if only_services:
+#                         if 'dynamic_service' not in v:
+#                             raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+#                         if not v['dynamic_service']:
+#                             raise ValueError('The "'+selection['lookup']+'" version is not marked as a Service Module.')
+#                     return {
+#                         'module_name': details['module_name'],
+#                         'version':v['version'],
+#                         'git_commit_hash':v['git_commit_hash'],
+#                         'docker_img_name':v['docker_img_name']
+#                     }
+
+
+
+
+
+        return None
+
+
+    def prepare_version_for_return(self, version, module_details):
+
+        # remove module_name_lc if it exists (should always be there, but if it was already removed don't worry)
+        try:
+            del(version['module_name_lc'])
+        except:
+            pass
+
+        # add git_url
+        version['git_url'] = module_details['git_url']
+        version['module_name'] = module_details['module_name']
+
+        # add release tag information
+        release_tags = []
+        for tag in ['release','beta','dev']:
+            if tag in module_details['current_versions'] and module_details['current_versions'][tag] is not None:
+                if 'git_commit_hash' in module_details['current_versions'][tag]:
+                    if module_details['current_versions'][tag]['git_commit_hash'] == version['git_commit_hash']:
+                        release_tags.append(tag)
+        version['release_tags'] = release_tags
+
+
+
 
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)

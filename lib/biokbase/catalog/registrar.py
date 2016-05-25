@@ -196,7 +196,7 @@ class Registrar:
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
 
-                #self.log(str(dockerClient.containers()));
+
             else:
                 self.log('IN TEST MODE!! SKIPPING DOCKER BUILD AND DOCKER REGISTRY UPDATE!!')
 
@@ -323,8 +323,6 @@ class Registrar:
         # Combining it into one call would just mean that this update happens as a single transaction, but a partial
         # update for now that fails midstream is probably not a huge issue- we can always reregister.
 
-
-
         # next update the basic information
         info = {
             'description': module_description,
@@ -365,8 +363,12 @@ class Registrar:
                 raise ValueError('There was an error saving local function specs, DB says: '+str(error))
 
         new_version = {
+            'module_name': module_name.strip(),
             'module_name_lc': module_name.strip().lower(),
             'module_description': module_description,
+            'released':0,
+            'released_timestamp':None,
+            'notes': '',
             'timestamp':self.timestamp,
             'registration_id':self.registration_id,
             'version' : version,

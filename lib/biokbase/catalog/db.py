@@ -404,7 +404,7 @@ class MongoCatalogDBI:
 
         # update the module version record with released=True, and the release_timestamp
         result = self.module_versions.update( { 'git_commit_hash':beta_tag['git_commit_hash'] }, 
-                        { '$set': { 'released': True, 'release_timestamp': release_timestamp } })
+                        { '$set': { 'released': 1, 'release_timestamp': release_timestamp } })
         if self._check_update_result(result) is not None:
             return self._check_update_result(result)
 
@@ -464,6 +464,28 @@ class MongoCatalogDBI:
                 error['mssg'] = 'An insert/upsert did not work on ' + l['function_id']
                 return error
         return None
+
+
+
+    def lookup_module_versions(self, module_name, git_commit_hash=None, released=None, included_fields=[], excluded_fields=[]):
+
+        query = { 'module_name_lc':module_name.strip().lower() }
+
+        if git_commit_hash is not None:
+            query['git_commit_hash'] = git_commit_hash
+        if released is not None:
+            query['released'] = released
+
+        selection = { '_id':0 }
+        if len(included_fields) > 0:
+            for f in included_fields:
+                selection[f] = 1
+        elif len(excluded_fields) > 0:
+            for f in excluded_fields:
+                selection[f] = 0
+
+        return list(self.module_versions.find(query,selection))
+
 
 
 
@@ -666,17 +688,18 @@ class MongoCatalogDBI:
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query, fields=['owners'])['owners']
 
-    def get_module_details(self, module_name='', git_url=''):
+    def get_module_details(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_details = self.modules.find_one(query, fields=['module_name','module_name_lc','git_url','info','owners','state', 'current_versions'])
-        if 'module_name_lc' in module_details:
+        if substitute_versions and 'module_name_lc' in module_details:
             self.substitute_hashes_for_version_info([module_details])
         return module_details
 
-    def get_module_full_details(self, module_name='', git_url=''):
+
+    def get_module_full_details(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_document = self.modules.find_one(query)
-        if 'module_name_lc' in module_document:
+        if substitute_versions and 'module_name_lc' in module_document:
             self.substitute_hashes_for_version_info([module_document])
         return module_document
 
@@ -760,24 +783,10 @@ class MongoCatalogDBI:
 
     # all released service module versions
     def list_all_released_service_module_versions(self):
-        #result = self.modules.aggregate([
-        #    {'$match':{'info.dynamic_service':1}}, # make sure it is a module that has at least one dynamic service
-        #    {'$unwind':"$release_version_list"},      # look at all the release versions
-        #    {'$match':{'release_version_list.dynamic_service':1}}, # find the dynamic service released versions
-        #    {'$project':{
-        #            'module_name':1,
-        #            'version':'$release_version_list.version',
-        #            'git_commit_hash':'$release_version_list.git_commit_hash',
-        #            'docker_img_name':'$release_version_list.docker_img_name',
-        #            '_id':0
-        #        }
-        #    }])
-
-
         return list(self.module_versions.find(
             {
                 'dynamic_service':1,
-                'released':True
+                'released':1
             },
             {
                 'module_name':1,
@@ -1245,9 +1254,8 @@ class MongoCatalogDBI:
             # first migrate over all released versions and update the module document
             new_release_version_list = []
             for rVer in m['release_version_list']:
-                rVer['module_name'] = m['module_name']
-                rVer['module_name_lc'] = m['module_name_lc']
-                rVer['released'] = True
+                rVer['released'] = 1
+                self.prepare_version_doc_for_db_2_to_3_update(rVer, m)
                 try:
                     self.module_versions.insert(rVer)
                 except:
@@ -1261,14 +1269,14 @@ class MongoCatalogDBI:
                 )
 
             for tag in ['release','beta','dev']: # we can skip release tags because that is already in the release_version_list
-                if m['current_versions'][tag]:
+                if tag in m['current_versions'] and m['current_versions'][tag] is not None:
                     modVer = m['current_versions'][tag]
-                    modVer['module_name'] = m['module_name']
-                    modVer['module_name_lc'] = m['module_name_lc']
+                    modVer['released'] = 0
+                    self.prepare_version_doc_for_db_2_to_3_update(modVer, m)
                     if 'git_commit_hash' in modVer and modVer['git_commit_hash'] is not None:
                         try:
                             self.module_versions.insert(modVer)
-                        except:
+                        except Exception as e:
                             # we expect this to happen for all 'release' tags and if, say, a version still tagged as dev/beta has been released
                             print(' - Warning - '+tag+ ' ver of ' + rVer['module_name'] + '.' + rVer['git_commit_hash'] + ' already inserted, skipping.')
                         self.modules.update(
@@ -1280,17 +1288,25 @@ class MongoCatalogDBI:
                             {'_id':m['_id']},
                             {'$set':{ 'current_versions.'+tag: None } }
                         )
+            print(' -> completed '+m['module_name'])
 
-
-        #for m in self.modules.find({}):
-        #    pprint.pprint(m)
-
-        #for m in self.module_versions.find({}):
-        #    pprint.pprint(m)
-
-
-        pass;
-
+    def prepare_version_doc_for_db_2_to_3_update(self, version, module):
+        version['module_name'] = module['module_name']
+        version['module_name_lc'] = module['module_name_lc']
+        version['module_description'] = module['info']['description']
+        version['module_language'] = module['info']['language']
+        version['notes'] = ''
+        if 'local_functions' not in version:
+            version['local_functions'] = []
+        if 'compilation_report' not in version:
+            version['compilation_report'] = None
+        if 'narrative_methods' not in version:
+            version['narrative_methods'] = []
+        if 'release_timestamp' not in version:
+            if version['released']==1:
+                version['release_timestamp'] = version['timestamp']
+            else:
+                 version['release_timestamp'] = None
 
 
 

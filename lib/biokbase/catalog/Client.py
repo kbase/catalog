@@ -278,6 +278,13 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
+    def get_module_version(self, selection, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_module_version: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_module_version',
+                          [selection], json_rpc_context)
+        return resp[0]
+  
     def list_local_functions(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method list_local_functions: argument json_rpc_context is not type dict as required.')

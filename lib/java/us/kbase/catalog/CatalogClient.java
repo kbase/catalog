@@ -378,6 +378,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_version_info</p>
      * <pre>
+     * DEPRECATED!!!  use get_module_version
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.SelectModuleVersionParams SelectModuleVersionParams}
      * @return   parameter "version" of type {@link us.kbase.catalog.ModuleVersionInfo ModuleVersionInfo}
@@ -406,6 +407,23 @@ public class CatalogClient {
         args.add(params);
         TypeReference<List<List<ModuleVersionInfo>>> retType = new TypeReference<List<List<ModuleVersionInfo>>>() {};
         List<List<ModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_released_module_versions", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_module_version</p>
+     * <pre>
+     * </pre>
+     * @param   selection   instance of type {@link us.kbase.catalog.SelectModuleVersion SelectModuleVersion}
+     * @return   parameter "version" of type {@link us.kbase.catalog.ModuleVersion ModuleVersion}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ModuleVersion getModuleVersion(SelectModuleVersion selection, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(selection);
+        TypeReference<List<ModuleVersion>> retType = new TypeReference<List<ModuleVersion>>() {};
+        List<ModuleVersion> res = caller.jsonrpcCall("Catalog.get_module_version", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 
