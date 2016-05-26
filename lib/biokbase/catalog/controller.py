@@ -37,17 +37,17 @@ class CatalogController:
             warnings.warn('no "admin-users" are set in config of CatalogController.')
         
         # make sure the minimal mongo settings are in place
-        if 'mongodb-host' not in config:
+        if 'mongodb-host' not in config: # pragma: no cover
             raise ValueError('"mongodb-host" config variable must be defined to start a CatalogController!')
-        if 'mongodb-database' not in config:
+        if 'mongodb-database' not in config: # pragma: no cover
             raise ValueError('"mongodb-database" config variable must be defined to start a CatalogController!')
 
         # give warnings if no mongo user information is set
-        if 'mongodb-user' not in config:
+        if 'mongodb-user' not in config: # pragma: no cover
             warnings.warn('"mongodb-user" is not set in config of CatalogController.')
             config['mongodb-user']=''
             config['mongodb-pwd']=''
-        if 'mongodb-pwd' not in config:
+        if 'mongodb-pwd' not in config: # pragma: no cover
             warnings.warn('"mongodb-pwd" is not set in config of CatalogController.')
             config['mongodb-pwd']=''
 
@@ -59,22 +59,22 @@ class CatalogController:
                     config['mongodb-pwd'])
 
         # check for the temp directory and make sure it exists
-        if 'temp-dir' not in config:
+        if 'temp-dir' not in config: # pragma: no cover
             raise ValueError('"temp-dir" config variable must be defined to start a CatalogController!')
         self.temp_dir = config['temp-dir']
-        if not os.path.exists(self.temp_dir):
+        if not os.path.exists(self.temp_dir): # pragma: no cover
             raise ValueError('"temp-dir" does not exist! It is required for registration to work!')
-        if not os.path.exists(self.temp_dir):
+        if not os.path.exists(self.temp_dir): # pragma: no cover
             raise ValueError('"temp-dir" does not exist! Space is required for registration to work!')
-        if not os.access(self.temp_dir, os.W_OK):
+        if not os.access(self.temp_dir, os.W_OK): # pragma: no cover
             raise ValueError('"temp-dir" not writable! Writable space is required for registration to work!')
 
-        if 'docker-base-url' not in config:
+        if 'docker-base-url' not in config: # pragma: no cover
             raise ValueError('"docker-base-url" config variable must be defined to start a CatalogController!')
         self.docker_base_url = config['docker-base-url']
         print('Docker base url config = '+ self.docker_base_url)
 
-        if 'docker-registry-host' not in config:
+        if 'docker-registry-host' not in config: # pragma: no cover
             raise ValueError('"docker-registry-host" config variable must be defined to start a CatalogController!')
         self.docker_registry_host = config['docker-registry-host']
         print('Docker registry host config = '+ self.docker_registry_host)
@@ -82,26 +82,26 @@ class CatalogController:
         self.docker_push_allow_insecure = None # none should just set this to default?
         if 'docker-push-allow-insecure' in config:
             print('Docker docker-push-allow-insecure = '+ config['docker-push-allow-insecure'])
-            if config['docker-push-allow-insecure'].strip() == "1":
+            if config['docker-push-allow-insecure'].strip() == "1": # pragma: no cover
                 self.docker_push_allow_insecure = True;
                 print('WARNING!! - Docker push is set to allow insecure connections.  This should never be on in production.')
 
 
-        if 'ref-data-base' not in config:
+        if 'ref-data-base' not in config: # pragma: no cover
             raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')
         self.ref_data_base = config['ref-data-base']
 
-        if 'kbase-endpoint' not in config:
+        if 'kbase-endpoint' not in config: # pragma: no cover
             raise ValueError('"kbase-endpoint" config variable must be defined to start a CatalogController!')
         self.kbase_endpoint = config['kbase-endpoint']
         
-        if 'nms-url' not in config:
+        if 'nms-url' not in config: # pragma: no cover
             raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
         self.nms_url = config['nms-url']
-        if 'nms-admin-user' not in config:
+        if 'nms-admin-user' not in config: # pragma: no cover
             raise ValueError('"nms-admin-user" config variable must be defined to start a CatalogController!')
         self.nms_admin_user = config['nms-admin-user']
-        if 'nms-admin-psswd' not in config:
+        if 'nms-admin-psswd' not in config: # pragma: no cover
             raise ValueError('"nms-admin-psswd" config variable must be defined to start a CatalogController!')
         self.nms_admin_psswd = config['nms-admin-psswd']
 
@@ -465,6 +465,8 @@ class CatalogController:
         if module_details is None:
             raise ValueError('Module cannot be found based on module_name or git_url parameters.')
 
+        if 'module_name_lc' not in module_details:
+            raise ValueError('Module was never properly registered, and has no available versions.')
         module_name_lc = module_details['module_name_lc']
 
         # figure out what info we actually need to fetch
@@ -572,7 +574,7 @@ class CatalogController:
                             self.prepare_version_for_return(v, module_details)
                             return v
                         else:
-                            raise Value
+                            raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
 
         return None
 
@@ -633,6 +635,11 @@ class CatalogController:
             params['include_released'] = 1
         if 'include_unreleased' not in params:
             params['include_unreleased'] = 0
+
+        if 'include_modules_with_no_name_set' not in params:
+            query['module_name_lc'] = { '$exists':True }
+        elif params['include_modules_with_no_name_set'] != 1:
+            query['module_name_lc'] = { '$exists':True }
 
         # figure out release/unreleased options so we can get just the unreleased if needed
         # default (if none of these matches is to list only released)

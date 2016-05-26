@@ -711,6 +711,7 @@ ListModuleParams is a reference to a hash where the following keys are defined:
 	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
+	include_modules_with_no_name_set has a value which is a Catalog.boolean
 boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
@@ -729,6 +730,7 @@ ListModuleParams is a reference to a hash where the following keys are defined:
 	include_released has a value which is a Catalog.boolean
 	include_unreleased has a value which is a Catalog.boolean
 	include_disabled has a value which is a Catalog.boolean
+	include_modules_with_no_name_set has a value which is a Catalog.boolean
 boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
@@ -4301,6 +4303,9 @@ Describes how to filter repositories.
 include_released - optional flag indicated modules that are released are included (default:true)
 include_unreleased - optional flag indicated modules that are not released are included (default:false)
 with_disabled - optional flag indicating disabled repos should be included (default:false).
+include_modules_with_no_name_set - default to 0, if set return modules that were never
+                                    registered successfully (first registration failed, never
+                                    got a module name, but there is a git_url)
 
 
 =item Definition
@@ -4313,6 +4318,7 @@ owners has a value which is a reference to a list where each element is a string
 include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
+include_modules_with_no_name_set has a value which is a Catalog.boolean
 
 </pre>
 
@@ -4325,6 +4331,7 @@ owners has a value which is a reference to a list where each element is a string
 include_released has a value which is a Catalog.boolean
 include_unreleased has a value which is a Catalog.boolean
 include_disabled has a value which is a Catalog.boolean
+include_modules_with_no_name_set has a value which is a Catalog.boolean
 
 
 =end text
