@@ -2,8 +2,13 @@
 
 KBase core service to manage app and module information, registration, and release.
 
-Build status (develop branch):
-[![Build Status](https://travis-ci.org/kbase/catalog.svg)](https://travis-ci.org/kbase/catalog)
+Build status:
+master:  [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=master)](https://travis-ci.org/kbase/catalog)
+staging: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=staging)](https://travis-ci.org/kbase/catalog)
+develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop)](https://travis-ci.org/kbase/catalog)
+
+Code coverage: (develop branch)
+[![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
 #### v2.0.0 - TBA
   - Major release to support local functions and dynamic services

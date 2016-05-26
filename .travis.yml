@@ -26,6 +26,8 @@ before_install:
 
 install:
     - pip install -r travis_requirements.txt
+    - pip install python-coveralls
+    - pip install coverage
     - cd ..
     - git clone https://github.com/kbase/jars
     - git clone https://github.com/kbase/kb_sdk
@@ -41,6 +43,10 @@ script:
     - cp -n test/test.cfg.example test/test.cfg
     - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg
     - make test
+
+after_success:
+  - mv test/.coverage .
+  - coveralls
 
 env:
   global:
