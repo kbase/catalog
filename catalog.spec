@@ -75,12 +75,16 @@ module Catalog {
         include_released - optional flag indicated modules that are released are included (default:true)
         include_unreleased - optional flag indicated modules that are not released are included (default:false)
         with_disabled - optional flag indicating disabled repos should be included (default:false).
+        include_modules_with_no_name_set - default to 0, if set return modules that were never
+                                            registered successfully (first registration failed, never
+                                            got a module name, but there is a git_url)
     */
     typedef structure {
         list <string> owners;
         boolean include_released;
         boolean include_unreleased;
         boolean include_disabled;
+        boolean include_modules_with_no_name_set;
     } ListModuleParams;
 
     typedef structure {

@@ -21,7 +21,7 @@ class Catalog:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "179b9783a506290fac2834da3def4b858b91aba1"
+    GIT_COMMIT_HASH = "526e2460bea9612c7017c28bcb71c66155f9438e"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER

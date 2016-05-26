@@ -216,15 +216,26 @@ class LocalFunctionReader:
 
     def finish_validation(self, compilation_report):
 
-        print('FINISH VALIDATION!!')
+        if len(self.function_specs)==0:
+            return
+
+        if 'functions' not in compilation_report:
+            raise ValueError('Invalid compilation report, functions are missing')
+        if 'function_places' not in compilation_report:
+            raise ValueError('Invalid compilation report, function_places are missing')
 
         # 1) compare functions to functions in the compilation report
-        # 2) pull out documentation from the compilation report
-        # 3) create the base record for each function
-        pprint(compilation_report)
-        pprint(self.function_specs)
+        for fid in self.function_specs:
+            if fid not in compilation_report['functions']:
+                raise ValueError('Invalid function specification, "'+fid+'" function could not be found.  Check local function spec names.')
+            if fid not in compilation_report['function_places']:
+                raise ValueError('Invalid function specification, "'+fid+'" function could not be found.  Check local function spec names.')
+            # 2) pull out documentation from the compilation report
+            self.function_specs[fid]['kidl'] = {
+                'parse': compilation_report['functions'][fid],
+                'src_location': compilation_report['function_places'][fid]
+            }
 
-        raise ValueError('done')
         return
 
     def extract_lf_names(self):

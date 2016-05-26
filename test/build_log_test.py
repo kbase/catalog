@@ -61,6 +61,11 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(len(complete_skip2limit1),1)
         self.assertEqual(complete[2], complete_skip2limit1[0])
 
+        # get specific module => TODO: doesn't quite behave how you expect when passing multiple modules with mixed git urls and module names
+        module_builds = self.catalog.list_builds(self.cUtil.anonymous_ctx(),{'modules': [{'module_name':'onerepotest'},
+            {'module_name':'registration_in_progress'}] })[0]
+        self.assertEqual(len(module_builds),5)
+
 
 
     @classmethod

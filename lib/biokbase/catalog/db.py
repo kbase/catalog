@@ -309,6 +309,7 @@ class MongoCatalogDBI:
         if registration_match:
             query['registration'] = registration_match
 
+        # TODO: doesn't quite behave how you expect when passing multiple modules with mixed git urls and module names
         if len(module_name_lcs)>0:
             query['module_name_lc'] = { '$in':module_name_lcs }
         if len(git_urls)>0:
