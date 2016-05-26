@@ -735,7 +735,7 @@ class MongoCatalogDBI:
 
         # lookup the info, save it to a dict
         ver_lookup = {}
-        for ver in self.module_versions.find({'git_commit_hash': {'$in':hash_list}}):
+        for ver in self.module_versions.find({'git_commit_hash': {'$in':hash_list}},{'_id':0}):
             if ver['module_name_lc'] not in ver_lookup:
                 ver_lookup[ver['module_name_lc']] = {}
             ver_lookup[ver['module_name_lc']][ver['git_commit_hash']] = ver
