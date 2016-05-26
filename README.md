@@ -18,7 +18,6 @@ Code coverage: (develop branch)
   - Module descriptions are now attached to specific module versions instead of to
     the module itself, so are effectively versioned
   - Tests extended to cover docker steps in registration in Travis, and added to coveralls
-  
 
 #### v1.0.4 - 2/26/16
   - Fix for bug with accessible dev-version after registration failure

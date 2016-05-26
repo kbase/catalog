@@ -33,7 +33,7 @@ class CatalogController:
             for t in tokens:
                 if t.strip():
                     self.adminList.append(t.strip())
-        if not self.adminList:
+        if not self.adminList:  # pragma: no cover
             warnings.warn('no "admin-users" are set in config of CatalogController.')
         
         # make sure the minimal mongo settings are in place
@@ -316,8 +316,6 @@ class CatalogController:
 
         if not module_details['state']['active']:
             raise ValueError('Cannot review request - module/repo is no longer active.')
-        if module_details['state']['release_approval'] != 'under_review':
-            raise ValueError('Cannot review request - module/repo is not under review!')
 
         if 'decision' not in review:
             raise ValueError('Cannot set review - no "decision" was provided!')
