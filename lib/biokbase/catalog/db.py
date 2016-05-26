@@ -438,7 +438,7 @@ class MongoCatalogDBI:
                 # if that doesn't work, try to update (NOTE: by now this version should only be updatable if it is a dev or orphan version, and
                 # we assume that check has already been made)
                 except:
-                    result = self.module_version.update( {
+                    result = self.module_versions.update( {
                                                     'module_name_lc':version_info['module_name_lc'],
                                                     'git_commit_hash':version_info['git_commit_hash']
                                                 },
