@@ -17,7 +17,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
 
 
     # assumes no developers have been added yet
-    def local_function_module(self):
+    def test_local_function_module(self):
 
         # TODO: figure out git_commit hash or branch configuration
         # assume test user is already approved as a developer
@@ -61,7 +61,6 @@ class LocalFunctionModuleTest(unittest.TestCase):
 
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
             {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome'}]})[0]
-        pprint(specs)
 
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
             {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 'release_tag':'beta'}]})[0]
@@ -70,6 +69,8 @@ class LocalFunctionModuleTest(unittest.TestCase):
 
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
             {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 'release_tag':'beta', 'git_commit_hash':'a01e1a20b9c504a0136c75323b00b1cd4c7f7970'}]})[0]
+
+        # todo: add some checks here
 
 
 

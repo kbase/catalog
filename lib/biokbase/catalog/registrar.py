@@ -198,7 +198,9 @@ class Registrar:
                                         'If you have been successfully registering this module already, this means that you may need to update ' +
                                         'to the latest version of the KBase SDK and rebuild your makefile.')
 
-                pprint.pprint(compilation_report)
+                self.local_function_reader.finish_validation(compilation_report)
+
+
                 self.log('Report complete')
 
                 self.set_build_step('pushing docker image to registry')
