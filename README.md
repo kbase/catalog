@@ -2,8 +2,25 @@
 
 KBase core service to manage app and module information, registration, and release.
 
-Build status (develop branch):
-[![Build Status](https://travis-ci.org/kbase/catalog.svg)](https://travis-ci.org/kbase/catalog)
+Build status:
+master:  [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=master)](https://travis-ci.org/kbase/catalog)
+staging: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=staging)](https://travis-ci.org/kbase/catalog)
+develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop)](https://travis-ci.org/kbase/catalog)
+
+Code coverage: (develop branch)
+[![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
+
+#### v2.0.2 - TBA
+  - Major release to support storage of local functions and dynamic services information,
+    including methods to query/filter/fetch local function and dynamic service info
+  - Improved methods for fetching module versions by semantic version matching
+  - All old module versions are now preserved and can be retrieved by git commit hash
+  - Module descriptions are now attached to specific module versions instead of to
+    the module itself, so are effectively versioned
+  - Tests extended to cover docker steps in registration in Travis, and added to coveralls
+
+#### v1.0.4 - 2/26/16
+  - Fix for bug with accessible dev-version after registration failure
 
 #### v1.0.3 - 2/24/16
   - Method to generate usage stats for admins

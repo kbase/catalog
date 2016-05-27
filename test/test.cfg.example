@@ -22,15 +22,17 @@ test-module-repo-2 = https://github.com/kbaseIncubator/catalog_test_module.git
 mongodb-host = localhost:27017
 
 # docker registry host endpoint
-docker-registry-host = dockerhub-ci.kbase.us
+docker-registry-host = localhost:5000
 
 # name of the mongo database
 # WARNING: this will get wiped!  Don't run tests against something that you may want to keep!
 mongodb-database = catalog-test
 
-# Path to docker socket/host
+# Path to docker socket/host - you can leave this blank if you have the appropriate docker env variables defined
 docker-base-url = unix://var/run/docker.sock
-# for tcp: "tcp://host:port"
+
+# temporary fix for travis- no longer needed
+docker-push-allow-insecure = 0
 
 #Narrative Method Store configuration
 nms-url = http://localhost:7125
@@ -51,7 +53,7 @@ method-spec-git-repo-local-dir = nms/local_narrative_method_specs
 method-spec-temp-dir = nms/scratch
 
 method-spec-git-repo = https://github.com/kbase/narrative_method_specs
-method-spec-git-repo-branch = dev
+method-spec-git-repo-branch = develop
 method-spec-git-repo-refresh-rate = 2000
 method-spec-cache-size = 5000
 method-spec-mongo-dbname = method_store_repo_db

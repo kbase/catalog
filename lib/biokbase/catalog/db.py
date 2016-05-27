@@ -1,6 +1,7 @@
 
 import json
 import pprint
+import copy
 from pymongo import MongoClient
 from pymongo import ASCENDING
 from pymongo import DESCENDING
@@ -69,6 +70,11 @@ Module Document:
                 registration_id:''
             }
         }
+
+        release_version_list: [
+
+
+        ]
     }
 
 FAVORITES
@@ -79,12 +85,38 @@ FAVORITES
         timestamp:
     }
 
+
+LOCAL_FUNCTIONS
+
+    {
+        module_name:
+        module_name_lc:
+        version:
+        git_commit_hash:
+        functions:
+        
+    }
+
+
+
+
+
+
+
 '''
 class MongoCatalogDBI:
 
     # Collection Names
 
+
+    _DB_VERSION='db_version' #single
+
     _MODULES='modules'
+
+    _MODULE_VERSIONS='module_versions'
+
+
+    _LOCAL_FUNCTIONS='local_functions'
     _DEVELOPERS='developers'
     _BUILD_LOGS='build_logs'
     _FAVORITES='favorites'
@@ -105,27 +137,45 @@ class MongoCatalogDBI:
         # Grab a handle to the database and collections
         self.db = self.mongo[mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
+        self.module_versions = self.db[MongoCatalogDBI._MODULE_VERSIONS]
+
+        self.local_functions = self.db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = self.db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
         self.client_groups = self.db[MongoCatalogDBI._CLIENT_GROUPS]
+
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
-        self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
-                                    {'$rename': {'avg_queue_time': 'total_queue_time',
-                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
-        self.exec_stats_users.update({'avg_queue_time': {'$exists' : True}}, 
-                                    {'$rename': {'avg_queue_time': 'total_queue_time',
-                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
 
         # Make sure we have an index on module and git_repo_url
-        self.modules.ensure_index('module_name', unique=True, sparse=True)
-        self.modules.ensure_index('module_name_lc', unique=True, sparse=True)
-        self.modules.ensure_index('git_url', unique=True)
+        self.module_versions.ensure_index('module_name_lc', sparse=False)
+        self.module_versions.ensure_index('git_commit_hash', sparse=False)
+        self.module_versions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
 
-        # other indecies for query performance
-        self.modules.ensure_index('owners.kb_username')
+        # Make sure we have a unique index on module_name_lc and git_commit_hash
+        self.local_functions.ensure_index('function_id')
+        self.local_functions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('function_id',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
+
+        # local function indecies
+        self.local_functions.ensure_index('module_name_lc')
+        self.local_functions.ensure_index('git_commit_hash')
+        self.local_functions.ensure_index('function_id')
+        self.local_functions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('function_id',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
+
+        # developers indecies
 
         self.developers.ensure_index('kb_username', unique=True)
 
@@ -179,6 +229,11 @@ class MongoCatalogDBI:
         # client group
         #  app_id = [lower case module name]/[app id]
         self.client_groups.ensure_index('app_id', unique=True, sparse=False)
+
+
+
+        self.check_db_schema()
+
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -255,6 +310,7 @@ class MongoCatalogDBI:
         if registration_match:
             query['registration'] = registration_match
 
+        # TODO: doesn't quite behave how you expect when passing multiple modules with mixed git urls and module names
         if len(module_name_lcs)>0:
             query['module_name_lc'] = { '$in':module_name_lcs }
         if len(git_urls)>0:
@@ -312,12 +368,9 @@ class MongoCatalogDBI:
             'current_versions': {
                 'release':None,
                 'beta':None,
-                'dev': {
-                    'timestamp' : timestamp,
-                    'registration_id' : registration_id
-                }
+                'dev': None
             },
-            'release_versions': { }
+            'release_version_list': []
         }
         self.modules.insert(module)
 
@@ -344,42 +397,244 @@ class MongoCatalogDBI:
 
 
     def push_beta_to_release(self, module_name='', git_url='', release_timestamp=None):
-        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
-        beta_version = current_versions['beta']
 
-        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        query['current_versions.beta.timestamp'] = beta_version['timestamp']
+        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url, substitute_versions=False)
+        beta_tag = current_versions['beta']
 
         if not release_timestamp:
             raise ValueError('internal error- timestamp not set in push_beta_to_release')
-        beta_version['release_timestamp'] = release_timestamp
-        
-        # we both update the release version, and since we archive release versions, we stash it in the release_versions list as well
+
+        # update the module version record with released=True, and the release_timestamp
+        result = self.module_versions.update( { 'git_commit_hash':beta_tag['git_commit_hash'] }, 
+                        { '$set': { 'released': 1, 'release_timestamp': release_timestamp } })
+        if self._check_update_result(result) is not None:
+            return self._check_update_result(result)
+
+        # update the tags in the module document
+        query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         result = self.modules.update(query, {'$set':{
                                                 'state.released':True,
-                                                'current_versions.release':beta_version,
-                                                'release_versions.'+str(beta_version['timestamp']):beta_version
+                                                'current_versions.release':beta_tag
+                                                },
+                                             '$push':{
+                                                'release_version_list':beta_tag
                                                 }})
         return self._check_update_result(result)
 
     def push_dev_to_beta(self, module_name='', git_url=''):
-        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
-        dev_version = current_versions['dev']
-
+        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url, substitute_versions=False)
+        dev_tag = current_versions['dev']
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        query['current_versions.dev.timestamp'] = dev_version['timestamp']
-        
-        result = self.modules.update(query, {'$set':{'current_versions.beta':dev_version}})
+        result = self.modules.update(query, {'$set':{'current_versions.beta':dev_tag}})
+
         return self._check_update_result(result)
 
-    def update_dev_version(self, version_info, module_name='', git_url=''):
+
+    def update_dev_version(self, version_info):
         if version_info:
-            query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-            result = self.modules.update(query, {'$set':{'current_versions.dev':version_info}})
-            return self._check_update_result(result)
+            if 'git_commit_hash' in version_info and 'module_name_lc' in version_info:
+                
+                # try to insert
+                try:
+                    v_info_copy = copy.deepcopy(version_info) # copy because insert has side effects on the data if it fails, stupid mongo!
+                    self.module_versions.insert(v_info_copy)
+                # if that doesn't work, try to update (NOTE: by now this version should only be updatable if it is a dev or orphan version, and
+                # we assume that check has already been made)
+                except:
+                    result = self.module_versions.update( {
+                                                    'module_name_lc':version_info['module_name_lc'],
+                                                    'git_commit_hash':version_info['git_commit_hash']
+                                                },
+                                                version_info)
+                    if self._check_update_result(result) is not None:
+                        return self._check_update_result(result)
+                query = self._get_mongo_query(module_name=version_info['module_name_lc'])
+                result = self.modules.update(query, {'$set':{'current_versions.dev':{'git_commit_hash':version_info['git_commit_hash']}}})
+                return self._check_update_result(result)
+            else:
+                raise ValueError('git_commit_hash is required to register a new version')
         return False
 
 
+    def save_local_function_specs(self, local_functions):
+        # just using insert doesn't accept a list of docs in mongo 2.6, so loop for now
+        for l in local_functions:
+            matcher = {'module_name_lc':l['module_name_lc'], 'function_id':l['function_id'], 'git_commit_hash':l['git_commit_hash']}
+            # insert or update- allows us to capture the latest info if a specific commit is reregistered without adding a duplicate
+            # or throwing an error
+            result = self.local_functions.update(matcher, l, upsert=True)
+            if self._check_update_result(result):
+                error = self._check_update_result(result)
+                error['mssg'] = 'An insert/upsert did not work on ' + l['function_id']
+                return error
+        return None
+
+
+
+    def lookup_module_versions(self, module_name, git_commit_hash=None, released=None, included_fields=[], excluded_fields=[]):
+
+        query = { 'module_name_lc':module_name.strip().lower() }
+
+        if git_commit_hash is not None:
+            query['git_commit_hash'] = git_commit_hash
+        if released is not None:
+            query['released'] = released
+
+        selection = { '_id':0 }
+        if len(included_fields) > 0:
+            for f in included_fields:
+                selection[f] = 1
+        elif len(excluded_fields) > 0:
+            for f in excluded_fields:
+                selection[f] = 0
+
+        return list(self.module_versions.find(query,selection))
+
+
+
+
+    def list_local_function_info(self, release_tag=None, module_names=[]):
+
+        git_commit_hash_list = []
+        git_commit_hash_release_tag_map = {}
+
+        # get all module brief info
+        tag = 'release'
+        if release_tag:
+            if release_tag not in ['release','beta','dev']:
+                raise ValueError('"release_tag" must be either release, beta or dev')
+            tag = release_tag
+
+        # might want to add a flag if a module ever has a local function
+        query = {
+            'state.active':True,
+            'info.local_functions':1,
+            'current_versions.'+tag+'.git_commit_hash': {'$exists':True}
+        }
+
+        check_mods = False
+        if len(module_names)>0:
+            check_mods = True
+            for m in module_names:
+                m = m.strip().lower()
+
+        # get the list of git commit hashes to query on
+        git_commit_hash_list = []
+        git_mod_name_lookup = {}
+        for mod in self.db.modules.find(query, {'module_name_lc':1, 'current_versions':1, '_id':0}):
+            if check_mods:
+                if mod['module_name_lc'] not in module_names:
+                    continue
+            git_commit_hash_list.append(mod['current_versions'][tag]['git_commit_hash'])
+            release_tags = []
+            for rt in ['release', 'beta', 'dev']:
+                if rt in mod['current_versions'] and mod['current_versions'][rt] is not None:
+                    if 'git_commit_hash' in mod['current_versions'][rt]:
+                        if mod['current_versions'][rt]['git_commit_hash'] == mod['current_versions'][tag]['git_commit_hash']:
+                            release_tags.append(rt)
+            git_mod_name_lookup[mod['module_name_lc']+mod['current_versions'][tag]['git_commit_hash']] = release_tags
+
+        # get the local functions
+        included_fields = {
+            '_id':0,
+            'module_name':1,
+            'module_name_lc':1,
+            'function_id':1,
+            'git_commit_hash':1,
+            'version':1,
+            'name':1,
+            'short_description':1,
+            'tags':1,
+            'authors':1
+        }
+        local_funcs = list(self.db.local_functions.find({'git_commit_hash':{'$in':git_commit_hash_list}}, included_fields))
+
+        # set the release_tag field
+        returned_funcs = []
+        for l in local_funcs:
+            if (l['module_name_lc'] + l['git_commit_hash']) in git_mod_name_lookup:
+                l['release_tag'] = git_mod_name_lookup[l['module_name_lc'] + l['git_commit_hash']]
+                del(l['module_name_lc'])
+                returned_funcs.append(l)
+
+        return returned_funcs
+
+
+    def get_local_function_spec(self, functions):
+
+        result_list = []
+
+        # first lookup all the module info so we can figure out any tags, and make a quick dict
+        module_name_lc_lookup = []
+        for f in functions:
+            module_name_lc_lookup.append(f['module_name'].lower())
+
+        mods = list(self.db.modules.find({'module_name_lc' : {'$in': module_name_lc_lookup}},
+                        {   
+                            '_id':0,
+                            'module_name_lc':1,
+                            'current_versions.dev.git_commit_hash':1,
+                            'current_versions.beta.git_commit_hash':1,
+                            'current_versions.release.git_commit_hash':1
+                        }))
+        mod_lookup = {}
+        git_hash_release_tag_lookup = {}
+        for m in mods:
+            mod_lookup[m['module_name_lc']] = m
+            for tag in ['dev','beta','release']:
+                if tag in m['current_versions'] and m['current_versions'][tag] is not None:
+                    if 'git_commit_hash' in m['current_versions'][tag]:
+                        git_hash_release_tag_lookup[m['current_versions'][tag]['git_commit_hash']] =tag
+
+        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here
+        # although we expect in general, most users will only get module details one at a time 
+        for f in functions:
+            query = {
+                'module_name_lc':f['module_name'].lower(),
+                'function_id':f['function_id'].lower()
+            }
+
+            if 'release_tag' in f:
+                if query['module_name_lc'] not in mod_lookup: continue
+                module = mod_lookup[query['module_name_lc']]
+                if f['release_tag'] in module['current_versions']:
+                    if 'git_commit_hash' in m['current_versions'][f['release_tag']]:
+                        query['git_commit_hash'] = m['current_versions'][f['release_tag']]['git_commit_hash']
+                else:
+                    continue
+                if 'git_commit_hash' in f:
+                    if f['git_commit_hash'] != query['git_commit_hash']:
+                        raise ValueError('For lookup: '+f['module_name']+'.'+f['function_id']+', release tag commit hash '+
+                            '('+git_commit_hash_needed+') does not match selector you gave ('+f['git_commit_hash']+')')
+            else:
+                if 'git_commit_hash' in f:
+                    query['git_commit_hash'] = f['git_commit_hash']
+                else:
+                    if query['module_name_lc'] not in mod_lookup: continue
+                    module = mod_lookup[query['module_name_lc']]
+                    if 'release' in module['current_versions']:
+                        if 'git_commit_hash' in module['current_versions']['release']:
+                            query['git_commit_hash'] = module['current_versions']['release']['git_commit_hash']
+                    if 'git_commit_hash' not in query:
+                        # no release version to return
+                        continue
+
+            # ok, finally do the query
+            function_data = self.db.local_functions.find_one(query, { '_id':0 })
+            long_description = function_data['long_description']
+            del(function_data['long_description'])
+            if 'release_tag' in f:
+                function_data['release_tag'] = f['release_tag']
+            else:
+                if function_data['git_commit_hash'] in git_hash_release_tag_lookup:
+                    function_data['release_tag'] = git_hash_release_tag_lookup[function_data['git_commit_hash']]
+
+            result_list.append({
+                'info': function_data,
+                'long_description': long_description
+            })
+
+        return result_list
 
     def set_module_name(self, git_url, module_name):
         if not module_name:
@@ -420,21 +675,31 @@ class MongoCatalogDBI:
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query, fields=['state'])['state']
 
-    def get_module_current_versions(self, module_name='', git_url=''):
+    def get_module_current_versions(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        return self.modules.find_one(query, fields=['current_versions'])['current_versions']
+        module_document = self.modules.find_one(query, fields=['module_name_lc','current_versions'])
+        if substitute_versions and 'module_name_lc' in module_document:
+            self.substitute_hashes_for_version_info([module_document])
+        return module_document['current_versions']
 
     def get_module_owners(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query, fields=['owners'])['owners']
 
-    def get_module_details(self, module_name='', git_url=''):
+    def get_module_details(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        return self.modules.find_one(query, fields=['module_name','git_url','info','owners','state','current_versions'])
+        module_details = self.modules.find_one(query, fields=['module_name','module_name_lc','git_url','info','owners','state', 'current_versions'])
+        if substitute_versions and 'module_name_lc' in module_details:
+            self.substitute_hashes_for_version_info([module_details])
+        return module_details
 
-    def get_module_full_details(self, module_name='', git_url=''):
+
+    def get_module_full_details(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        return self.modules.find_one(query)
+        module_document = self.modules.find_one(query)
+        if substitute_versions and 'module_name_lc' in module_document:
+            self.substitute_hashes_for_version_info([module_document])
+        return module_document
 
     #### LIST / SEARCH methods
 
@@ -442,7 +707,96 @@ class MongoCatalogDBI:
         return list(self.modules.find(query,{'module_name':1,'git_url':1,'_id':0}))
 
     def find_current_versions_and_owners(self, query):
-        return list(self.modules.find(query,{'module_name':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))
+        result = list(self.modules.find(query,{'module_name':1,'module_name_lc':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))
+        self.substitute_hashes_for_version_info(result)
+        return result
+
+
+    def substitute_hashes_for_version_info(self, module_list):
+
+        # get all the version commit hashes
+        hash_list = []
+        for mod in module_list:
+            if 'module_name_lc' not in mod:
+                raise ValueError('DB Error: module_name_lc must be specified to get version documents')
+
+            if 'current_versions' in mod:
+                for tag in ['release', 'beta', 'dev']:
+                    if tag in mod['current_versions'] and mod['current_versions'][tag] is not None:
+                        if 'git_commit_hash' in mod['current_versions'][tag]:
+                            hash_list.append(mod['current_versions'][tag]['git_commit_hash'])
+
+            if 'release_version_list' in mod:
+                for r in mod['release_version_list']:
+                    if 'git_commit_hash' in r:
+                        hash_list.append(r['git_commit_hash'])
+
+        # lookup the info, save it to a dict
+        ver_lookup = {}
+        for ver in self.module_versions.find({'git_commit_hash': {'$in':hash_list}},{'_id':0}):
+            if ver['module_name_lc'] not in ver_lookup:
+                ver_lookup[ver['module_name_lc']] = {}
+            ver_lookup[ver['module_name_lc']][ver['git_commit_hash']] = ver
+
+        # replace them
+        for mod in module_list:
+            if 'current_versions' in mod:
+                for tag in ['release', 'beta', 'dev']:
+                    if tag in mod['current_versions'] and mod['current_versions'][tag] is not None:
+                        if 'git_commit_hash' in mod['current_versions'][tag]:
+                            mod['current_versions'][tag] = ver_lookup[mod['module_name_lc']][mod['current_versions'][tag]['git_commit_hash']]
+
+            if 'release_version_list' in mod:
+                new_release_version_list = []
+                for r in mod['release_version_list']:
+                    if 'git_commit_hash' in r:
+                        new_release_version_list.append(ver_lookup[mod['module_name_lc']][r['git_commit_hash']])
+                mod['release_version_list'] = new_release_version_list
+
+        return module_list
+
+
+
+
+
+    # tag should be one of dev, beta, release - do checking outside of this method
+    def list_service_module_versions_with_tag(self, tag):
+
+        mods = list(self.modules.find({'info.dynamic_service':1}, {'module_name_lc':1, 'module_name':1, 'current_versions.'+tag : 1 }))
+        self.substitute_hashes_for_version_info(mods)
+
+        result = []
+        for m in mods:
+            if tag in m['current_versions'] and m['current_versions'][tag] is not None:
+                if 'dynamic_service' in m['current_versions'][tag] and m['current_versions'][tag]['dynamic_service'] == 1:
+                    result.append({
+                            'module_name':m['module_name'],
+                            'version':m['current_versions'][tag]['version'],
+                            'git_commit_hash':m['current_versions'][tag]['git_commit_hash'],
+                            'docker_img_name':m['current_versions'][tag]['docker_img_name']
+
+                        })
+        return result;
+
+
+    # all released service module versions
+    def list_all_released_service_module_versions(self):
+        return list(self.module_versions.find(
+            {
+                'dynamic_service':1,
+                'released':1
+            },
+            {
+                'module_name':1,
+                'version':1,
+                'git_commit_hash':1,
+                'docker_img_name':1,
+                '_id':0
+            }))
+
+
+
+
 
 
     #### developer check methods
@@ -496,7 +850,7 @@ class MongoCatalogDBI:
         if module_details['current_versions']['release']:
             raise ValueError('Cannot delete module that has been released.  Make it inactive instead.')
 
-        if module_details['release_versions']:
+        if module_details['release_version_list']:
             raise ValueError('Cannot delete module that has released versions.  Make it inactive instead.')
 
         result = self.modules.remove({'_id':module_details['_id']})
@@ -771,4 +1125,195 @@ class MongoCatalogDBI:
 
         return counts
 
+
+    def get_exec_raw_stats(self, minTime, maxTime):
+
+        filter = {}
+        creationTimeFilter = {}
+        if minTime is not None:
+            creationTimeFilter['$gt']=minTime
+        if maxTime is not None:
+            creationTimeFilter['$lt']=maxTime
+        if len(creationTimeFilter)>0:
+            filter = {
+                'creation_time': creationTimeFilter
+            }
+
+        return list(self.exec_stats_raw.find(filter, {'_id':0}))
+
         
+    
+
+
+    # DB version handling
+
+    # todo: add 'in-progress' flag so if something goes done during an update, or if
+    # another server is already starting an update, we can skip or abort
+    def check_db_schema(self):
+
+        db_version = self.get_db_version()
+        print('db_version=' + str(db_version))
+
+        if db_version<2:
+            print('Updating DB schema to V2...')
+            self.update_db_1_to_2()
+            self.update_db_version(2)
+            print('done.')
+
+        if db_version<3:
+            print('Updating DB schema to V3...')
+            self.update_db_2_to_3()
+            self.update_db_version(3)
+            print('done.')
+
+
+    def get_db_version(self):
+        # version is a collection that should only have a single 
+        version_collection = self.db[MongoCatalogDBI._DB_VERSION]
+        ver = version_collection.find_one({})
+        if(ver):
+            return ver['version']
+        else:
+            # if there is no version document, then we are DB v1
+            self.update_db_version(1)
+            return 1;
+
+    def update_db_version(self, version):
+        # make sure we can't have two version documents
+        version_collection = self.db[MongoCatalogDBI._DB_VERSION]
+        version_collection.ensure_index('version_doc', unique=True, sparse=False)
+
+        # try to insert the version doc, which will fail if the version doc exists
+        # if it exists, then update
+        try:
+            version_collection.insert({'version_doc':True, 'version':version})
+        except:
+            version_collection.update({'version_doc':True}, {'$set':{'version':version}})
+
+
+
+    # version 1 kept released module versions in a map, version 2 updates that to a list
+    # and adds dynamic service tags
+    def update_db_1_to_2(self):
+        for m in self.modules.find({'release_versions': {'$exists' : True}}):
+            release_version_list = []
+            for timestamp in m['release_versions']:
+                m['release_versions'][timestamp]['dynamic_service'] = 0
+                release_version_list.append(m['release_versions'][timestamp])
+
+            self.modules.update(
+                {'_id':m['_id']},
+                {
+                    '$unset':{'release_versions':''},
+                    '$set':{'release_version_list':release_version_list}
+                })
+
+            # make sure everything has the dynamic service flag
+            if not 'dynamic_service' in m['info']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'info.dynamic_service':0}})
+
+            if m['current_versions']['release']:
+                if not 'dynamic_service' in m['current_versions']['release']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.release.dynamic_service':0}})
+
+            if m['current_versions']['beta']:
+                if not 'dynamic_service' in m['current_versions']['beta']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.beta.dynamic_service':0}})
+
+            if m['current_versions']['dev']:
+                if not 'dynamic_service' in m['current_versions']['dev']:
+                    self.modules.update(
+                        {'_id':m['_id']},
+                        {'$set':{'current_versions.dev.dynamic_service':0}})
+
+        # also ensure the execution stats fields have correct names
+        self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
+                                    {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
+        self.exec_stats_users.update({'avg_queue_time': {'$exists' : True}}, 
+                                    {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
+
+
+
+    # version 3 moves the module version information out of the module document into
+    # a separate module versions collection.  
+    def update_db_2_to_3(self):
+
+        # update all module versions
+        for m in self.modules.find({}):
+
+            # skip modules that have not been properly registered, might want to delete these later
+            if 'module_name' not in m or 'module_name_lc' not in m:
+                continue;
+
+            # skip modules that have not been properly registered, might want to delete these later
+            if 'info' not in m:
+                continue;
+
+            # first migrate over all released versions and update the module document
+            new_release_version_list = []
+            for rVer in m['release_version_list']:
+                rVer['released'] = 1
+                self.prepare_version_doc_for_db_2_to_3_update(rVer, m)
+                try:
+                    self.module_versions.insert(rVer)
+                except:
+                    print(' - Warning - '+rVer['module_name'] + '.' + rVer['git_commit_hash'] + ' already inserted, skipping.')
+                new_release_version_list.append({
+                    'git_commit_hash':rVer['git_commit_hash']
+                })
+            self.modules.update(
+                    {'_id':m['_id']},
+                    {'$set':{ 'release_version_list':new_release_version_list } }
+                )
+
+            for tag in ['release','beta','dev']: # we can skip release tags because that is already in the release_version_list
+                if tag in m['current_versions'] and m['current_versions'][tag] is not None:
+                    modVer = m['current_versions'][tag]
+                    modVer['released'] = 0
+                    self.prepare_version_doc_for_db_2_to_3_update(modVer, m)
+                    if 'git_commit_hash' in modVer and modVer['git_commit_hash'] is not None:
+                        try:
+                            self.module_versions.insert(modVer)
+                        except Exception as e:
+                            # we expect this to happen for all 'release' tags and if, say, a version still tagged as dev/beta has been released
+                            print(' - Warning - '+tag+ ' ver of ' + modVer['module_name'] + '.' + modVer['git_commit_hash'] + ' already inserted, skipping.')
+                        self.modules.update(
+                            {'_id':m['_id']},
+                            {'$set':{ 'current_versions.'+tag: {'git_commit_hash':modVer['git_commit_hash']} } }
+                        )
+                    else:
+                        self.modules.update(
+                            {'_id':m['_id']},
+                            {'$set':{ 'current_versions.'+tag: None } }
+                        )
+            print(' -> completed '+m['module_name'])
+
+    def prepare_version_doc_for_db_2_to_3_update(self, version, module):
+        version['module_name'] = module['module_name']
+        version['module_name_lc'] = module['module_name_lc']
+        version['module_description'] = module['info']['description']
+        version['module_language'] = module['info']['language']
+        version['notes'] = ''
+        if 'local_functions' not in version:
+            version['local_functions'] = []
+        if 'compilation_report' not in version:
+            version['compilation_report'] = None
+        if 'narrative_methods' not in version:
+            version['narrative_methods'] = []
+        if 'release_timestamp' not in version:
+            if version['released']==1:
+                version['release_timestamp'] = version['timestamp']
+            else:
+                 version['release_timestamp'] = None
+
+
+
+

@@ -19,6 +19,10 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     #########################################
+    VERSION = "0.0.1"
+    GIT_URL = "git@github.com:kbase/catalog.git"
+    GIT_COMMIT_HASH = "7c4d4c7eaf09343a2892f4a646adda210e783a87"
+    
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -37,6 +41,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
+    
 
     def version(self, ctx):
         # ctx is the context object
@@ -232,6 +237,78 @@ class Catalog:
         # return the results
         return [versions]
 
+    def get_module_version(self, ctx, selection):
+        # ctx is the context object
+        # return variables are: version
+        #BEGIN get_module_version
+        version = self.cc.get_module_version(selection)
+        if version is None:
+            raise ValueError("No module version found that matches your criteria!")
+        #END get_module_version
+
+        # At some point might do deeper type checking...
+        if not isinstance(version, dict):
+            raise ValueError('Method get_module_version return value ' +
+                             'version is not type dict as required.')
+        # return the results
+        return [version]
+
+    def list_local_functions(self, ctx, params):
+        # ctx is the context object
+        # return variables are: info_list
+        #BEGIN list_local_functions
+        info_list = self.cc.list_local_functions(params)
+        #END list_local_functions
+
+        # At some point might do deeper type checking...
+        if not isinstance(info_list, list):
+            raise ValueError('Method list_local_functions return value ' +
+                             'info_list is not type list as required.')
+        # return the results
+        return [info_list]
+
+    def get_local_function_details(self, ctx, params):
+        # ctx is the context object
+        # return variables are: detail_list
+        #BEGIN get_local_function_details
+        detail_list = self.cc.get_local_function_details(params)
+        #END get_local_function_details
+
+        # At some point might do deeper type checking...
+        if not isinstance(detail_list, list):
+            raise ValueError('Method get_local_function_details return value ' +
+                             'detail_list is not type list as required.')
+        # return the results
+        return [detail_list]
+
+    def module_version_lookup(self, ctx, selection):
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN module_version_lookup
+        returnVal = self.cc.module_version_lookup(selection)
+        #END module_version_lookup
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method module_version_lookup return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
+    def list_service_modules(self, ctx, filter):
+        # ctx is the context object
+        # return variables are: service_modules
+        #BEGIN list_service_modules
+        service_modules = self.cc.list_service_modules(filter)
+        #END list_service_modules
+
+        # At some point might do deeper type checking...
+        if not isinstance(service_modules, list):
+            raise ValueError('Method list_service_modules return value ' +
+                             'service_modules is not type list as required.')
+        # return the results
+        return [service_modules]
+
     def set_registration_state(self, ctx, params):
         # ctx is the context object
         #BEGIN set_registration_state
@@ -387,6 +464,8 @@ class Catalog:
         # ctx is the context object
         #BEGIN log_exec_stats
         admin_user_id = ctx['user_id']
+        if not self.cc.is_admin(admin_user_id):
+            raise ValueError('You do not have permission to log execution statistics.')
         user_id = params['user_id']
         app_module_name = None if 'app_module_name' not in params else params['app_module_name']
         app_id = None if 'app_id' not in params else params['app_id']
@@ -433,6 +512,20 @@ class Catalog:
         # return the results
         return [table]
 
+    def get_exec_raw_stats(self, ctx, params):
+        # ctx is the context object
+        # return variables are: records
+        #BEGIN get_exec_raw_stats
+        records = self.cc.get_exec_raw_stats(ctx['user_id'], params)
+        #END get_exec_raw_stats
+
+        # At some point might do deeper type checking...
+        if not isinstance(records, list):
+            raise ValueError('Method get_exec_raw_stats return value ' +
+                             'records is not type list as required.')
+        # return the results
+        return [records]
+
     def set_client_group(self, ctx, group):
         # ctx is the context object
         #BEGIN set_client_group
@@ -469,4 +562,11 @@ class Catalog:
             raise ValueError('Method is_admin return value ' +
                              'returnVal is not type int as required.')
         # return the results
+        return [returnVal]
+
+    def status(self, ctx):
+        #BEGIN_STATUS
+        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
+                     'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
+        #END_STATUS
         return [returnVal]

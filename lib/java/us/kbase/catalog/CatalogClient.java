@@ -378,6 +378,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: get_version_info</p>
      * <pre>
+     * DEPRECATED!!!  use get_module_version
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.SelectModuleVersionParams SelectModuleVersionParams}
      * @return   parameter "version" of type {@link us.kbase.catalog.ModuleVersionInfo ModuleVersionInfo}
@@ -406,6 +407,91 @@ public class CatalogClient {
         args.add(params);
         TypeReference<List<List<ModuleVersionInfo>>> retType = new TypeReference<List<List<ModuleVersionInfo>>>() {};
         List<List<ModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_released_module_versions", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_module_version</p>
+     * <pre>
+     * </pre>
+     * @param   selection   instance of type {@link us.kbase.catalog.SelectModuleVersion SelectModuleVersion}
+     * @return   parameter "version" of type {@link us.kbase.catalog.ModuleVersion ModuleVersion}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public ModuleVersion getModuleVersion(SelectModuleVersion selection, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(selection);
+        TypeReference<List<ModuleVersion>> retType = new TypeReference<List<ModuleVersion>>() {};
+        List<ModuleVersion> res = caller.jsonrpcCall("Catalog.get_module_version", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_local_functions</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ListLocalFunctionParams ListLocalFunctionParams}
+     * @return   parameter "info_list" of list of type {@link us.kbase.catalog.LocalFunctionInfo LocalFunctionInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<LocalFunctionInfo> listLocalFunctions(ListLocalFunctionParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<LocalFunctionInfo>>> retType = new TypeReference<List<List<LocalFunctionInfo>>>() {};
+        List<List<LocalFunctionInfo>> res = caller.jsonrpcCall("Catalog.list_local_functions", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_local_function_details</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetLocalFunctionDetails GetLocalFunctionDetails}
+     * @return   parameter "detail_list" of list of type {@link us.kbase.catalog.LocalFunctionDetails LocalFunctionDetails}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<LocalFunctionDetails> getLocalFunctionDetails(GetLocalFunctionDetails params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<LocalFunctionDetails>>> retType = new TypeReference<List<List<LocalFunctionDetails>>>() {};
+        List<List<LocalFunctionDetails>> res = caller.jsonrpcCall("Catalog.get_local_function_details", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: module_version_lookup</p>
+     * <pre>
+     * </pre>
+     * @param   selection   instance of type {@link us.kbase.catalog.ModuleVersionLookupParams ModuleVersionLookupParams}
+     * @return   instance of type {@link us.kbase.catalog.BasicModuleVersionInfo BasicModuleVersionInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public BasicModuleVersionInfo moduleVersionLookup(ModuleVersionLookupParams selection, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(selection);
+        TypeReference<List<BasicModuleVersionInfo>> retType = new TypeReference<List<BasicModuleVersionInfo>>() {};
+        List<BasicModuleVersionInfo> res = caller.jsonrpcCall("Catalog.module_version_lookup", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_service_modules</p>
+     * <pre>
+     * </pre>
+     * @param   filter   instance of type {@link us.kbase.catalog.ListServiceModuleParams ListServiceModuleParams}
+     * @return   parameter "service_modules" of list of type {@link us.kbase.catalog.BasicModuleVersionInfo BasicModuleVersionInfo}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<BasicModuleVersionInfo> listServiceModules(ListServiceModuleParams filter, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(filter);
+        TypeReference<List<List<BasicModuleVersionInfo>>> retType = new TypeReference<List<List<BasicModuleVersionInfo>>>() {};
+        List<List<BasicModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_service_modules", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 
@@ -670,6 +756,23 @@ public class CatalogClient {
         args.add(params);
         TypeReference<List<UObject>> retType = new TypeReference<List<UObject>>() {};
         List<UObject> res = caller.jsonrpcCall("Catalog.get_exec_aggr_table", args, retType, true, true, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_exec_raw_stats</p>
+     * <pre>
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetExecRawStatsParams GetExecRawStatsParams}
+     * @return   parameter "records" of list of unspecified object
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<UObject> getExecRawStats(GetExecRawStatsParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<UObject>>> retType = new TypeReference<List<List<UObject>>>() {};
+        List<List<UObject>> res = caller.jsonrpcCall("Catalog.get_exec_raw_stats", args, retType, true, true, jsonRpcContext);
         return res.get(0);
     }
 

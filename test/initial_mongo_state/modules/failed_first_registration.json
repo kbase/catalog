@@ -1,0 +1,27 @@
+{
+    "info" : {
+
+    },
+    "current_versions" : {
+        "release" : null,
+        "beta" : null,
+        "dev" : {
+            "timestamp" : 1462216824349,
+            "registration_id" : "1462216824349_2739"
+        }
+    },
+    "owners" : [
+        {
+            "kb_username" : "jplfaria"
+        }
+    ],
+    "state" : {
+        "active" : true,
+        "released" : false,
+        "registration" : "error",
+        "error_message" : "Module name (in kbase.yaml) is already registered.  Please specify a different name and try again.",
+        "release_approval" : "not_requested"
+    },
+    "git_url" : "https://github.com/jplfaria/ElectronicAnnotationMethods-",
+    "release_version_list" : [ ]
+}
