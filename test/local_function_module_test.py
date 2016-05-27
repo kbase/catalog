@@ -55,22 +55,40 @@ class LocalFunctionModuleTest(unittest.TestCase):
        
         self.assertEqual(state['registration'],'complete')
 
+        specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
+            {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome'}]})[0]
+        #pprint(specs)
 
 
         self.catalog.push_dev_to_beta(self.cUtil.user_ctx(),{'module_name':'GenomeToPowerpointConverter'})
 
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
             {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome'}]})[0]
+        #pprint(specs)
 
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
             {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 'release_tag':'beta'}]})[0]
-        pprint(specs)
+        #pprint(specs)
 
 
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions':[
-            {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 'release_tag':'beta', 'git_commit_hash':'a01e1a20b9c504a0136c75323b00b1cd4c7f7970'}]})[0]
+            {'module_name':'GenomeTopowerpointConverter', 'function_id':'powerpoint_to_genome', 
+            'release_tag':'beta', 'git_commit_hash':'a01e1a20b9c504a0136c75323b00b1cd4c7f7970'}]})[0]
+        #pprint(specs)
 
         # todo: add some checks here
+
+        print('function list')
+        func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
+                            {'release_tag':'dev'})[0]
+        #pprint(func_list)
+
+        self.catalog.request_release(self.cUtil.user_ctx(),{'module_name':'GenomeToPowerpointConverter'})
+        self.catalog.review_release_request(self.cUtil.admin_ctx(),{'module_name':'GenomeToPowerpointConverter', 'decision':'approved'})
+
+        func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
+                            {'release_tag':'dev'})[0]
+        #pprint(func_list)
 
 
 

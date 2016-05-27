@@ -358,7 +358,7 @@ module Catalog {
         string git_commit_hash;
 
         string version;
-        string release_tag;
+        list<string> release_tag;
 
         string name;
         string short_description;
@@ -375,8 +375,9 @@ module Catalog {
 
     /*
         Allows various ways to filter.
-        Release tag = dev/beta/release
-        module_names = only include modules in the list
+        Release tag = dev/beta/release, default is release
+        module_names = only include modules in the list; if empty or not
+                       provided then include everything
     */
     typedef structure {
         string release_tag;
