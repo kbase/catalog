@@ -133,7 +133,7 @@ class CatalogController:
 
         # 0) Make sure the submitter is on the list
         if not self.is_approved_developer([username])[0]:
-            raise ValueError('You are not an approved developer.  Contact us to request approval.')
+            raise ValueError('You are not an approved developer.  Contact us via http://kbase.us/contact-us/ to request approval.')
 
         prev_dev_version = None
 

@@ -89,7 +89,7 @@ class AdminMethodsTest(unittest.TestCase):
             self.catalog.register_repo(self.cUtil.user_ctx(),
                 {'git_url':self.cUtil.get_test_repo_1()})
         self.assertEqual(str(e.exception),
-            'You are not an approved developer.  Contact us to request approval.');
+            'You are not an approved developer.  Contact us via http://kbase.us/contact-us/ to request approval.');
 
         # after the developer is added, should be allowed to start now (give a bogus url so if finishes registration
         # right away with an error
