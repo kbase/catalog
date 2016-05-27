@@ -33,7 +33,7 @@ class CoreRegistrationTest(unittest.TestCase):
         while True:
             state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
             if state['registration'] in ['complete','error']:
-                print state
+                pprint(state)
                 break
             self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
         self.assertEqual(state['registration'],'complete')
@@ -100,7 +100,6 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertIsNotNone(recent_build_list[0]['module_name_lc'])
         self.assertEqual(recent_build_list[0]['git_url'],giturl)
 
-
         # check some bad parameters
         with self.assertRaises(ValueError) as e:
             parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
@@ -112,7 +111,6 @@ class CoreRegistrationTest(unittest.TestCase):
                             {'registration_id':registration_id, 'first_n':4, 'last_n':2 })[0]
         self.assertEqual(str(e.exception),
             'Cannot combine skip/limit/first_n with last_n parameters');
-
 
         # (3) get module info
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
@@ -150,6 +148,19 @@ class CoreRegistrationTest(unittest.TestCase):
                 methMissing = False
         self.assertTrue(methMissing,'Make sure we did not find the method in NMS under the release tag')
 
+        #(3b) registration again should work
+        registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
+            {'git_url':giturl, 'git_commit_hash':githash})[0]
+        timestamp = int(registration_id.split('_')[0])
+        start = time()
+        timeout = 60 #seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
+            if state['registration'] in ['complete','error']:
+                pprint(state)
+                break
+            self.assertTrue(time()-start < timeout, 'simple registration build exceeded timeout of '+str(timeout)+'s')
+        self.assertEqual(state['registration'],'complete')
 
         #(4) update beta
         self.catalog.push_dev_to_beta(self.cUtil.user_ctx(),{'module_name':module_name})

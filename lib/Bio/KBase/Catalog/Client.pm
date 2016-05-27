@@ -5110,6 +5110,12 @@ module_names has a value which is a reference to a list where each element is a 
 
 
 
+=item Description
+
+release_tag = dev | beta | release, if it doesn't exist and git_commit_hash isn't set, we default to release
+              and will not return anything if the function is not released
+
+
 =item Definition
 
 =begin html

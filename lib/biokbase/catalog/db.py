@@ -1,6 +1,7 @@
 
 import json
 import pprint
+import copy
 from pymongo import MongoClient
 from pymongo import ASCENDING
 from pymongo import DESCENDING
@@ -431,11 +432,12 @@ class MongoCatalogDBI:
 
     def update_dev_version(self, version_info):
         if version_info:
-            if 'git_commit_hash' in version_info:
+            if 'git_commit_hash' in version_info and 'module_name_lc' in version_info:
                 
                 # try to insert
                 try:
-                    self.module_versions.insert(version_info)
+                    v_info_copy = copy.deepcopy(version_info) # copy because insert has side effects on the data if it fails, stupid mongo!
+                    self.module_versions.insert(v_info_copy)
                 # if that doesn't work, try to update (NOTE: by now this version should only be updatable if it is a dev or orphan version, and
                 # we assume that check has already been made)
                 except:
@@ -580,11 +582,12 @@ class MongoCatalogDBI:
         for m in mods:
             mod_lookup[m['module_name_lc']] = m
             for tag in ['dev','beta','release']:
-                if tag in m['current_versions']:
+                if tag in m['current_versions'] and m['current_versions'][tag] is not None:
                     if 'git_commit_hash' in m['current_versions'][tag]:
                         git_hash_release_tag_lookup[m['current_versions'][tag]['git_commit_hash']] =tag
 
-        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here 
+        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here
+        # although we expect in general, most users will only get module details one at a time 
         for f in functions:
             query = {
                 'module_name_lc':f['module_name'].lower(),
