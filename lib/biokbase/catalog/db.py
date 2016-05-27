@@ -513,17 +513,18 @@ class MongoCatalogDBI:
         }
 
         check_mods = False
+        mod_name_lc = []
         if len(module_names)>0:
             check_mods = True
             for m in module_names:
-                m = m.strip().lower()
+                mod_name_lc.append(m.strip().lower())
 
         # get the list of git commit hashes to query on
         git_commit_hash_list = []
         git_mod_name_lookup = {}
         for mod in self.db.modules.find(query, {'module_name_lc':1, 'current_versions':1, '_id':0}):
             if check_mods:
-                if mod['module_name_lc'] not in module_names:
+                if mod['module_name_lc'] not in mod_name_lc:
                     continue
             git_commit_hash_list.append(mod['current_versions'][tag]['git_commit_hash'])
             release_tags = []
@@ -573,62 +574,76 @@ class MongoCatalogDBI:
                         {   
                             '_id':0,
                             'module_name_lc':1,
-                            'current_versions.dev.git_commit_hash':1,
-                            'current_versions.beta.git_commit_hash':1,
-                            'current_versions.release.git_commit_hash':1
+                            'current_versions':1
                         }))
+
         mod_lookup = {}
         git_hash_release_tag_lookup = {}
         for m in mods:
             mod_lookup[m['module_name_lc']] = m
-            for tag in ['dev','beta','release']:
+            for tag in ['release','beta','dev']:
                 if tag in m['current_versions'] and m['current_versions'][tag] is not None:
                     if 'git_commit_hash' in m['current_versions'][tag]:
-                        git_hash_release_tag_lookup[m['current_versions'][tag]['git_commit_hash']] =tag
+                        key = m['module_name_lc']+m['current_versions'][tag]['git_commit_hash']
+                        if key in git_hash_release_tag_lookup:
+                            git_hash_release_tag_lookup[key].append(tag)
+                        else:
+                            git_hash_release_tag_lookup[key] = [tag]
 
         # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here
         # although we expect in general, most users will only get module details one at a time 
         for f in functions:
             query = {
                 'module_name_lc':f['module_name'].lower(),
-                'function_id':f['function_id'].lower()
+                'function_id':f['function_id']
             }
 
             if 'release_tag' in f:
-                if query['module_name_lc'] not in mod_lookup: continue
+                if query['module_name_lc'] not in mod_lookup:
+                    continue
                 module = mod_lookup[query['module_name_lc']]
-                if f['release_tag'] in module['current_versions']:
+                if f['release_tag'] in module['current_versions'] and module['current_versions'][f['release_tag']] is not None:
                     if 'git_commit_hash' in m['current_versions'][f['release_tag']]:
                         query['git_commit_hash'] = m['current_versions'][f['release_tag']]['git_commit_hash']
                 else:
                     continue
                 if 'git_commit_hash' in f:
                     if f['git_commit_hash'] != query['git_commit_hash']:
-                        raise ValueError('For lookup: '+f['module_name']+'.'+f['function_id']+', release tag commit hash '+
+                        raise ValueError('For lookup: '+f['module_name']+'.'+f['function_id']+', '+f['release_tag']+' tag commit hash '+
                             '('+git_commit_hash_needed+') does not match selector you gave ('+f['git_commit_hash']+')')
             else:
                 if 'git_commit_hash' in f:
                     query['git_commit_hash'] = f['git_commit_hash']
                 else:
-                    if query['module_name_lc'] not in mod_lookup: continue
-                    module = mod_lookup[query['module_name_lc']]
-                    if 'release' in module['current_versions']:
-                        if 'git_commit_hash' in module['current_versions']['release']:
-                            query['git_commit_hash'] = module['current_versions']['release']['git_commit_hash']
-                    if 'git_commit_hash' not in query:
-                        # no release version to return
+                    if query['module_name_lc'] not in mod_lookup: 
                         continue
+                    module = mod_lookup[query['module_name_lc']]
+                    for t in ['release', 'beta', 'dev']:
+                        if t in module['current_versions'] and module['current_versions'][t] is not None:
+                            if 'git_commit_hash' in module['current_versions'][t]:
+                                query['git_commit_hash'] = module['current_versions'][t]['git_commit_hash']
+                                break
+                    
+            if 'git_commit_hash' not in query:
+                # no version to be found, because we couldn't figure out what to lookup...
+                continue
 
             # ok, finally do the query
             function_data = self.db.local_functions.find_one(query, { '_id':0 })
+
+            # if we didn't get anything, then the git_commit_hash or function_id was wrong, and we just continue
+            if function_data is None:
+                continue
+
             long_description = function_data['long_description']
             del(function_data['long_description'])
-            if 'release_tag' in f:
-                function_data['release_tag'] = f['release_tag']
+            key = function_data['module_name_lc'] + function_data['git_commit_hash']
+            if key in git_hash_release_tag_lookup:
+                function_data['release_tag'] = git_hash_release_tag_lookup[key]
             else:
-                if function_data['git_commit_hash'] in git_hash_release_tag_lookup:
-                    function_data['release_tag'] = git_hash_release_tag_lookup[function_data['git_commit_hash']]
+                function_data['release_tag'] = []
 
+            del(function_data['module_name_lc']) # this is for internal use only
             result_list.append({
                 'info': function_data,
                 'long_description': long_description
