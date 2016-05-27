@@ -513,17 +513,18 @@ class MongoCatalogDBI:
         }
 
         check_mods = False
+        mod_name_lc = []
         if len(module_names)>0:
             check_mods = True
             for m in module_names:
-                m = m.strip().lower()
+                mod_name_lc.append(m.strip().lower())
 
         # get the list of git commit hashes to query on
         git_commit_hash_list = []
         git_mod_name_lookup = {}
         for mod in self.db.modules.find(query, {'module_name_lc':1, 'current_versions':1, '_id':0}):
             if check_mods:
-                if mod['module_name_lc'] not in module_names:
+                if mod['module_name_lc'] not in mod_name_lc:
                     continue
             git_commit_hash_list.append(mod['current_versions'][tag]['git_commit_hash'])
             release_tags = []
@@ -575,7 +576,7 @@ class MongoCatalogDBI:
                             'module_name_lc':1,
                             'current_versions':1
                         }))
-        
+
         mod_lookup = {}
         git_hash_release_tag_lookup = {}
         for m in mods:

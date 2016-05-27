@@ -96,11 +96,17 @@ class LocalFunctionModuleTest(unittest.TestCase):
         func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
                             {})[0]
         self.assertEquals(len(func_list),0)
+        func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
+                            {'module_names':['GenomeTopowerpoIntConverter']})[0]
+        self.assertEqual(len(func_list),0)
 
         # but listing dev should return something
         func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
                             {'release_tag':'dev'})[0]
         self.assertEquals(len(func_list),2)
+        func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
+                            {'release_tag':'dev', 'module_names':['GenomeTopowerpoIntConverter']})[0]
+        self.assertEqual(len(func_list),2)
 
         # push things to beta
         self.catalog.push_dev_to_beta(self.cUtil.user_ctx(),{'module_name':'GenomeToPowerpointConverter'})
@@ -150,6 +156,10 @@ class LocalFunctionModuleTest(unittest.TestCase):
         self.assertEqual(len(func_list),2)
         func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
                             {})[0]
+        self.assertEqual(len(func_list),2)
+
+        func_list = self.catalog.list_local_functions(self.cUtil.user_ctx(),
+                            {'module_names':['GenomeTopowerpoIntConverter']})[0]
         self.assertEqual(len(func_list),2)
 
         # make sure we can fetch it by commit hash
