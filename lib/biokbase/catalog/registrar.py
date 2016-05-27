@@ -342,6 +342,13 @@ class Registrar:
             info['dynamic_service'] = 1
         else:
             info['dynamic_service'] = 0
+
+        local_functions = self.local_function_reader.extract_lf_records()
+        if len(local_functions)>0:
+            info['local_functions'] = 1
+        else:
+            info['local_functions'] = 0
+
         self.log('new info: '+pprint.pformat(info))
         error = self.db.set_module_info(info, git_url=self.git_url)
         if error is not None:
@@ -364,7 +371,6 @@ class Registrar:
                 if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
                     narrative_methods.append(m)
 
-        local_functions = self.local_function_reader.extract_lf_records()
         if len(local_functions) > 0:
             self.log('Saving local function specs:')
             self.log(pprint.pformat(local_functions))

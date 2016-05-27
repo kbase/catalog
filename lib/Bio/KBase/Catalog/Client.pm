@@ -1822,7 +1822,7 @@ LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
-	release_tag has a value which is a string
+	release_tag has a value which is a reference to a list where each element is a string
 	name has a value which is a string
 	short_description has a value which is a string
 	tags has a value which is a Catalog.LocalFunctionTags
@@ -1850,7 +1850,7 @@ LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
-	release_tag has a value which is a string
+	release_tag has a value which is a reference to a list where each element is a string
 	name has a value which is a string
 	short_description has a value which is a string
 	tags has a value which is a Catalog.LocalFunctionTags
@@ -1948,7 +1948,7 @@ LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
-	release_tag has a value which is a string
+	release_tag has a value which is a reference to a list where each element is a string
 	name has a value which is a string
 	short_description has a value which is a string
 	tags has a value which is a Catalog.LocalFunctionTags
@@ -1983,7 +1983,7 @@ LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
-	release_tag has a value which is a string
+	release_tag has a value which is a reference to a list where each element is a string
 	name has a value which is a string
 	short_description has a value which is a string
 	tags has a value which is a Catalog.LocalFunctionTags
@@ -5004,7 +5004,7 @@ module_name has a value which is a string
 function_id has a value which is a string
 git_commit_hash has a value which is a string
 version has a value which is a string
-release_tag has a value which is a string
+release_tag has a value which is a reference to a list where each element is a string
 name has a value which is a string
 short_description has a value which is a string
 tags has a value which is a Catalog.LocalFunctionTags
@@ -5020,7 +5020,7 @@ module_name has a value which is a string
 function_id has a value which is a string
 git_commit_hash has a value which is a string
 version has a value which is a string
-release_tag has a value which is a string
+release_tag has a value which is a reference to a list where each element is a string
 name has a value which is a string
 short_description has a value which is a string
 tags has a value which is a Catalog.LocalFunctionTags
@@ -5073,8 +5073,9 @@ long_description has a value which is a string
 =item Description
 
 Allows various ways to filter.
-Release tag = dev/beta/release
-module_names = only include modules in the list
+Release tag = dev/beta/release, default is release
+module_names = only include modules in the list; if empty or not
+               provided then include everything
 
 
 =item Definition
@@ -5107,6 +5108,12 @@ module_names has a value which is a reference to a list where each element is a 
 
 =over 4
 
+
+
+=item Description
+
+release_tag = dev | beta | release, if it doesn't exist and git_commit_hash isn't set, we default to release
+              and will not return anything if the function is not released
 
 
 =item Definition

@@ -1,6 +1,7 @@
 
 import json
 import pprint
+import copy
 from pymongo import MongoClient
 from pymongo import ASCENDING
 from pymongo import DESCENDING
@@ -397,7 +398,7 @@ class MongoCatalogDBI:
 
     def push_beta_to_release(self, module_name='', git_url='', release_timestamp=None):
 
-        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
+        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url, substitute_versions=False)
         beta_tag = current_versions['beta']
 
         if not release_timestamp:
@@ -421,20 +422,22 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def push_dev_to_beta(self, module_name='', git_url=''):
-        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url)
+        current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url, substitute_versions=False)
         dev_tag = current_versions['dev']
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         result = self.modules.update(query, {'$set':{'current_versions.beta':dev_tag}})
+
         return self._check_update_result(result)
 
 
     def update_dev_version(self, version_info):
         if version_info:
-            if 'git_commit_hash' in version_info:
+            if 'git_commit_hash' in version_info and 'module_name_lc' in version_info:
                 
                 # try to insert
                 try:
-                    self.module_versions.insert(version_info)
+                    v_info_copy = copy.deepcopy(version_info) # copy because insert has side effects on the data if it fails, stupid mongo!
+                    self.module_versions.insert(v_info_copy)
                 # if that doesn't work, try to update (NOTE: by now this version should only be updatable if it is a dev or orphan version, and
                 # we assume that check has already been made)
                 except:
@@ -495,54 +498,47 @@ class MongoCatalogDBI:
         git_commit_hash_list = []
         git_commit_hash_release_tag_map = {}
 
-        # if no module names are given, then use the release tag and get all latest released functions
-        if len(module_names)==0:
-            if not release_tag:
-                raise ValueError('In catalog DB, internal error: release_tag or module_names is required.')
-            mods = list(self.db.modules.find({'current_versions.'+release_tag+'.local_functions.0': {'$exists': True}},
-                                {'_id':0, 'current_versions.'+release_tag+'.git_commit_hash':1 }))
-            for m in mods:
-                git_commit_hash_list.append(m['current_versions'][release_tag]['git_commit_hash'])
+        # get all module brief info
+        tag = 'release'
+        if release_tag:
+            if release_tag not in ['release','beta','dev']:
+                raise ValueError('"release_tag" must be either release, beta or dev')
+            tag = release_tag
 
-        # if modules are defined, then do some more work
+        # might want to add a flag if a module ever has a local function
+        query = {
+            'state.active':True,
+            'info.local_functions':1,
+            'current_versions.'+tag+'.git_commit_hash': {'$exists':True}
+        }
+
+        check_mods = False
         if len(module_names)>0:
+            check_mods = True
+            for m in module_names:
+                m = m.strip().lower()
 
-            module_names_lc = []
-            for name in module_names:
-                module_names_lc.append(name.lower())
+        # get the list of git commit hashes to query on
+        git_commit_hash_list = []
+        git_mod_name_lookup = {}
+        for mod in self.db.modules.find(query, {'module_name_lc':1, 'current_versions':1, '_id':0}):
+            if check_mods:
+                if mod['module_name_lc'] not in module_names:
+                    continue
+            git_commit_hash_list.append(mod['current_versions'][tag]['git_commit_hash'])
+            release_tags = []
+            for rt in ['release', 'beta', 'dev']:
+                if rt in mod['current_versions'] and mod['current_versions'][rt] is not None:
+                    if 'git_commit_hash' in mod['current_versions'][rt]:
+                        if mod['current_versions'][rt]['git_commit_hash'] == mod['current_versions'][tag]['git_commit_hash']:
+                            release_tags.append(rt)
+            git_mod_name_lookup[mod['module_name_lc']+mod['current_versions'][tag]['git_commit_hash']] = release_tags
 
-            # if module names and a release tag is present, then get those exactly
-            if release_tag:
-                mods = list(self.db.modules.find({
-                            'current_versions.'+release_tag+'.local_functions.0': {'$exists': True},
-                            'module_name_lc' : {'$in': module_names_lc}
-                        },{'_id':0, 'current_versions.'+release_tag+'.git_commit_hash':1 }))
-                for m in mods:
-                    git_commit_hash_list.append(m['current_versions'][release_tag]['git_commit_hash'])
-
-            # if module names but no release tag, then return all versions of the functions in those modules
-            else:
-                mods = list(self.db.modules.find({'module_name_lc' : {'$in': module_names_lc}},
-                            {   
-                                '_id':0,
-                                'current_versions.dev.git_commit_hash':1,
-                                'current_versions.beta.git_commit_hash':1,
-                                'current_versions.release.git_commit_hash':1,
-                                'release_version_list':1
-                            }))
-                # get the git commit hashes, and remember to mark the versions that are tagged dev/beta/release
-                for m in mods:
-                    for tag in ['dev', 'beta', 'release']: # need to go in order so that we get the tag listed properly
-                        if tag in m['current_versions']:
-                            if 'git_commit_hash' in m['current_versions'][tag]:
-                                git_commit_hash_list.append(m['current_versions'][tag]['git_commit_hash'])
-                                git_commit_hash_release_tag_map[m['current_versions'][tag]['git_commit_hash']] = tag
-                    for r in m['release_version_list']:
-                            git_commit_hash_list.append(r['git_commit_hash'])
-
+        # get the local functions
         included_fields = {
             '_id':0,
             'module_name':1,
+            'module_name_lc':1,
             'function_id':1,
             'git_commit_hash':1,
             'version':1,
@@ -551,18 +547,17 @@ class MongoCatalogDBI:
             'tags':1,
             'authors':1
         }
-
         local_funcs = list(self.db.local_functions.find({'git_commit_hash':{'$in':git_commit_hash_list}}, included_fields))
 
         # set the release_tag field
+        returned_funcs = []
         for l in local_funcs:
-            if release_tag:
-                l['release_tag'] = release_tag
-            else:
-                if l['git_commit_hash'] in git_commit_hash_release_tag_map:
-                    l['release_tag'] = git_commit_hash_release_tag_map[l['git_commit_hash']]
+            if (l['module_name_lc'] + l['git_commit_hash']) in git_mod_name_lookup:
+                l['release_tag'] = git_mod_name_lookup[l['module_name_lc'] + l['git_commit_hash']]
+                del(l['module_name_lc'])
+                returned_funcs.append(l)
 
-        return local_funcs
+        return returned_funcs
 
 
     def get_local_function_spec(self, functions):
@@ -587,11 +582,12 @@ class MongoCatalogDBI:
         for m in mods:
             mod_lookup[m['module_name_lc']] = m
             for tag in ['dev','beta','release']:
-                if tag in m['current_versions']:
+                if tag in m['current_versions'] and m['current_versions'][tag] is not None:
                     if 'git_commit_hash' in m['current_versions'][tag]:
                         git_hash_release_tag_lookup[m['current_versions'][tag]['git_commit_hash']] =tag
 
-        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here 
+        # for now be lazy and break up the call into separate queries and loops over mod list...   lots of optimization you could do here
+        # although we expect in general, most users will only get module details one at a time 
         for f in functions:
             query = {
                 'module_name_lc':f['module_name'].lower(),
@@ -679,10 +675,11 @@ class MongoCatalogDBI:
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query, fields=['state'])['state']
 
-    def get_module_current_versions(self, module_name='', git_url=''):
+    def get_module_current_versions(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_document = self.modules.find_one(query, fields=['module_name_lc','current_versions'])
-        self.substitute_hashes_for_version_info([module_document])
+        if substitute_versions and 'module_name_lc' in module_document:
+            self.substitute_hashes_for_version_info([module_document])
         return module_document['current_versions']
 
     def get_module_owners(self, module_name='', git_url=''):
