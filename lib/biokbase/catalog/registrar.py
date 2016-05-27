@@ -9,7 +9,8 @@ import pprint
 import json
 import semantic_version
 
-import git
+#import git
+import subprocess
 import yaml
 import requests
 from urlparse import urlparse
@@ -17,7 +18,9 @@ from docker import Client as DockerClient
 from docker.tls import TLSConfig as DockerTLSConfig
 
 from biokbase.catalog.db import MongoCatalogDBI
+from biokbase.catalog.local_function_reader import LocalFunctionReader
 from biokbase.narrative_method_store.client import NarrativeMethodStore
+
 
     
 class Registrar:
@@ -25,8 +28,8 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, nms_url, nms_admin_user, nms_admin_psswd, module_details,
-                    ref_data_base, kbase_endpoint):
+                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_user, nms_admin_psswd, module_details,
+                    ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
         # at this point, we assume git_url has been checked
@@ -40,12 +43,15 @@ class Registrar:
         self.temp_dir = temp_dir
         self.docker_base_url = docker_base_url
         self.docker_registry_host = docker_registry_host
+        self.docker_push_allow_insecure = docker_push_allow_insecure
 
         self.nms_url = nms_url
         self.nms_admin_user = nms_admin_user
         self.nms_admin_psswd = nms_admin_psswd
 
         self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+
+        self.local_function_reader = LocalFunctionReader()
 
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
@@ -56,6 +62,7 @@ class Registrar:
         
         self.ref_data_base = ref_data_base
         self.kbase_endpoint = kbase_endpoint
+        self.prev_dev_version = prev_dev_version
 
 
     def start_registration(self):
@@ -73,32 +80,47 @@ class Registrar:
 
             basedir = os.path.join(self.temp_dir,self.registration_id,'module_repo')
 
+            parsed_url=urlparse(self.git_url)
+
             self.log('Attempting to clone into: '+basedir);
             self.log('git clone ' + self.git_url)
-            repo = git.Repo.clone_from(self.git_url, basedir)
+            subprocess.check_call( ['git','clone',self.git_url, basedir ] )
             # try to get hash from repo
-            self.log('current commit hash at HEAD:' + str(repo.heads.master.commit))
-            git_commit_hash = repo.heads.master.commit
+            git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
+            self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
                     self.log('git checkout ' + self.params['git_commit_hash'].strip())
-                    repo.git.checkout(self.params['git_commit_hash'].strip())
+                    subprocess.check_call ( ['git', 'checkout', '--quiet', self.params['git_commit_hash'] ], cwd=basedir )
                     git_commit_hash = self.params['git_commit_hash'].strip()
+
+            # check if this was a git_commit_hash that was already released- if so, we abort for now (we could just update the dev tag in the future)
+            for r in self.module_details['release_version_list']:
+                if r['git_commit_hash'] == git_commit_hash:
+                    raise ValueError('The specified commit is already released.  You cannot reregister that commit version or image.')
+
+            # do the same for beta versions for now
+            if 'beta' in self.module_details['current_versions'] and self.module_details['current_versions']['beta'] is not None:
+                if self.module_details['current_versions']['beta']['git_commit_hash'] == git_commit_hash:
+                    raise ValueError('The specified commit is already registered and in beta.  You cannot reregister that commit version or image.')
+
 
             ##############################
             # 2 - sanity check (things parse, files exist, module_name matches, etc)
             self.set_build_step('reading files and performing basic checks')
-            self.sanity_checks_and_parse(repo, basedir)
+            self.sanity_checks_and_parse(basedir, git_commit_hash)
+
 
             ##############################
             # 2.5 - dealing with git releases .git/config.lock, if it still exists after 5s then kill it
-            git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
-            if os.path.exists(git_config_lock_file):
-                self.log('.git/config.lock exists, waiting 5s for it to release')
-                time.sleep(5)
-                if os.path.exists(git_config_lock_file):
-                    self.log('.git/config.lock file still there, we are just going to delete it....')
-                    os.remove(git_config_lock_file)
+###### should no longer need this after switching to subprocess
+#            git_config_lock_file = os.path.join(basedir, ".git", "config.lock")
+#            if os.path.exists(git_config_lock_file):
+#                self.log('.git/config.lock exists, waiting 5s for it to release')
+#                time.sleep(5)
+#                if os.path.exists(git_config_lock_file):
+#                    self.log('.git/config.lock file still there, we are just going to delete it....')
+#                    os.remove(git_config_lock_file)
 
             ##############################
             # 3 docker build - in progress
@@ -160,6 +182,10 @@ class Registrar:
                                                   ref_data_ver, basedir, self.temp_dir, self.registration_id,
                                                   self.token, self.kbase_endpoint)
                 
+
+                self.set_build_step('preparing compilation report')
+                self.log('Preparing compilation report.')
+
                 # Trying to extract compilation report with line numbers of funcdefs from docker image.
                 # There is "report" entry-point command responsible for that. In case there are any
                 # errors we just skip it.
@@ -167,16 +193,26 @@ class Registrar:
                                                                      self.temp_dir, self.registration_id, 
                                                                      self.token, self.kbase_endpoint)
 
+                if compilation_report is None:
+                    raise ValueError('Unable to generate a compilation report, which is now required, so your registration cannot continue.  ' +
+                                        'If you have been successfully registering this module already, this means that you may need to update ' +
+                                        'to the latest version of the KBase SDK and rebuild your makefile.')
+
+                self.local_function_reader.finish_validation(compilation_report)
+
+
+                self.log('Report complete')
+
                 self.set_build_step('pushing docker image to registry')
                 self.push_docker_image(dockerclient,self.image_name)
 
-                #self.log(str(dockerClient.containers()));
+
             else:
                 self.log('IN TEST MODE!! SKIPPING DOCKER BUILD AND DOCKER REGISTRY UPDATE!!')
 
             # 4 - Update the DB
             self.set_build_step('updating the catalog')
-            self.update_the_catalog(repo, basedir, ref_data_folder, ref_data_ver, compilation_report)
+            self.update_the_catalog(basedir, ref_data_folder, ref_data_ver, compilation_report)
             
             self.build_is_complete()
 
@@ -185,6 +221,11 @@ class Registrar:
             self.set_build_error(str(e))
             self.log(traceback.format_exc(), is_error=True)
             self.log('BUILD_ERROR: '+str(e), is_error=True)
+            if self.prev_dev_version:
+                self.log('Reverting dev version to git_commit_hash=' + self.prev_dev_version['git_commit_hash'] +
+                         ', version=' + self.prev_dev_version['version'] + ', git_commit_message=' +
+                         self.prev_dev_version['git_commit_message'])
+                self.db.update_dev_version(self.prev_dev_version, git_url=self.git_url)
         finally:
             self.flush_log_to_db();
             self.logfile.close();
@@ -192,7 +233,7 @@ class Registrar:
 
 
 
-    def sanity_checks_and_parse(self, repo, basedir):
+    def sanity_checks_and_parse(self, basedir, git_commit_hash):
         # check that files exist
         yaml_filename = 'kbase.yaml'
         if not os.path.isfile(os.path.join(basedir,'kbase.yaml')) :
@@ -219,6 +260,13 @@ class Registrar:
         service_language = self.get_required_field_as_string(self.kb_yaml,'service-language').strip()
         owners = self.get_required_field_as_list(self.kb_yaml,'owners')
 
+        service_config = self.get_optional_field_as_dict(self.kb_yaml, 'service-config')
+        if service_config:
+            # validate service_config parameters
+            if 'dynamic-service' in service_config:
+                if not type(service_config['dynamic-service']) == type(True):
+                    raise ValueError('Invalid service-config in kbase.yaml - "dynamic-service" property must be a boolean "true" or "false".') 
+
         # module_name must match what exists (unless it is not yet defined)
         if 'module_name' in self.module_details:
             if self.module_details['module_name'] != module_name:
@@ -242,6 +290,13 @@ class Registrar:
         # TODO: check for directory structure, method spec format, documentation, version
         self.validate_method_specs(basedir)
 
+        # initial validation of the local function specifications
+        lf_report = self.local_function_reader.parse_and_basic_validation(basedir, self.module_details, module_name, version, git_commit_hash)
+        self.log(self.local_function_reader.report_to_string_for_log(lf_report))
+
+        if len(lf_report['functions_errored']) > 0:
+            raise ValueError('Errors exist in local function specifications.')
+
         # return the parse so we can figure things out later
         return self.kb_yaml
 
@@ -256,17 +311,17 @@ class Registrar:
             raise ValueError('Module names must be alphanumeric characters (including underscores) only, with no spaces.')
 
 
-    def update_the_catalog(self, repo, basedir, ref_data_folder, ref_data_ver, compilation_report):
-
+    def update_the_catalog(self, basedir, ref_data_folder, ref_data_ver, compilation_report):
         # get the basic info that we need
-        commit_hash = repo.head.commit.hexsha
-        commit_message = repo.head.commit.message
+        commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
+        commit_message = str( subprocess.check_output ( ['git','log', '--pretty=%B', '-n', '1' ], cwd=basedir ) ).rstrip()
 
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name')
         module_description = self.get_required_field_as_string(self.kb_yaml,'module-description')
         version = self.get_required_field_as_string(self.kb_yaml,'module-version')
         service_language = self.get_required_field_as_string(self.kb_yaml,'service-language')
         owners = self.get_required_field_as_list(self.kb_yaml,'owners')
+        service_config = self.get_optional_field_as_dict(self.kb_yaml, 'service-config')
 
         # first update the module name, which is now permanent, if we haven't already
         if ('module_name' not in self.module_details) or ('module_name_lc' not in self.module_details):
@@ -283,10 +338,21 @@ class Registrar:
             'description': module_description,
             'language' : service_language
         }
+        if service_config and service_config['dynamic-service']:
+            info['dynamic_service'] = 1
+        else:
+            info['dynamic_service'] = 0
+
+        local_functions = self.local_function_reader.extract_lf_records()
+        if len(local_functions)>0:
+            info['local_functions'] = 1
+        else:
+            info['local_functions'] = 0
+
         self.log('new info: '+pprint.pformat(info))
         error = self.db.set_module_info(info, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to set module info - there was an internal database error: '+error)
+            raise ValueError('Unable to set module info - there was an internal database error: '+str(error))
 
         # next update the owners
         ownersListForUpdate = []
@@ -296,7 +362,7 @@ class Registrar:
         self.log('new owners list: '+pprint.pformat(ownersListForUpdate))
         error = self.db.set_module_owners(ownersListForUpdate, git_url=self.git_url)
         if error is not None:
-            raise ValueError('Unable to set module owners - there was an internal database error: '+error)
+            raise ValueError('Unable to set module owners - there was an internal database error: '+str(error))
 
         # finally update the actual dev version info
         narrative_methods = []
@@ -305,23 +371,42 @@ class Registrar:
                 if os.path.isdir(os.path.join(basedir,'ui','narrative','methods',m)):
                     narrative_methods.append(m)
 
+        if len(local_functions) > 0:
+            self.log('Saving local function specs:')
+            self.log(pprint.pformat(local_functions))
+            error = self.db.save_local_function_specs(local_functions)
+            if error is not None:
+                raise ValueError('There was an error saving local function specs, DB says: '+str(error))
+
         new_version = {
+            'module_name': module_name.strip(),
+            'module_name_lc': module_name.strip().lower(),
+            'module_description': module_description,
+            'released':0,
+            'released_timestamp':None,
+            'notes': '',
             'timestamp':self.timestamp,
             'registration_id':self.registration_id,
             'version' : version,
             'git_commit_hash': commit_hash,
             'git_commit_message': commit_message,
             'narrative_methods': narrative_methods,
+            'local_functions' : self.local_function_reader.extract_lf_names(),
             'docker_img_name': self.image_name,
             'compilation_report': compilation_report
         }
         if ref_data_ver:
             new_version['data_folder'] = ref_data_folder
             new_version['data_version'] = ref_data_ver
+        if service_config and service_config['dynamic-service']:
+            new_version['dynamic_service'] = 1
+        else:
+            new_version['dynamic_service'] = 0
+
         self.log('new dev version object: '+pprint.pformat(new_version))
-        error = self.db.update_dev_version(new_version, git_url=self.git_url)
+        error = self.db.update_dev_version(new_version)
         if error is not None:
-            raise ValueError('Unable to update dev version - there was an internal database error: '+error)
+            raise ValueError('Unable to update dev version - there was an internal database error: '+str(error))
 
         #push to NMS
         self.log('registering specs with NMS')
@@ -402,6 +487,15 @@ class Registrar:
             raise ValueError('kbase.yaml file "'+field_name+'" required field must be a list')
         return value
 
+    def get_optional_field_as_dict(self, kb_yaml, field_name):
+        if field_name not in kb_yaml:
+            return None
+        value = kb_yaml[field_name]
+        if not type(value) is dict:
+            raise ValueError('kbase.yaml file "'+field_name+'" optional field must be a dict')
+        return value
+
+
 
     def log(self, message, no_end_line=False, is_error=False):
         if no_end_line:
@@ -414,8 +508,8 @@ class Registrar:
         lines = content.splitlines();
         for l in lines:
             # add each line to the buffer
-            if len(l)>10000 :
-                l = l[0:10000] + ' ... truncated to 10k characters of ' + str(len(l))
+            if len(l)>1000 :
+                l = l[0:1000] + ' ... truncated to 1k characters of ' + str(len(l))
             self.log_buffer.append({'content':l+'\n', 'error':is_error})
 
         # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
@@ -451,7 +545,7 @@ class Registrar:
         # examine stream to determine success/failure of build
         imageId=None
         last={}
-        for line in docker_client.build(path=basedir,rm=True,tag=image_name):
+        for line in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
             line_parse = json.loads(line)
             log_line = ''
             if 'stream' in line_parse:
@@ -479,7 +573,11 @@ class Registrar:
         #self.log(str(response_stream))
 
         # to do: examine stream to determine success/failure of build
-        for line in docker_client.push(image, tag=tag, stream=True):
+        if self.docker_push_allow_insecure:
+            print("Docker push: insecure_registry: "+ str(self.docker_push_allow_insecure))
+        else:
+            print("Docker push: insecure_registry: None")
+        for line in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
             # example line:
             #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
             line_parse = json.loads(line)
