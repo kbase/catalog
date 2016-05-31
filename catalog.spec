@@ -147,10 +147,32 @@ module Catalog {
     } FunctionPlace;
 
     typedef structure {
+        string type;
+        string comment;
+    } Parameter;
+
+    typedef structure {
+        string name;
+        string comment;
+        FunctionPlace place;
+        list<Parameter> input;
+        list<Parameter> output;
+    } Function;
+
+    typedef structure {
+        string file_name;
+        string content;
+        boolean is_main;
+    } SpecFile;
+
+    typedef structure {
+        string module_name;
         string sdk_version;
         string sdk_git_commit;
         string impl_file_path;
         mapping<string, FunctionPlace> function_places;
+        mapping<string, Function> functions;
+        list<SpecFile> spec_files;
     } CompilationReport;
 
     /*
