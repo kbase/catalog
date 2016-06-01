@@ -2,9 +2,9 @@
 
 import os
 import json
+import datetime
 
 from pprint import pprint, pformat
-from datetime import datetime
 from ConfigParser import ConfigParser
 from pymongo import MongoClient
 
@@ -45,17 +45,31 @@ class CatalogTestUtil:
         # 2 check that db exists and collections are empty
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])
         db = self.mongo[self.test_cfg['mongodb-database']]
+        self.db_version = db[MongoCatalogDBI._DB_VERSION]
         self.modules = db[MongoCatalogDBI._MODULES]
+        self.module_versions = db[MongoCatalogDBI._MODULE_VERSIONS]
+        self.local_functions = db[MongoCatalogDBI._LOCAL_FUNCTIONS]
         self.developers = db[MongoCatalogDBI._DEVELOPERS]
         self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = db[MongoCatalogDBI._FAVORITES]
         self.client_groups = db[MongoCatalogDBI._CLIENT_GROUPS]
+
+        self.exec_stats_raw = db[MongoCatalogDBI._EXEC_STATS_RAW]
+        self.exec_stats_apps = db[MongoCatalogDBI._EXEC_STATS_APPS]
+        self.exec_stats_users = db[MongoCatalogDBI._EXEC_STATS_USERS]
+
         # just drop the test db
+        self.db_version.drop()
         self.modules.drop()
+        self.module_versions.drop()
+        self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()
         self.client_groups.drop()
+        self.exec_stats_raw.drop()
+        self.exec_stats_apps.drop()
+        self.exec_stats_users.drop()
 
         #if self.modules.count() > 0 :
         #    raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
@@ -63,7 +77,7 @@ class CatalogTestUtil:
         self.initialize_mongo()
 
         # 3 setup the scratch space
-        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',str(datetime.now()))
+        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',datetime.datetime.now().strftime("%Y-%m-%d-(%H-%M-%S-%f)"))
         self.log("scratch directory="+self.scratch_dir)
         os.makedirs(self.scratch_dir)
 
@@ -79,6 +93,7 @@ class CatalogTestUtil:
             'temp-dir':self.scratch_dir,
             'docker-base-url':self.test_cfg['docker-base-url'],
             'docker-registry-host':self.test_cfg['docker-registry-host'],
+            'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
             'nms-url':self.test_cfg['nms-url'],
             'nms-admin-user':self.test_cfg['nms-admin-user'],
             'nms-admin-psswd':self.test_cfg['nms-admin-psswd'],
@@ -159,10 +174,17 @@ class CatalogTestUtil:
     def tearDown(self):
         self.log("tearDown()")
         self.modules.drop()
+        self.module_versions.drop()
+        self.local_functions.drop()
         self.developers.drop()
         self.build_logs.drop()
         self.favorites.drop()
         self.client_groups.drop()
+
+        self.exec_stats_raw.drop()
+        self.exec_stats_apps.drop()
+        self.exec_stats_users.drop()
+        
         # make sure NMS is clean after each test
         self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])
 

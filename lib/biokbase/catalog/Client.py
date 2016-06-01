@@ -29,7 +29,7 @@ def _get_token(user_id, password,
                         'grant_type=client_credentials'):
     # This is bandaid helper function until we get a full
     # KBase python auth client released
-    auth = _base64.encodestring(user_id + ':' + password)
+    auth = _base64.b64encode(user_id + ':' + password)
     headers = {'Authorization': 'Basic ' + auth}
     ret = _requests.get(auth_svc, headers=headers, allow_redirects=True)
     status = ret.status_code
@@ -278,6 +278,41 @@ class Catalog(object):
                           [params], json_rpc_context)
         return resp[0]
   
+    def get_module_version(self, selection, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_module_version: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_module_version',
+                          [selection], json_rpc_context)
+        return resp[0]
+  
+    def list_local_functions(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method list_local_functions: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_local_functions',
+                          [params], json_rpc_context)
+        return resp[0]
+  
+    def get_local_function_details(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_local_function_details: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_local_function_details',
+                          [params], json_rpc_context)
+        return resp[0]
+  
+    def module_version_lookup(self, selection, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method module_version_lookup: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.module_version_lookup',
+                          [selection], json_rpc_context)
+        return resp[0]
+  
+    def list_service_modules(self, filter, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method list_service_modules: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.list_service_modules',
+                          [filter], json_rpc_context)
+        return resp[0]
+  
     def set_registration_state(self, params, json_rpc_context = None):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method set_registration_state: argument json_rpc_context is not type dict as required.')
@@ -379,6 +414,13 @@ class Catalog(object):
         if json_rpc_context and type(json_rpc_context) is not dict:
             raise ValueError('Method get_exec_aggr_table: argument json_rpc_context is not type dict as required.')
         resp = self._call('Catalog.get_exec_aggr_table',
+                          [params], json_rpc_context)
+        return resp[0]
+  
+    def get_exec_raw_stats(self, params, json_rpc_context = None):
+        if json_rpc_context and type(json_rpc_context) is not dict:
+            raise ValueError('Method get_exec_raw_stats: argument json_rpc_context is not type dict as required.')
+        resp = self._call('Catalog.get_exec_raw_stats',
                           [params], json_rpc_context)
         return resp[0]
   

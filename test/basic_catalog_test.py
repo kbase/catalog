@@ -14,7 +14,7 @@ class BasicCatalogTest(unittest.TestCase):
 
 
     def test_version(self):
-        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['1.0.3'])
+        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['2.0.3'])
 
 
     def test_is_registered(self):
@@ -81,7 +81,7 @@ class BasicCatalogTest(unittest.TestCase):
             module_names.append(m['module_name'])
         self.assertEqual(
             ",".join(sorted(module_names)),
-            ",".join(['onerepotest','pending_second_release','release_history'])
+            ",".join(['DynamicService','DynamicService2','onerepotest','pending_second_release','release_history'])
             )
 
         # all released and unreleased
@@ -92,9 +92,30 @@ class BasicCatalogTest(unittest.TestCase):
             module_names.append(m['module_name'])
         self.assertEqual(
             ",".join(sorted(module_names)),
-            ",".join(sorted(['denied_release','onerepotest','pending_first_release','pending_second_release',
+            ",".join(sorted(['DynamicService','DynamicService2','denied_release','onerepotest','pending_first_release','pending_second_release',
                 'registration_error','registration_in_progress','release_history']))
             )
+
+        # include unreleased and failed first registration
+        include_unreleased = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
+            {'include_unreleased':1, 'include_modules_with_no_name_set':1 })[0]
+        git_urls = []
+        for m in include_unreleased:
+            git_urls.append(m['git_url'])
+        self.assertEqual(
+            ",".join(sorted(git_urls)),
+            ",".join(sorted(['https://github.com/jplfaria/ElectronicAnnotationMethods-',
+                'https://github.com/kbaseIncubator/denied_release',
+                'https://github.com/kbaseIncubator/dynamic_service',
+                'https://github.com/kbaseIncubator/dynamic_service2',
+                'https://github.com/kbaseIncubator/onerepotest',
+                'https://github.com/kbaseIncubator/pending_Release',
+                'https://github.com/kbaseIncubator/pending_second_release',
+                'https://github.com/kbaseIncubator/registration_error',
+                'https://github.com/kbaseIncubator/registration_in_progress',
+                'https://github.com/kbaseIncubator/release_history']))
+            )
+
 
         # no released and no unreleased
         include_nothing = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
@@ -258,6 +279,175 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(info['owners'],['kbasetest'])
         self.assertEqual(info['language'],'perl')
         self.assertTrue(info['release'] is None)
+
+
+
+    def test_get_module_version(self):
+
+        # fetch without version info, should return latest release version
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history'})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+        # should work based on git_url as well
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'git_url':'https://github.com/kbaseIncubator/release_history'})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+
+        # get a specific tag
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'dev', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445024094055)
+        self.assertEqual(version['version'],"0.0.5")
+        self.assertEqual(version['narrative_methods'],['send_data2'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445024094055_4123')
+        self.assertEqual(version['release_tags'],['dev'])
+        self.assertEqual(version['release_timestamp'], None)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.b06c5f9daf603a4d206071787c3f6184000bf128')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"b06c5f9daf603a4d206071787c3f6184000bf128")
+        self.assertEqual(version['git_commit_message'],"another change")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+        # get by git commit hash
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'49dc505febb8f4cccb2078c58ded0de3320534d7', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+        # get by exact semantic version
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'0.0.3', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+
+        # get by semantic version spec
+        version = self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+            {'module_name':'release_history', 'version':'>0.0.1', 'include_module_description':0, 'include_compilation_report':0})[0]
+
+        self.assertEqual(version['timestamp'],1445022818884)
+        self.assertEqual(version['version'],"0.0.3")
+        self.assertEqual(version['narrative_methods'],['send_data'])
+        self.assertEqual(version['local_functions'],[])
+        self.assertEqual(version['module_language'],'python')
+        self.assertEqual(version['module_name'],'release_history')
+        self.assertEqual(version['notes'],'')
+        self.assertEqual(version['registration_id'],'1445022818884_4123')
+        self.assertEqual(version['release_tags'],['release'])
+        self.assertEqual(version['release_timestamp'], 1445022818884)
+        self.assertEqual(version['docker_img_name'],'dockerhub-ci.kbase.us/kbase:release_history.49dc505febb8f4cccb2078c58ded0de3320534d7')
+        self.assertEqual(version['dynamic_service'],0)
+        self.assertEqual(version['git_commit_hash'],"49dc505febb8f4cccb2078c58ded0de3320534d7")
+        self.assertEqual(version['git_commit_message'],"added username for testing")
+        self.assertEqual(version['git_url'],"https://github.com/kbaseIncubator/release_history")
+
+
+        # handle some error cases:
+        # need parameters to work
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+                {})
+        self.assertEqual(str(e.exception),
+            'Missing required fields git_url or module_name');
+
+        # cannot find the right module
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+                {'module_name':'made_up_module'})
+        self.assertEqual(str(e.exception),
+            'Module cannot be found based on module_name or git_url parameters.');
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+                {'git_url':'not_a_url'})
+        self.assertEqual(str(e.exception),
+            'Module cannot be found based on module_name or git_url parameters.');
+
+        # no release version exists
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+                {'module_name':'pending_first_release', 'version':'release' })
+        self.assertEqual(str(e.exception),
+            'No module version found that matches your criteria!');
+
+         # does not have any valid versions
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+                {'git_url':'https://github.com/jplfaria/ElectronicAnnotationMethods-'})
+        self.assertEqual(str(e.exception),
+            'Module was never properly registered, and has no available versions.');
+
+        # didn't give a proper version matcher
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
+                {'module_name':'pending_first_release', 'version':'the best version'})
+        self.assertEqual(str(e.exception),
+            'No module version found that matches your criteria!');
+
 
 
     def test_get_version_info(self):

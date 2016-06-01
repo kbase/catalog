@@ -75,18 +75,21 @@ module Catalog {
         include_released - optional flag indicated modules that are released are included (default:true)
         include_unreleased - optional flag indicated modules that are not released are included (default:false)
         with_disabled - optional flag indicating disabled repos should be included (default:false).
+        include_modules_with_no_name_set - default to 0, if set return modules that were never
+                                            registered successfully (first registration failed, never
+                                            got a module name, but there is a git_url)
     */
     typedef structure {
         list <string> owners;
         boolean include_released;
         boolean include_unreleased;
         boolean include_disabled;
+        boolean include_modules_with_no_name_set;
     } ListModuleParams;
 
     typedef structure {
         string module_name;
         string git_url;
-
     } BasicModuleInfo;
     /*
     To Add:
@@ -167,7 +170,9 @@ module Catalog {
         string version;
         string git_commit_hash;
         string git_commit_message;
+        boolean dynamic_service;
         list<string> narrative_method_ids;
+        list<string> local_function_ids;
         string docker_img_name;
         string data_folder;
         string data_version;
@@ -213,9 +218,233 @@ module Catalog {
         string version;
     } SelectModuleVersionParams;
 
+    /* DEPRECATED!!!  use get_module_version */
     funcdef get_version_info(SelectModuleVersionParams params) returns (ModuleVersionInfo version);
 
     funcdef list_released_module_versions(SelectOneModuleParams params) returns (list<ModuleVersionInfo> versions);
+
+
+
+
+
+    /*
+        module_name            - the name of the module
+        module_description     - (optionally returned) html description in KBase YAML of this module
+        git_url                - the git url of the source for this module
+
+        released               - 1 if this version has been released, 0 otherwise
+        release_tags           - list of strings of: 'dev', 'beta', or 'release', or empty list
+                                 this is a list because the same commit version may be the version in multiple release states
+        release_timestamp      - time in ms since epoch when this module was approved and moved to release, null otherwise
+                                 note that a module was released before v1.0.0, the release timestamp may not have been
+                                 recorded and will default to the registration timestamp
+
+        timestamp              - time in ms since epoch when the registration for this version was started
+        registration_id        - id of the last registration for this version, used for fetching registration logs and state
+
+        version                - validated semantic version number as indicated in the KBase YAML of this version
+                                 semantic versions are unique among released versions of this module
+
+        git_commit_hash        - the full git commit hash of the source for this module
+        git_commit_message     - the message attached to this git commit
+
+        dynamic_service        - 1 if this version is available as a web service, 0 otherwise
+
+        narrative_app_ids      - list of Narrative App ids registered with this module version
+        local_function_ids     - list of Local Function ids registered with this module version
+
+        docker_img_name        - name of the docker image for this module created on registration
+        data_folder            - name of the data folder used 
+
+        compilation_report     - (optionally returned) summary of the KIDL specification compilation
+    */
+    typedef structure {
+        string module_name;
+        string module_description;
+        string git_url;
+
+        boolean released;
+        list<string> release_tags;
+
+        int timestamp;
+        string registration_id;
+
+        string version;
+        string git_commit_hash;
+        string git_commit_message;
+
+        boolean dynamic_service;
+
+        list<string> narrative_app_ids;
+
+        list<string> local_function_ids;
+
+        string docker_img_name;
+        string data_folder;
+        string data_version;
+
+        CompilationReport compilation_report;
+
+    } ModuleVersion;
+
+
+    /*
+        Get a specific module version.
+
+        Requires either a module_name or git_url.  If both are provided, they both must match.
+
+        If no other options are specified, then the latest 'release' version is returned.  If
+        the module has not been released, then the latest 'beta' or 'dev' version is returned.
+        You can check in the returned object if the version has been released (see is_released)
+        and what release tags are pointing to this version (see release_tags).
+
+        Optionally, a 'version' parameter can be provided that can be either:
+            1) release tag: 'dev' | 'beta' | 'release'
+
+            2) specific semantic version of a released version (you cannot pull dev/beta or other
+               unreleased versions by semantic version)
+                - e.g. 2.0.1
+
+            3) semantic version requirement specification, see: https://pypi.python.org/pypi/semantic_version/
+               which will return the latest released version that matches the criteria.  You cannot pull
+               dev/beta or other unreleased versions this way.
+                - e.g.:
+                    - '>1.0.0'
+                    - '>=2.1.1,<3.3.0'
+                    - '!=0.2.4-alpha,<0.3.0'
+
+            4) specific full git commit hash
+
+        include_module_description - set to 1 to include the module description in the YAML file of this version;
+                                     default is 0
+        include_compilation_report - set to 1 to include the module compilation report, default is 0
+
+
+    */
+    typedef structure {
+        string module_name;
+        string git_url;
+
+        string version;
+
+        boolean include_module_description;
+        boolean include_compilation_report;
+    } SelectModuleVersion;
+
+    funcdef get_module_version(SelectModuleVersion selection) returns (ModuleVersion version);
+
+
+
+
+    /* Local Function Listing Support */
+
+
+
+    typedef structure {
+        list<string> file_types;
+        list<string> kb_types;
+    } IOTags;
+
+    typedef structure {
+        list <string> categories;
+        IOTags input;
+        IOTags output;
+    } LocalFunctionTags;
+
+    /* todo: switch release_tag to release_tags */
+    typedef structure {
+        string module_name;
+        string function_id;
+        string git_commit_hash;
+
+        string version;
+        list<string> release_tag;
+
+        string name;
+        string short_description;
+
+        LocalFunctionTags tags;
+    } LocalFunctionInfo;
+
+
+
+    typedef structure {
+        LocalFunctionInfo info;
+        string long_description;
+    } LocalFunctionDetails;
+
+    /*
+        Allows various ways to filter.
+        Release tag = dev/beta/release, default is release
+        module_names = only include modules in the list; if empty or not
+                       provided then include everything
+    */
+    typedef structure {
+        string release_tag;
+        list<string> module_names;
+    } ListLocalFunctionParams;
+
+    funcdef list_local_functions(ListLocalFunctionParams params) returns (list<LocalFunctionInfo> info_list);
+
+
+    /*
+        release_tag = dev | beta | release, if it doesn't exist and git_commit_hash isn't set, we default to release
+                      and will not return anything if the function is not released
+    */
+    typedef structure {
+        string module_name;
+        string function_id;
+        string release_tag;
+        string git_commit_hash;
+    } SelectOneLocalFunction;
+
+    typedef structure {
+        list<SelectOneLocalFunction> functions;
+    } GetLocalFunctionDetails;
+
+    funcdef get_local_function_details(GetLocalFunctionDetails params) returns (list<LocalFunctionDetails> detail_list);
+
+    /* End local function listing support */
+
+
+    /*  DYNAMIC SERVICES SUPPORT Methods */
+
+    typedef structure {
+        string module_name;
+        string version;
+        string git_commit_hash;
+        string docker_img_name;
+    } BasicModuleVersionInfo;
+
+    /*
+        module_name - required for module lookup
+        lookup - a lookup string, if empty will get the latest released module
+                    1) version tag = dev | beta | release
+                    2) semantic version match identifiier
+                    not supported yet: 3) exact commit hash
+                    not supported yet: 4) exact timestamp
+        only_service_versions - 1/0, default is 1
+    */
+    typedef structure {
+        string module_name;
+        string lookup;
+        boolean only_service_versions;
+    } ModuleVersionLookupParams;
+
+    funcdef module_version_lookup(ModuleVersionLookupParams selection) returns (BasicModuleVersionInfo);
+
+    /*
+        tag = dev | beta | release
+        if tag is not set, all release versions are returned
+    */
+    typedef structure {
+        string tag;
+    } ListServiceModuleParams;
+
+    funcdef list_service_modules(ListServiceModuleParams filter) returns (list<BasicModuleVersionInfo> service_modules);
+
+
+    /*  End Dynamic Services Support Methods */
 
 
     typedef structure {
@@ -421,6 +650,17 @@ module Catalog {
     } ExecAggrTableParams;
 
     funcdef get_exec_aggr_table(ExecAggrTableParams params) returns (UnspecifiedObject table) authentication required;
+
+
+    /*
+        Get raw usage metrics; available only to Admins.
+    */
+    typedef structure {
+        int begin;
+        int end;
+    } GetExecRawStatsParams;
+
+    funcdef get_exec_raw_stats(GetExecRawStatsParams params) returns (list<UnspecifiedObject> records) authentication required;
 
 
     /* Temporary set of methods to dynamically set client groups for specific methods.  These methods
