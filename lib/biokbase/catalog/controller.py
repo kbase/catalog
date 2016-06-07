@@ -433,9 +433,10 @@ class CatalogController:
         if 'git_commit_hash' in params:
             # check current versions
             for version in ['dev','beta','release']:
-                if 'git_commit_hash' in current_version[version] and current_version[version]['git_commit_hash'] == params['git_commit_hash']:
-                    v = current_version[version]
-                    return v
+                if version in current_version:
+                    if 'git_commit_hash' in current_version[version] and current_version[version]['git_commit_hash'] == params['git_commit_hash']:
+                        v = current_version[version]
+                        return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
             all_versions = details['release_version_list']
