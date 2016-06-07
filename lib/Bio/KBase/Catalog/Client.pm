@@ -4013,7 +4013,7 @@ boolean is an int
 
 =item Description
 
-
+must specify all properties of the VolumeMountConfig
 
 =back
 
@@ -4060,6 +4060,105 @@ boolean is an int
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_volume_mount",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'set_volume_mount',
+				       );
+    }
+}
+ 
+
+
+=head2 remove_volume_mount
+
+  $obj->remove_volume_mount($config)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$config is a Catalog.VolumeMountConfig
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$config is a Catalog.VolumeMountConfig
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+must specify module_name, app_id, client_group and this method will delete any configured mounts
+
+=back
+
+=cut
+
+ sub remove_volume_mount
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function remove_volume_mount (received $n, expecting 1)");
+    }
+    {
+	my($config) = @args;
+
+	my @_bad_arguments;
+        (ref($config) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"config\" (value was \"$config\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to remove_volume_mount:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'remove_volume_mount');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.remove_volume_mount",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'remove_volume_mount',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_volume_mount",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'remove_volume_mount',
 				       );
     }
 }
@@ -4132,7 +4231,7 @@ boolean is an int
 {
     my($self, @args) = @_;
 
-# Authentication: none
+# Authentication: required
 
     if ((my $n = @args) != 1)
     {

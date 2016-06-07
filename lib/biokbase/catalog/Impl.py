@@ -21,7 +21,7 @@ class Catalog:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "07df43086e8b31434364c0fbe18a826e345b6383"
+    GIT_COMMIT_HASH = "2ad9fb3923f3afba86d2a7635f1dbdfa82854c03"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -1158,6 +1158,7 @@ class Catalog:
 
     def set_volume_mount(self, ctx, config):
         """
+        must specify all properties of the VolumeMountConfig
         :param config: instance of type "VolumeMountConfig" (for a module,
            app, and client group, set mount configurations) -> structure:
            parameter "module_name" of String, parameter "app_id" of String,
@@ -1168,10 +1169,25 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_volume_mount
-
-        
-        
+        self.cc.set_volume_mount(ctx['user_id'], config)
         #END set_volume_mount
+        pass
+
+    def remove_volume_mount(self, ctx, config):
+        """
+        must specify module_name, app_id, client_group and this method will delete any configured mounts
+        :param config: instance of type "VolumeMountConfig" (for a module,
+           app, and client group, set mount configurations) -> structure:
+           parameter "module_name" of String, parameter "app_id" of String,
+           parameter "client_group" of String, parameter "volume_mounts" of
+           list of type "VolumeMount" -> structure: parameter "host_dir" of
+           String, parameter "container_dir" of String, parameter "read_only"
+           of type "boolean" (@range [0,1])
+        """
+        # ctx is the context object
+        #BEGIN remove_volume_mount
+        self.cc.remove_volume_mount(ctx['user_id'], config)
+        #END remove_volume_mount
         pass
 
     def list_volume_mounts(self, ctx, filter):
@@ -1196,9 +1212,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: volume_mount_configs
         #BEGIN list_volume_mounts
-
-
-        volume_mount_configs = []
+        volume_mount_configs = self.cc.list_volume_mounts(ctx['user_id'], filter)
         #END list_volume_mounts
 
         # At some point might do deeper type checking...

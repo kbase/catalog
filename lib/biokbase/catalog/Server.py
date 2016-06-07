@@ -491,10 +491,14 @@ class Application(object):
                              name='Catalog.set_volume_mount',
                              types=[dict])
         self.method_authentication['Catalog.set_volume_mount'] = 'required'
+        self.rpc_service.add(impl_Catalog.remove_volume_mount,
+                             name='Catalog.remove_volume_mount',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_volume_mount'] = 'required'
         self.rpc_service.add(impl_Catalog.list_volume_mounts,
                              name='Catalog.list_volume_mounts',
                              types=[dict])
-        self.method_authentication['Catalog.list_volume_mounts'] = 'none'
+        self.method_authentication['Catalog.list_volume_mounts'] = 'required'
         self.rpc_service.add(impl_Catalog.is_admin,
                              name='Catalog.is_admin',
                              types=[basestring])

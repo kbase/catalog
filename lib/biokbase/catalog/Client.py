@@ -843,6 +843,7 @@ class Catalog(object):
 
     def set_volume_mount(self, config, context=None):
         """
+        must specify all properties of the VolumeMountConfig
         :param config: instance of type "VolumeMountConfig" (for a module,
            app, and client group, set mount configurations) -> structure:
            parameter "module_name" of String, parameter "app_id" of String,
@@ -853,6 +854,21 @@ class Catalog(object):
         """
         return self._client.call_method(
             'Catalog.set_volume_mount',
+            [config], self._service_ver, context)
+
+    def remove_volume_mount(self, config, context=None):
+        """
+        must specify module_name, app_id, client_group and this method will delete any configured mounts
+        :param config: instance of type "VolumeMountConfig" (for a module,
+           app, and client group, set mount configurations) -> structure:
+           parameter "module_name" of String, parameter "app_id" of String,
+           parameter "client_group" of String, parameter "volume_mounts" of
+           list of type "VolumeMount" -> structure: parameter "host_dir" of
+           String, parameter "container_dir" of String, parameter "read_only"
+           of type "boolean" (@range [0,1])
+        """
+        return self._client.call_method(
+            'Catalog.remove_volume_mount',
             [config], self._service_ver, context)
 
     def list_volume_mounts(self, filter, context=None):

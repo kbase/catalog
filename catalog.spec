@@ -704,8 +704,11 @@ module Catalog {
         list <VolumeMount> volume_mounts;
     } VolumeMountConfig;
 
-
+    /* must specify all properties of the VolumeMountConfig */
     funcdef set_volume_mount(VolumeMountConfig config) returns () authentication required;
+
+    /* must specify module_name, app_id, client_group and this method will delete any configured mounts */
+    funcdef remove_volume_mount(VolumeMountConfig config) returns () authentication required;
 
     /*
         Parameters for listing VolumeMountConfigs.  If nothing is set, everything is
@@ -720,7 +723,8 @@ module Catalog {
         string client_group;
     } VolumeMountFilter;
     
-    funcdef list_volume_mounts(VolumeMountFilter filter) returns (list<VolumeMountConfig> volume_mount_configs);
+    funcdef list_volume_mounts(VolumeMountFilter filter)
+                returns (list<VolumeMountConfig> volume_mount_configs) authentication required;
 
     /* returns true (1) if the user is an admin, false (0) otherwise */
     funcdef is_admin(string username) returns (boolean); 
