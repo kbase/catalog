@@ -687,6 +687,41 @@ module Catalog {
 
     funcdef get_client_groups(GetClientGroupParams params) returns (list<AppClientGroup> groups);
 
+
+
+    typedef structure {
+        string host_dir;
+        string container_dir;
+        boolean read_only;
+    } VolumeMount;
+
+    /* for a module, app, and client group, set mount configurations */
+    typedef structure {
+        string module_name;
+        string app_id;
+        string client_group;
+
+        list <VolumeMount> volume_mounts;
+    } VolumeMountConfig;
+
+
+    funcdef set_volume_mount(VolumeMountConfig config) returns () authentication required;
+
+    /*
+        Parameters for listing VolumeMountConfigs.  If nothing is set, everything is
+        returned.  Otherwise, will return everything that matches all fields set.  For
+        instance, if only module_name is set, will return everything for that module.  If
+        they are all set, will return the specific module/app/client group config.  Returns
+        nothing if no matches are found.
+    */
+    typedef structure {
+        string module_name;
+        string app_id;
+        string client_group;
+    } VolumeMountFilter;
+    
+    funcdef list_volume_mounts(VolumeMountFilter filter) returns (list<VolumeMountConfig> volume_mount_configs);
+
     /* returns true (1) if the user is an admin, false (0) otherwise */
     funcdef is_admin(string username) returns (boolean); 
 
