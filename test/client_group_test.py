@@ -135,6 +135,22 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
 
 
+    def test_volume_mount_configs(self):
+
+        userCtx = self.cUtil.user_ctx()
+        adminCtx = self.cUtil.admin_ctx()
+        anonCtx = self.cUtil.anonymous_ctx()
+
+        filter = {}
+        vol_mounts = self.catalog.list_volume_mounts(anonCtx, filter)[0]
+
+        pprint(vol_mounts)
+
+        return
+
+
+
+
     @classmethod
     def setUpClass(cls):
         print('++++++++++++ RUNNING client_group_test.py +++++++++++')

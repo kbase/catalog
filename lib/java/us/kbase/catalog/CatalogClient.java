@@ -809,6 +809,38 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: set_volume_mount</p>
+     * <pre>
+     * </pre>
+     * @param   config   instance of type {@link us.kbase.catalog.VolumeMountConfig VolumeMountConfig}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setVolumeMount(VolumeMountConfig config, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(config);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_volume_mount", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_volume_mounts</p>
+     * <pre>
+     * </pre>
+     * @param   filter   instance of type {@link us.kbase.catalog.VolumeMountFilter VolumeMountFilter}
+     * @return   parameter "volume_mount_configs" of list of type {@link us.kbase.catalog.VolumeMountConfig VolumeMountConfig}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<VolumeMountConfig> listVolumeMounts(VolumeMountFilter filter, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(filter);
+        TypeReference<List<List<VolumeMountConfig>>> retType = new TypeReference<List<List<VolumeMountConfig>>>() {};
+        List<List<VolumeMountConfig>> res = caller.jsonrpcCall("Catalog.list_volume_mounts", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: is_admin</p>
      * <pre>
      * returns true (1) if the user is an admin, false (0) otherwise
