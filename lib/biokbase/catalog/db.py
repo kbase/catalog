@@ -121,6 +121,7 @@ class MongoCatalogDBI:
     _BUILD_LOGS='build_logs'
     _FAVORITES='favorites'
     _CLIENT_GROUPS='client_groups'
+    _VOLUME_MOUNTS='volume_mounts'
     _EXEC_STATS_RAW='exec_stats_raw'
     _EXEC_STATS_APPS='exec_stats_apps'
     _EXEC_STATS_USERS='exec_stats_users'
@@ -144,6 +145,7 @@ class MongoCatalogDBI:
         self.build_logs = self.db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = self.db[MongoCatalogDBI._FAVORITES]
         self.client_groups = self.db[MongoCatalogDBI._CLIENT_GROUPS]
+        self.volume_mounts = self.db[MongoCatalogDBI._VOLUME_MOUNTS]
 
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
@@ -229,6 +231,12 @@ class MongoCatalogDBI:
         # client group
         #  app_id = [lower case module name]/[app id]
         self.client_groups.ensure_index('app_id', unique=True, sparse=False)
+
+
+        self.volume_mounts.ensure_index([('client_group', ASCENDING), 
+                                            ('module_name_lc', ASCENDING),
+                                            ('app_id', ASCENDING)], 
+                                           unique=True, sparse=False)
 
 
 
@@ -989,6 +997,35 @@ class MongoCatalogDBI:
             query['app_id'] = { '$in':app_ids }
 
         return list(self.client_groups.find(query, selection))
+
+
+    def set_volume_mount(self, volume_mount):
+        volume_mount['module_name_lc'] = volume_mount['module_name'].lower()
+        return self._check_update_result(self.volume_mounts.update(
+                {
+                    'module_name_lc':volume_mount['module_name_lc'],
+                    'app_id':volume_mount['app_id'],
+                    'client_group':volume_mount['client_group']
+                },
+                volume_mount,
+                upsert=True
+            ))
+
+    def remove_volume_mount(self, volume_mount):
+        volume_mount['module_name_lc'] = volume_mount['module_name'].lower()
+        return self._check_update_result(self.volume_mounts.remove(
+                {
+                    'module_name_lc':volume_mount['module_name_lc'],
+                    'app_id':volume_mount['app_id'],
+                    'client_group':volume_mount['client_group']
+                }))
+
+    def list_volume_mounts(self, filter):
+        selection = { "_id": 0, "module_name_lc":0 }
+        if 'module_name' in filter:
+            filter['module_name_lc'] = filter['module_name'].lower()
+            del(filter['module_name'])
+        return list(self.volume_mounts.find(filter, selection))
 
 
     #### utility methods

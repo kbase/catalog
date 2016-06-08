@@ -34,7 +34,7 @@ init:
 	git submodule update
 
 compile-kb-module:
-	kb-mobu compile $(SPEC_FILE) \
+	kb-sdk compile $(SPEC_FILE) \
 		--out $(LIB_DIR) \
 		--plclname Bio::KBase::$(SERVICE_CAPS)::Client \
 		--jsclname javascript/Client \

@@ -433,9 +433,10 @@ class CatalogController:
         if 'git_commit_hash' in params:
             # check current versions
             for version in ['dev','beta','release']:
-                if 'git_commit_hash' in current_version[version] and current_version[version]['git_commit_hash'] == params['git_commit_hash']:
-                    v = current_version[version]
-                    return v
+                if version in current_version:
+                    if 'git_commit_hash' in current_version[version] and current_version[version]['git_commit_hash'] == params['git_commit_hash']:
+                        v = current_version[version]
+                        return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
             all_versions = details['release_version_list']
@@ -1221,6 +1222,131 @@ class CatalogController:
             if len(app_ids) == 0 :
                 app_ids = None
         return self.db.list_client_groups(app_ids)
+
+
+    def set_volume_mount(self, username, config):
+        # must be an admin
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to set volume mounts.')
+
+        # do lots of parameter checking
+        record = {}
+
+        if 'module_name' not in config:
+            raise ValueError('module_name parameter field is required')
+        if not isinstance(config['module_name'],basestring):
+            raise ValueError('module_name parameter field must be a string')
+        record['module_name'] = config['module_name'].strip()
+
+        if 'app_id' not in config:
+            raise ValueError('app_id parameter field is required')
+        if not isinstance(config['app_id'],basestring):
+            raise ValueError('app_id parameter field must be a string')
+        record['app_id'] = config['app_id'].strip()
+
+        if 'client_group' not in config:
+            raise ValueError('client_group parameter field is required')
+        if not isinstance(config['client_group'],basestring):
+            raise ValueError('client_group parameter field must be a string')
+        record['client_group'] = config['client_group'].strip()
+
+        if 'volume_mounts' not in config:
+            raise ValueError('volume_mounts parameter field is required')
+        if not isinstance(config['volume_mounts'],list):
+            raise ValueError('volume_mounts parameter field must be a list')
+
+        record['volume_mounts'] = []
+        for v in config['volume_mounts']:
+            vm = {}
+            if 'host_dir' not in v:
+                raise ValueError('host_dir parameter field is required in all volume_mount configurations')
+            if not isinstance(v['host_dir'],basestring):
+                raise ValueError('host_dir parameter field in volume_mount list must be a string')
+            vm['host_dir'] = v['host_dir'].strip()
+
+            if 'container_dir' not in v:
+                raise ValueError('container_dir parameter field is required in all volume_mount configurations')
+            if not isinstance(v['container_dir'],basestring):
+                raise ValueError('container_dir parameter field in volume_mount list must be a string')
+            vm['container_dir'] = v['container_dir'].strip()
+
+            if 'read_only' not in v:
+                raise ValueError('read_only parameter field is required in all volume_mount configurations')
+            if not isinstance(str(v['read_only']),basestring):
+                raise ValueError('read_only parameter field in volume_mount list must be either 1 (true) or 0 (false)')
+
+            if str(v['read_only']) not in ['0', '1']:
+                raise ValueError('read_only parameter field in volume_mount list must be either 1 (true) or 0 (false)')
+            if str(v['read_only']) == '0':
+                vm['read_only'] = 0
+            else:
+                vm['read_only'] = 1
+
+            record['volume_mounts'].append(vm)
+
+        error = self.db.set_volume_mount(record)
+        if error is not None:
+            raise ValueError('Insert/update probably failed, blame mongo: upsert operation returned: '+error)
+
+
+    def remove_volume_mount(self, username, config):
+        # do some parameter checks
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to remove volume mounts.')
+
+        selection = {}
+
+        if 'module_name' not in config:
+            raise ValueError('module_name parameter field is required')
+        if not isinstance(config['module_name'],basestring):
+            raise ValueError('module_name parameter field must be a string')
+        selection['module_name'] = config['module_name'].strip()
+
+        if 'app_id' not in config:
+            raise ValueError('app_id parameter field is required')
+        if not isinstance(config['app_id'],basestring):
+            raise ValueError('app_id parameter field must be a string')
+        selection['app_id'] = config['app_id'].strip()
+
+        if 'client_group' not in config:
+            raise ValueError('client_group parameter field is required')
+        if not isinstance(config['client_group'],basestring):
+            raise ValueError('client_group parameter field must be a string')
+        selection['client_group'] = config['client_group'].strip()
+
+        error = self.db.remove_volume_mount(selection)
+        if error is not None:
+            raise ValueError('Removal probably failed, blame mongo: remove operation returned: '+error)
+
+
+    def list_volume_mounts(self, username, filter):
+        # add some checks on the filter
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to view volume mounts.')
+
+        processed_filter = {}
+        if filter:
+            if 'module_name' in filter:
+                if not isinstance(filter['module_name'],basestring):
+                    raise ValueError('module_name parameter field must be a string')
+                processed_filter['module_name'] = filter['module_name'].strip()
+
+            if 'app_id' in filter:
+                if not isinstance(filter['app_id'],basestring):
+                    raise ValueError('app_id parameter field must be a string')
+                processed_filter['app_id'] = filter['app_id'].strip()
+
+            if 'client_group' in filter:
+                if not isinstance(filter['client_group'],basestring):
+                    raise ValueError('client_group parameter field must be a string')
+                processed_filter['client_group'] = filter['client_group'].strip()
+
+        return self.db.list_volume_mounts(processed_filter)
+
+
+
+
+
 
 
 

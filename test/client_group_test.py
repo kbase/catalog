@@ -135,6 +135,48 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
 
 
+    def test_volume_mount_configs(self):
+
+        userCtx = self.cUtil.user_ctx()
+        adminCtx = self.cUtil.admin_ctx()
+
+        filter = {}
+        vol_mounts = self.catalog.list_volume_mounts(adminCtx, filter)[0]
+        pprint(vol_mounts)
+
+
+        volume_mount_config = {
+            'module_name': 'Tester2',
+            'app_id':'my_app',
+            'client_group':'g23123',
+            'volume_mounts' : [
+            {
+                'host_dir' : '/tmp',
+                'container_dir' : '/tmp/asdf',
+                'read_only': 1
+            }
+            ]
+        }
+
+        self.catalog.set_volume_mount(adminCtx, volume_mount_config)
+
+        filter = { 'module_name' : 'tester2' }
+        vol_mounts = self.catalog.list_volume_mounts(adminCtx, filter)[0]
+        pprint(vol_mounts)
+
+        del(volume_mount_config['volume_mounts'])
+        self.catalog.remove_volume_mount(adminCtx, volume_mount_config)
+
+        
+        filter = { 'module_name' : 'tester2' }
+        vol_mounts = self.catalog.list_volume_mounts(adminCtx, filter)[0]
+        pprint(vol_mounts)
+
+        return
+
+
+
+
     @classmethod
     def setUpClass(cls):
         print('++++++++++++ RUNNING client_group_test.py +++++++++++')

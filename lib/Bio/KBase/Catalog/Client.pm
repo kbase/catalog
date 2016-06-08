@@ -3967,6 +3967,313 @@ AppClientGroup is a reference to a hash where the following keys are defined:
  
 
 
+=head2 set_volume_mount
+
+  $obj->set_volume_mount($config)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$config is a Catalog.VolumeMountConfig
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$config is a Catalog.VolumeMountConfig
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+must specify all properties of the VolumeMountConfig
+
+=back
+
+=cut
+
+ sub set_volume_mount
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function set_volume_mount (received $n, expecting 1)");
+    }
+    {
+	my($config) = @args;
+
+	my @_bad_arguments;
+        (ref($config) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"config\" (value was \"$config\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to set_volume_mount:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'set_volume_mount');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.set_volume_mount",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'set_volume_mount',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_volume_mount",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'set_volume_mount',
+				       );
+    }
+}
+ 
+
+
+=head2 remove_volume_mount
+
+  $obj->remove_volume_mount($config)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$config is a Catalog.VolumeMountConfig
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$config is a Catalog.VolumeMountConfig
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+must specify module_name, app_id, client_group and this method will delete any configured mounts
+
+=back
+
+=cut
+
+ sub remove_volume_mount
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function remove_volume_mount (received $n, expecting 1)");
+    }
+    {
+	my($config) = @args;
+
+	my @_bad_arguments;
+        (ref($config) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"config\" (value was \"$config\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to remove_volume_mount:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'remove_volume_mount');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.remove_volume_mount",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'remove_volume_mount',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_volume_mount",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'remove_volume_mount',
+				       );
+    }
+}
+ 
+
+
+=head2 list_volume_mounts
+
+  $volume_mount_configs = $obj->list_volume_mounts($filter)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$filter is a Catalog.VolumeMountFilter
+$volume_mount_configs is a reference to a list where each element is a Catalog.VolumeMountConfig
+VolumeMountFilter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$filter is a Catalog.VolumeMountFilter
+$volume_mount_configs is a reference to a list where each element is a Catalog.VolumeMountConfig
+VolumeMountFilter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+VolumeMountConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	client_group has a value which is a string
+	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+VolumeMount is a reference to a hash where the following keys are defined:
+	host_dir has a value which is a string
+	container_dir has a value which is a string
+	read_only has a value which is a Catalog.boolean
+boolean is an int
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_volume_mounts
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_volume_mounts (received $n, expecting 1)");
+    }
+    {
+	my($filter) = @args;
+
+	my @_bad_arguments;
+        (ref($filter) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"filter\" (value was \"$filter\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_volume_mounts:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_volume_mounts');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_volume_mounts",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_volume_mounts',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_volume_mounts",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_volume_mounts',
+				       );
+    }
+}
+ 
+
+
 =head2 is_admin
 
   $return = $obj->is_admin($username)
@@ -5934,6 +6241,124 @@ app_ids has a value which is a reference to a list where each element is a strin
 
 a reference to a hash where the following keys are defined:
 app_ids has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 VolumeMount
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+host_dir has a value which is a string
+container_dir has a value which is a string
+read_only has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+host_dir has a value which is a string
+container_dir has a value which is a string
+read_only has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
+=head2 VolumeMountConfig
+
+=over 4
+
+
+
+=item Description
+
+for a module, app, and client group, set mount configurations
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+client_group has a value which is a string
+volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+client_group has a value which is a string
+volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
+
+
+=end text
+
+=back
+
+
+
+=head2 VolumeMountFilter
+
+=over 4
+
+
+
+=item Description
+
+Parameters for listing VolumeMountConfigs.  If nothing is set, everything is
+returned.  Otherwise, will return everything that matches all fields set.  For
+instance, if only module_name is set, will return everything for that module.  If
+they are all set, will return the specific module/app/client group config.  Returns
+nothing if no matches are found.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+client_group has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+client_group has a value which is a string
 
 
 =end text
