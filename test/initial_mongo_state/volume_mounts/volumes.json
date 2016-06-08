@@ -25,8 +25,8 @@
     "volume_mounts" : [
         {
             "host_dir" : "/home/wstester1",
-            "container_dir" : "/mnt/tmp",
-            "read_only" : 1
+            "container_dir" : "/mnt/tmp2",
+            "read_only" : 0
         }
     ]
 },
