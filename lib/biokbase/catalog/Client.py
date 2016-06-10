@@ -140,8 +140,20 @@ class Catalog(object):
            parameter "include_disabled" of type "boolean" (@range [0,1]),
            parameter "include_modules_with_no_name_set" of type "boolean"
            (@range [0,1])
-        :returns: instance of list of type "BasicModuleInfo" -> structure:
-           parameter "module_name" of String, parameter "git_url" of String
+        :returns: instance of list of type "BasicModuleInfo" (git_url is
+           always returned.  Every other field may or may not exist depending
+           on what has been registered or if certain registrations have
+           failed) -> structure: parameter "module_name" of String, parameter
+           "git_url" of String, parameter "language" of String, parameter
+           "dynamic_service" of type "boolean" (@range [0,1]), parameter
+           "owners" of list of String, parameter "dev" of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String, parameter "beta" of type "VersionCommitInfo" -> structure:
+           parameter "git_commit_hash" of String, parameter "release" of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String, parameter "released_version_list" of list of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String
         """
         return self._client.call_method(
             'Catalog.list_basic_module_info',

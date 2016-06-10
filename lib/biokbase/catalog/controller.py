@@ -656,7 +656,33 @@ class CatalogController:
             if params['owners']: # might want to filter out empty strings in the future
                 query['owners.kb_username']={'$in':params['owners']}
 
-        return self.db.find_basic_module_info(query)
+        modList = self.db.find_basic_module_info(query)
+
+        # now massage data into a nice format for the API
+        final_modList = []
+        for m in modList:
+            if 'owners' in m:
+                owner_list = []
+                for o in m['owners']:
+                    owner_list.append(o['kb_username'])
+                m['owners']=owner_list
+            else:
+                continue
+            if 'current_versions' in m:
+                for tag in ['dev', 'beta', 'release']:
+                    m[tag] = None
+                    if tag in m['current_versions']:
+                        m[tag] = m['current_versions'][tag]
+                del(m['current_versions'])
+            if 'info' in m:
+                if 'language' in m['info']:
+                    m['language'] = m['info']['language']
+                if 'dynamic_service' in  m['info']:
+                    m['dynamic_service'] = m['info']['dynamic_service']
+                del(m['info'])
+            final_modList.append(m)
+
+        return final_modList
 
 
 

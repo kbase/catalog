@@ -716,6 +716,15 @@ boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
+	language has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
+	owners has a value which is a reference to a list where each element is a string
+	dev has a value which is a Catalog.VersionCommitInfo
+	beta has a value which is a Catalog.VersionCommitInfo
+	release has a value which is a Catalog.VersionCommitInfo
+	released_version_list has a value which is a reference to a list where each element is a Catalog.VersionCommitInfo
+VersionCommitInfo is a reference to a hash where the following keys are defined:
+	git_commit_hash has a value which is a string
 
 </pre>
 
@@ -735,6 +744,15 @@ boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	git_url has a value which is a string
+	language has a value which is a string
+	dynamic_service has a value which is a Catalog.boolean
+	owners has a value which is a reference to a list where each element is a string
+	dev has a value which is a Catalog.VersionCommitInfo
+	beta has a value which is a Catalog.VersionCommitInfo
+	release has a value which is a Catalog.VersionCommitInfo
+	released_version_list has a value which is a reference to a list where each element is a Catalog.VersionCommitInfo
+VersionCommitInfo is a reference to a hash where the following keys are defined:
+	git_commit_hash has a value which is a string
 
 
 =end text
@@ -4775,7 +4793,7 @@ include_modules_with_no_name_set has a value which is a Catalog.boolean
 
 
 
-=head2 BasicModuleInfo
+=head2 VersionCommitInfo
 
 =over 4
 
@@ -4787,8 +4805,52 @@ include_modules_with_no_name_set has a value which is a Catalog.boolean
 
 <pre>
 a reference to a hash where the following keys are defined:
+git_commit_hash has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+git_commit_hash has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 BasicModuleInfo
+
+=over 4
+
+
+
+=item Description
+
+git_url is always returned.  Every other field
+may or may not exist depending on what has been registered or if
+certain registrations have failed
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 git_url has a value which is a string
+language has a value which is a string
+dynamic_service has a value which is a Catalog.boolean
+owners has a value which is a reference to a list where each element is a string
+dev has a value which is a Catalog.VersionCommitInfo
+beta has a value which is a Catalog.VersionCommitInfo
+release has a value which is a Catalog.VersionCommitInfo
+released_version_list has a value which is a reference to a list where each element is a Catalog.VersionCommitInfo
 
 </pre>
 
@@ -4799,6 +4861,13 @@ git_url has a value which is a string
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 git_url has a value which is a string
+language has a value which is a string
+dynamic_service has a value which is a Catalog.boolean
+owners has a value which is a reference to a list where each element is a string
+dev has a value which is a Catalog.VersionCommitInfo
+beta has a value which is a Catalog.VersionCommitInfo
+release has a value which is a Catalog.VersionCommitInfo
+released_version_list has a value which is a reference to a list where each element is a Catalog.VersionCommitInfo
 
 
 =end text

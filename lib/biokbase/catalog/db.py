@@ -727,7 +727,16 @@ class MongoCatalogDBI:
     #### LIST / SEARCH methods
 
     def find_basic_module_info(self, query):
-        return list(self.modules.find(query,{'module_name':1,'git_url':1,'_id':0}))
+        selection = {
+            '_id':0,
+            'module_name':1,
+            'git_url':1,
+            'info':1,
+            'current_versions':1,
+            'release_version_list':1,
+            'owners':1
+        }
+        return list(self.modules.find(query,selection))
 
     def find_current_versions_and_owners(self, query):
         result = list(self.modules.find(query,{'module_name':1,'module_name_lc':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))

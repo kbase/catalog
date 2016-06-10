@@ -87,16 +87,31 @@ module Catalog {
         boolean include_modules_with_no_name_set;
     } ListModuleParams;
 
+
+    typedef structure {
+        string git_commit_hash;
+    } VersionCommitInfo;
+
+    /*
+        git_url is always returned.  Every other field
+        may or may not exist depending on what has been registered or if
+        certain registrations have failed
+    */
     typedef structure {
         string module_name;
         string git_url;
-    } BasicModuleInfo;
-    /*
-    To Add:
-        string brief_description;
+
+        string language;
+        boolean dynamic_service;
+
         list <string> owners;
-        boolean is_released;
-    */
+
+        VersionCommitInfo dev;
+        VersionCommitInfo beta;
+        VersionCommitInfo release;
+
+        list <VersionCommitInfo> released_version_list;
+    } BasicModuleInfo;
 
     /* */
     funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
