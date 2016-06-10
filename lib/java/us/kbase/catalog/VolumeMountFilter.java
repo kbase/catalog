@@ -26,15 +26,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "app_id",
+    "function_name",
     "client_group"
 })
 public class VolumeMountFilter {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("app_id")
-    private String appId;
+    @JsonProperty("function_name")
+    private String functionName;
     @JsonProperty("client_group")
     private String clientGroup;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -54,18 +54,18 @@ public class VolumeMountFilter {
         return this;
     }
 
-    @JsonProperty("app_id")
-    public String getAppId() {
-        return appId;
+    @JsonProperty("function_name")
+    public String getFunctionName() {
+        return functionName;
     }
 
-    @JsonProperty("app_id")
-    public void setAppId(String appId) {
-        this.appId = appId;
+    @JsonProperty("function_name")
+    public void setFunctionName(String functionName) {
+        this.functionName = functionName;
     }
 
-    public VolumeMountFilter withAppId(String appId) {
-        this.appId = appId;
+    public VolumeMountFilter withFunctionName(String functionName) {
+        this.functionName = functionName;
         return this;
     }
 
@@ -96,7 +96,7 @@ public class VolumeMountFilter {
 
     @Override
     public String toString() {
-        return ((((((((("VolumeMountFilter"+" [moduleName=")+ moduleName)+", appId=")+ appId)+", clientGroup=")+ clientGroup)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("VolumeMountFilter"+" [moduleName=")+ moduleName)+", functionName=")+ functionName)+", clientGroup=")+ clientGroup)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

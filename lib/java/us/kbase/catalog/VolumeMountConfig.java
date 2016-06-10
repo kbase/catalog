@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: VolumeMountConfig</p>
  * <pre>
- * for a module, app, and client group, set mount configurations
+ * for a module, function, and client group, set mount configurations
  * </pre>
  * 
  */
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "app_id",
+    "function_name",
     "client_group",
     "volume_mounts"
 })
@@ -31,8 +31,8 @@ public class VolumeMountConfig {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("app_id")
-    private String appId;
+    @JsonProperty("function_name")
+    private String functionName;
     @JsonProperty("client_group")
     private String clientGroup;
     @JsonProperty("volume_mounts")
@@ -54,18 +54,18 @@ public class VolumeMountConfig {
         return this;
     }
 
-    @JsonProperty("app_id")
-    public String getAppId() {
-        return appId;
+    @JsonProperty("function_name")
+    public String getFunctionName() {
+        return functionName;
     }
 
-    @JsonProperty("app_id")
-    public void setAppId(String appId) {
-        this.appId = appId;
+    @JsonProperty("function_name")
+    public void setFunctionName(String functionName) {
+        this.functionName = functionName;
     }
 
-    public VolumeMountConfig withAppId(String appId) {
-        this.appId = appId;
+    public VolumeMountConfig withFunctionName(String functionName) {
+        this.functionName = functionName;
         return this;
     }
 
@@ -111,7 +111,7 @@ public class VolumeMountConfig {
 
     @Override
     public String toString() {
-        return ((((((((((("VolumeMountConfig"+" [moduleName=")+ moduleName)+", appId=")+ appId)+", clientGroup=")+ clientGroup)+", volumeMounts=")+ volumeMounts)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((("VolumeMountConfig"+" [moduleName=")+ moduleName)+", functionName=")+ functionName)+", clientGroup=")+ clientGroup)+", volumeMounts=")+ volumeMounts)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

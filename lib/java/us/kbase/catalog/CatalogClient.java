@@ -827,7 +827,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: remove_volume_mount</p>
      * <pre>
-     * must specify module_name, app_id, client_group and this method will delete any configured mounts
+     * must specify module_name, function_name, client_group and this method will delete any configured mounts
      * </pre>
      * @param   config   instance of type {@link us.kbase.catalog.VolumeMountConfig VolumeMountConfig}
      * @throws IOException if an IO exception occurs

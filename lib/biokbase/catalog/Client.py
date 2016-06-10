@@ -238,21 +238,33 @@ class Catalog(object):
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
            "compilation_report" of type "CompilationReport" -> structure:
-           parameter "sdk_version" of String, parameter "sdk_git_commit" of
-           String, parameter "impl_file_path" of String, parameter
-           "function_places" of mapping from String to type "FunctionPlace"
-           -> structure: parameter "start_line" of Long, parameter "end_line"
-           of Long, parameter "beta" of type "ModuleVersionInfo" (data_folder
-           - optional field representing unique module name (like
-           <module_name> transformed to lower cases) used for reference data
-           purposes (see description for data_version field). This value will
-           be treated as part of file system path relative to the base that
-           comes from the config (currently base is supposed to be "/kb/data"
-           defined in "ref-data-base" parameter). data_version - optional
-           field, reflects version of data defined in kbase.yml (see
-           "data-version" key). In case this field is set data folder with
-           path "/kb/data/<data_folder>/<data_version>" should be initialized
-           by running docker image with "init" target from catalog. And later
+           parameter "module_name" of String, parameter "sdk_version" of
+           String, parameter "sdk_git_commit" of String, parameter
+           "impl_file_path" of String, parameter "function_places" of mapping
+           from String to type "FunctionPlace" -> structure: parameter
+           "start_line" of Long, parameter "end_line" of Long, parameter
+           "functions" of mapping from String to type "Function" ->
+           structure: parameter "name" of String, parameter "comment" of
+           String, parameter "place" of type "FunctionPlace" -> structure:
+           parameter "start_line" of Long, parameter "end_line" of Long,
+           parameter "input" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "output" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "spec_files" of list of type "SpecFile" -> structure:
+           parameter "file_name" of String, parameter "content" of String,
+           parameter "is_main" of type "boolean" (@range [0,1]), parameter
+           "beta" of type "ModuleVersionInfo" (data_folder - optional field
+           representing unique module name (like <module_name> transformed to
+           lower cases) used for reference data purposes (see description for
+           data_version field). This value will be treated as part of file
+           system path relative to the base that comes from the config
+           (currently base is supposed to be "/kb/data" defined in
+           "ref-data-base" parameter). data_version - optional field,
+           reflects version of data defined in kbase.yml (see "data-version"
+           key). In case this field is set data folder with path
+           "/kb/data/<data_folder>/<data_version>" should be initialized by
+           running docker image with "init" target from catalog. And later
            when async methods are run it should be mounted on AWE worker
            machine into "/data" folder inside docker container by execution
            engine.) -> structure: parameter "timestamp" of Long, parameter
@@ -264,21 +276,33 @@ class Catalog(object):
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
            "compilation_report" of type "CompilationReport" -> structure:
-           parameter "sdk_version" of String, parameter "sdk_git_commit" of
-           String, parameter "impl_file_path" of String, parameter
-           "function_places" of mapping from String to type "FunctionPlace"
-           -> structure: parameter "start_line" of Long, parameter "end_line"
-           of Long, parameter "dev" of type "ModuleVersionInfo" (data_folder
-           - optional field representing unique module name (like
-           <module_name> transformed to lower cases) used for reference data
-           purposes (see description for data_version field). This value will
-           be treated as part of file system path relative to the base that
-           comes from the config (currently base is supposed to be "/kb/data"
-           defined in "ref-data-base" parameter). data_version - optional
-           field, reflects version of data defined in kbase.yml (see
-           "data-version" key). In case this field is set data folder with
-           path "/kb/data/<data_folder>/<data_version>" should be initialized
-           by running docker image with "init" target from catalog. And later
+           parameter "module_name" of String, parameter "sdk_version" of
+           String, parameter "sdk_git_commit" of String, parameter
+           "impl_file_path" of String, parameter "function_places" of mapping
+           from String to type "FunctionPlace" -> structure: parameter
+           "start_line" of Long, parameter "end_line" of Long, parameter
+           "functions" of mapping from String to type "Function" ->
+           structure: parameter "name" of String, parameter "comment" of
+           String, parameter "place" of type "FunctionPlace" -> structure:
+           parameter "start_line" of Long, parameter "end_line" of Long,
+           parameter "input" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "output" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "spec_files" of list of type "SpecFile" -> structure:
+           parameter "file_name" of String, parameter "content" of String,
+           parameter "is_main" of type "boolean" (@range [0,1]), parameter
+           "dev" of type "ModuleVersionInfo" (data_folder - optional field
+           representing unique module name (like <module_name> transformed to
+           lower cases) used for reference data purposes (see description for
+           data_version field). This value will be treated as part of file
+           system path relative to the base that comes from the config
+           (currently base is supposed to be "/kb/data" defined in
+           "ref-data-base" parameter). data_version - optional field,
+           reflects version of data defined in kbase.yml (see "data-version"
+           key). In case this field is set data folder with path
+           "/kb/data/<data_folder>/<data_version>" should be initialized by
+           running docker image with "init" target from catalog. And later
            when async methods are run it should be mounted on AWE worker
            machine into "/data" folder inside docker container by execution
            engine.) -> structure: parameter "timestamp" of Long, parameter
@@ -290,11 +314,22 @@ class Catalog(object):
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
            "compilation_report" of type "CompilationReport" -> structure:
-           parameter "sdk_version" of String, parameter "sdk_git_commit" of
-           String, parameter "impl_file_path" of String, parameter
-           "function_places" of mapping from String to type "FunctionPlace"
-           -> structure: parameter "start_line" of Long, parameter "end_line"
-           of Long
+           parameter "module_name" of String, parameter "sdk_version" of
+           String, parameter "sdk_git_commit" of String, parameter
+           "impl_file_path" of String, parameter "function_places" of mapping
+           from String to type "FunctionPlace" -> structure: parameter
+           "start_line" of Long, parameter "end_line" of Long, parameter
+           "functions" of mapping from String to type "Function" ->
+           structure: parameter "name" of String, parameter "comment" of
+           String, parameter "place" of type "FunctionPlace" -> structure:
+           parameter "start_line" of Long, parameter "end_line" of Long,
+           parameter "input" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "output" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "spec_files" of list of type "SpecFile" -> structure:
+           parameter "file_name" of String, parameter "content" of String,
+           parameter "is_main" of type "boolean" (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.get_module_info',
@@ -341,11 +376,22 @@ class Catalog(object):
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
            "compilation_report" of type "CompilationReport" -> structure:
-           parameter "sdk_version" of String, parameter "sdk_git_commit" of
-           String, parameter "impl_file_path" of String, parameter
-           "function_places" of mapping from String to type "FunctionPlace"
-           -> structure: parameter "start_line" of Long, parameter "end_line"
-           of Long
+           parameter "module_name" of String, parameter "sdk_version" of
+           String, parameter "sdk_git_commit" of String, parameter
+           "impl_file_path" of String, parameter "function_places" of mapping
+           from String to type "FunctionPlace" -> structure: parameter
+           "start_line" of Long, parameter "end_line" of Long, parameter
+           "functions" of mapping from String to type "Function" ->
+           structure: parameter "name" of String, parameter "comment" of
+           String, parameter "place" of type "FunctionPlace" -> structure:
+           parameter "start_line" of Long, parameter "end_line" of Long,
+           parameter "input" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "output" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "spec_files" of list of type "SpecFile" -> structure:
+           parameter "file_name" of String, parameter "content" of String,
+           parameter "is_main" of type "boolean" (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.get_version_info',
@@ -380,11 +426,22 @@ class Catalog(object):
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
            "compilation_report" of type "CompilationReport" -> structure:
-           parameter "sdk_version" of String, parameter "sdk_git_commit" of
-           String, parameter "impl_file_path" of String, parameter
-           "function_places" of mapping from String to type "FunctionPlace"
-           -> structure: parameter "start_line" of Long, parameter "end_line"
-           of Long
+           parameter "module_name" of String, parameter "sdk_version" of
+           String, parameter "sdk_git_commit" of String, parameter
+           "impl_file_path" of String, parameter "function_places" of mapping
+           from String to type "FunctionPlace" -> structure: parameter
+           "start_line" of Long, parameter "end_line" of Long, parameter
+           "functions" of mapping from String to type "Function" ->
+           structure: parameter "name" of String, parameter "comment" of
+           String, parameter "place" of type "FunctionPlace" -> structure:
+           parameter "start_line" of Long, parameter "end_line" of Long,
+           parameter "input" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "output" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "spec_files" of list of type "SpecFile" -> structure:
+           parameter "file_name" of String, parameter "content" of String,
+           parameter "is_main" of type "boolean" (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.list_released_module_versions',
@@ -456,11 +513,23 @@ class Catalog(object):
            "local_function_ids" of list of String, parameter
            "docker_img_name" of String, parameter "data_folder" of String,
            parameter "data_version" of String, parameter "compilation_report"
-           of type "CompilationReport" -> structure: parameter "sdk_version"
-           of String, parameter "sdk_git_commit" of String, parameter
-           "impl_file_path" of String, parameter "function_places" of mapping
-           from String to type "FunctionPlace" -> structure: parameter
-           "start_line" of Long, parameter "end_line" of Long
+           of type "CompilationReport" -> structure: parameter "module_name"
+           of String, parameter "sdk_version" of String, parameter
+           "sdk_git_commit" of String, parameter "impl_file_path" of String,
+           parameter "function_places" of mapping from String to type
+           "FunctionPlace" -> structure: parameter "start_line" of Long,
+           parameter "end_line" of Long, parameter "functions" of mapping
+           from String to type "Function" -> structure: parameter "name" of
+           String, parameter "comment" of String, parameter "place" of type
+           "FunctionPlace" -> structure: parameter "start_line" of Long,
+           parameter "end_line" of Long, parameter "input" of list of type
+           "Parameter" -> structure: parameter "type" of String, parameter
+           "comment" of String, parameter "output" of list of type
+           "Parameter" -> structure: parameter "type" of String, parameter
+           "comment" of String, parameter "spec_files" of list of type
+           "SpecFile" -> structure: parameter "file_name" of String,
+           parameter "content" of String, parameter "is_main" of type
+           "boolean" (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.get_module_version',
@@ -845,12 +914,13 @@ class Catalog(object):
         """
         must specify all properties of the VolumeMountConfig
         :param config: instance of type "VolumeMountConfig" (for a module,
-           app, and client group, set mount configurations) -> structure:
-           parameter "module_name" of String, parameter "app_id" of String,
-           parameter "client_group" of String, parameter "volume_mounts" of
-           list of type "VolumeMount" -> structure: parameter "host_dir" of
-           String, parameter "container_dir" of String, parameter "read_only"
-           of type "boolean" (@range [0,1])
+           function, and client group, set mount configurations) ->
+           structure: parameter "module_name" of String, parameter
+           "function_name" of String, parameter "client_group" of String,
+           parameter "volume_mounts" of list of type "VolumeMount" ->
+           structure: parameter "host_dir" of String, parameter
+           "container_dir" of String, parameter "read_only" of type "boolean"
+           (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.set_volume_mount',
@@ -858,14 +928,15 @@ class Catalog(object):
 
     def remove_volume_mount(self, config, context=None):
         """
-        must specify module_name, app_id, client_group and this method will delete any configured mounts
+        must specify module_name, function_name, client_group and this method will delete any configured mounts
         :param config: instance of type "VolumeMountConfig" (for a module,
-           app, and client group, set mount configurations) -> structure:
-           parameter "module_name" of String, parameter "app_id" of String,
-           parameter "client_group" of String, parameter "volume_mounts" of
-           list of type "VolumeMount" -> structure: parameter "host_dir" of
-           String, parameter "container_dir" of String, parameter "read_only"
-           of type "boolean" (@range [0,1])
+           function, and client group, set mount configurations) ->
+           structure: parameter "module_name" of String, parameter
+           "function_name" of String, parameter "client_group" of String,
+           parameter "volume_mounts" of list of type "VolumeMount" ->
+           structure: parameter "host_dir" of String, parameter
+           "container_dir" of String, parameter "read_only" of type "boolean"
+           (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.remove_volume_mount',
@@ -880,15 +951,16 @@ class Catalog(object):
            everything for that module.  If they are all set, will return the
            specific module/app/client group config.  Returns nothing if no
            matches are found.) -> structure: parameter "module_name" of
-           String, parameter "app_id" of String, parameter "client_group" of
-           String
+           String, parameter "function_name" of String, parameter
+           "client_group" of String
         :returns: instance of list of type "VolumeMountConfig" (for a module,
-           app, and client group, set mount configurations) -> structure:
-           parameter "module_name" of String, parameter "app_id" of String,
-           parameter "client_group" of String, parameter "volume_mounts" of
-           list of type "VolumeMount" -> structure: parameter "host_dir" of
-           String, parameter "container_dir" of String, parameter "read_only"
-           of type "boolean" (@range [0,1])
+           function, and client group, set mount configurations) ->
+           structure: parameter "module_name" of String, parameter
+           "function_name" of String, parameter "client_group" of String,
+           parameter "volume_mounts" of list of type "VolumeMount" ->
+           structure: parameter "host_dir" of String, parameter
+           "container_dir" of String, parameter "read_only" of type "boolean"
+           (@range [0,1])
         """
         return self._client.call_method(
             'Catalog.list_volume_mounts',

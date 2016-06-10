@@ -1277,13 +1277,29 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1320,13 +1336,29 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 
 =end text
@@ -1420,13 +1452,29 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1457,13 +1505,29 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 
 =end text
@@ -1554,13 +1618,29 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1588,13 +1668,29 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 
 =end text
@@ -1693,13 +1789,29 @@ ModuleVersion is a reference to a hash where the following keys are defined:
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 </pre>
 
@@ -1735,13 +1847,29 @@ ModuleVersion is a reference to a hash where the following keys are defined:
 	data_version has a value which is a string
 	compilation_report has a value which is a Catalog.CompilationReport
 CompilationReport is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
 	function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+	functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+	spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 FunctionPlace is a reference to a hash where the following keys are defined:
 	start_line has a value which is an int
 	end_line has a value which is an int
+Function is a reference to a hash where the following keys are defined:
+	name has a value which is a string
+	comment has a value which is a string
+	place has a value which is a Catalog.FunctionPlace
+	input has a value which is a reference to a list where each element is a Catalog.Parameter
+	output has a value which is a reference to a list where each element is a Catalog.Parameter
+Parameter is a reference to a hash where the following keys are defined:
+	type has a value which is a string
+	comment has a value which is a string
+SpecFile is a reference to a hash where the following keys are defined:
+	file_name has a value which is a string
+	content has a value which is a string
+	is_main has a value which is a Catalog.boolean
 
 
 =end text
@@ -3981,7 +4109,7 @@ AppClientGroup is a reference to a hash where the following keys are defined:
 $config is a Catalog.VolumeMountConfig
 VolumeMountConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 VolumeMount is a reference to a hash where the following keys are defined:
@@ -3999,7 +4127,7 @@ boolean is an int
 $config is a Catalog.VolumeMountConfig
 VolumeMountConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 VolumeMount is a reference to a hash where the following keys are defined:
@@ -4080,7 +4208,7 @@ must specify all properties of the VolumeMountConfig
 $config is a Catalog.VolumeMountConfig
 VolumeMountConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 VolumeMount is a reference to a hash where the following keys are defined:
@@ -4098,7 +4226,7 @@ boolean is an int
 $config is a Catalog.VolumeMountConfig
 VolumeMountConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 VolumeMount is a reference to a hash where the following keys are defined:
@@ -4112,7 +4240,7 @@ boolean is an int
 
 =item Description
 
-must specify module_name, app_id, client_group and this method will delete any configured mounts
+must specify module_name, function_name, client_group and this method will delete any configured mounts
 
 =back
 
@@ -4180,11 +4308,11 @@ $filter is a Catalog.VolumeMountFilter
 $volume_mount_configs is a reference to a list where each element is a Catalog.VolumeMountConfig
 VolumeMountFilter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 VolumeMountConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 VolumeMount is a reference to a hash where the following keys are defined:
@@ -4203,11 +4331,11 @@ $filter is a Catalog.VolumeMountFilter
 $volume_mount_configs is a reference to a list where each element is a Catalog.VolumeMountConfig
 VolumeMountFilter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 VolumeMountConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	app_id has a value which is a string
+	function_name has a value which is a string
 	client_group has a value which is a string
 	volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 VolumeMount is a reference to a hash where the following keys are defined:
@@ -4854,6 +4982,110 @@ end_line has a value which is an int
 
 
 
+=head2 Parameter
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+type has a value which is a string
+comment has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+type has a value which is a string
+comment has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 Function
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+name has a value which is a string
+comment has a value which is a string
+place has a value which is a Catalog.FunctionPlace
+input has a value which is a reference to a list where each element is a Catalog.Parameter
+output has a value which is a reference to a list where each element is a Catalog.Parameter
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+name has a value which is a string
+comment has a value which is a string
+place has a value which is a Catalog.FunctionPlace
+input has a value which is a reference to a list where each element is a Catalog.Parameter
+output has a value which is a reference to a list where each element is a Catalog.Parameter
+
+
+=end text
+
+=back
+
+
+
+=head2 SpecFile
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+file_name has a value which is a string
+content has a value which is a string
+is_main has a value which is a Catalog.boolean
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+file_name has a value which is a string
+content has a value which is a string
+is_main has a value which is a Catalog.boolean
+
+
+=end text
+
+=back
+
+
+
 =head2 CompilationReport
 
 =over 4
@@ -4866,10 +5098,13 @@ end_line has a value which is an int
 
 <pre>
 a reference to a hash where the following keys are defined:
+module_name has a value which is a string
 sdk_version has a value which is a string
 sdk_git_commit has a value which is a string
 impl_file_path has a value which is a string
 function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 
 </pre>
 
@@ -4878,10 +5113,13 @@ function_places has a value which is a reference to a hash where the key is a st
 =begin text
 
 a reference to a hash where the following keys are defined:
+module_name has a value which is a string
 sdk_version has a value which is a string
 sdk_git_commit has a value which is a string
 impl_file_path has a value which is a string
 function_places has a value which is a reference to a hash where the key is a string and the value is a Catalog.FunctionPlace
+functions has a value which is a reference to a hash where the key is a string and the value is a Catalog.Function
+spec_files has a value which is a reference to a list where each element is a Catalog.SpecFile
 
 
 =end text
@@ -6291,7 +6529,7 @@ read_only has a value which is a Catalog.boolean
 
 =item Description
 
-for a module, app, and client group, set mount configurations
+for a module, function, and client group, set mount configurations
 
 
 =item Definition
@@ -6301,7 +6539,7 @@ for a module, app, and client group, set mount configurations
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
-app_id has a value which is a string
+function_name has a value which is a string
 client_group has a value which is a string
 volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 
@@ -6313,7 +6551,7 @@ volume_mounts has a value which is a reference to a list where each element is a
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
-app_id has a value which is a string
+function_name has a value which is a string
 client_group has a value which is a string
 volume_mounts has a value which is a reference to a list where each element is a Catalog.VolumeMount
 
@@ -6346,7 +6584,7 @@ nothing if no matches are found.
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
-app_id has a value which is a string
+function_name has a value which is a string
 client_group has a value which is a string
 
 </pre>
@@ -6357,7 +6595,7 @@ client_group has a value which is a string
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
-app_id has a value which is a string
+function_name has a value which is a string
 client_group has a value which is a string
 
 

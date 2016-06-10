@@ -717,10 +717,10 @@ module Catalog {
         boolean read_only;
     } VolumeMount;
 
-    /* for a module, app, and client group, set mount configurations */
+    /* for a module, function, and client group, set mount configurations */
     typedef structure {
         string module_name;
-        string app_id;
+        string function_name;
         string client_group;
 
         list <VolumeMount> volume_mounts;
@@ -729,7 +729,7 @@ module Catalog {
     /* must specify all properties of the VolumeMountConfig */
     funcdef set_volume_mount(VolumeMountConfig config) returns () authentication required;
 
-    /* must specify module_name, app_id, client_group and this method will delete any configured mounts */
+    /* must specify module_name, function_name, client_group and this method will delete any configured mounts */
     funcdef remove_volume_mount(VolumeMountConfig config) returns () authentication required;
 
     /*
@@ -741,7 +741,7 @@ module Catalog {
     */
     typedef structure {
         string module_name;
-        string app_id;
+        string function_name;
         string client_group;
     } VolumeMountFilter;
     

@@ -235,7 +235,7 @@ class MongoCatalogDBI:
 
         self.volume_mounts.ensure_index([('client_group', ASCENDING), 
                                             ('module_name_lc', ASCENDING),
-                                            ('app_id', ASCENDING)], 
+                                            ('function_name', ASCENDING)], 
                                            unique=True, sparse=False)
 
 
@@ -1004,7 +1004,7 @@ class MongoCatalogDBI:
         return self._check_update_result(self.volume_mounts.update(
                 {
                     'module_name_lc':volume_mount['module_name_lc'],
-                    'app_id':volume_mount['app_id'],
+                    'function_name':volume_mount['function_name'],
                     'client_group':volume_mount['client_group']
                 },
                 volume_mount,
@@ -1016,7 +1016,7 @@ class MongoCatalogDBI:
         return self._check_update_result(self.volume_mounts.remove(
                 {
                     'module_name_lc':volume_mount['module_name_lc'],
-                    'app_id':volume_mount['app_id'],
+                    'function_name':volume_mount['function_name'],
                     'client_group':volume_mount['client_group']
                 }))
 

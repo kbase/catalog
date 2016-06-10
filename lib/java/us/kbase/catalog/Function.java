@@ -40,9 +40,9 @@ public class Function {
     @JsonProperty("place")
     private FunctionPlace place;
     @JsonProperty("input")
-    private List<us.kbase.catalog.Parameter> input;
+    private List<Parameter> input;
     @JsonProperty("output")
-    private List<us.kbase.catalog.Parameter> output;
+    private List<Parameter> output;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("name")
@@ -101,31 +101,31 @@ public class Function {
     }
 
     @JsonProperty("input")
-    public List<us.kbase.catalog.Parameter> getInput() {
+    public List<Parameter> getInput() {
         return input;
     }
 
     @JsonProperty("input")
-    public void setInput(List<us.kbase.catalog.Parameter> input) {
+    public void setInput(List<Parameter> input) {
         this.input = input;
     }
 
-    public Function withInput(List<us.kbase.catalog.Parameter> input) {
+    public Function withInput(List<Parameter> input) {
         this.input = input;
         return this;
     }
 
     @JsonProperty("output")
-    public List<us.kbase.catalog.Parameter> getOutput() {
+    public List<Parameter> getOutput() {
         return output;
     }
 
     @JsonProperty("output")
-    public void setOutput(List<us.kbase.catalog.Parameter> output) {
+    public void setOutput(List<Parameter> output) {
         this.output = output;
     }
 
-    public Function withOutput(List<us.kbase.catalog.Parameter> output) {
+    public Function withOutput(List<Parameter> output) {
         this.output = output;
         return this;
     }
