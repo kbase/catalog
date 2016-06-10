@@ -164,7 +164,7 @@ class ClientGroupMethodsTest(unittest.TestCase):
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'module_name':'VolmountModTest1' })[0]
         self.assertEqual(len(vol_mounts),1)
         self.assertEqual(vol_mounts[0]['module_name'],'VolMountModTest1')
-        self.assertEqual(vol_mounts[0]['app_id'],'func1')
+        self.assertEqual(vol_mounts[0]['function_name'],'func1')
         self.assertEqual(vol_mounts[0]['client_group'],'G1')
         self.assertEqual(len(vol_mounts[0]['volume_mounts']), 2)
         self.assertEqual(vol_mounts[0]['volume_mounts'][0]['host_dir'], '/home/wstester1')
@@ -174,19 +174,19 @@ class ClientGroupMethodsTest(unittest.TestCase):
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'module_name':'VolMountModTest2' })[0]
         self.assertEqual(len(vol_mounts),3)
 
-        vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'app_id':'func1' })[0]
+        vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'function_name':'func1' })[0]
         self.assertEqual(len(vol_mounts),3)
 
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'client_group':'G3' })[0]
         self.assertEqual(len(vol_mounts),2)
 
-        vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'module_name':'VolMountModTest2', 'app_id':'func1' })[0]
+        vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'module_name':'VolMountModTest2', 'function_name':'func1' })[0]
         self.assertEqual(len(vol_mounts),2)
 
-        vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'module_name':'VolMountModTest2', 'app_id':'func1', 'client_group':'G2' })[0]
+        vol_mounts = self.catalog.list_volume_mounts(adminCtx, { 'module_name':'VolMountModTest2', 'function_name':'func1', 'client_group':'G2' })[0]
         self.assertEqual(len(vol_mounts),1)
         self.assertEqual(vol_mounts[0]['module_name'],'VolMountModTest2')
-        self.assertEqual(vol_mounts[0]['app_id'],'func1')
+        self.assertEqual(vol_mounts[0]['function_name'],'func1')
         self.assertEqual(vol_mounts[0]['client_group'],'G2')
         self.assertEqual(len(vol_mounts[0]['volume_mounts']), 1)
         self.assertEqual(vol_mounts[0]['volume_mounts'][0]['host_dir'], '/home/wstester1')
@@ -199,16 +199,19 @@ class ClientGroupMethodsTest(unittest.TestCase):
             'module_name parameter field must be a string');
 
         with self.assertRaises(ValueError) as e:
-            self.catalog.list_volume_mounts(adminCtx, { 'app_id': [] })
+            self.catalog.list_volume_mounts(adminCtx, { 'function_name': [] })
         self.assertEqual(str(e.exception),
-            'app_id parameter field must be a string');
+            'function_name parameter field must be a string');
 
         with self.assertRaises(ValueError) as e:
             self.catalog.list_volume_mounts(adminCtx, { 'client_group': [] })
         self.assertEqual(str(e.exception),
             'client_group parameter field must be a string');
 
-
+        with self.assertRaises(ValueError) as e:
+            self.catalog.list_volume_mounts(adminCtx, { 'app_id': 'my_app' })
+        self.assertEqual(str(e.exception),
+            'cannot filter by app_id - use function_name instead');
 
         # try to add a volume mount, keep adding things till we get a success
         volume_mount_config = {}
@@ -227,14 +230,14 @@ class ClientGroupMethodsTest(unittest.TestCase):
         with self.assertRaises(ValueError) as e:
             self.catalog.set_volume_mount(adminCtx, volume_mount_config)
         self.assertEqual(str(e.exception),
-            'app_id parameter field is required');
+            'function_name parameter field is required');
 
-        volume_mount_config['app_id'] = []
+        volume_mount_config['function_name'] = []
         with self.assertRaises(ValueError) as e:
             self.catalog.set_volume_mount(adminCtx, volume_mount_config)
         self.assertEqual(str(e.exception),
-            'app_id parameter field must be a string');
-        volume_mount_config['app_id'] = 'my_app'
+            'function_name parameter field must be a string');
+        volume_mount_config['function_name'] = 'my_app'
 
         with self.assertRaises(ValueError) as e:
             self.catalog.set_volume_mount(adminCtx, volume_mount_config)
@@ -302,7 +305,7 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
         volume_mount_config = {
             'module_name': 'tester2',
-            'app_id':'my_app',
+            'function_name':'my_app',
             'client_group':'g23123',
             'volume_mounts' : [
             {
@@ -319,7 +322,7 @@ class ClientGroupMethodsTest(unittest.TestCase):
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, filter)[0]
         self.assertEqual(len(vol_mounts),1)
         self.assertEqual(vol_mounts[0]['module_name'],'tester2')
-        self.assertEqual(vol_mounts[0]['app_id'],'my_app')
+        self.assertEqual(vol_mounts[0]['function_name'],'my_app')
         self.assertEqual(vol_mounts[0]['client_group'],'g23123')
         self.assertEqual(len(vol_mounts[0]['volume_mounts']), 1)
         self.assertEqual(vol_mounts[0]['volume_mounts'][0]['host_dir'], '/tmp')
@@ -332,7 +335,7 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
         volume_mount_config = {
             'module_name': 'tester2',
-            'app_id':'my_app',
+            'function_name':'my_app',
             'client_group':'g23123',
             'volume_mounts' : []
         }
@@ -342,7 +345,7 @@ class ClientGroupMethodsTest(unittest.TestCase):
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, filter)[0]
         self.assertEqual(len(vol_mounts),1)
         self.assertEqual(vol_mounts[0]['module_name'],'tester2')
-        self.assertEqual(vol_mounts[0]['app_id'],'my_app')
+        self.assertEqual(vol_mounts[0]['function_name'],'my_app')
         self.assertEqual(vol_mounts[0]['client_group'],'g23123')
         self.assertEqual(len(vol_mounts[0]['volume_mounts']), 0)
 
@@ -361,18 +364,18 @@ class ClientGroupMethodsTest(unittest.TestCase):
         with self.assertRaises(ValueError) as e:
             self.catalog.remove_volume_mount(adminCtx, {'module_name':'Tester2'})
         self.assertEqual(str(e.exception),
-            'app_id parameter field is required');
+            'function_name parameter field is required');
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, {})[0]
         self.assertEqual(len(vol_mounts),5)
 
         with self.assertRaises(ValueError) as e:
-            self.catalog.remove_volume_mount(adminCtx, {'module_name':'Tester2', 'app_id':'my_app'})
+            self.catalog.remove_volume_mount(adminCtx, {'module_name':'Tester2', 'function_name':'my_app'})
         self.assertEqual(str(e.exception),
             'client_group parameter field is required');
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, {})[0]
         self.assertEqual(len(vol_mounts),5)
 
-        self.catalog.remove_volume_mount(adminCtx, {'module_name':'Tester2', 'app_id':'my_app', 'client_group':'g23123'})
+        self.catalog.remove_volume_mount(adminCtx, {'module_name':'Tester2', 'function_name':'my_app', 'client_group':'g23123'})
 
         vol_mounts = self.catalog.list_volume_mounts(adminCtx, {})[0]
         self.assertEqual(len(vol_mounts),4)

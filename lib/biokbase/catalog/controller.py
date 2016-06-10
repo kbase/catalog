@@ -1238,11 +1238,11 @@ class CatalogController:
             raise ValueError('module_name parameter field must be a string')
         record['module_name'] = config['module_name'].strip()
 
-        if 'app_id' not in config:
-            raise ValueError('app_id parameter field is required')
-        if not isinstance(config['app_id'],basestring):
-            raise ValueError('app_id parameter field must be a string')
-        record['app_id'] = config['app_id'].strip()
+        if 'function_name' not in config:
+            raise ValueError('function_name parameter field is required')
+        if not isinstance(config['function_name'],basestring):
+            raise ValueError('function_name parameter field must be a string')
+        record['function_name'] = config['function_name'].strip()
 
         if 'client_group' not in config:
             raise ValueError('client_group parameter field is required')
@@ -1302,11 +1302,11 @@ class CatalogController:
             raise ValueError('module_name parameter field must be a string')
         selection['module_name'] = config['module_name'].strip()
 
-        if 'app_id' not in config:
-            raise ValueError('app_id parameter field is required')
-        if not isinstance(config['app_id'],basestring):
-            raise ValueError('app_id parameter field must be a string')
-        selection['app_id'] = config['app_id'].strip()
+        if 'function_name' not in config:
+            raise ValueError('function_name parameter field is required')
+        if not isinstance(config['function_name'],basestring):
+            raise ValueError('function_name parameter field must be a string')
+        selection['function_name'] = config['function_name'].strip()
 
         if 'client_group' not in config:
             raise ValueError('client_group parameter field is required')
@@ -1331,15 +1331,19 @@ class CatalogController:
                     raise ValueError('module_name parameter field must be a string')
                 processed_filter['module_name'] = filter['module_name'].strip()
 
-            if 'app_id' in filter:
-                if not isinstance(filter['app_id'],basestring):
-                    raise ValueError('app_id parameter field must be a string')
-                processed_filter['app_id'] = filter['app_id'].strip()
+            if 'function_name' in filter:
+                if not isinstance(filter['function_name'],basestring):
+                    raise ValueError('function_name parameter field must be a string')
+                processed_filter['function_name'] = filter['function_name'].strip()
 
             if 'client_group' in filter:
                 if not isinstance(filter['client_group'],basestring):
                     raise ValueError('client_group parameter field must be a string')
                 processed_filter['client_group'] = filter['client_group'].strip()
+
+            if 'app_id' in filter:
+                raise ValueError('cannot filter by app_id - use function_name instead')
+
 
         return self.db.list_volume_mounts(processed_filter)
 
