@@ -1211,26 +1211,36 @@ class CatalogController:
 
 
 
-
-    def set_client_group(self, username, params):
+    def set_client_group_config(self, username, config):
 
         if not self.is_admin(username):
             raise ValueError('You do not have permission to set execution client groups.')
 
-        if not 'app_id' in params:
-            raise ValueError('You must set the "app_id" parameter to [module_name]/[app_id]')
+        record = {}
 
-        client_groups = []
-        if 'client_groups' in params:
-            if not isinstance(params['client_groups'], list):
-                raise ValueError('client_groups parameter must be a list')
-            for c in params['client_groups']:
-                #if not isinstance(c, str):
-                #    raise ValueError('client_groups parameter must be a list of strings')
-                # other client group checks should go here if needed
-                client_groups.append(c)
+        if 'module_name' not in config:
+            raise ValueError('module_name parameter field is required')
+        if not isinstance(config['module_name'],basestring):
+            raise ValueError('module_name parameter field must be a string')
+        record['module_name'] = config['module_name'].strip()
 
-        error = self.db.set_client_group(params['app_id'], client_groups)
+        if 'function_name' not in config:
+            raise ValueError('function_name parameter field is required')
+        if not isinstance(config['function_name'],basestring):
+            raise ValueError('function_name parameter field must be a string')
+        record['function_name'] = config['function_name'].strip()
+
+        if 'client_groups' not in config:
+            config['client_groups'] = []
+        if not isinstance(config['client_groups'],list):
+            raise ValueError('client_groups parameter field must be a list')
+
+        for c in config['client_groups']:
+            if not isinstance(c,basestring):
+                raise ValueError('client_groups must be a list of strings') 
+        record['client_groups'] = config['client_groups']
+
+        error = self.db.set_client_group_config(record)
         if error is not None:
             raise ValueError('Update probably failed, blame mongo: update operation returned: '+error)
 
@@ -1247,7 +1257,14 @@ class CatalogController:
                 app_ids.append(a)
             if len(app_ids) == 0 :
                 app_ids = None
-        return self.db.list_client_groups(app_ids)
+        groups = self.db.list_client_groups(app_ids)
+        print('llll')
+        pprint(groups)
+        # we have to munge the group data to the old structure
+        for g in groups:
+            g['app_id'] = g['module_name'].lower() + '/' + g['function_name']
+
+        return groups
 
 
     def set_volume_mount(self, username, config):

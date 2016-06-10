@@ -3937,91 +3937,6 @@ GetExecRawStatsParams is a reference to a hash where the following keys are defi
  
 
 
-=head2 set_client_group
-
-  $obj->set_client_group($group)
-
-=over 4
-
-=item Parameter and return types
-
-=begin html
-
-<pre>
-$group is a Catalog.AppClientGroup
-AppClientGroup is a reference to a hash where the following keys are defined:
-	app_id has a value which is a string
-	client_groups has a value which is a reference to a list where each element is a string
-
-</pre>
-
-=end html
-
-=begin text
-
-$group is a Catalog.AppClientGroup
-AppClientGroup is a reference to a hash where the following keys are defined:
-	app_id has a value which is a string
-	client_groups has a value which is a reference to a list where each element is a string
-
-
-=end text
-
-=item Description
-
-
-
-=back
-
-=cut
-
- sub set_client_group
-{
-    my($self, @args) = @_;
-
-# Authentication: required
-
-    if ((my $n = @args) != 1)
-    {
-	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function set_client_group (received $n, expecting 1)");
-    }
-    {
-	my($group) = @args;
-
-	my @_bad_arguments;
-        (ref($group) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"group\" (value was \"$group\")");
-        if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to set_client_group:\n" . join("", map { "\t$_\n" } @_bad_arguments);
-	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'set_client_group');
-	}
-    }
-
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.set_client_group",
-	params => \@args,
-    });
-    if ($result) {
-	if ($result->is_error) {
-	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
-					       code => $result->content->{error}->{code},
-					       method_name => 'set_client_group',
-					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
-					      );
-	} else {
-	    return;
-	}
-    } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_client_group",
-					    status_line => $self->{client}->status_line,
-					    method_name => 'set_client_group',
-				       );
-    }
-}
- 
-
-
 =head2 get_client_groups
 
   $groups = $obj->get_client_groups($params)
@@ -4035,8 +3950,7 @@ AppClientGroup is a reference to a hash where the following keys are defined:
 <pre>
 $params is a Catalog.GetClientGroupParams
 $groups is a reference to a list where each element is a Catalog.AppClientGroup
-GetClientGroupParams is a reference to a hash where the following keys are defined:
-	app_ids has a value which is a reference to a list where each element is a string
+GetClientGroupParams is a reference to a hash where the following keys are defined
 AppClientGroup is a reference to a hash where the following keys are defined:
 	app_id has a value which is a string
 	client_groups has a value which is a reference to a list where each element is a string
@@ -4049,8 +3963,7 @@ AppClientGroup is a reference to a hash where the following keys are defined:
 
 $params is a Catalog.GetClientGroupParams
 $groups is a reference to a list where each element is a Catalog.AppClientGroup
-GetClientGroupParams is a reference to a hash where the following keys are defined:
-	app_ids has a value which is a reference to a list where each element is a string
+GetClientGroupParams is a reference to a hash where the following keys are defined
 AppClientGroup is a reference to a hash where the following keys are defined:
 	app_id has a value which is a string
 	client_groups has a value which is a reference to a list where each element is a string
@@ -4060,7 +3973,7 @@ AppClientGroup is a reference to a hash where the following keys are defined:
 
 =item Description
 
-
+@deprecated list_client_group_configs
 
 =back
 
@@ -4107,6 +4020,277 @@ AppClientGroup is a reference to a hash where the following keys are defined:
         Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_client_groups",
 					    status_line => $self->{client}->status_line,
 					    method_name => 'get_client_groups',
+				       );
+    }
+}
+ 
+
+
+=head2 set_client_group_config
+
+  $obj->set_client_group_config($config)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$config is a Catalog.ClientGroupConfig
+ClientGroupConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$config is a Catalog.ClientGroupConfig
+ClientGroupConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub set_client_group_config
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function set_client_group_config (received $n, expecting 1)");
+    }
+    {
+	my($config) = @args;
+
+	my @_bad_arguments;
+        (ref($config) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"config\" (value was \"$config\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to set_client_group_config:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'set_client_group_config');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.set_client_group_config",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'set_client_group_config',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_client_group_config",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'set_client_group_config',
+				       );
+    }
+}
+ 
+
+
+=head2 remove_client_group_config
+
+  $obj->remove_client_group_config($config)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$config is a Catalog.ClientGroupConfig
+ClientGroupConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$config is a Catalog.ClientGroupConfig
+ClientGroupConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub remove_client_group_config
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function remove_client_group_config (received $n, expecting 1)");
+    }
+    {
+	my($config) = @args;
+
+	my @_bad_arguments;
+        (ref($config) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"config\" (value was \"$config\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to remove_client_group_config:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'remove_client_group_config');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.remove_client_group_config",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'remove_client_group_config',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_client_group_config",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'remove_client_group_config',
+				       );
+    }
+}
+ 
+
+
+=head2 list_client_group_configs
+
+  $groups = $obj->list_client_group_configs($filter)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$filter is a Catalog.ClientGroupFilter
+$groups is a reference to a list where each element is a Catalog.ClientGroupConfig
+ClientGroupFilter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_group has a value which is a string
+ClientGroupConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$filter is a Catalog.ClientGroupFilter
+$groups is a reference to a list where each element is a Catalog.ClientGroupConfig
+ClientGroupFilter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_group has a value which is a string
+ClientGroupConfig is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	function_name has a value which is a string
+	client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=item Description
+
+
+
+=back
+
+=cut
+
+ sub list_client_group_configs
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function list_client_group_configs (received $n, expecting 1)");
+    }
+    {
+	my($filter) = @args;
+
+	my @_bad_arguments;
+        (ref($filter) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"filter\" (value was \"$filter\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to list_client_group_configs:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'list_client_group_configs');
+	}
+    }
+
+    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
+	method => "Catalog.list_client_group_configs",
+	params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'list_client_group_configs',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method list_client_group_configs",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'list_client_group_configs',
 				       );
     }
 }
@@ -6537,8 +6721,36 @@ if app_ids is empty or null, all client groups are returned
 =begin html
 
 <pre>
+a reference to a hash where the following keys are defined
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined
+
+=end text
+
+=back
+
+
+
+=head2 ClientGroupConfig
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
 a reference to a hash where the following keys are defined:
-app_ids has a value which is a reference to a list where each element is a string
+module_name has a value which is a string
+function_name has a value which is a string
+client_groups has a value which is a reference to a list where each element is a string
 
 </pre>
 
@@ -6547,7 +6759,43 @@ app_ids has a value which is a reference to a list where each element is a strin
 =begin text
 
 a reference to a hash where the following keys are defined:
-app_ids has a value which is a reference to a list where each element is a string
+module_name has a value which is a string
+function_name has a value which is a string
+client_groups has a value which is a reference to a list where each element is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ClientGroupFilter
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+function_name has a value which is a string
+client_group has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+function_name has a value which is a string
+client_group has a value which is a string
 
 
 =end text

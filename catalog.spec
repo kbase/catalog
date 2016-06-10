@@ -715,14 +715,32 @@ module Catalog {
         list<string> client_groups;
     } AppClientGroup;
 
-    funcdef set_client_group(AppClientGroup group) returns () authentication required;
-
     /* if app_ids is empty or null, all client groups are returned */
     typedef structure {
-        list<string> app_ids;
     } GetClientGroupParams;
 
+    /* @deprecated list_client_group_configs */
     funcdef get_client_groups(GetClientGroupParams params) returns (list<AppClientGroup> groups);
+
+
+
+    typedef structure {
+        string module_name;
+        string function_name;
+        list<string> client_groups;
+    } ClientGroupConfig;
+
+    funcdef set_client_group_config(ClientGroupConfig config) returns () authentication required;
+
+    funcdef remove_client_group_config(ClientGroupConfig config) returns () authentication required;
+
+    typedef structure {
+        string module_name;
+        string function_name;
+        string client_group;
+    } ClientGroupFilter;
+
+    funcdef list_client_group_configs(ClientGroupFilter filter) returns (list<ClientGroupConfig> groups);
 
 
 
