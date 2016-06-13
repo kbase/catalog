@@ -140,8 +140,20 @@ class Catalog(object):
            parameter "include_disabled" of type "boolean" (@range [0,1]),
            parameter "include_modules_with_no_name_set" of type "boolean"
            (@range [0,1])
-        :returns: instance of list of type "BasicModuleInfo" -> structure:
-           parameter "module_name" of String, parameter "git_url" of String
+        :returns: instance of list of type "BasicModuleInfo" (git_url is
+           always returned.  Every other field may or may not exist depending
+           on what has been registered or if certain registrations have
+           failed) -> structure: parameter "module_name" of String, parameter
+           "git_url" of String, parameter "language" of String, parameter
+           "dynamic_service" of type "boolean" (@range [0,1]), parameter
+           "owners" of list of String, parameter "dev" of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String, parameter "beta" of type "VersionCommitInfo" -> structure:
+           parameter "git_commit_hash" of String, parameter "release" of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String, parameter "released_version_list" of list of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String
         """
         return self._client.call_method(
             'Catalog.list_basic_module_info',
@@ -881,24 +893,11 @@ class Catalog(object):
             'Catalog.get_exec_raw_stats',
             [params], self._service_ver, context)
 
-    def set_client_group(self, group, context=None):
-        """
-        :param group: instance of type "AppClientGroup" (app_id = full app
-           id; if module name is used it will be case insensitive this will
-           overwrite all existing client groups (it won't just push what's on
-           the list) If client_groups is empty or set to null, then the
-           client_group mapping will be removed.) -> structure: parameter
-           "app_id" of String, parameter "client_groups" of list of String
-        """
-        return self._client.call_method(
-            'Catalog.set_client_group',
-            [group], self._service_ver, context)
-
     def get_client_groups(self, params, context=None):
         """
+        @deprecated list_client_group_configs
         :param params: instance of type "GetClientGroupParams" (if app_ids is
            empty or null, all client groups are returned) -> structure:
-           parameter "app_ids" of list of String
         :returns: instance of list of type "AppClientGroup" (app_id = full
            app id; if module name is used it will be case insensitive this
            will overwrite all existing client groups (it won't just push
@@ -909,6 +908,39 @@ class Catalog(object):
         return self._client.call_method(
             'Catalog.get_client_groups',
             [params], self._service_ver, context)
+
+    def set_client_group_config(self, config, context=None):
+        """
+        :param config: instance of type "ClientGroupConfig" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String, parameter "client_groups" of list of String
+        """
+        return self._client.call_method(
+            'Catalog.set_client_group_config',
+            [config], self._service_ver, context)
+
+    def remove_client_group_config(self, config, context=None):
+        """
+        :param config: instance of type "ClientGroupConfig" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String, parameter "client_groups" of list of String
+        """
+        return self._client.call_method(
+            'Catalog.remove_client_group_config',
+            [config], self._service_ver, context)
+
+    def list_client_group_configs(self, filter, context=None):
+        """
+        :param filter: instance of type "ClientGroupFilter" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String
+        :returns: instance of list of type "ClientGroupConfig" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String, parameter "client_groups" of list of String
+        """
+        return self._client.call_method(
+            'Catalog.list_client_group_configs',
+            [filter], self._service_ver, context)
 
     def set_volume_mount(self, config, context=None):
         """

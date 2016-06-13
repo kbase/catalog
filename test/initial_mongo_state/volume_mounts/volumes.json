@@ -21,7 +21,7 @@
     "module_name" : "VolMountModTest2",
     "module_name_lc" : "volmountmodtest2",
     "client_group" : "G2",
-    "function_name": "func1",
+    "app_id": "func1",
     "volume_mounts" : [
         {
             "host_dir" : "/home/wstester1",
@@ -34,7 +34,7 @@
     "module_name" : "VolMountModTest2",
     "module_name_lc" : "volmountmodtest2",
     "client_group" : "G3",
-    "function_name": "func1",
+    "app_id": "func1",
     "volume_mounts" : [
         {
             "host_dir" : "/home/2/wstester1",

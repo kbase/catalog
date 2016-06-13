@@ -777,23 +777,9 @@ public class CatalogClient {
     }
 
     /**
-     * <p>Original spec-file function name: set_client_group</p>
-     * <pre>
-     * </pre>
-     * @param   group   instance of type {@link us.kbase.catalog.AppClientGroup AppClientGroup}
-     * @throws IOException if an IO exception occurs
-     * @throws JsonClientException if a JSON RPC exception occurs
-     */
-    public void setClientGroup(AppClientGroup group, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
-        List<Object> args = new ArrayList<Object>();
-        args.add(group);
-        TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_client_group", args, retType, false, true, jsonRpcContext);
-    }
-
-    /**
      * <p>Original spec-file function name: get_client_groups</p>
      * <pre>
+     * @deprecated list_client_group_configs
      * </pre>
      * @param   params   instance of type {@link us.kbase.catalog.GetClientGroupParams GetClientGroupParams}
      * @return   parameter "groups" of list of type {@link us.kbase.catalog.AppClientGroup AppClientGroup}
@@ -805,6 +791,53 @@ public class CatalogClient {
         args.add(params);
         TypeReference<List<List<AppClientGroup>>> retType = new TypeReference<List<List<AppClientGroup>>>() {};
         List<List<AppClientGroup>> res = caller.jsonrpcCall("Catalog.get_client_groups", args, retType, true, false, jsonRpcContext);
+        return res.get(0);
+    }
+
+    /**
+     * <p>Original spec-file function name: set_client_group_config</p>
+     * <pre>
+     * </pre>
+     * @param   config   instance of type {@link us.kbase.catalog.ClientGroupConfig ClientGroupConfig}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setClientGroupConfig(ClientGroupConfig config, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(config);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_client_group_config", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: remove_client_group_config</p>
+     * <pre>
+     * </pre>
+     * @param   config   instance of type {@link us.kbase.catalog.ClientGroupConfig ClientGroupConfig}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void removeClientGroupConfig(ClientGroupConfig config, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(config);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.remove_client_group_config", args, retType, false, true, jsonRpcContext);
+    }
+
+    /**
+     * <p>Original spec-file function name: list_client_group_configs</p>
+     * <pre>
+     * </pre>
+     * @param   filter   instance of type {@link us.kbase.catalog.ClientGroupFilter ClientGroupFilter}
+     * @return   parameter "groups" of list of type {@link us.kbase.catalog.ClientGroupConfig ClientGroupConfig}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<ClientGroupConfig> listClientGroupConfigs(ClientGroupFilter filter, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(filter);
+        TypeReference<List<List<ClientGroupConfig>>> retType = new TypeReference<List<List<ClientGroupConfig>>>() {};
+        List<List<ClientGroupConfig>> res = caller.jsonrpcCall("Catalog.list_client_group_configs", args, retType, true, false, jsonRpcContext);
         return res.get(0);
     }
 

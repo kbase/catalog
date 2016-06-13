@@ -19,39 +19,37 @@ class ClientGroupMethodsTest(unittest.TestCase):
         adminCtx = self.cUtil.admin_ctx()
         anonCtx = self.cUtil.anonymous_ctx()
 
-        # list should be empty
+        # list should have 5, for these tests
         groups = self.catalog.get_client_groups(anonCtx, {})[0]
-        self.assertEqual(groups,[])
+        self.assertEqual(len(groups),5)
 
         # error if user attempts to set the context
         with self.assertRaises(ValueError) as e:
-            self.catalog.set_client_group(userCtx, 
-                {'app_id':'mEgaHit/run_Megahit', 'client_groups':['g1']})
+            self.catalog.set_client_group_config(userCtx, 
+                {'module_name':'mEgaHit', 'function_name':'run_Megahit', 'client_groups':['g1']})
         self.assertEqual(str(e.exception),
             'You do not have permission to set execution client groups.');
 
         # try adding one
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'mEgaHit/run_Megahit', 'client_groups':['g1']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'mEgaHit','function_name':'run_Megahit', 'client_groups':['g1']})
 
         groups = self.catalog.get_client_groups(anonCtx, {})[0]
-        self.assertEqual(len(groups),1)
-        self.assertEqual(groups[0]['app_id'],'megahit/run_Megahit')
-        self.assertEqual(groups[0]['client_groups'],['g1'])
+        self.assertEqual(len(groups),6)
 
         # try adding a few more
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'rna/run_something', 'client_groups':['g1']})
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'rna/run_something2', 'client_groups':['g1','g2']})
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'rna/run_something3', 'client_groups':['g3']})
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['g2']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'rna', 'function_name':'run_something', 'client_groups':['g1']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'rna', 'function_name':'run_something2', 'client_groups':['g1','g2']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'rna', 'function_name':'run_something3', 'client_groups':['g3']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'DNA', 'function_name':'run_something', 'client_groups':['g2']})
 
         # check em
         groups = self.catalog.get_client_groups(anonCtx, {})[0]
-        self.assertEqual(len(groups),5)
+        self.assertEqual(len(groups),10)
         found_megahit = False
         found_rna = False
         found_dna = False
@@ -100,38 +98,137 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
         # should give everything
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':[]})[0]
-        self.assertEqual(len(groups),5)
+        self.assertEqual(len(groups),10)
+
+        # check some error cases
+        group_config = {}
+        with self.assertRaises(ValueError) as e:
+            self.catalog.set_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'module_name parameter field is required');
+
+        group_config['module_name'] = []
+        with self.assertRaises(ValueError) as e:
+            self.catalog.set_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'module_name parameter field must be a string');
+        group_config['module_name'] = 'Tester2'
+
+        with self.assertRaises(ValueError) as e:
+            self.catalog.set_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'function_name parameter field is required');
+
+        group_config['function_name'] = []
+        with self.assertRaises(ValueError) as e:
+            self.catalog.set_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'function_name parameter field must be a string');
+        group_config['function_name'] = 'my_app'
+
+        group_config['client_groups'] = {}
+        with self.assertRaises(ValueError) as e:
+            self.catalog.set_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'client_groups parameter field must be a list');
+
+        group_config['client_groups'] = [['asdf']]
+        with self.assertRaises(ValueError) as e:
+            self.catalog.set_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'client_groups must be a list of strings');
+
+        group_config = {}
+        with self.assertRaises(ValueError) as e:
+            self.catalog.remove_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'module_name parameter field is required');
+
+        group_config['module_name'] = []
+        with self.assertRaises(ValueError) as e:
+            self.catalog.remove_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'module_name parameter field must be a string');
+        group_config['module_name'] = 'Tester2'
+
+        with self.assertRaises(ValueError) as e:
+            self.catalog.remove_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'function_name parameter field is required');
+
+        group_config['function_name'] = []
+        with self.assertRaises(ValueError) as e:
+            self.catalog.remove_client_group_config(adminCtx, group_config)
+        self.assertEqual(str(e.exception),
+            'function_name parameter field must be a string');
+
+        group_filter = {'module_name':[]}
+        with self.assertRaises(ValueError) as e:
+            self.catalog.list_client_group_configs(adminCtx, group_filter)
+        self.assertEqual(str(e.exception),
+            'module_name parameter field must be a string');
+
+        group_filter = {'function_name':[]}
+        with self.assertRaises(ValueError) as e:
+            self.catalog.list_client_group_configs(adminCtx, group_filter)
+        self.assertEqual(str(e.exception),
+            'function_name parameter field must be a string');
 
         # finally check that we can update something a few times
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['new_group']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'DNA', 'function_name':'run_something', 'client_groups':['new_group']})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
         self.assertEqual(groups[0]['client_groups'],['new_group'])
 
 
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['*']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'DNA','function_name':'run_something', 'client_groups':['*']})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
         self.assertEqual(groups[0]['client_groups'],['*'])
 
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':[]})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'DNA','function_name':'run_something', 'client_groups':[]})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
         self.assertEqual(groups[0]['client_groups'],[])
 
-
-        self.catalog.set_client_group(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['new_g1', 'new_g2', 'new_g3']})
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'DNA','function_name':'run_something', 'client_groups':['new_g1', 'new_g2', 'new_g3']})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
         self.assertEqual(groups[0]['client_groups'],['new_g1', 'new_g2', 'new_g3'])
+
+        self.catalog.set_client_group_config(adminCtx, 
+            {'module_name':'DNA','function_name':'run_something'})
+        groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
+        self.assertEqual(len(groups),1)
+        self.assertEqual(groups[0]['app_id'],'dna/run_something')
+        self.assertEqual(groups[0]['client_groups'],[])
+
+        groups = self.catalog.list_client_group_configs(anonCtx,{})[0]
+        self.assertEqual(len(groups),10)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'module_name':'DNA'})[0]
+        self.assertEqual(len(groups),1)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'function_name':'run_something'})[0]
+        self.assertEqual(len(groups),2)
+
+        self.catalog.remove_client_group_config(adminCtx, 
+            {'module_name':'DNA','function_name':'run_something'})
+        groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
+        self.assertEqual(len(groups),0)
+
+        groups = self.catalog.list_client_group_configs(anonCtx,{})[0]
+        self.assertEqual(len(groups),9)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'module_name':'DNA'})[0]
+        self.assertEqual(len(groups),0)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'function_name':'run_something'})[0]
+        self.assertEqual(len(groups),1)
 
 
 

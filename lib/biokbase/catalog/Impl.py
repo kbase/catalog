@@ -21,7 +21,7 @@ class Catalog:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "a99ebfc9805890197fee193c5ed859ba796c3d63"
+    GIT_COMMIT_HASH = "52464b1e02762e4ffa5b6f4a0d8e50f71e5c57d0"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -196,8 +196,20 @@ class Catalog:
            parameter "include_disabled" of type "boolean" (@range [0,1]),
            parameter "include_modules_with_no_name_set" of type "boolean"
            (@range [0,1])
-        :returns: instance of list of type "BasicModuleInfo" -> structure:
-           parameter "module_name" of String, parameter "git_url" of String
+        :returns: instance of list of type "BasicModuleInfo" (git_url is
+           always returned.  Every other field may or may not exist depending
+           on what has been registered or if certain registrations have
+           failed) -> structure: parameter "module_name" of String, parameter
+           "git_url" of String, parameter "language" of String, parameter
+           "dynamic_service" of type "boolean" (@range [0,1]), parameter
+           "owners" of list of String, parameter "dev" of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String, parameter "beta" of type "VersionCommitInfo" -> structure:
+           parameter "git_commit_hash" of String, parameter "release" of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String, parameter "released_version_list" of list of type
+           "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
+           String
         """
         # ctx is the context object
         # return variables are: info_list
@@ -1185,26 +1197,11 @@ class Catalog:
         # return the results
         return [records]
 
-    def set_client_group(self, ctx, group):
-        """
-        :param group: instance of type "AppClientGroup" (app_id = full app
-           id; if module name is used it will be case insensitive this will
-           overwrite all existing client groups (it won't just push what's on
-           the list) If client_groups is empty or set to null, then the
-           client_group mapping will be removed.) -> structure: parameter
-           "app_id" of String, parameter "client_groups" of list of String
-        """
-        # ctx is the context object
-        #BEGIN set_client_group
-        self.cc.set_client_group(ctx['user_id'], group)
-        #END set_client_group
-        pass
-
     def get_client_groups(self, ctx, params):
         """
+        @deprecated list_client_group_configs
         :param params: instance of type "GetClientGroupParams" (if app_ids is
            empty or null, all client groups are returned) -> structure:
-           parameter "app_ids" of list of String
         :returns: instance of list of type "AppClientGroup" (app_id = full
            app id; if module name is used it will be case insensitive this
            will overwrite all existing client groups (it won't just push
@@ -1221,6 +1218,52 @@ class Catalog:
         # At some point might do deeper type checking...
         if not isinstance(groups, list):
             raise ValueError('Method get_client_groups return value ' +
+                             'groups is not type list as required.')
+        # return the results
+        return [groups]
+
+    def set_client_group_config(self, ctx, config):
+        """
+        :param config: instance of type "ClientGroupConfig" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String, parameter "client_groups" of list of String
+        """
+        # ctx is the context object
+        #BEGIN set_client_group_config
+        self.cc.set_client_group_config(ctx['user_id'], config)
+        #END set_client_group_config
+        pass
+
+    def remove_client_group_config(self, ctx, config):
+        """
+        :param config: instance of type "ClientGroupConfig" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String, parameter "client_groups" of list of String
+        """
+        # ctx is the context object
+        #BEGIN remove_client_group_config
+        self.cc.remove_client_group_config(ctx['user_id'], config)
+        #END remove_client_group_config
+        pass
+
+    def list_client_group_configs(self, ctx, filter):
+        """
+        :param filter: instance of type "ClientGroupFilter" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String
+        :returns: instance of list of type "ClientGroupConfig" -> structure:
+           parameter "module_name" of String, parameter "function_name" of
+           String, parameter "client_groups" of list of String
+        """
+        # ctx is the context object
+        # return variables are: groups
+        #BEGIN list_client_group_configs
+        groups = self.cc.list_client_group_configs(filter)
+        #END list_client_group_configs
+
+        # At some point might do deeper type checking...
+        if not isinstance(groups, list):
+            raise ValueError('Method list_client_group_configs return value ' +
                              'groups is not type list as required.')
         # return the results
         return [groups]

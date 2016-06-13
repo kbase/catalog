@@ -479,14 +479,22 @@ class Application(object):
                              name='Catalog.get_exec_raw_stats',
                              types=[dict])
         self.method_authentication['Catalog.get_exec_raw_stats'] = 'required'
-        self.rpc_service.add(impl_Catalog.set_client_group,
-                             name='Catalog.set_client_group',
-                             types=[dict])
-        self.method_authentication['Catalog.set_client_group'] = 'required'
         self.rpc_service.add(impl_Catalog.get_client_groups,
                              name='Catalog.get_client_groups',
                              types=[dict])
         self.method_authentication['Catalog.get_client_groups'] = 'none'
+        self.rpc_service.add(impl_Catalog.set_client_group_config,
+                             name='Catalog.set_client_group_config',
+                             types=[dict])
+        self.method_authentication['Catalog.set_client_group_config'] = 'required'
+        self.rpc_service.add(impl_Catalog.remove_client_group_config,
+                             name='Catalog.remove_client_group_config',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_client_group_config'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_client_group_configs,
+                             name='Catalog.list_client_group_configs',
+                             types=[dict])
+        self.method_authentication['Catalog.list_client_group_configs'] = 'none'
         self.rpc_service.add(impl_Catalog.set_volume_mount,
                              name='Catalog.set_volume_mount',
                              types=[dict])

@@ -151,6 +151,9 @@ class MongoCatalogDBI:
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
 
+        # check the db schema
+        self.check_db_schema()
+
         # Make sure we have an index on module and git_repo_url
         self.module_versions.ensure_index('module_name_lc', sparse=False)
         self.module_versions.ensure_index('git_commit_hash', sparse=False)
@@ -178,7 +181,6 @@ class MongoCatalogDBI:
             unique=True, sparse=False)
 
         # developers indecies
-
         self.developers.ensure_index('kb_username', unique=True)
 
         self.build_logs.ensure_index('registration_id',unique=True)
@@ -228,20 +230,16 @@ class MongoCatalogDBI:
                                             ('time_range', ASCENDING)], 
                                            unique=True, sparse=False)
 
-        # client group
-        #  app_id = [lower case module name]/[app id]
-        self.client_groups.ensure_index('app_id', unique=True, sparse=False)
-
+        
+        # client groups and volume mounts
+        self.client_groups.ensure_index([('module_name_lc', ASCENDING),
+                                            ('function_name', ASCENDING)], 
+                                           unique=True, sparse=False)
 
         self.volume_mounts.ensure_index([('client_group', ASCENDING), 
                                             ('module_name_lc', ASCENDING),
                                             ('function_name', ASCENDING)], 
                                            unique=True, sparse=False)
-
-
-
-        self.check_db_schema()
-
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -727,7 +725,16 @@ class MongoCatalogDBI:
     #### LIST / SEARCH methods
 
     def find_basic_module_info(self, query):
-        return list(self.modules.find(query,{'module_name':1,'git_url':1,'_id':0}))
+        selection = {
+            '_id':0,
+            'module_name':1,
+            'git_url':1,
+            'info':1,
+            'current_versions':1,
+            'release_version_list':1,
+            'owners':1
+        }
+        return list(self.modules.find(query,selection))
 
     def find_current_versions_and_owners(self, query):
         result = list(self.modules.find(query,{'module_name':1,'module_name_lc':1,'git_url':1,'current_versions':1,'owners':1,'_id':0}))
@@ -966,37 +973,60 @@ class MongoCatalogDBI:
                 })
         return counts
 
+    # DEPRECATED! temporary function until everything is migrated to new client group structure
+    def list_client_groups(self, app_ids):
+        if app_ids is not None:
+            selection = {
+                '_id': 0,
+                'function_name': 1, 
+                'client_groups': 1,
+                'module_name':1,
+                'module_name_lc':1
+            }
+            gList = list(self.client_groups.find({}, selection))
+            filteredGList = []
+            for g in gList:
+                for a in app_ids:
+                    if g['module_name_lc'] + '/' + g['function_name'] == a:
+                        filteredGList.append(g);
+            for g in filteredGList:
+                del[g['module_name_lc']]
+            return filteredGList
+        
+        selection = {
+            '_id': 0,
+            'function_name': 1, 
+            'client_groups': 1,
+            'module_name':1
+        }
+        return list(self.client_groups.find({}, selection))
 
-    # assumes module names in app_ids are already lower 
-    def set_client_group(self, app_id, client_groups):
-        if not app_id:
-            return
 
-        if not client_groups:
-            client_groups = []
-
-        # lower case the module name on insert
-        tokens = app_id.strip().split('/')
-        if len(tokens)==2 :
-            app_id = tokens[0].lower() + '/' + tokens[1];
-
+    def set_client_group_config(self, config):
+        config['module_name_lc'] = config['module_name'].lower()
         return self._check_update_result(self.client_groups.update(
-                {'app_id':app_id},
-                {'app_id':app_id, 'client_groups': client_groups },
+                {
+                    'module_name_lc':config['module_name_lc'],
+                    'function_name':config['function_name']
+                },
+                config,
                 upsert=True
             ))
+    def remove_client_group_config(self, config):
+        config['module_name_lc'] = config['module_name'].lower()
+        return self._check_update_result(self.client_groups.remove(
+                {
+                    'module_name_lc':config['module_name_lc'],
+                    'function_name':config['function_name']
+                }
+            ))
 
-    def list_client_groups(self, app_ids):
-        query = {}
-        selection = {
-            "_id": 0,
-            "app_id": 1, 
-            "client_groups": 1
-        }
-        if app_ids:
-            query['app_id'] = { '$in':app_ids }
-
-        return list(self.client_groups.find(query, selection))
+    def list_client_group_configs(self, filter):
+        selection = { "_id": 0, "module_name_lc":0 }
+        if 'module_name' in filter:
+            filter['module_name_lc'] = filter['module_name'].lower()
+            del(filter['module_name'])
+        return list(self.client_groups.find(filter, selection))
 
 
     def set_volume_mount(self, volume_mount):
@@ -1218,6 +1248,12 @@ class MongoCatalogDBI:
             self.update_db_version(3)
             print('done.')
 
+        if db_version<4:
+            print('Updating DB schema to V4...')
+            self.update_db_3_to_4()
+            self.update_db_version(4)
+            print('done.')
+
 
     def get_db_version(self):
         # version is a collection that should only have a single 
@@ -1298,6 +1334,13 @@ class MongoCatalogDBI:
     # a separate module versions collection.  
     def update_db_2_to_3(self):
 
+        self.module_versions.ensure_index('module_name_lc', sparse=False)
+        self.module_versions.ensure_index('git_commit_hash', sparse=False)
+        self.module_versions.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('git_commit_hash',ASCENDING)], 
+            unique=True, sparse=False)
+
         # update all module versions
         for m in self.modules.find({}):
 
@@ -1366,6 +1409,35 @@ class MongoCatalogDBI:
             else:
                  version['release_timestamp'] = None
 
+    # version 4 performs a small modification to the client group structure and volume_mounts structure
+    def update_db_3_to_4(self):
+
+        # make sure we don't have any indecies on the collections
+        self.volume_mounts.drop_indexes()
+        self.client_groups.drop_indexes()
+
+        # update the volume_mounts, just need to rename app_id to function_name
+        for vm in self.volume_mounts.find({}):
+            if 'app_id' in vm and 'function_name' not in vm:
+                self.volume_mounts.update(
+                        {'_id':vm['_id']},
+                        {'$set':{ 'function_name':vm['app_id'] }, '$unset':{ 'app_id':1 } }
+                    )
+
+        for cg in self.client_groups.find({}):
+            if 'app_id' in cg:
+                self.client_groups.remove({'_id':cg['_id']})
+                tokens = cg['app_id'].split('/')
+                if(len(tokens) != 2):
+                    print('   When updating client groups, bad app_id found.  Record will be lost:')
+                    pprint.pprint(cg)
+                new_cg = {
+                    'module_name' : tokens[0],
+                    'module_name_lc' : tokens[0].lower(),
+                    'function_name' : tokens[1],
+                    'client_groups' : cg['client_groups']
+                }
+                self.client_groups.insert(new_cg)
 
 
 

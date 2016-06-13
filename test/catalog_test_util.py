@@ -158,6 +158,21 @@ class CatalogTestUtil:
                     self.volume_mounts.insert(parsed_document)
                     load_count+=1
 
+        client_groups_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._CLIENT_GROUPS)
+        for document_name in os.listdir(client_groups_dir):
+            document_path = os.path.join(client_groups_dir,document_name)
+            if os.path.isfile(document_path):
+                with open(document_path) as document_file:
+                    document = document_file.read()
+                parsed_document = json.loads(document)
+                if isinstance(parsed_document,list):
+                    for p in parsed_document:
+                        self.client_groups.insert(p)
+                        load_count+=1
+                else:
+                    self.client_groups.insert(parsed_document)
+                    load_count+=1
+
         self.log(str(load_count)+" documents loaded")
 
 
