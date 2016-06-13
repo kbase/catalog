@@ -976,17 +976,32 @@ class MongoCatalogDBI:
                 })
         return counts
 
-    # DEPRECATED!
+    # DEPRECATED! temporary function until everything is migrated to new client group structure
     def list_client_groups(self, app_ids):
-        query = {}
+        if app_ids is not None:
+            selection = {
+                '_id': 0,
+                'function_name': 1, 
+                'client_groups': 1,
+                'module_name':1,
+                'module_name_lc':1
+            }
+            gList = list(self.client_groups.find({}, selection))
+            filteredGList = []
+            for g in gList:
+                for a in app_ids:
+                    if g['module_name_lc'] + '/' + g['function_name'] == a:
+                        del(g['module_name_lc'])
+                        filteredGList.append(g);
+            return filteredGList
+        
         selection = {
             '_id': 0,
             'function_name': 1, 
             'client_groups': 1,
             'module_name':1
         }
-
-        return list(self.client_groups.find(query, selection))
+        return list(self.client_groups.find({}, selection))
 
 
     def set_client_group_config(self, config):
@@ -994,11 +1009,18 @@ class MongoCatalogDBI:
         return self._check_update_result(self.client_groups.update(
                 {
                     'module_name_lc':config['module_name_lc'],
-                    'function_name':config['function_name'],
-                    'client_groups':config['client_groups']
+                    'function_name':config['function_name']
                 },
                 config,
                 upsert=True
+            ))
+    def remove_client_group_config(self, config):
+        config['module_name_lc'] = config['module_name'].lower()
+        return self._check_update_result(self.client_groups.remove(
+                {
+                    'module_name_lc':config['module_name_lc'],
+                    'function_name':config['function_name']
+                }
             ))
 
     def list_client_group_configs(self, filter):

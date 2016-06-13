@@ -1244,6 +1244,45 @@ class CatalogController:
         if error is not None:
             raise ValueError('Update probably failed, blame mongo: update operation returned: '+error)
 
+    def remove_client_group_config(self, username, config):
+        # do some parameter checks
+        if not self.is_admin(username):
+            raise ValueError('You do not have permission to remove volume mounts.')
+
+        selection = {}
+
+        if 'module_name' not in config:
+            raise ValueError('module_name parameter field is required')
+        if not isinstance(config['module_name'],basestring):
+            raise ValueError('module_name parameter field must be a string')
+        selection['module_name'] = config['module_name'].strip()
+
+        if 'function_name' not in config:
+            raise ValueError('function_name parameter field is required')
+        if not isinstance(config['function_name'],basestring):
+            raise ValueError('function_name parameter field must be a string')
+        selection['function_name'] = config['function_name'].strip()
+
+        error = self.db.remove_client_group_config(selection)
+        if error is not None:
+            raise ValueError('Removal probably failed, blame mongo: remove operation returned: '+error)
+
+    def list_client_group_configs(self, filter):
+        processed_filter = {}
+        if filter:
+            if 'module_name' in filter:
+                if not isinstance(filter['module_name'],basestring):
+                    raise ValueError('module_name parameter field must be a string')
+                processed_filter['module_name'] = filter['module_name'].strip()
+
+            if 'function_name' in filter:
+                if not isinstance(filter['function_name'],basestring):
+                    raise ValueError('function_name parameter field must be a string')
+                processed_filter['function_name'] = filter['function_name'].strip()
+
+        return self.db.list_client_group_configs(processed_filter)
+
+
     def get_client_groups(self, params):
         app_ids = None
         if 'app_ids' in params:
@@ -1258,8 +1297,6 @@ class CatalogController:
             if len(app_ids) == 0 :
                 app_ids = None
         groups = self.db.list_client_groups(app_ids)
-        print('llll')
-        pprint(groups)
         # we have to munge the group data to the old structure
         for g in groups:
             g['app_id'] = g['module_name'].lower() + '/' + g['function_name']

@@ -737,7 +737,6 @@ module Catalog {
     typedef structure {
         string module_name;
         string function_name;
-        string client_group;
     } ClientGroupFilter;
 
     funcdef list_client_group_configs(ClientGroupFilter filter) returns (list<ClientGroupConfig> groups);

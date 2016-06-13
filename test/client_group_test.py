@@ -21,7 +21,6 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
         # list should have 5, for these tests
         groups = self.catalog.get_client_groups(anonCtx, {})[0]
-        pprint(groups)
         self.assertEqual(len(groups),5)
 
         # error if user attempts to set the context
@@ -103,7 +102,7 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
         # finally check that we can update something a few times
         self.catalog.set_client_group_config(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['new_group']})
+            {'module_name':'DNA', 'function_name':'run_something', 'client_groups':['new_group']})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
@@ -111,14 +110,14 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
 
         self.catalog.set_client_group_config(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['*']})
+            {'module_name':'DNA','function_name':'run_something', 'client_groups':['*']})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
         self.assertEqual(groups[0]['client_groups'],['*'])
 
         self.catalog.set_client_group_config(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':[]})
+            {'module_name':'DNA','function_name':'run_something', 'client_groups':[]})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
@@ -126,11 +125,30 @@ class ClientGroupMethodsTest(unittest.TestCase):
 
 
         self.catalog.set_client_group_config(adminCtx, 
-            {'app_id':'DNA/run_something', 'client_groups':['new_g1', 'new_g2', 'new_g3']})
+            {'module_name':'DNA','function_name':'run_something', 'client_groups':['new_g1', 'new_g2', 'new_g3']})
         groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
         self.assertEqual(len(groups),1)
         self.assertEqual(groups[0]['app_id'],'dna/run_something')
         self.assertEqual(groups[0]['client_groups'],['new_g1', 'new_g2', 'new_g3'])
+
+        groups = self.catalog.list_client_group_configs(anonCtx,{})[0]
+        self.assertEqual(len(groups),10)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'module_name':'DNA'})[0]
+        self.assertEqual(len(groups),1)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'function_name':'run_something'})[0]
+        self.assertEqual(len(groups),2)
+
+        self.catalog.remove_client_group_config(adminCtx, 
+            {'module_name':'DNA','function_name':'run_something'})
+        groups = self.catalog.get_client_groups(anonCtx, {'app_ids':['dna/run_something']})[0]
+        self.assertEqual(len(groups),0)
+
+        groups = self.catalog.list_client_group_configs(anonCtx,{})[0]
+        self.assertEqual(len(groups),9)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'module_name':'DNA'})[0]
+        self.assertEqual(len(groups),0)
+        groups = self.catalog.list_client_group_configs(anonCtx,{'function_name':'run_something'})[0]
+        self.assertEqual(len(groups),1)
 
 
 
