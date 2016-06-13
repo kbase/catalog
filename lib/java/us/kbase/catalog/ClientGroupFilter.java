@@ -20,8 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "function_name",
-    "client_group"
+    "function_name"
 })
 public class ClientGroupFilter {
 
@@ -29,8 +28,6 @@ public class ClientGroupFilter {
     private String moduleName;
     @JsonProperty("function_name")
     private String functionName;
-    @JsonProperty("client_group")
-    private String clientGroup;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("module_name")
@@ -63,21 +60,6 @@ public class ClientGroupFilter {
         return this;
     }
 
-    @JsonProperty("client_group")
-    public String getClientGroup() {
-        return clientGroup;
-    }
-
-    @JsonProperty("client_group")
-    public void setClientGroup(String clientGroup) {
-        this.clientGroup = clientGroup;
-    }
-
-    public ClientGroupFilter withClientGroup(String clientGroup) {
-        this.clientGroup = clientGroup;
-        return this;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -90,7 +72,7 @@ public class ClientGroupFilter {
 
     @Override
     public String toString() {
-        return ((((((((("ClientGroupFilter"+" [moduleName=")+ moduleName)+", functionName=")+ functionName)+", clientGroup=")+ clientGroup)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((("ClientGroupFilter"+" [moduleName=")+ moduleName)+", functionName=")+ functionName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

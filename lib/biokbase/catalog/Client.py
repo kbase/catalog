@@ -933,7 +933,7 @@ class Catalog(object):
         """
         :param filter: instance of type "ClientGroupFilter" -> structure:
            parameter "module_name" of String, parameter "function_name" of
-           String, parameter "client_group" of String
+           String
         :returns: instance of list of type "ClientGroupConfig" -> structure:
            parameter "module_name" of String, parameter "function_name" of
            String, parameter "client_groups" of list of String

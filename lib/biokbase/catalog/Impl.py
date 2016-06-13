@@ -21,7 +21,7 @@ class Catalog:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "bf26740d36424164c3d8e9443dca7d2bd63d0750"
+    GIT_COMMIT_HASH = "52464b1e02762e4ffa5b6f4a0d8e50f71e5c57d0"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -1250,7 +1250,7 @@ class Catalog:
         """
         :param filter: instance of type "ClientGroupFilter" -> structure:
            parameter "module_name" of String, parameter "function_name" of
-           String, parameter "client_group" of String
+           String
         :returns: instance of list of type "ClientGroupConfig" -> structure:
            parameter "module_name" of String, parameter "function_name" of
            String, parameter "client_groups" of list of String

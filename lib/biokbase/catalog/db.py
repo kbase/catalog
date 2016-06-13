@@ -988,8 +988,9 @@ class MongoCatalogDBI:
             for g in gList:
                 for a in app_ids:
                     if g['module_name_lc'] + '/' + g['function_name'] == a:
-                        del(g['module_name_lc'])
                         filteredGList.append(g);
+            for g in filteredGList:
+                del[g['module_name_lc']]
             return filteredGList
         
         selection = {

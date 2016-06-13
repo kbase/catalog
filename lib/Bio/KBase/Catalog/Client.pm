@@ -4216,7 +4216,6 @@ $groups is a reference to a list where each element is a Catalog.ClientGroupConf
 ClientGroupFilter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	function_name has a value which is a string
-	client_group has a value which is a string
 ClientGroupConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	function_name has a value which is a string
@@ -4233,7 +4232,6 @@ $groups is a reference to a list where each element is a Catalog.ClientGroupConf
 ClientGroupFilter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	function_name has a value which is a string
-	client_group has a value which is a string
 ClientGroupConfig is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	function_name has a value which is a string
@@ -6784,7 +6782,6 @@ client_groups has a value which is a reference to a list where each element is a
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 function_name has a value which is a string
-client_group has a value which is a string
 
 </pre>
 
@@ -6795,7 +6792,6 @@ client_group has a value which is a string
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 function_name has a value which is a string
-client_group has a value which is a string
 
 
 =end text
