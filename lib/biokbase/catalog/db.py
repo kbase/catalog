@@ -181,7 +181,6 @@ class MongoCatalogDBI:
             unique=True, sparse=False)
 
         # developers indecies
-
         self.developers.ensure_index('kb_username', unique=True)
 
         self.build_logs.ensure_index('registration_id',unique=True)
@@ -232,9 +231,7 @@ class MongoCatalogDBI:
                                            unique=True, sparse=False)
 
         
-        # client group
-        #  app_id = [lower case module name]/[app id]
-
+        # client groups and volume mounts
         self.client_groups.ensure_index([('module_name_lc', ASCENDING),
                                             ('function_name', ASCENDING)], 
                                            unique=True, sparse=False)
