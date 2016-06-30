@@ -21,6 +21,7 @@ import us.kbase.common.service.UnauthorizedException;
  */
 public class CatalogClient {
     private JsonClientCaller caller;
+    private String serviceVersion = null;
 
 
     /** Constructs a client with a custom URL and no user credentials.
@@ -139,6 +140,14 @@ public class CatalogClient {
         caller.setFileForNextRpcResponse(f);
     }
 
+    public String getServiceVersion() {
+        return this.serviceVersion;
+    }
+
+    public void setServiceVersion(String newValue) {
+        this.serviceVersion = newValue;
+    }
+
     /**
      * <p>Original spec-file function name: version</p>
      * <pre>
@@ -151,7 +160,7 @@ public class CatalogClient {
     public String version(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
-        List<String> res = caller.jsonrpcCall("Catalog.version", args, retType, true, false, jsonRpcContext);
+        List<String> res = caller.jsonrpcCall("Catalog.version", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -169,7 +178,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
-        List<Long> res = caller.jsonrpcCall("Catalog.is_registered", args, retType, true, false, jsonRpcContext);
+        List<Long> res = caller.jsonrpcCall("Catalog.is_registered", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -193,7 +202,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
-        List<String> res = caller.jsonrpcCall("Catalog.register_repo", args, retType, true, true, jsonRpcContext);
+        List<String> res = caller.jsonrpcCall("Catalog.register_repo", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -211,7 +220,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.push_dev_to_beta", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.push_dev_to_beta", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -227,7 +236,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.request_release", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.request_release", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -241,7 +250,7 @@ public class CatalogClient {
     public List<RequestedReleaseInfo> listRequestedReleases(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<List<RequestedReleaseInfo>>> retType = new TypeReference<List<List<RequestedReleaseInfo>>>() {};
-        List<List<RequestedReleaseInfo>> res = caller.jsonrpcCall("Catalog.list_requested_releases", args, retType, true, false, jsonRpcContext);
+        List<List<RequestedReleaseInfo>> res = caller.jsonrpcCall("Catalog.list_requested_releases", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -257,7 +266,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(review);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.review_release_request", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.review_release_request", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -273,7 +282,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<BasicModuleInfo>>> retType = new TypeReference<List<List<BasicModuleInfo>>>() {};
-        List<List<BasicModuleInfo>> res = caller.jsonrpcCall("Catalog.list_basic_module_info", args, retType, true, false, jsonRpcContext);
+        List<List<BasicModuleInfo>> res = caller.jsonrpcCall("Catalog.list_basic_module_info", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -289,7 +298,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.add_favorite", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.add_favorite", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -304,7 +313,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.remove_favorite", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.remove_favorite", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -320,7 +329,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(username);
         TypeReference<List<List<FavoriteItem>>> retType = new TypeReference<List<List<FavoriteItem>>>() {};
-        List<List<FavoriteItem>> res = caller.jsonrpcCall("Catalog.list_favorites", args, retType, true, false, jsonRpcContext);
+        List<List<FavoriteItem>> res = caller.jsonrpcCall("Catalog.list_favorites", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -337,7 +346,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(item);
         TypeReference<List<List<FavoriteUser>>> retType = new TypeReference<List<List<FavoriteUser>>>() {};
-        List<List<FavoriteUser>> res = caller.jsonrpcCall("Catalog.list_app_favorites", args, retType, true, false, jsonRpcContext);
+        List<List<FavoriteUser>> res = caller.jsonrpcCall("Catalog.list_app_favorites", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -354,7 +363,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<FavoriteCount>>> retType = new TypeReference<List<List<FavoriteCount>>>() {};
-        List<List<FavoriteCount>> res = caller.jsonrpcCall("Catalog.list_favorite_counts", args, retType, true, false, jsonRpcContext);
+        List<List<FavoriteCount>> res = caller.jsonrpcCall("Catalog.list_favorite_counts", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -371,7 +380,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(selection);
         TypeReference<List<ModuleInfo>> retType = new TypeReference<List<ModuleInfo>>() {};
-        List<ModuleInfo> res = caller.jsonrpcCall("Catalog.get_module_info", args, retType, true, false, jsonRpcContext);
+        List<ModuleInfo> res = caller.jsonrpcCall("Catalog.get_module_info", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -389,7 +398,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<ModuleVersionInfo>> retType = new TypeReference<List<ModuleVersionInfo>>() {};
-        List<ModuleVersionInfo> res = caller.jsonrpcCall("Catalog.get_version_info", args, retType, true, false, jsonRpcContext);
+        List<ModuleVersionInfo> res = caller.jsonrpcCall("Catalog.get_version_info", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -406,7 +415,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<ModuleVersionInfo>>> retType = new TypeReference<List<List<ModuleVersionInfo>>>() {};
-        List<List<ModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_released_module_versions", args, retType, true, false, jsonRpcContext);
+        List<List<ModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_released_module_versions", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -423,7 +432,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(selection);
         TypeReference<List<ModuleVersion>> retType = new TypeReference<List<ModuleVersion>>() {};
-        List<ModuleVersion> res = caller.jsonrpcCall("Catalog.get_module_version", args, retType, true, false, jsonRpcContext);
+        List<ModuleVersion> res = caller.jsonrpcCall("Catalog.get_module_version", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -440,7 +449,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<LocalFunctionInfo>>> retType = new TypeReference<List<List<LocalFunctionInfo>>>() {};
-        List<List<LocalFunctionInfo>> res = caller.jsonrpcCall("Catalog.list_local_functions", args, retType, true, false, jsonRpcContext);
+        List<List<LocalFunctionInfo>> res = caller.jsonrpcCall("Catalog.list_local_functions", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -457,7 +466,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<LocalFunctionDetails>>> retType = new TypeReference<List<List<LocalFunctionDetails>>>() {};
-        List<List<LocalFunctionDetails>> res = caller.jsonrpcCall("Catalog.get_local_function_details", args, retType, true, false, jsonRpcContext);
+        List<List<LocalFunctionDetails>> res = caller.jsonrpcCall("Catalog.get_local_function_details", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -474,7 +483,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(selection);
         TypeReference<List<BasicModuleVersionInfo>> retType = new TypeReference<List<BasicModuleVersionInfo>>() {};
-        List<BasicModuleVersionInfo> res = caller.jsonrpcCall("Catalog.module_version_lookup", args, retType, true, false, jsonRpcContext);
+        List<BasicModuleVersionInfo> res = caller.jsonrpcCall("Catalog.module_version_lookup", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -491,7 +500,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(filter);
         TypeReference<List<List<BasicModuleVersionInfo>>> retType = new TypeReference<List<List<BasicModuleVersionInfo>>>() {};
-        List<List<BasicModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_service_modules", args, retType, true, false, jsonRpcContext);
+        List<List<BasicModuleVersionInfo>> res = caller.jsonrpcCall("Catalog.list_service_modules", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -507,7 +516,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_registration_state", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.set_registration_state", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -523,7 +532,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<ModuleState>> retType = new TypeReference<List<ModuleState>>() {};
-        List<ModuleState> res = caller.jsonrpcCall("Catalog.get_module_state", args, retType, true, false, jsonRpcContext);
+        List<ModuleState> res = caller.jsonrpcCall("Catalog.get_module_state", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -540,7 +549,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(registrationId);
         TypeReference<List<String>> retType = new TypeReference<List<String>>() {};
-        List<String> res = caller.jsonrpcCall("Catalog.get_build_log", args, retType, true, false, jsonRpcContext);
+        List<String> res = caller.jsonrpcCall("Catalog.get_build_log", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -558,7 +567,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<BuildLog>> retType = new TypeReference<List<BuildLog>>() {};
-        List<BuildLog> res = caller.jsonrpcCall("Catalog.get_parsed_build_log", args, retType, true, false, jsonRpcContext);
+        List<BuildLog> res = caller.jsonrpcCall("Catalog.get_parsed_build_log", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -575,7 +584,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<BuildInfo>>> retType = new TypeReference<List<List<BuildInfo>>>() {};
-        List<List<BuildInfo>> res = caller.jsonrpcCall("Catalog.list_builds", args, retType, true, false, jsonRpcContext);
+        List<List<BuildInfo>> res = caller.jsonrpcCall("Catalog.list_builds", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -592,7 +601,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.delete_module", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.delete_module", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -611,7 +620,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.migrate_module_to_new_git_url", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.migrate_module_to_new_git_url", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -627,7 +636,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_to_active", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.set_to_active", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -642,7 +651,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_to_inactive", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.set_to_inactive", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -659,7 +668,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(usernames);
         TypeReference<List<List<Long>>> retType = new TypeReference<List<List<Long>>>() {};
-        List<List<Long>> res = caller.jsonrpcCall("Catalog.is_approved_developer", args, retType, true, false, jsonRpcContext);
+        List<List<Long>> res = caller.jsonrpcCall("Catalog.is_approved_developer", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -674,7 +683,7 @@ public class CatalogClient {
     public List<String> listApprovedDevelopers(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<List<String>>> retType = new TypeReference<List<List<String>>>() {};
-        List<List<String>> res = caller.jsonrpcCall("Catalog.list_approved_developers", args, retType, true, false, jsonRpcContext);
+        List<List<String>> res = caller.jsonrpcCall("Catalog.list_approved_developers", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -690,7 +699,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(username);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.approve_developer", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.approve_developer", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -705,7 +714,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(username);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.revoke_developer", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.revoke_developer", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -722,7 +731,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.log_exec_stats", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.log_exec_stats", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -738,7 +747,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<ExecAggrStats>>> retType = new TypeReference<List<List<ExecAggrStats>>>() {};
-        List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext);
+        List<List<ExecAggrStats>> res = caller.jsonrpcCall("Catalog.get_exec_aggr_stats", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -755,7 +764,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<UObject>> retType = new TypeReference<List<UObject>>() {};
-        List<UObject> res = caller.jsonrpcCall("Catalog.get_exec_aggr_table", args, retType, true, true, jsonRpcContext);
+        List<UObject> res = caller.jsonrpcCall("Catalog.get_exec_aggr_table", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -772,7 +781,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<UObject>>> retType = new TypeReference<List<List<UObject>>>() {};
-        List<List<UObject>> res = caller.jsonrpcCall("Catalog.get_exec_raw_stats", args, retType, true, true, jsonRpcContext);
+        List<List<UObject>> res = caller.jsonrpcCall("Catalog.get_exec_raw_stats", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -790,7 +799,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<List<List<AppClientGroup>>> retType = new TypeReference<List<List<AppClientGroup>>>() {};
-        List<List<AppClientGroup>> res = caller.jsonrpcCall("Catalog.get_client_groups", args, retType, true, false, jsonRpcContext);
+        List<List<AppClientGroup>> res = caller.jsonrpcCall("Catalog.get_client_groups", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -806,7 +815,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(config);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_client_group_config", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.set_client_group_config", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -821,7 +830,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(config);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.remove_client_group_config", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.remove_client_group_config", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -837,7 +846,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(filter);
         TypeReference<List<List<ClientGroupConfig>>> retType = new TypeReference<List<List<ClientGroupConfig>>>() {};
-        List<List<ClientGroupConfig>> res = caller.jsonrpcCall("Catalog.list_client_group_configs", args, retType, true, false, jsonRpcContext);
+        List<List<ClientGroupConfig>> res = caller.jsonrpcCall("Catalog.list_client_group_configs", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -854,7 +863,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(config);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_volume_mount", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.set_volume_mount", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -870,7 +879,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(config);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.remove_volume_mount", args, retType, false, true, jsonRpcContext);
+        caller.jsonrpcCall("Catalog.remove_volume_mount", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
@@ -886,7 +895,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(filter);
         TypeReference<List<List<VolumeMountConfig>>> retType = new TypeReference<List<List<VolumeMountConfig>>>() {};
-        List<List<VolumeMountConfig>> res = caller.jsonrpcCall("Catalog.list_volume_mounts", args, retType, true, true, jsonRpcContext);
+        List<List<VolumeMountConfig>> res = caller.jsonrpcCall("Catalog.list_volume_mounts", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 
@@ -904,7 +913,7 @@ public class CatalogClient {
         List<Object> args = new ArrayList<Object>();
         args.add(username);
         TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
-        List<Long> res = caller.jsonrpcCall("Catalog.is_admin", args, retType, true, false, jsonRpcContext);
+        List<Long> res = caller.jsonrpcCall("Catalog.is_admin", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 }

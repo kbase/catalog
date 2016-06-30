@@ -145,9 +145,10 @@ Get the version of the deployed catalog service endpoint.
 							       "Invalid argument count for function version (received $n, expecting 0)");
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.version",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.version",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -234,9 +235,10 @@ returns true (1) if the module exists, false (2) otherwise
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.is_registered",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.is_registered",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -327,9 +329,10 @@ version from the repo) and start a build.
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.register_repo",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.register_repo",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -413,9 +416,10 @@ is discarded.  Will fail if a release request is active and has not been approve
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.push_dev_to_beta",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.push_dev_to_beta",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -498,9 +502,10 @@ requests a push from beta to release version; must be approved be a kbase Admin
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.request_release",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.request_release",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -580,9 +585,10 @@ RequestedReleaseInfo is a reference to a hash where the following keys are defin
 							       "Invalid argument count for function list_requested_releases (received $n, expecting 0)");
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_requested_releases",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_requested_releases",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -669,9 +675,10 @@ ReleaseReview is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.review_release_request",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.review_release_request",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -788,9 +795,10 @@ VersionCommitInfo is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_basic_module_info",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_basic_module_info",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -873,9 +881,10 @@ FavoriteItem is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.add_favorite",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.add_favorite",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -958,9 +967,10 @@ FavoriteItem is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.remove_favorite",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.remove_favorite",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1045,9 +1055,10 @@ FavoriteItem is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_favorites",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_favorites",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1138,9 +1149,10 @@ FavoriteUser is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_app_favorites",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_app_favorites",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1231,9 +1243,10 @@ FavoriteCount is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_favorite_counts",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_favorite_counts",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1412,9 +1425,10 @@ SpecFile is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_module_info",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_module_info",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1581,9 +1595,10 @@ DEPRECATED!!!  use get_module_version
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_version_info",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_version_info",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1744,9 +1759,10 @@ SpecFile is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_released_module_versions",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_released_module_versions",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -1923,9 +1939,10 @@ SpecFile is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_module_version",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_module_version",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2042,9 +2059,10 @@ IOTags is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_local_functions",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_local_functions",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2175,9 +2193,10 @@ IOTags is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_local_function_details",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_local_function_details",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2276,9 +2295,10 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.module_version_lookup",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.module_version_lookup",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2371,9 +2391,10 @@ BasicModuleVersionInfo is a reference to a hash where the following keys are def
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_service_modules",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_service_modules",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2460,9 +2481,10 @@ SetRegistrationStateParams is a reference to a hash where the following keys are
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.set_registration_state",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.set_registration_state",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2563,9 +2585,10 @@ boolean is an int
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_module_state",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_module_state",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2644,9 +2667,10 @@ $return is a string
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_build_log",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_build_log",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2761,9 +2785,10 @@ given the registration_id returned from the register method, you can check the b
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_parsed_build_log",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_parsed_build_log",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2878,9 +2903,10 @@ BuildInfo is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_builds",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_builds",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -2963,9 +2989,10 @@ admin method to delete a module, will only work if the module has not been relea
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.delete_module",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.delete_module",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3053,9 +3080,10 @@ be correct.
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.migrate_module_to_new_git_url",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.migrate_module_to_new_git_url",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3138,9 +3166,10 @@ admin methods to turn on/off modules
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.set_to_active",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.set_to_active",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3223,9 +3252,10 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.set_to_inactive",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.set_to_inactive",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3306,9 +3336,10 @@ temporary developer approval, should be moved to more mature user profile servic
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.is_approved_developer",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.is_approved_developer",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3374,9 +3405,10 @@ $usernames is a reference to a list where each element is a string
 							       "Invalid argument count for function list_approved_developers (received $n, expecting 0)");
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_approved_developers",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_approved_developers",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3453,9 +3485,10 @@ $username is a string
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.approve_developer",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.approve_developer",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3532,9 +3565,10 @@ $username is a string
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.revoke_developer",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.revoke_developer",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3636,9 +3670,10 @@ using catalog admin credentials only.
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.log_exec_stats",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.log_exec_stats",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3739,9 +3774,10 @@ ExecAggrStats is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_exec_aggr_stats",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_exec_aggr_stats",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3826,9 +3862,10 @@ ExecAggrTableParams is a reference to a hash where the following keys are define
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_exec_aggr_table",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_exec_aggr_table",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -3913,9 +3950,10 @@ GetExecRawStatsParams is a reference to a hash where the following keys are defi
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_exec_raw_stats",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_exec_raw_stats",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4002,9 +4040,10 @@ AppClientGroup is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.get_client_groups",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_client_groups",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4089,9 +4128,10 @@ ClientGroupConfig is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.set_client_group_config",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.set_client_group_config",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4176,9 +4216,10 @@ ClientGroupConfig is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.remove_client_group_config",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.remove_client_group_config",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4271,9 +4312,10 @@ ClientGroupConfig is a reference to a hash where the following keys are defined:
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_client_group_configs",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_client_group_configs",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4370,9 +4412,10 @@ must specify all properties of the VolumeMountConfig
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.set_volume_mount",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.set_volume_mount",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4469,9 +4512,10 @@ must specify module_name, function_name, client_group and this method will delet
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.remove_volume_mount",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.remove_volume_mount",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4578,9 +4622,10 @@ boolean is an int
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.list_volume_mounts",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.list_volume_mounts",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
@@ -4661,9 +4706,10 @@ returns true (1) if the user is an admin, false (0) otherwise
 	}
     }
 
-    my $result = $self->{client}->call($self->{url}, $self->{headers}, {
-	method => "Catalog.is_admin",
-	params => \@args,
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.is_admin",
+	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {

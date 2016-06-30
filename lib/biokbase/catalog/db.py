@@ -1254,6 +1254,11 @@ class MongoCatalogDBI:
             self.update_db_version(4)
             print('done.')
 
+        if db_version>4:
+            # bad version!
+            raise IOError('Incompatible DB versions.  Expecting DB V4, found DV V'+str(db_version) + 
+                '. You are probably running an old version of the service.  Start up failed.')
+
 
     def get_db_version(self):
         # version is a collection that should only have a single 
