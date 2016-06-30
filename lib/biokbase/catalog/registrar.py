@@ -7,6 +7,7 @@ import time
 import datetime
 import pprint
 import json
+import codecs
 import semantic_version
 
 #import git
@@ -242,7 +243,8 @@ class Registrar:
             else:
                 yaml_filename = 'kbase.yml'
         # parse some stuff, and check for things
-        with open(os.path.join(basedir,yaml_filename)) as kb_yaml_file:
+
+        with codecs.open(os.path.join(basedir,yaml_filename), 'r', "utf-8", errors='ignore') as kb_yaml_file:
             kb_yaml_string = kb_yaml_file.read()
         self.kb_yaml = yaml.load(kb_yaml_string)
         self.log('=====kbase.yaml parse:')
@@ -429,9 +431,10 @@ class Registrar:
                         raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
                     if not os.path.isfile(os.path.join(method_path,'display.yaml')):
                         raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
-                    with open(os.path.join(method_path,'spec.json')) as spec_json_file:
+
+                    with codecs.open(os.path.join(method_path,'spec.json'), 'r', "utf-8", errors='ignore') as spec_json_file:
                         spec_json = spec_json_file.read()
-                    with open(os.path.join(method_path,'display.yaml')) as display_yaml_file:
+                    with codecs.open(os.path.join(method_path,'display.yaml'), 'r', "utf-8", errors='ignore') as display_yaml_file:
                         display_yaml = display_yaml_file.read()
 
                     # gather any extra html files
@@ -439,7 +442,7 @@ class Registrar:
                     for extra_file_name in os.listdir(os.path.join(method_path)):
                         if not os.path.isfile(os.path.join(method_path,extra_file_name)): break
                         if not extra_file_name.endswith('.html'): break
-                        with open(os.path.join(method_path,extra_file_name)) as extra_file:
+                        with codecs.open(oos.path.join(method_path,extra_file_name), 'r', "utf-8", errors='ignore') as extra_file: 
                             extrafiles[extra_file_name] = extra_file.read()
 
                     # validate against the NMS target endpoint
