@@ -10,7 +10,12 @@ develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop
 Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
-#### v2.0.3 - TBA
+
+#### v2.0.5 - TBA
+  - Added volume mount configuration
+  - Modified client group configurations so that functions are specified, not app_ids
+
+#### v2.0.3 - 5/31/16
   - Major release to support storage of local functions and dynamic services information,
     including methods to query/filter/fetch local function and dynamic service info
   - Improved methods for fetching module versions by semantic version matching

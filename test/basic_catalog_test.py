@@ -14,7 +14,7 @@ class BasicCatalogTest(unittest.TestCase):
 
 
     def test_version(self):
-        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['2.0.3'])
+        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['2.0.5'])
 
 
     def test_is_registered(self):
@@ -77,8 +77,20 @@ class BasicCatalogTest(unittest.TestCase):
         default = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
             {})[0]
         module_names = []
+        found_dynamic_service = False;
         for m in default:
             module_names.append(m['module_name'])
+            if m['module_name'] == 'DynamicService':
+                self.assertEquals(m['dev'],{'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128'})
+                self.assertEquals(m['beta'],{'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6'})
+                self.assertEquals(m['release'],{'git_commit_hash':'49dc505febb8f4cccb2078c58ded0de3320534d7'})
+                self.assertEquals(sorted(m['owners']),['rsutormin','wstester2'])
+                self.assertEquals(m['language'],'python')
+                self.assertEquals(m['dynamic_service'],1)
+                self.assertEquals(len(m['release_version_list']),4)
+                found_dynamic_service = True
+
+        self.assertTrue(found_dynamic_service)
         self.assertEqual(
             ",".join(sorted(module_names)),
             ",".join(['DynamicService','DynamicService2','onerepotest','pending_second_release','release_history'])

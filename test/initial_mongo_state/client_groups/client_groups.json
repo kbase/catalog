@@ -1,0 +1,26 @@
+[
+{
+    "module_name" : "CGTest1",
+    "module_name_lc" : "cgtest1",
+    "function_name" : "func1",
+    "client_groups" : ["G1"]
+},
+{
+    "module_name" : "CGTest1",
+    "module_name_lc" : "cgtest1",
+    "function_name" : "func2",
+    "client_groups" : ["G1", "G2"]
+},
+{
+    "app_id" : "module1234/app",
+    "client_groups" : ["G1", "G2"]
+},
+{
+    "app_id" : "module421/app2",
+    "client_groups" : ["G2"]
+},
+{
+    "app_id" : "module4/app2312",
+    "client_groups" : []
+}
+]

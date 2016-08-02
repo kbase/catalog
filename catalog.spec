@@ -87,16 +87,31 @@ module Catalog {
         boolean include_modules_with_no_name_set;
     } ListModuleParams;
 
+
+    typedef structure {
+        string git_commit_hash;
+    } VersionCommitInfo;
+
+    /*
+        git_url is always returned.  Every other field
+        may or may not exist depending on what has been registered or if
+        certain registrations have failed
+    */
     typedef structure {
         string module_name;
         string git_url;
-    } BasicModuleInfo;
-    /*
-    To Add:
-        string brief_description;
+
+        string language;
+        boolean dynamic_service;
+
         list <string> owners;
-        boolean is_released;
-    */
+
+        VersionCommitInfo dev;
+        VersionCommitInfo beta;
+        VersionCommitInfo release;
+
+        list <VersionCommitInfo> released_version_list;
+    } BasicModuleInfo;
 
     /* */
     funcdef list_basic_module_info(ListModuleParams params) returns (list<BasicModuleInfo> info_list);
@@ -147,10 +162,32 @@ module Catalog {
     } FunctionPlace;
 
     typedef structure {
+        string type;
+        string comment;
+    } Parameter;
+
+    typedef structure {
+        string name;
+        string comment;
+        FunctionPlace place;
+        list<Parameter> input;
+        list<Parameter> output;
+    } Function;
+
+    typedef structure {
+        string file_name;
+        string content;
+        boolean is_main;
+    } SpecFile;
+
+    typedef structure {
+        string module_name;
         string sdk_version;
         string sdk_git_commit;
         string impl_file_path;
         mapping<string, FunctionPlace> function_places;
+        mapping<string, Function> functions;
+        list<SpecFile> spec_files;
     } CompilationReport;
 
     /*
@@ -678,14 +715,70 @@ module Catalog {
         list<string> client_groups;
     } AppClientGroup;
 
-    funcdef set_client_group(AppClientGroup group) returns () authentication required;
-
     /* if app_ids is empty or null, all client groups are returned */
     typedef structure {
-        list<string> app_ids;
     } GetClientGroupParams;
 
+    /* @deprecated list_client_group_configs */
     funcdef get_client_groups(GetClientGroupParams params) returns (list<AppClientGroup> groups);
+
+
+
+    typedef structure {
+        string module_name;
+        string function_name;
+        list<string> client_groups;
+    } ClientGroupConfig;
+
+    funcdef set_client_group_config(ClientGroupConfig config) returns () authentication required;
+
+    funcdef remove_client_group_config(ClientGroupConfig config) returns () authentication required;
+
+    typedef structure {
+        string module_name;
+        string function_name;
+    } ClientGroupFilter;
+
+    funcdef list_client_group_configs(ClientGroupFilter filter) returns (list<ClientGroupConfig> groups);
+
+
+
+    typedef structure {
+        string host_dir;
+        string container_dir;
+        boolean read_only;
+    } VolumeMount;
+
+    /* for a module, function, and client group, set mount configurations */
+    typedef structure {
+        string module_name;
+        string function_name;
+        string client_group;
+
+        list <VolumeMount> volume_mounts;
+    } VolumeMountConfig;
+
+    /* must specify all properties of the VolumeMountConfig */
+    funcdef set_volume_mount(VolumeMountConfig config) returns () authentication required;
+
+    /* must specify module_name, function_name, client_group and this method will delete any configured mounts */
+    funcdef remove_volume_mount(VolumeMountConfig config) returns () authentication required;
+
+    /*
+        Parameters for listing VolumeMountConfigs.  If nothing is set, everything is
+        returned.  Otherwise, will return everything that matches all fields set.  For
+        instance, if only module_name is set, will return everything for that module.  If
+        they are all set, will return the specific module/app/client group config.  Returns
+        nothing if no matches are found.
+    */
+    typedef structure {
+        string module_name;
+        string function_name;
+        string client_group;
+    } VolumeMountFilter;
+    
+    funcdef list_volume_mounts(VolumeMountFilter filter)
+                returns (list<VolumeMountConfig> volume_mount_configs) authentication required;
 
     /* returns true (1) if the user is an admin, false (0) otherwise */
     funcdef is_admin(string username) returns (boolean); 
