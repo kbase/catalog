@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #BEGIN_HEADER
 from pprint import pprint
 from biokbase.catalog.controller import CatalogController
@@ -20,8 +21,8 @@ class Catalog:
     # the latter method is running.
     #########################################
     VERSION = "0.0.1"
-    GIT_URL = "git@github.com:kbase/catalog.git"
-    GIT_COMMIT_HASH = "fb01cbdd9c1f3e5861e843314640e493ae16bb76"
+    GIT_URL = "https://github.com/mrcreosote/catalog"
+    GIT_COMMIT_HASH = "35a34cbc8a7df705e3e3227bf0c4745f79ef8bd9"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
