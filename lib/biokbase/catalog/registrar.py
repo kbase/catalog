@@ -28,7 +28,7 @@ class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
-    def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
+    def __init__(self, params, registration_id, timestamp, username, is_admin,token, db, temp_dir, docker_base_url, 
                     docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_user, nms_admin_psswd, module_details,
                     ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
@@ -39,6 +39,7 @@ class Registrar:
         self.registration_id = registration_id
         self.timestamp = timestamp
         self.username = username
+        self.is_admin = is_admin
         self.token = token
         self.db = db
         self.temp_dir = temp_dir
@@ -283,7 +284,7 @@ class Registrar:
         self.db.set_build_log_module_name(self.registration_id, module_name)
 
         # you can't remove yourself from the owners list, or register something that you are not an owner of
-        if self.username not in owners:
+        if self.username not in owners and is_admin is False:
             raise ValueError('Your kbase username ('+self.username+') must be in the owners list in the kbase.yaml file.')
 
         # OPTIONAL TODO: check if all the users are on the owners list?  not necessarily required, because we
