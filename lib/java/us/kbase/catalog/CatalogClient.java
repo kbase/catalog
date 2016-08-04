@@ -42,19 +42,6 @@ public class CatalogClient {
         caller = new JsonClientCaller(url, token);
     }
 
-    /** Constructs a client with a custom URL
-     * and a custom authorization service URL.
-     * @param url the URL of the service.
-     * @param token the user's authorization token.
-     * @param auth the URL of the authorization server.
-     * @throws UnauthorizedException if the token is not valid.
-     * @throws IOException if an IOException occurs when checking the token's
-     * validity.
-     */
-    public CatalogClient(URL url, AuthToken token, URL auth) throws UnauthorizedException, IOException {
-        caller = new JsonClientCaller(url, token, auth);
-    }
-
     /** Constructs a client with a custom URL.
      * @param url the URL of the service.
      * @param user the user name.

@@ -22,7 +22,7 @@ class Catalog:
     #########################################
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/mrcreosote/catalog"
-    GIT_COMMIT_HASH = "35a34cbc8a7df705e3e3227bf0c4745f79ef8bd9"
+    GIT_COMMIT_HASH = "e2e1ccec3e9441ec62d189962190a6bcd9ceb7a8"
     
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
