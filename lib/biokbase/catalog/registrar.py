@@ -284,7 +284,7 @@ class Registrar:
         self.db.set_build_log_module_name(self.registration_id, module_name)
 
         # you can't remove yourself from the owners list, or register something that you are not an owner of
-        if self.username not in owners and is_admin is False:
+        if self.username not in owners and self.is_admin is False:
             raise ValueError('Your kbase username ('+self.username+') must be in the owners list in the kbase.yaml file.')
 
         # OPTIONAL TODO: check if all the users are on the owners list?  not necessarily required, because we
