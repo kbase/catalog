@@ -106,7 +106,6 @@ class CatalogController:
             nmsuser = config.get('nms-admin-user')
             nmspwd = config.get('nms-admin-psswd')
             if not nmsuser or not nmspwd:  # pragma: no cover
-                print config
                 raise ValueError('if nms-admin-token is not specified in ' +
                                  'the config, nms-admin-user and ' +
                                  'nms-admin-psswd must be')
