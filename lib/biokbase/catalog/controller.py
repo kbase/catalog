@@ -11,6 +11,7 @@ import re
 import uuid
 
 import biokbase.catalog.version
+from biokbase.catalog.Client import Catalog
 
 from pprint import pprint
 from datetime import datetime
@@ -98,15 +99,28 @@ class CatalogController:
         if 'nms-url' not in config: # pragma: no cover
             raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
         self.nms_url = config['nms-url']
-        if 'nms-admin-user' not in config: # pragma: no cover
-            raise ValueError('"nms-admin-user" config variable must be defined to start a CatalogController!')
-        self.nms_admin_user = config['nms-admin-user']
-        if 'nms-admin-psswd' not in config: # pragma: no cover
-            raise ValueError('"nms-admin-psswd" config variable must be defined to start a CatalogController!')
-        self.nms_admin_psswd = config['nms-admin-psswd']
+        nmstoken = config.get('nms-admin-token')
+        if nmstoken:  # pragma: no cover
+            self.nms_token = nmstoken
+        else:  # pragma: no cover
+            nmsuser = config.get('nms-admin-user')
+            nmspwd = config.get('nms-admin-psswd')
+            if not nmsuser or not nmspwd:  # pragma: no cover
+                raise ValueError('if nms-admin-token is not specified in ' +
+                                 'the config, nms-admin-user and ' +
+                                 'nms-admin-psswd must be')
+            self.nms_token = self.get_token(nmsuser, nmspwd,
+                                            config.get('auth-server-url'))
 
-        self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+        self.nms = NarrativeMethodStore(self.nms_url, token=self.nms_token)
 
+    def get_token(self, user, pwd, authurl):
+        if authurl:  # pragma: no cover
+            nms = Catalog(self.nms_url, user_id=user,
+                          password=pwd, auth_svc=authurl)
+        else:
+            nms = Catalog(self.nms_url, user_id=user, password=pwd)
+        return nms._client._headers['AUTHORIZATION']
 
     def register_repo(self, params, username, token):
 
@@ -181,7 +195,7 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.docker_push_allow_insecure, self.nms_url, self.nms_admin_user, self.nms_admin_psswd, module_details, self.ref_data_base, self.kbase_endpoint,
+            self.docker_registry_host, self.docker_push_allow_insecure, self.nms_url, self.nms_token, module_details, self.ref_data_base, self.kbase_endpoint,
             prev_dev_version))
         t.start()
 
@@ -1438,9 +1452,9 @@ class CatalogController:
 # NOT PART OF CLASS CATALOG!!
 def _start_registration(params,registration_id, timestamp,username,token, db, temp_dir, docker_base_url, docker_registry_host,
                         docker_push_allow_insecure,
-                        nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
+                        nms_url, nms_admin_token, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
     registrar = Registrar(params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, docker_registry_host,
                             docker_push_allow_insecure, 
-                            nms_url, nms_admin_user, nms_admin_psswd, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
+                            nms_url, nms_admin_token, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
     registrar.start_registration()
 
