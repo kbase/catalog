@@ -74,10 +74,12 @@ class CatalogTestUtil:
             'docker-registry-host':self.test_cfg['docker-registry-host'],
             'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
             'nms-url':self.test_cfg['nms-url'],
-            'nms-admin-user':self.test_cfg['nms-admin-user'],
-            'nms-admin-psswd':self.test_cfg['nms-admin-psswd'],
+            'nms-admin-user':self.test_cfg.get('nms-admin-user', ''),
+            'nms-admin-psswd':self.test_cfg.get('nms-admin-psswd', ''),
+            'nms-admin-token': self.test_cfg.get('nms-admin-token', ''),
             'ref-data-base':self.test_cfg['ref-data-base'],
-            'kbase-endpoint':self.test_cfg['kbase-endpoint']
+            'kbase-endpoint':self.test_cfg['kbase-endpoint'],
+            'auth-service-url': self.test_cfg.get('auth-service-url', '')
         }
 
     def _init_db_handles(self):

@@ -4,11 +4,15 @@
 # TO RUN TESTS:
 #  1) copy this file to test.cfg
 #  2) fill in the mongodb-host url in both [catalog-test] and [NarrativeMethodStore]
-#  3) set the nms-admin-user and nms-admin-password to a kb user that matches the 
-#      method-spec-admin-users list in [NarrativeMethodStore section]
+#  3) set the nms-admin-user and nms-admin-password or nms-admin-token to a
+#      kb user that matches the method-spec-admin-users list in
+#      the [NarrativeMethodStore section]
 # 
 
 [catalog-test]
+
+# The KBase auth server url.
+auth-server-url = https://kbase.us/services/authorization/Sessions/Login
 
 # user accounts for testing (should be different accounts)
 test-user-1 = wstester1
@@ -34,10 +38,12 @@ docker-base-url = unix://var/run/docker.sock
 # temporary fix for travis- no longer needed
 docker-push-allow-insecure = 0
 
-#Narrative Method Store configuration
+# Narrative Method Store configuration. Provide either a token or a uid/pwd.
+# If both are provided, the token is used.
 nms-url = http://localhost:7125
 nms-admin-user = wstester4
-nms-admin-psswd = 
+nms-admin-psswd =
+nms-admin-token = 
 
 # configs for reference data
 ref-data-base = /kb/data

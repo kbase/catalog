@@ -29,7 +29,7 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, is_admin,token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_user, nms_admin_psswd, module_details,
+                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_token, module_details,
                     ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
@@ -48,10 +48,8 @@ class Registrar:
         self.docker_push_allow_insecure = docker_push_allow_insecure
 
         self.nms_url = nms_url
-        self.nms_admin_user = nms_admin_user
-        self.nms_admin_psswd = nms_admin_psswd
 
-        self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+        self.nms = NarrativeMethodStore(self.nms_url, token=nms_admin_token)
 
         self.local_function_reader = LocalFunctionReader()
 
