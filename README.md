@@ -11,9 +11,11 @@ Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
 
-#### v2.0.5 - TBA
+#### v2.0.5 - 9/12/16
   - Added volume mount configuration
   - Modified client group configurations so that functions are specified, not app_ids
+  - Allow admin users to register modules
+  - Initial porting to new KBase authentication clients
 
 #### v2.0.3 - 5/31/16
   - Major release to support storage of local functions and dynamic services information,
