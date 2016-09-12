@@ -1,0 +1,59 @@
+[
+{
+    "module_name" : "VolMountModTest1",
+    "module_name_lc" : "volmountmodtest1",
+    "client_group" : "G1",
+    "function_name": "func1",
+    "volume_mounts" : [
+        {
+            "host_dir" : "/home/wstester1",
+            "container_dir" : "/mnt/tmp",
+            "read_only" : 1
+        },
+        {
+            "host_dir" : "/home/wstester2",
+            "container_dir" : "/mnt/tmp",
+            "read_only" : 0
+        }
+    ]
+},
+{
+    "module_name" : "VolMountModTest2",
+    "module_name_lc" : "volmountmodtest2",
+    "client_group" : "G2",
+    "app_id": "func1",
+    "volume_mounts" : [
+        {
+            "host_dir" : "/home/wstester1",
+            "container_dir" : "/mnt/tmp2",
+            "read_only" : 0
+        }
+    ]
+},
+{
+    "module_name" : "VolMountModTest2",
+    "module_name_lc" : "volmountmodtest2",
+    "client_group" : "G3",
+    "app_id": "func1",
+    "volume_mounts" : [
+        {
+            "host_dir" : "/home/2/wstester1",
+            "container_dir" : "/mnt/tmp",
+            "read_only" : 1
+        }
+    ]
+},
+{
+    "module_name" : "VolMountModTest2",
+    "module_name_lc" : "volmountmodtest2",
+    "client_group" : "G3",
+    "function_name": "func2",
+    "volume_mounts" : [
+        {
+            "host_dir" : "/home/2/wstester1",
+            "container_dir" : "/mnt/tmp",
+            "read_only" : 1
+        }
+    ]
+}
+]

@@ -7,6 +7,7 @@ import time
 import datetime
 import pprint
 import json
+import codecs
 import semantic_version
 
 #import git
@@ -27,8 +28,8 @@ class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
-    def __init__(self, params, registration_id, timestamp, username, token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_user, nms_admin_psswd, module_details,
+    def __init__(self, params, registration_id, timestamp, username, is_admin,token, db, temp_dir, docker_base_url, 
+                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_token, module_details,
                     ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
@@ -38,6 +39,7 @@ class Registrar:
         self.registration_id = registration_id
         self.timestamp = timestamp
         self.username = username
+        self.is_admin = is_admin
         self.token = token
         self.db = db
         self.temp_dir = temp_dir
@@ -46,10 +48,8 @@ class Registrar:
         self.docker_push_allow_insecure = docker_push_allow_insecure
 
         self.nms_url = nms_url
-        self.nms_admin_user = nms_admin_user
-        self.nms_admin_psswd = nms_admin_psswd
 
-        self.nms = NarrativeMethodStore(self.nms_url,user_id=self.nms_admin_user,password=self.nms_admin_psswd)
+        self.nms = NarrativeMethodStore(self.nms_url, token=nms_admin_token)
 
         self.local_function_reader = LocalFunctionReader()
 
@@ -242,7 +242,8 @@ class Registrar:
             else:
                 yaml_filename = 'kbase.yml'
         # parse some stuff, and check for things
-        with open(os.path.join(basedir,yaml_filename)) as kb_yaml_file:
+
+        with codecs.open(os.path.join(basedir,yaml_filename), 'r', "utf-8", errors='ignore') as kb_yaml_file:
             kb_yaml_string = kb_yaml_file.read()
         self.kb_yaml = yaml.load(kb_yaml_string)
         self.log('=====kbase.yaml parse:')
@@ -281,7 +282,7 @@ class Registrar:
         self.db.set_build_log_module_name(self.registration_id, module_name)
 
         # you can't remove yourself from the owners list, or register something that you are not an owner of
-        if self.username not in owners:
+        if self.username not in owners and self.is_admin is False:
             raise ValueError('Your kbase username ('+self.username+') must be in the owners list in the kbase.yaml file.')
 
         # OPTIONAL TODO: check if all the users are on the owners list?  not necessarily required, because we
@@ -429,9 +430,10 @@ class Registrar:
                         raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
                     if not os.path.isfile(os.path.join(method_path,'display.yaml')):
                         raise ValueError('Invalid narrative method specification ('+m+'): No spec.json file defined.')
-                    with open(os.path.join(method_path,'spec.json')) as spec_json_file:
+
+                    with codecs.open(os.path.join(method_path,'spec.json'), 'r', "utf-8", errors='ignore') as spec_json_file:
                         spec_json = spec_json_file.read()
-                    with open(os.path.join(method_path,'display.yaml')) as display_yaml_file:
+                    with codecs.open(os.path.join(method_path,'display.yaml'), 'r', "utf-8", errors='ignore') as display_yaml_file:
                         display_yaml = display_yaml_file.read()
 
                     # gather any extra html files
@@ -439,7 +441,7 @@ class Registrar:
                     for extra_file_name in os.listdir(os.path.join(method_path)):
                         if not os.path.isfile(os.path.join(method_path,extra_file_name)): break
                         if not extra_file_name.endswith('.html'): break
-                        with open(os.path.join(method_path,extra_file_name)) as extra_file:
+                        with codecs.open(oos.path.join(method_path,extra_file_name), 'r', "utf-8", errors='ignore') as extra_file: 
                             extrafiles[extra_file_name] = extra_file.read()
 
                     # validate against the NMS target endpoint

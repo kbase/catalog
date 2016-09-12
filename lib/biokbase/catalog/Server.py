@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from wsgiref.simple_server import make_server
 import sys
 import json
@@ -12,17 +13,17 @@ from jsonrpcbase import ServerError as JSONServerError
 from os import environ
 from ConfigParser import ConfigParser
 from biokbase import log
-import biokbase.nexus
 import requests as _requests
-import urlparse as _urlparse
 import random as _random
 import os
-import requests.packages.urllib3
+from biokbase.catalog.authclient import KBaseAuth as _KBaseAuth
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
+AUTH = 'auth-server-url'
 
 # Note that the error fields do not match the 2.0 JSONRPC spec
+
 
 def get_config_file():
     return environ.get(DEPLOY, None)
@@ -44,7 +45,7 @@ def get_config():
 
 config = get_config()
 
-from biokbase.catalog.Impl import Catalog
+from biokbase.catalog.Impl import Catalog  # @IgnorePep8
 impl_Catalog = Catalog(config)
 
 
@@ -58,190 +59,6 @@ class JSONObjectEncoder(json.JSONEncoder):
         if hasattr(obj, 'toJSONable'):
             return obj.toJSONable()
         return json.JSONEncoder.default(self, obj)
-
-sync_methods = {}
-async_run_methods = {}
-async_check_methods = {}
-async_run_methods['Catalog.version_async'] = ['Catalog', 'version']
-async_check_methods['Catalog.version_check'] = ['Catalog', 'version']
-sync_methods['Catalog.version'] = True
-async_run_methods['Catalog.is_registered_async'] = ['Catalog', 'is_registered']
-async_check_methods['Catalog.is_registered_check'] = ['Catalog', 'is_registered']
-sync_methods['Catalog.is_registered'] = True
-async_run_methods['Catalog.register_repo_async'] = ['Catalog', 'register_repo']
-async_check_methods['Catalog.register_repo_check'] = ['Catalog', 'register_repo']
-sync_methods['Catalog.register_repo'] = True
-async_run_methods['Catalog.push_dev_to_beta_async'] = ['Catalog', 'push_dev_to_beta']
-async_check_methods['Catalog.push_dev_to_beta_check'] = ['Catalog', 'push_dev_to_beta']
-sync_methods['Catalog.push_dev_to_beta'] = True
-async_run_methods['Catalog.request_release_async'] = ['Catalog', 'request_release']
-async_check_methods['Catalog.request_release_check'] = ['Catalog', 'request_release']
-sync_methods['Catalog.request_release'] = True
-async_run_methods['Catalog.list_requested_releases_async'] = ['Catalog', 'list_requested_releases']
-async_check_methods['Catalog.list_requested_releases_check'] = ['Catalog', 'list_requested_releases']
-sync_methods['Catalog.list_requested_releases'] = True
-async_run_methods['Catalog.review_release_request_async'] = ['Catalog', 'review_release_request']
-async_check_methods['Catalog.review_release_request_check'] = ['Catalog', 'review_release_request']
-sync_methods['Catalog.review_release_request'] = True
-async_run_methods['Catalog.list_basic_module_info_async'] = ['Catalog', 'list_basic_module_info']
-async_check_methods['Catalog.list_basic_module_info_check'] = ['Catalog', 'list_basic_module_info']
-sync_methods['Catalog.list_basic_module_info'] = True
-async_run_methods['Catalog.add_favorite_async'] = ['Catalog', 'add_favorite']
-async_check_methods['Catalog.add_favorite_check'] = ['Catalog', 'add_favorite']
-sync_methods['Catalog.add_favorite'] = True
-async_run_methods['Catalog.remove_favorite_async'] = ['Catalog', 'remove_favorite']
-async_check_methods['Catalog.remove_favorite_check'] = ['Catalog', 'remove_favorite']
-sync_methods['Catalog.remove_favorite'] = True
-async_run_methods['Catalog.list_favorites_async'] = ['Catalog', 'list_favorites']
-async_check_methods['Catalog.list_favorites_check'] = ['Catalog', 'list_favorites']
-sync_methods['Catalog.list_favorites'] = True
-async_run_methods['Catalog.list_app_favorites_async'] = ['Catalog', 'list_app_favorites']
-async_check_methods['Catalog.list_app_favorites_check'] = ['Catalog', 'list_app_favorites']
-sync_methods['Catalog.list_app_favorites'] = True
-async_run_methods['Catalog.list_favorite_counts_async'] = ['Catalog', 'list_favorite_counts']
-async_check_methods['Catalog.list_favorite_counts_check'] = ['Catalog', 'list_favorite_counts']
-sync_methods['Catalog.list_favorite_counts'] = True
-async_run_methods['Catalog.get_module_info_async'] = ['Catalog', 'get_module_info']
-async_check_methods['Catalog.get_module_info_check'] = ['Catalog', 'get_module_info']
-sync_methods['Catalog.get_module_info'] = True
-async_run_methods['Catalog.get_version_info_async'] = ['Catalog', 'get_version_info']
-async_check_methods['Catalog.get_version_info_check'] = ['Catalog', 'get_version_info']
-sync_methods['Catalog.get_version_info'] = True
-async_run_methods['Catalog.list_released_module_versions_async'] = ['Catalog', 'list_released_module_versions']
-async_check_methods['Catalog.list_released_module_versions_check'] = ['Catalog', 'list_released_module_versions']
-sync_methods['Catalog.list_released_module_versions'] = True
-async_run_methods['Catalog.get_module_version_async'] = ['Catalog', 'get_module_version']
-async_check_methods['Catalog.get_module_version_check'] = ['Catalog', 'get_module_version']
-sync_methods['Catalog.get_module_version'] = True
-async_run_methods['Catalog.list_local_functions_async'] = ['Catalog', 'list_local_functions']
-async_check_methods['Catalog.list_local_functions_check'] = ['Catalog', 'list_local_functions']
-sync_methods['Catalog.list_local_functions'] = True
-async_run_methods['Catalog.get_local_function_details_async'] = ['Catalog', 'get_local_function_details']
-async_check_methods['Catalog.get_local_function_details_check'] = ['Catalog', 'get_local_function_details']
-sync_methods['Catalog.get_local_function_details'] = True
-async_run_methods['Catalog.module_version_lookup_async'] = ['Catalog', 'module_version_lookup']
-async_check_methods['Catalog.module_version_lookup_check'] = ['Catalog', 'module_version_lookup']
-sync_methods['Catalog.module_version_lookup'] = True
-async_run_methods['Catalog.list_service_modules_async'] = ['Catalog', 'list_service_modules']
-async_check_methods['Catalog.list_service_modules_check'] = ['Catalog', 'list_service_modules']
-sync_methods['Catalog.list_service_modules'] = True
-async_run_methods['Catalog.set_registration_state_async'] = ['Catalog', 'set_registration_state']
-async_check_methods['Catalog.set_registration_state_check'] = ['Catalog', 'set_registration_state']
-sync_methods['Catalog.set_registration_state'] = True
-async_run_methods['Catalog.get_module_state_async'] = ['Catalog', 'get_module_state']
-async_check_methods['Catalog.get_module_state_check'] = ['Catalog', 'get_module_state']
-sync_methods['Catalog.get_module_state'] = True
-async_run_methods['Catalog.get_build_log_async'] = ['Catalog', 'get_build_log']
-async_check_methods['Catalog.get_build_log_check'] = ['Catalog', 'get_build_log']
-sync_methods['Catalog.get_build_log'] = True
-async_run_methods['Catalog.get_parsed_build_log_async'] = ['Catalog', 'get_parsed_build_log']
-async_check_methods['Catalog.get_parsed_build_log_check'] = ['Catalog', 'get_parsed_build_log']
-sync_methods['Catalog.get_parsed_build_log'] = True
-async_run_methods['Catalog.list_builds_async'] = ['Catalog', 'list_builds']
-async_check_methods['Catalog.list_builds_check'] = ['Catalog', 'list_builds']
-sync_methods['Catalog.list_builds'] = True
-async_run_methods['Catalog.delete_module_async'] = ['Catalog', 'delete_module']
-async_check_methods['Catalog.delete_module_check'] = ['Catalog', 'delete_module']
-sync_methods['Catalog.delete_module'] = True
-async_run_methods['Catalog.migrate_module_to_new_git_url_async'] = ['Catalog', 'migrate_module_to_new_git_url']
-async_check_methods['Catalog.migrate_module_to_new_git_url_check'] = ['Catalog', 'migrate_module_to_new_git_url']
-sync_methods['Catalog.migrate_module_to_new_git_url'] = True
-async_run_methods['Catalog.set_to_active_async'] = ['Catalog', 'set_to_active']
-async_check_methods['Catalog.set_to_active_check'] = ['Catalog', 'set_to_active']
-sync_methods['Catalog.set_to_active'] = True
-async_run_methods['Catalog.set_to_inactive_async'] = ['Catalog', 'set_to_inactive']
-async_check_methods['Catalog.set_to_inactive_check'] = ['Catalog', 'set_to_inactive']
-sync_methods['Catalog.set_to_inactive'] = True
-async_run_methods['Catalog.is_approved_developer_async'] = ['Catalog', 'is_approved_developer']
-async_check_methods['Catalog.is_approved_developer_check'] = ['Catalog', 'is_approved_developer']
-sync_methods['Catalog.is_approved_developer'] = True
-async_run_methods['Catalog.list_approved_developers_async'] = ['Catalog', 'list_approved_developers']
-async_check_methods['Catalog.list_approved_developers_check'] = ['Catalog', 'list_approved_developers']
-sync_methods['Catalog.list_approved_developers'] = True
-async_run_methods['Catalog.approve_developer_async'] = ['Catalog', 'approve_developer']
-async_check_methods['Catalog.approve_developer_check'] = ['Catalog', 'approve_developer']
-sync_methods['Catalog.approve_developer'] = True
-async_run_methods['Catalog.revoke_developer_async'] = ['Catalog', 'revoke_developer']
-async_check_methods['Catalog.revoke_developer_check'] = ['Catalog', 'revoke_developer']
-sync_methods['Catalog.revoke_developer'] = True
-async_run_methods['Catalog.log_exec_stats_async'] = ['Catalog', 'log_exec_stats']
-async_check_methods['Catalog.log_exec_stats_check'] = ['Catalog', 'log_exec_stats']
-sync_methods['Catalog.log_exec_stats'] = True
-async_run_methods['Catalog.get_exec_aggr_stats_async'] = ['Catalog', 'get_exec_aggr_stats']
-async_check_methods['Catalog.get_exec_aggr_stats_check'] = ['Catalog', 'get_exec_aggr_stats']
-sync_methods['Catalog.get_exec_aggr_stats'] = True
-async_run_methods['Catalog.get_exec_aggr_table_async'] = ['Catalog', 'get_exec_aggr_table']
-async_check_methods['Catalog.get_exec_aggr_table_check'] = ['Catalog', 'get_exec_aggr_table']
-sync_methods['Catalog.get_exec_aggr_table'] = True
-async_run_methods['Catalog.get_exec_raw_stats_async'] = ['Catalog', 'get_exec_raw_stats']
-async_check_methods['Catalog.get_exec_raw_stats_check'] = ['Catalog', 'get_exec_raw_stats']
-sync_methods['Catalog.get_exec_raw_stats'] = True
-async_run_methods['Catalog.set_client_group_async'] = ['Catalog', 'set_client_group']
-async_check_methods['Catalog.set_client_group_check'] = ['Catalog', 'set_client_group']
-sync_methods['Catalog.set_client_group'] = True
-async_run_methods['Catalog.get_client_groups_async'] = ['Catalog', 'get_client_groups']
-async_check_methods['Catalog.get_client_groups_check'] = ['Catalog', 'get_client_groups']
-sync_methods['Catalog.get_client_groups'] = True
-async_run_methods['Catalog.is_admin_async'] = ['Catalog', 'is_admin']
-async_check_methods['Catalog.is_admin_check'] = ['Catalog', 'is_admin']
-sync_methods['Catalog.is_admin'] = True
-
-class AsyncJobServiceClient(object):
-
-    def __init__(self, timeout=30 * 60, token=None,
-                 ignore_authrc=True, trust_all_ssl_certificates=False):
-        url = environ.get('KB_JOB_SERVICE_URL', None)
-        if url is None and config is not None:
-            url = config.get('job-service-url')
-        if url is None:
-            raise ValueError('Neither \'job-service-url\' parameter is defined in '+
-                    'configuration nor \'KB_JOB_SERVICE_URL\' variable is defined in system')
-        scheme, _, _, _, _, _ = _urlparse.urlparse(url)
-        if scheme not in ['http', 'https']:
-            raise ValueError(url + " isn't a valid http url")
-        self.url = url
-        self.timeout = int(timeout)
-        self._headers = dict()
-        self.trust_all_ssl_certificates = trust_all_ssl_certificates
-        if token is None:
-            raise ValueError('Authentication is required for async methods')        
-        self._headers['AUTHORIZATION'] = token
-        if self.timeout < 1:
-            raise ValueError('Timeout value must be at least 1 second')
-
-    def _call(self, method, params, json_rpc_call_context = None):
-        arg_hash = {'method': method,
-                    'params': params,
-                    'version': '1.1',
-                    'id': str(_random.random())[2:]
-                    }
-        if json_rpc_call_context:
-            arg_hash['context'] = json_rpc_call_context
-        body = json.dumps(arg_hash, cls=JSONObjectEncoder)
-        ret = _requests.post(self.url, data=body, headers=self._headers,
-                             timeout=self.timeout,
-                             verify=not self.trust_all_ssl_certificates)
-        if ret.status_code == _requests.codes.server_error:
-            if 'content-type' in ret.headers and ret.headers['content-type'] == 'application/json':
-                err = json.loads(ret.text)
-                if 'error' in err:
-                    raise ServerError(**err['error'])
-                else:
-                    raise ServerError('Unknown', 0, ret.text)
-            else:
-                raise ServerError('Unknown', 0, ret.text)
-        if ret.status_code != _requests.codes.OK:
-            ret.raise_for_status()
-        resp = json.loads(ret.text)
-        if 'result' not in resp:
-            raise ServerError('Unknown', 0, 'An unknown server error occurred')
-        return resp['result']
-
-    def run_job(self, run_job_params, json_rpc_call_context = None):
-        return self._call('KBaseJobService.run_job', [run_job_params], json_rpc_call_context)[0]
-
-    def check_job(self, job_id, json_rpc_call_context = None):
-        return self._call('KBaseJobService.check_job', [job_id], json_rpc_call_context)[0]
 
 
 class JSONRPCServiceCustom(JSONRPCService):
@@ -664,14 +481,34 @@ class Application(object):
                              name='Catalog.get_exec_raw_stats',
                              types=[dict])
         self.method_authentication['Catalog.get_exec_raw_stats'] = 'required'
-        self.rpc_service.add(impl_Catalog.set_client_group,
-                             name='Catalog.set_client_group',
-                             types=[dict])
-        self.method_authentication['Catalog.set_client_group'] = 'required'
         self.rpc_service.add(impl_Catalog.get_client_groups,
                              name='Catalog.get_client_groups',
                              types=[dict])
         self.method_authentication['Catalog.get_client_groups'] = 'none'
+        self.rpc_service.add(impl_Catalog.set_client_group_config,
+                             name='Catalog.set_client_group_config',
+                             types=[dict])
+        self.method_authentication['Catalog.set_client_group_config'] = 'required'
+        self.rpc_service.add(impl_Catalog.remove_client_group_config,
+                             name='Catalog.remove_client_group_config',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_client_group_config'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_client_group_configs,
+                             name='Catalog.list_client_group_configs',
+                             types=[dict])
+        self.method_authentication['Catalog.list_client_group_configs'] = 'none'
+        self.rpc_service.add(impl_Catalog.set_volume_mount,
+                             name='Catalog.set_volume_mount',
+                             types=[dict])
+        self.method_authentication['Catalog.set_volume_mount'] = 'required'
+        self.rpc_service.add(impl_Catalog.remove_volume_mount,
+                             name='Catalog.remove_volume_mount',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_volume_mount'] = 'required'
+        self.rpc_service.add(impl_Catalog.list_volume_mounts,
+                             name='Catalog.list_volume_mounts',
+                             types=[dict])
+        self.method_authentication['Catalog.list_volume_mounts'] = 'required'
         self.rpc_service.add(impl_Catalog.is_admin,
                              name='Catalog.is_admin',
                              types=[basestring])
@@ -679,11 +516,8 @@ class Application(object):
         self.rpc_service.add(impl_Catalog.status,
                              name='Catalog.status',
                              types=[dict])
-        self.auth_client = biokbase.nexus.Client(
-            config={'server': 'nexus.api.globusonline.org',
-                    'verify_ssl': True,
-                    'client': None,
-                    'client_secret': None})
+        authurl = config.get(AUTH) if config else None
+        self.auth_client = _KBaseAuth(authurl)
 
     def __call__(self, environ, start_response):
         # Context object, equivalent to the perl impl CallContext
@@ -713,33 +547,35 @@ class Application(object):
             else:
                 ctx['module'], ctx['method'] = req['method'].split('.')
                 ctx['call_id'] = req['id']
-                ctx['rpc_context'] = {'call_stack': [{'time':self.now_in_utc(), 'method': req['method']}]}
-                prov_action = {'service': ctx['module'], 'method': ctx['method'], 
-                               'method_params': req['params']}
+                ctx['rpc_context'] = {
+                    'call_stack': [{'time': self.now_in_utc(),
+                                    'method': req['method']}
+                                   ]
+                }
+                prov_action = {'service': ctx['module'],
+                               'method': ctx['method'],
+                               'method_params': req['params']
+                               }
                 ctx['provenance'] = [prov_action]
                 try:
                     token = environ.get('HTTP_AUTHORIZATION')
                     # parse out the method being requested and check if it
                     # has an authentication requirement
                     method_name = req['method']
-                    if method_name in async_run_methods:
-                        method_name = async_run_methods[method_name][0] + "." + async_run_methods[method_name][1]
-                    if method_name in async_check_methods:
-                        method_name = async_check_methods[method_name][0] + "." + async_check_methods[method_name][1]
-                    auth_req = self.method_authentication.get(method_name,
-                                                              "none")
-                    if auth_req != "none":
+                    auth_req = self.method_authentication.get(
+                        method_name, 'none')
+                    if auth_req != 'none':
                         if token is None and auth_req == 'required':
                             err = JSONServerError()
-                            err.data = "Authentication required for " + \
-                                "Catalog but no authentication header was passed"
+                            err.data = (
+                                'Authentication required for Catalog ' +
+                                'but no authentication header was passed')
                             raise err
                         elif token is None and auth_req == 'optional':
                             pass
                         else:
                             try:
-                                user, _, _ = \
-                                    self.auth_client.validate_token(token)
+                                user = self.auth_client.get_user(token)
                                 ctx['user_id'] = user
                                 ctx['authenticated'] = 1
                                 ctx['token'] = token
@@ -752,50 +588,10 @@ class Application(object):
                     if (environ.get('HTTP_X_FORWARDED_FOR')):
                         self.log(log.INFO, ctx, 'X-Forwarded-For: ' +
                                  environ.get('HTTP_X_FORWARDED_FOR'))
-                    method_name = req['method']
-                    if method_name in async_run_methods or method_name in async_check_methods:
-                        if method_name in async_run_methods:
-                            orig_method_pair = async_run_methods[method_name]
-                        else:
-                            orig_method_pair = async_check_methods[method_name]
-                        orig_method_name = orig_method_pair[0] + '.' + orig_method_pair[1]
-                        if 'required' != self.method_authentication.get(orig_method_name, 'none'):
-                            err = JSONServerError()
-                            err.data = 'Async method ' + orig_method_name + ' should require ' + \
-                                'authentication, but it has authentication level: ' + \
-                                self.method_authentication.get(orig_method_name, 'none')
-                            raise err
-                        job_service_client = AsyncJobServiceClient(token = ctx['token'])
-                        if method_name in async_run_methods:
-                            run_job_params = {
-                                'method': orig_method_name,
-                                'params': req['params']}
-                            if 'rpc_context' in ctx:
-                                run_job_params['rpc_context'] = ctx['rpc_context']
-                            job_id = job_service_client.run_job(run_job_params)
-                            respond = {'version': '1.1', 'result': [job_id], 'id': req['id']}
-                            rpc_result = json.dumps(respond, cls=JSONObjectEncoder)
-                            status = '200 OK'
-                        else:
-                            job_id = req['params'][0]
-                            job_state = job_service_client.check_job(job_id)
-                            finished = job_state['finished']
-                            if finished != 0 and 'error' in job_state and job_state['error'] is not None:
-                                err = {'error': job_state['error']}
-                                rpc_result = self.process_error(err, ctx, req, None)
-                            else:
-                                respond = {'version': '1.1', 'result': [job_state], 'id': req['id']}
-                                rpc_result = json.dumps(respond, cls=JSONObjectEncoder)
-                                status = '200 OK'
-                    elif method_name in sync_methods or (method_name + '_async') not in async_run_methods:
-                        self.log(log.INFO, ctx, 'start method')
-                        rpc_result = self.rpc_service.call(ctx, req)
-                        self.log(log.INFO, ctx, 'end method')
-                        status = '200 OK'
-                    else:
-                        err = JSONServerError()
-                        err.data = 'Method ' + method_name + ' cannot be run synchronously'
-                        raise err
+                    self.log(log.INFO, ctx, 'start method')
+                    rpc_result = self.rpc_service.call(ctx, req)
+                    self.log(log.INFO, ctx, 'end method')
+                    status = '200 OK'
                 except JSONRPCError as jre:
                     err = {'error': {'code': jre.code,
                                      'name': jre.message,
@@ -841,7 +637,8 @@ class Application(object):
             error['id'] = request['id']
         if 'version' in request:
             error['version'] = request['version']
-            if 'error' not in error['error'] or error['error']['error'] is None:
+            e = error['error'].get('error')
+            if not e:
                 error['error']['error'] = trace
         elif 'jsonrpc' in request:
             error['jsonrpc'] = request['jsonrpc']
@@ -852,11 +649,11 @@ class Application(object):
         return json.dumps(error)
 
     def now_in_utc(self):
-        # Taken from http://stackoverflow.com/questions/3401428/how-to-get-an-isoformat-datetime-string-including-the-default-timezone
+        # Taken from http://stackoverflow.com/questions/3401428/how-to-get-an-isoformat-datetime-string-including-the-default-timezone @IgnorePep8
         dtnow = datetime.datetime.now()
         dtutcnow = datetime.datetime.utcnow()
         delta = dtnow - dtutcnow
-        hh,mm = divmod((delta.days * 24*60*60 + delta.seconds + 30) // 60, 60)
+        hh, mm = divmod((delta.days * 24*60*60 + delta.seconds + 30) // 60, 60)
         return "%s%+02d:%02d" % (dtnow.isoformat(), hh, mm)
 
 application = Application()
@@ -923,17 +720,18 @@ def stop_server():
     _proc.terminate()
     _proc = None
 
+
 def process_async_cli(input_file_path, output_file_path, token):
     exit_code = 0
-    with open(input_file_path) as data_file:    
+    with open(input_file_path) as data_file:
         req = json.load(data_file)
     if 'version' not in req:
         req['version'] = '1.1'
-    if 'id' not in req: 
+    if 'id' not in req:
         req['id'] = str(_random.random())[2:]
     ctx = MethodContext(application.userlog)
     if token:
-        user, _, _ = application.auth_client.validate_token(token)
+        user = application.auth_client.get_user(token)
         ctx['user_id'] = user
         ctx['authenticated'] = 1
         ctx['token'] = token
@@ -941,7 +739,7 @@ def process_async_cli(input_file_path, output_file_path, token):
         ctx['rpc_context'] = req['context']
     ctx['CLI'] = 1
     ctx['module'], ctx['method'] = req['method'].split('.')
-    prov_action = {'service': ctx['module'], 'method': ctx['method'], 
+    prov_action = {'service': ctx['module'], 'method': ctx['method'],
                    'method_params': req['params']}
     ctx['provenance'] = [prov_action]
     resp = None
@@ -955,8 +753,8 @@ def process_async_cli(input_file_path, output_file_path, token):
                           'name': jre.message,
                           'message': jre.data,
                           'error': trace}
-               }
-    except Exception, e:
+                }
+    except Exception:
         trace = traceback.format_exc()
         resp = {'id': req['id'],
                 'version': req['version'],
@@ -964,20 +762,20 @@ def process_async_cli(input_file_path, output_file_path, token):
                           'name': 'Unexpected Server Error',
                           'message': 'An unexpected server error occurred',
                           'error': trace}
-               }
+                }
     if 'error' in resp:
         exit_code = 500
     with open(output_file_path, "w") as f:
         f.write(json.dumps(resp, cls=JSONObjectEncoder))
     return exit_code
-    
+
 if __name__ == "__main__":
-    requests.packages.urllib3.disable_warnings()
-    if len(sys.argv) >= 3 and len(sys.argv) <= 4 and os.path.isfile(sys.argv[1]):
+    if (len(sys.argv) >= 3 and len(sys.argv) <= 4 and
+            os.path.isfile(sys.argv[1])):
         token = None
         if len(sys.argv) == 4:
             if os.path.isfile(sys.argv[3]):
-                with open(sys.argv[3]) as token_file: 
+                with open(sys.argv[3]) as token_file:
                     token = token_file.read()
             else:
                 token = sys.argv[3]

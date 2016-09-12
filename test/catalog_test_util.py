@@ -18,10 +18,27 @@ class CatalogTestUtil:
     def __init__(self, test_dir):
         self.test_dir = os.path.abspath(test_dir)
 
+    def setUpEmpty(self, db_version=None):
+        self.log("setUp()")
+        self.log("test directory="+self.test_dir)
+        self._setup_config()
+        self._init_db_handles()
+        self._clear_db()
+
+        if db_version is not None:
+            self.db_version.insert({'version_doc':True, 'version':db_version})
+
 
     def setUp(self):
         self.log("setUp()")
         self.log("test directory="+self.test_dir)
+
+        self._setup_config()
+        self._init_db_handles()
+        self._clear_db()
+        self._initialize_mongo_data()
+
+    def _setup_config(self):
 
         # 1 read config file and pull out some stuff
         if not os.path.isfile(os.path.join(self.test_dir,'test.cfg')):
@@ -42,6 +59,30 @@ class CatalogTestUtil:
         self.test_user_2 = self.test_cfg['test-user-2']
         #self.test_user_psswd_2 = self.test_cfg['test-user-psswd-2']
 
+        # 2 setup the scratch space
+        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',datetime.datetime.now().strftime("%Y-%m-%d-(%H-%M-%S-%f)"))
+        self.log("scratch directory="+self.scratch_dir)
+        os.makedirs(self.scratch_dir)
+
+        # 3 assemble the config file for the catalog service
+        self.catalog_cfg = {
+            'admin-users':self.test_user_2,
+            'mongodb-host':self.test_cfg['mongodb-host'],
+            'mongodb-database':self.test_cfg['mongodb-database'],
+            'temp-dir':self.scratch_dir,
+            'docker-base-url':self.test_cfg['docker-base-url'],
+            'docker-registry-host':self.test_cfg['docker-registry-host'],
+            'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
+            'nms-url':self.test_cfg['nms-url'],
+            'nms-admin-user':self.test_cfg.get('nms-admin-user', ''),
+            'nms-admin-psswd':self.test_cfg.get('nms-admin-psswd', ''),
+            'nms-admin-token': self.test_cfg.get('nms-admin-token', ''),
+            'ref-data-base':self.test_cfg['ref-data-base'],
+            'kbase-endpoint':self.test_cfg['kbase-endpoint'],
+            'auth-service-url': self.test_cfg.get('auth-service-url', '')
+        }
+
+    def _init_db_handles(self):
         # 2 check that db exists and collections are empty
         self.mongo = MongoClient('mongodb://'+self.test_cfg['mongodb-host'])
         db = self.mongo[self.test_cfg['mongodb-database']]
@@ -53,11 +94,13 @@ class CatalogTestUtil:
         self.build_logs = db[MongoCatalogDBI._BUILD_LOGS]
         self.favorites = db[MongoCatalogDBI._FAVORITES]
         self.client_groups = db[MongoCatalogDBI._CLIENT_GROUPS]
+        self.volume_mounts = db[MongoCatalogDBI._VOLUME_MOUNTS]
 
         self.exec_stats_raw = db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_users = db[MongoCatalogDBI._EXEC_STATS_USERS]
 
+    def _clear_db(self):
         # just drop the test db
         self.db_version.drop()
         self.modules.drop()
@@ -67,6 +110,7 @@ class CatalogTestUtil:
         self.build_logs.drop()
         self.favorites.drop()
         self.client_groups.drop()
+        self.volume_mounts.drop()
         self.exec_stats_raw.drop()
         self.exec_stats_apps.drop()
         self.exec_stats_users.drop()
@@ -74,35 +118,8 @@ class CatalogTestUtil:
         #if self.modules.count() > 0 :
         #    raise ValueError('mongo database collection "'+MongoCatalogDBI._MODULES+'"" not empty (contains '+str(self.modules.count())+' records).  aborting.')
 
-        self.initialize_mongo()
 
-        # 3 setup the scratch space
-        self.scratch_dir = os.path.join(self.test_dir,'temp_test_files',datetime.datetime.now().strftime("%Y-%m-%d-(%H-%M-%S-%f)"))
-        self.log("scratch directory="+self.scratch_dir)
-        os.makedirs(self.scratch_dir)
-
-
-        # 4 startup any dependencies (nms, docker registry?)
-
-
-        # 4 assemble the config file for the catalog service
-        self.catalog_cfg = {
-            'admin-users':self.test_user_2,
-            'mongodb-host':self.test_cfg['mongodb-host'],
-            'mongodb-database':self.test_cfg['mongodb-database'],
-            'temp-dir':self.scratch_dir,
-            'docker-base-url':self.test_cfg['docker-base-url'],
-            'docker-registry-host':self.test_cfg['docker-registry-host'],
-            'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
-            'nms-url':self.test_cfg['nms-url'],
-            'nms-admin-user':self.test_cfg['nms-admin-user'],
-            'nms-admin-psswd':self.test_cfg['nms-admin-psswd'],
-            'ref-data-base':self.test_cfg['ref-data-base'],
-            'kbase-endpoint':self.test_cfg['kbase-endpoint']
-        }
-
-
-    def initialize_mongo(self):
+    def _initialize_mongo_data(self):
         self.log("initializing mongo")
         # we only have one collection for now, but this should look over all collection folders
         load_count = 0
@@ -141,6 +158,36 @@ class CatalogTestUtil:
                     self.favorites.insert(parsed_document)
                     load_count+=1
 
+        volume_mounts_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._VOLUME_MOUNTS)
+        for document_name in os.listdir(volume_mounts_dir):
+            document_path = os.path.join(volume_mounts_dir,document_name)
+            if os.path.isfile(document_path):
+                with open(document_path) as document_file:
+                    document = document_file.read()
+                parsed_document = json.loads(document)
+                if isinstance(parsed_document,list):
+                    for p in parsed_document:
+                        self.volume_mounts.insert(p)
+                        load_count+=1
+                else:
+                    self.volume_mounts.insert(parsed_document)
+                    load_count+=1
+
+        client_groups_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._CLIENT_GROUPS)
+        for document_name in os.listdir(client_groups_dir):
+            document_path = os.path.join(client_groups_dir,document_name)
+            if os.path.isfile(document_path):
+                with open(document_path) as document_file:
+                    document = document_file.read()
+                parsed_document = json.loads(document)
+                if isinstance(parsed_document,list):
+                    for p in parsed_document:
+                        self.client_groups.insert(p)
+                        load_count+=1
+                else:
+                    self.client_groups.insert(parsed_document)
+                    load_count+=1
+
         self.log(str(load_count)+" documents loaded")
 
 
@@ -173,17 +220,7 @@ class CatalogTestUtil:
 
     def tearDown(self):
         self.log("tearDown()")
-        self.modules.drop()
-        self.module_versions.drop()
-        self.local_functions.drop()
-        self.developers.drop()
-        self.build_logs.drop()
-        self.favorites.drop()
-        self.client_groups.drop()
-
-        self.exec_stats_raw.drop()
-        self.exec_stats_apps.drop()
-        self.exec_stats_users.drop()
+        self._clear_db();
         
         # make sure NMS is clean after each test
         self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])

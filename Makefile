@@ -34,7 +34,7 @@ init:
 	git submodule update
 
 compile-kb-module:
-	kb-mobu compile $(SPEC_FILE) \
+	kb-sdk compile $(SPEC_FILE) \
 		--out $(LIB_DIR) \
 		--plclname Bio::KBase::$(SERVICE_CAPS)::Client \
 		--jsclname javascript/Client \
@@ -102,7 +102,6 @@ setup-tests:
 	mkdir -p $(TESTLIB)/biokbase
 	mkdir -p $(TESTDIR)/nms
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
-	rsync -av auth/python-libs/biokbase/* $(TESTLIB)/biokbase/.
 	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
 	cd narrative_method_store; make; make build-classpath-list;
 #	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
