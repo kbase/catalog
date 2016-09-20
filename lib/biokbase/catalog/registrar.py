@@ -547,15 +547,16 @@ class Registrar:
         # examine stream to determine success/failure of build
         imageId=None
         last={}
-        for line in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
-            line_parse = json.loads(line)
-            log_line = ''
-            if 'stream' in line_parse:
-                self.log(line_parse['stream'],no_end_line=True)
-            if 'errorDetail' in line_parse:
-                self.log(str(line_parse),no_end_line=True)
-                raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
-            last=line_parse
+        for lines in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
+            for line in lines.strip().splitlines():
+                line_parse = json.loads(line.strip())
+                log_line = ''
+                if 'stream' in line_parse:
+                    self.log(line_parse['stream'],no_end_line=True)
+                if 'errorDetail' in line_parse:
+                    self.log(str(line_parse),no_end_line=True)
+                    raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
+                last=line_parse
         
         if 'stream' in last and last['stream'][:19]=='Successfully built ':
             imageId = docker_client.inspect_image(image_name)['Id']
@@ -579,30 +580,31 @@ class Registrar:
             print("Docker push: insecure_registry: "+ str(self.docker_push_allow_insecure))
         else:
             print("Docker push: insecure_registry: None")
-        for line in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
-            # example line:
-            #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
-            line_parse = json.loads(line)
-            log_line = ''
-            if 'id' in line_parse:
-                log_line += line_parse['id']+' - ';
-            if 'status' in line_parse:
-                log_line += line_parse['status']
-            if 'progress' in line_parse:
-                log_line += ' - ' + line_parse['progress']
-            #if 'progressDetail' in line_parse:
-            #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
+        for lines in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
+            for line in lines.strip().splitlines():
+                # example line:
+                #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
+                line_parse = json.loads(line)
+                log_line = ''
+                if 'id' in line_parse:
+                    log_line += line_parse['id']+' - ';
+                if 'status' in line_parse:
+                    log_line += line_parse['status']
+                if 'progress' in line_parse:
+                    log_line += ' - ' + line_parse['progress']
+                #if 'progressDetail' in line_parse:
+                #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
 
-            # catch anything unexpected, we should probably throw an error here
-            for key in line_parse:
-                if key not in ['id','status','progress','progressDetail']:
-                    log_line += '['+key+'='+str(line_parse[key])+'] '
+                # catch anything unexpected, we should probably throw an error here
+                for key in line_parse:
+                    if key not in ['id','status','progress','progressDetail']:
+                        log_line += '['+key+'='+str(line_parse[key])+'] '
 
-            self.log(log_line)
+                self.log(log_line)
 
-            if 'error' in line_parse:
-                self.log(str(line_parse),no_end_line=True)
-                raise ValueError('Docker push failed: '+str(line_parse['error']))
+                if 'error' in line_parse:
+                    self.log(str(line_parse),no_end_line=True)
+                    raise ValueError('Docker push failed: '+str(line_parse['error']))
 
         self.log('done pushing docker image to registry for ' + image_name+'\n');
 
