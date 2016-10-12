@@ -14,13 +14,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: ModuleInfo</p>
- * 
+ * <pre>
+ * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+ *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
+    "kidl_module_name",
     "git_url",
     "description",
     "language",
@@ -33,6 +37,8 @@ public class ModuleInfo {
 
     @JsonProperty("module_name")
     private java.lang.String moduleName;
+    @JsonProperty("kidl_module_name")
+    private java.lang.String kidlModuleName;
     @JsonProperty("git_url")
     private java.lang.String gitUrl;
     @JsonProperty("description")
@@ -106,6 +112,21 @@ public class ModuleInfo {
 
     public ModuleInfo withModuleName(java.lang.String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public java.lang.String getKidlModuleName() {
+        return kidlModuleName;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public void setKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
+    }
+
+    public ModuleInfo withKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
         return this;
     }
 
@@ -316,7 +337,7 @@ public class ModuleInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((("ModuleInfo"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", description=")+ description)+", language=")+ language)+", owners=")+ owners)+", release=")+ release)+", beta=")+ beta)+", dev=")+ dev)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((("ModuleInfo"+" [moduleName=")+ moduleName)+", kidlModuleName=")+ kidlModuleName)+", gitUrl=")+ gitUrl)+", description=")+ description)+", language=")+ language)+", owners=")+ owners)+", release=")+ release)+", beta=")+ beta)+", dev=")+ dev)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -27,7 +27,9 @@ public class LocalFunctionDetails {
     /**
      * <p>Original spec-file type: LocalFunctionInfo</p>
      * <pre>
-     * todo: switch release_tag to release_tags
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * TODO: switch release_tag to release_tags
      * </pre>
      * 
      */
@@ -40,7 +42,9 @@ public class LocalFunctionDetails {
     /**
      * <p>Original spec-file type: LocalFunctionInfo</p>
      * <pre>
-     * todo: switch release_tag to release_tags
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * TODO: switch release_tag to release_tags
      * </pre>
      * 
      */
@@ -52,7 +56,9 @@ public class LocalFunctionDetails {
     /**
      * <p>Original spec-file type: LocalFunctionInfo</p>
      * <pre>
-     * todo: switch release_tag to release_tags
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * TODO: switch release_tag to release_tags
      * </pre>
      * 
      */

@@ -16,8 +16,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: BasicModuleInfo</p>
  * <pre>
  * git_url is always returned.  Every other field
- * may or may not exist depending on what has been registered or if
- * certain registrations have failed
+ *     may or may not exist depending on what has been registered or if
+ *     certain registrations have failed,
+ * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+ *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
  * </pre>
  * 
  */
@@ -25,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
+    "kidl_module_name",
     "git_url",
     "language",
     "dynamic_service",
@@ -38,6 +41,8 @@ public class BasicModuleInfo {
 
     @JsonProperty("module_name")
     private java.lang.String moduleName;
+    @JsonProperty("kidl_module_name")
+    private java.lang.String kidlModuleName;
     @JsonProperty("git_url")
     private java.lang.String gitUrl;
     @JsonProperty("language")
@@ -83,6 +88,21 @@ public class BasicModuleInfo {
 
     public BasicModuleInfo withModuleName(java.lang.String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public java.lang.String getKidlModuleName() {
+        return kidlModuleName;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public void setKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
+    }
+
+    public BasicModuleInfo withKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
         return this;
     }
 
@@ -248,7 +268,7 @@ public class BasicModuleInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((("BasicModuleInfo"+" [moduleName=")+ moduleName)+", gitUrl=")+ gitUrl)+", language=")+ language)+", dynamicService=")+ dynamicService)+", owners=")+ owners)+", dev=")+ dev)+", beta=")+ beta)+", release=")+ release)+", releasedVersionList=")+ releasedVersionList)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((("BasicModuleInfo"+" [moduleName=")+ moduleName)+", kidlModuleName=")+ kidlModuleName)+", gitUrl=")+ gitUrl)+", language=")+ language)+", dynamicService=")+ dynamicService)+", owners=")+ owners)+", dev=")+ dev)+", beta=")+ beta)+", release=")+ release)+", releasedVersionList=")+ releasedVersionList)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

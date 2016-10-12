@@ -14,16 +14,16 @@ class Catalog:
     Service for managing, registering, and building KBase Modules using the KBase SDK.
     '''
 
-    ######## WARNING FOR GEVENT USERS #######
+    ######## WARNING FOR GEVENT USERS ####### noqa
     # Since asynchronous IO can lead to methods - even the same method -
     # interrupting each other, you must be *very* careful when using global
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
-    #########################################
+    ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/mrcreosote/catalog"
-    GIT_COMMIT_HASH = "e2e1ccec3e9441ec62d189962190a6bcd9ceb7a8"
-    
+    GIT_URL = "https://github.com/rsutormin/catalog"
+    GIT_COMMIT_HASH = "3bdd5d4248a8af4bf78e366769ed8e9884064957"
+
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -42,7 +42,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
-    
+
 
     def version(self, ctx):
         """
@@ -200,8 +200,12 @@ class Catalog:
         :returns: instance of list of type "BasicModuleInfo" (git_url is
            always returned.  Every other field may or may not exist depending
            on what has been registered or if certain registrations have
-           failed) -> structure: parameter "module_name" of String, parameter
-           "git_url" of String, parameter "language" of String, parameter
+           failed, kidl_module_name - is module_name used for server stubs
+           generation inside docker container (it should be used as module
+           name in JSON-RPC calls and in most cases it equals to
+           module_name).) -> structure: parameter "module_name" of String,
+           parameter "kidl_module_name" of String, parameter "git_url" of
+           String, parameter "language" of String, parameter
            "dynamic_service" of type "boolean" (@range [0,1]), parameter
            "owners" of list of String, parameter "dev" of type
            "VersionCommitInfo" -> structure: parameter "git_commit_hash" of
@@ -322,41 +326,48 @@ class Catalog:
            module defined in kbase.yaml file; git_url - the url used to
            register the module) -> structure: parameter "module_name" of
            String, parameter "git_url" of String
-        :returns: instance of type "ModuleInfo" -> structure: parameter
-           "module_name" of String, parameter "git_url" of String, parameter
-           "description" of String, parameter "language" of String, parameter
-           "owners" of list of String, parameter "release" of type
-           "ModuleVersionInfo" (data_folder - optional field representing
-           unique module name (like <module_name> transformed to lower cases)
-           used for reference data purposes (see description for data_version
-           field). This value will be treated as part of file system path
-           relative to the base that comes from the config (currently base is
-           supposed to be "/kb/data" defined in "ref-data-base" parameter).
-           data_version - optional field, reflects version of data defined in
-           kbase.yml (see "data-version" key). In case this field is set data
-           folder with path "/kb/data/<data_folder>/<data_version>" should be
-           initialized by running docker image with "init" target from
-           catalog. And later when async methods are run it should be mounted
-           on AWE worker machine into "/data" folder inside docker container
-           by execution engine.) -> structure: parameter "timestamp" of Long,
-           parameter "registration_id" of String, parameter "version" of
-           String, parameter "git_commit_hash" of String, parameter
+        :returns: instance of type "ModuleInfo" (kidl_module_name - is
+           module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "git_url" of String, parameter "description" of String,
+           parameter "language" of String, parameter "owners" of list of
+           String, parameter "release" of type "ModuleVersionInfo"
+           (data_folder - optional field representing unique module name
+           (like <module_name> transformed to lower cases) used for reference
+           data purposes (see description for data_version field). This value
+           will be treated as part of file system path relative to the base
+           that comes from the config (currently base is supposed to be
+           "/kb/data" defined in "ref-data-base" parameter). data_version -
+           optional field, reflects version of data defined in kbase.yml (see
+           "data-version" key). In case this field is set data folder with
+           path "/kb/data/<data_folder>/<data_version>" should be initialized
+           by running docker image with "init" target from catalog. And later
+           when async methods are run it should be mounted on AWE worker
+           machine into "/data" folder inside docker container by execution
+           engine.) -> structure: parameter "timestamp" of Long, parameter
+           "registration_id" of String, parameter "version" of String,
+           parameter "git_commit_hash" of String, parameter
            "git_commit_message" of String, parameter "dynamic_service" of
            type "boolean" (@range [0,1]), parameter "narrative_method_ids" of
            list of String, parameter "local_function_ids" of list of String,
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
-           "compilation_report" of type "CompilationReport" -> structure:
-           parameter "module_name" of String, parameter "sdk_version" of
-           String, parameter "sdk_git_commit" of String, parameter
-           "impl_file_path" of String, parameter "function_places" of mapping
-           from String to type "FunctionPlace" -> structure: parameter
-           "start_line" of Long, parameter "end_line" of Long, parameter
-           "functions" of mapping from String to type "Function" ->
-           structure: parameter "name" of String, parameter "comment" of
-           String, parameter "place" of type "FunctionPlace" -> structure:
-           parameter "start_line" of Long, parameter "end_line" of Long,
-           parameter "input" of list of type "Parameter" -> structure:
+           "compilation_report" of type "CompilationReport" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "sdk_version" of String, parameter "sdk_git_commit" of
+           String, parameter "impl_file_path" of String, parameter
+           "function_places" of mapping from String to type "FunctionPlace"
+           -> structure: parameter "start_line" of Long, parameter "end_line"
+           of Long, parameter "functions" of mapping from String to type
+           "Function" -> structure: parameter "name" of String, parameter
+           "comment" of String, parameter "place" of type "FunctionPlace" ->
+           structure: parameter "start_line" of Long, parameter "end_line" of
+           Long, parameter "input" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
            parameter "output" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
@@ -384,17 +395,20 @@ class Catalog:
            list of String, parameter "local_function_ids" of list of String,
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
-           "compilation_report" of type "CompilationReport" -> structure:
-           parameter "module_name" of String, parameter "sdk_version" of
-           String, parameter "sdk_git_commit" of String, parameter
-           "impl_file_path" of String, parameter "function_places" of mapping
-           from String to type "FunctionPlace" -> structure: parameter
-           "start_line" of Long, parameter "end_line" of Long, parameter
-           "functions" of mapping from String to type "Function" ->
-           structure: parameter "name" of String, parameter "comment" of
-           String, parameter "place" of type "FunctionPlace" -> structure:
-           parameter "start_line" of Long, parameter "end_line" of Long,
-           parameter "input" of list of type "Parameter" -> structure:
+           "compilation_report" of type "CompilationReport" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "sdk_version" of String, parameter "sdk_git_commit" of
+           String, parameter "impl_file_path" of String, parameter
+           "function_places" of mapping from String to type "FunctionPlace"
+           -> structure: parameter "start_line" of Long, parameter "end_line"
+           of Long, parameter "functions" of mapping from String to type
+           "Function" -> structure: parameter "name" of String, parameter
+           "comment" of String, parameter "place" of type "FunctionPlace" ->
+           structure: parameter "start_line" of Long, parameter "end_line" of
+           Long, parameter "input" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
            parameter "output" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
@@ -422,17 +436,20 @@ class Catalog:
            list of String, parameter "local_function_ids" of list of String,
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
-           "compilation_report" of type "CompilationReport" -> structure:
-           parameter "module_name" of String, parameter "sdk_version" of
-           String, parameter "sdk_git_commit" of String, parameter
-           "impl_file_path" of String, parameter "function_places" of mapping
-           from String to type "FunctionPlace" -> structure: parameter
-           "start_line" of Long, parameter "end_line" of Long, parameter
-           "functions" of mapping from String to type "Function" ->
-           structure: parameter "name" of String, parameter "comment" of
-           String, parameter "place" of type "FunctionPlace" -> structure:
-           parameter "start_line" of Long, parameter "end_line" of Long,
-           parameter "input" of list of type "Parameter" -> structure:
+           "compilation_report" of type "CompilationReport" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "sdk_version" of String, parameter "sdk_git_commit" of
+           String, parameter "impl_file_path" of String, parameter
+           "function_places" of mapping from String to type "FunctionPlace"
+           -> structure: parameter "start_line" of Long, parameter "end_line"
+           of Long, parameter "functions" of mapping from String to type
+           "Function" -> structure: parameter "name" of String, parameter
+           "comment" of String, parameter "place" of type "FunctionPlace" ->
+           structure: parameter "start_line" of Long, parameter "end_line" of
+           Long, parameter "input" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
            parameter "output" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
@@ -493,17 +510,20 @@ class Catalog:
            list of String, parameter "local_function_ids" of list of String,
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
-           "compilation_report" of type "CompilationReport" -> structure:
-           parameter "module_name" of String, parameter "sdk_version" of
-           String, parameter "sdk_git_commit" of String, parameter
-           "impl_file_path" of String, parameter "function_places" of mapping
-           from String to type "FunctionPlace" -> structure: parameter
-           "start_line" of Long, parameter "end_line" of Long, parameter
-           "functions" of mapping from String to type "Function" ->
-           structure: parameter "name" of String, parameter "comment" of
-           String, parameter "place" of type "FunctionPlace" -> structure:
-           parameter "start_line" of Long, parameter "end_line" of Long,
-           parameter "input" of list of type "Parameter" -> structure:
+           "compilation_report" of type "CompilationReport" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "sdk_version" of String, parameter "sdk_git_commit" of
+           String, parameter "impl_file_path" of String, parameter
+           "function_places" of mapping from String to type "FunctionPlace"
+           -> structure: parameter "start_line" of Long, parameter "end_line"
+           of Long, parameter "functions" of mapping from String to type
+           "Function" -> structure: parameter "name" of String, parameter
+           "comment" of String, parameter "place" of type "FunctionPlace" ->
+           structure: parameter "start_line" of Long, parameter "end_line" of
+           Long, parameter "input" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
            parameter "output" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
@@ -554,17 +574,20 @@ class Catalog:
            list of String, parameter "local_function_ids" of list of String,
            parameter "docker_img_name" of String, parameter "data_folder" of
            String, parameter "data_version" of String, parameter
-           "compilation_report" of type "CompilationReport" -> structure:
-           parameter "module_name" of String, parameter "sdk_version" of
-           String, parameter "sdk_git_commit" of String, parameter
-           "impl_file_path" of String, parameter "function_places" of mapping
-           from String to type "FunctionPlace" -> structure: parameter
-           "start_line" of Long, parameter "end_line" of Long, parameter
-           "functions" of mapping from String to type "Function" ->
-           structure: parameter "name" of String, parameter "comment" of
-           String, parameter "place" of type "FunctionPlace" -> structure:
-           parameter "start_line" of Long, parameter "end_line" of Long,
-           parameter "input" of list of type "Parameter" -> structure:
+           "compilation_report" of type "CompilationReport" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "sdk_version" of String, parameter "sdk_git_commit" of
+           String, parameter "impl_file_path" of String, parameter
+           "function_places" of mapping from String to type "FunctionPlace"
+           -> structure: parameter "start_line" of Long, parameter "end_line"
+           of Long, parameter "functions" of mapping from String to type
+           "Function" -> structure: parameter "name" of String, parameter
+           "comment" of String, parameter "place" of type "FunctionPlace" ->
+           structure: parameter "start_line" of Long, parameter "end_line" of
+           Long, parameter "input" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
            parameter "output" of list of type "Parameter" -> structure:
            parameter "type" of String, parameter "comment" of String,
@@ -613,7 +636,10 @@ class Catalog:
            type "boolean" (@range [0,1]), parameter
            "include_compilation_report" of type "boolean" (@range [0,1])
         :returns: instance of type "ModuleVersion" (module_name            -
-           the name of the module module_description     - (optionally
+           the name of the module kidl_module_name       - is module_name
+           used for server stubs generation inside docker container (it
+           should be used as module name in JSON-RPC calls and in most cases
+           it equals to module_name). module_description     - (optionally
            returned) html description in KBase YAML of this module git_url   
            - the git url of the source for this module released              
            - 1 if this version has been released, 0 otherwise release_tags   
@@ -640,34 +666,37 @@ class Catalog:
            data_folder            - name of the data folder used
            compilation_report     - (optionally returned) summary of the KIDL
            specification compilation) -> structure: parameter "module_name"
-           of String, parameter "module_description" of String, parameter
-           "git_url" of String, parameter "released" of type "boolean"
-           (@range [0,1]), parameter "release_tags" of list of String,
-           parameter "timestamp" of Long, parameter "registration_id" of
-           String, parameter "version" of String, parameter "git_commit_hash"
-           of String, parameter "git_commit_message" of String, parameter
-           "dynamic_service" of type "boolean" (@range [0,1]), parameter
-           "narrative_app_ids" of list of String, parameter
-           "local_function_ids" of list of String, parameter
-           "docker_img_name" of String, parameter "data_folder" of String,
-           parameter "data_version" of String, parameter "compilation_report"
-           of type "CompilationReport" -> structure: parameter "module_name"
-           of String, parameter "sdk_version" of String, parameter
-           "sdk_git_commit" of String, parameter "impl_file_path" of String,
-           parameter "function_places" of mapping from String to type
-           "FunctionPlace" -> structure: parameter "start_line" of Long,
-           parameter "end_line" of Long, parameter "functions" of mapping
-           from String to type "Function" -> structure: parameter "name" of
-           String, parameter "comment" of String, parameter "place" of type
-           "FunctionPlace" -> structure: parameter "start_line" of Long,
-           parameter "end_line" of Long, parameter "input" of list of type
-           "Parameter" -> structure: parameter "type" of String, parameter
-           "comment" of String, parameter "output" of list of type
-           "Parameter" -> structure: parameter "type" of String, parameter
-           "comment" of String, parameter "spec_files" of list of type
-           "SpecFile" -> structure: parameter "file_name" of String,
-           parameter "content" of String, parameter "is_main" of type
-           "boolean" (@range [0,1])
+           of String, parameter "kidl_module_name" of String, parameter
+           "module_description" of String, parameter "git_url" of String,
+           parameter "released" of type "boolean" (@range [0,1]), parameter
+           "release_tags" of list of String, parameter "timestamp" of Long,
+           parameter "registration_id" of String, parameter "version" of
+           String, parameter "git_commit_hash" of String, parameter
+           "git_commit_message" of String, parameter "dynamic_service" of
+           type "boolean" (@range [0,1]), parameter "narrative_app_ids" of
+           list of String, parameter "local_function_ids" of list of String,
+           parameter "docker_img_name" of String, parameter "data_folder" of
+           String, parameter "data_version" of String, parameter
+           "compilation_report" of type "CompilationReport" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
+           parameter "sdk_version" of String, parameter "sdk_git_commit" of
+           String, parameter "impl_file_path" of String, parameter
+           "function_places" of mapping from String to type "FunctionPlace"
+           -> structure: parameter "start_line" of Long, parameter "end_line"
+           of Long, parameter "functions" of mapping from String to type
+           "Function" -> structure: parameter "name" of String, parameter
+           "comment" of String, parameter "place" of type "FunctionPlace" ->
+           structure: parameter "start_line" of Long, parameter "end_line" of
+           Long, parameter "input" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "output" of list of type "Parameter" -> structure:
+           parameter "type" of String, parameter "comment" of String,
+           parameter "spec_files" of list of type "SpecFile" -> structure:
+           parameter "file_name" of String, parameter "content" of String,
+           parameter "is_main" of type "boolean" (@range [0,1])
         """
         # ctx is the context object
         # return variables are: version
@@ -691,19 +720,23 @@ class Catalog:
            release module_names = only include modules in the list; if empty
            or not provided then include everything) -> structure: parameter
            "release_tag" of String, parameter "module_names" of list of String
-        :returns: instance of list of type "LocalFunctionInfo" (todo: switch
-           release_tag to release_tags) -> structure: parameter "module_name"
-           of String, parameter "function_id" of String, parameter
-           "git_commit_hash" of String, parameter "version" of String,
-           parameter "release_tag" of list of String, parameter "name" of
-           String, parameter "short_description" of String, parameter "tags"
-           of type "LocalFunctionTags" -> structure: parameter "categories"
-           of list of String, parameter "input" of type "IOTags" (Local
+        :returns: instance of list of type "LocalFunctionInfo"
+           (kidl_module_name - is module_name used for server stubs
+           generation inside docker container (it should be used as module
+           name in JSON-RPC calls and in most cases it equals to
+           module_name). TODO: switch release_tag to release_tags) ->
+           structure: parameter "module_name" of String, parameter
+           "kidl_module_name" of String, parameter "function_id" of String,
+           parameter "git_commit_hash" of String, parameter "version" of
+           String, parameter "release_tag" of list of String, parameter
+           "name" of String, parameter "short_description" of String,
+           parameter "tags" of type "LocalFunctionTags" -> structure:
+           parameter "categories" of list of String, parameter "input" of
+           type "IOTags" (Local Function Listing Support) -> structure:
+           parameter "file_types" of list of String, parameter "kb_types" of
+           list of String, parameter "output" of type "IOTags" (Local
            Function Listing Support) -> structure: parameter "file_types" of
-           list of String, parameter "kb_types" of list of String, parameter
-           "output" of type "IOTags" (Local Function Listing Support) ->
-           structure: parameter "file_types" of list of String, parameter
-           "kb_types" of list of String
+           list of String, parameter "kb_types" of list of String
         """
         # ctx is the context object
         # return variables are: info_list
@@ -729,9 +762,13 @@ class Catalog:
            parameter "function_id" of String, parameter "release_tag" of
            String, parameter "git_commit_hash" of String
         :returns: instance of list of type "LocalFunctionDetails" ->
-           structure: parameter "info" of type "LocalFunctionInfo" (todo:
-           switch release_tag to release_tags) -> structure: parameter
-           "module_name" of String, parameter "function_id" of String,
+           structure: parameter "info" of type "LocalFunctionInfo"
+           (kidl_module_name - is module_name used for server stubs
+           generation inside docker container (it should be used as module
+           name in JSON-RPC calls and in most cases it equals to
+           module_name). TODO: switch release_tag to release_tags) ->
+           structure: parameter "module_name" of String, parameter
+           "kidl_module_name" of String, parameter "function_id" of String,
            parameter "git_commit_hash" of String, parameter "version" of
            String, parameter "release_tag" of list of String, parameter
            "name" of String, parameter "short_description" of String,
@@ -768,8 +805,11 @@ class Catalog:
            structure: parameter "module_name" of String, parameter "lookup"
            of String, parameter "only_service_versions" of type "boolean"
            (@range [0,1])
-        :returns: instance of type "BasicModuleVersionInfo" (DYNAMIC SERVICES
-           SUPPORT Methods) -> structure: parameter "module_name" of String,
+        :returns: instance of type "BasicModuleVersionInfo" (kidl_module_name
+           - is module_name used for server stubs generation inside docker
+           container (it should be used as module name in JSON-RPC calls and
+           in most cases it equals to module_name).) -> structure: parameter
+           "module_name" of String, parameter "kidl_module_name" of String,
            parameter "version" of String, parameter "git_commit_hash" of
            String, parameter "docker_img_name" of String
         """
@@ -791,10 +831,14 @@ class Catalog:
         :param filter: instance of type "ListServiceModuleParams" (tag = dev
            | beta | release if tag is not set, all release versions are
            returned) -> structure: parameter "tag" of String
-        :returns: instance of list of type "BasicModuleVersionInfo" (DYNAMIC
-           SERVICES SUPPORT Methods) -> structure: parameter "module_name" of
-           String, parameter "version" of String, parameter "git_commit_hash"
-           of String, parameter "docker_img_name" of String
+        :returns: instance of list of type "BasicModuleVersionInfo"
+           (kidl_module_name - is module_name used for server stubs
+           generation inside docker container (it should be used as module
+           name in JSON-RPC calls and in most cases it equals to
+           module_name).) -> structure: parameter "module_name" of String,
+           parameter "kidl_module_name" of String, parameter "version" of
+           String, parameter "git_commit_hash" of String, parameter
+           "docker_img_name" of String
         """
         # ctx is the context object
         # return variables are: service_modules
@@ -1359,7 +1403,6 @@ class Catalog:
                              'returnVal is not type int as required.')
         # return the results
         return [returnVal]
-
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 

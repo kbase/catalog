@@ -14,13 +14,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * <p>Original spec-file type: CompilationReport</p>
- * 
+ * <pre>
+ * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+ *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+ * </pre>
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
+    "kidl_module_name",
     "sdk_version",
     "sdk_git_commit",
     "impl_file_path",
@@ -32,6 +36,8 @@ public class CompilationReport {
 
     @JsonProperty("module_name")
     private java.lang.String moduleName;
+    @JsonProperty("kidl_module_name")
+    private java.lang.String kidlModuleName;
     @JsonProperty("sdk_version")
     private java.lang.String sdkVersion;
     @JsonProperty("sdk_git_commit")
@@ -58,6 +64,21 @@ public class CompilationReport {
 
     public CompilationReport withModuleName(java.lang.String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public java.lang.String getKidlModuleName() {
+        return kidlModuleName;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public void setKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
+    }
+
+    public CompilationReport withKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
         return this;
     }
 
@@ -163,7 +184,7 @@ public class CompilationReport {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((("CompilationReport"+" [moduleName=")+ moduleName)+", sdkVersion=")+ sdkVersion)+", sdkGitCommit=")+ sdkGitCommit)+", implFilePath=")+ implFilePath)+", functionPlaces=")+ functionPlaces)+", functions=")+ functions)+", specFiles=")+ specFiles)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((("CompilationReport"+" [moduleName=")+ moduleName)+", kidlModuleName=")+ kidlModuleName)+", sdkVersion=")+ sdkVersion)+", sdkGitCommit=")+ sdkGitCommit)+", implFilePath=")+ implFilePath)+", functionPlaces=")+ functionPlaces)+", functions=")+ functions)+", specFiles=")+ specFiles)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
