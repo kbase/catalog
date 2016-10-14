@@ -67,7 +67,7 @@ class Registrar:
 
     def start_registration(self):
         try:
-            self.logfile = open(self.temp_dir+'/registration.log.'+self.registration_id, 'w')
+            self.logfile = codecs.open(self.temp_dir+'/registration.log.'+self.registration_id, 'w', 'utf-8')
             self.log('Registration started on '+ str(datetime.datetime.now()) + ' by '+self.username)
             self.log('Registration ID: '+str(self.registration_id));
             self.log('Registration Parameters: '+str(self.params));
@@ -700,7 +700,7 @@ class Registrar:
                 self.log("Report file doesn't exist: " + report_file)
                 return None
             else:
-                with open(report_file) as f:    
+                with codecs.open(report_file, 'r', 'utf-8', errors='ignore') as f:    
                     return json.load(f)
         except Exception, e:
             self.log("Error preparing compilation log: " + str(e))
