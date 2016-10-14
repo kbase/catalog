@@ -19,6 +19,7 @@ install:
     - git clone https://github.com/kbase/jars
     - git clone https://github.com/kbase/kb_sdk
     - cd kb_sdk
+    - git checkout 9b628a9
     - make
     - make sdkbase
     - docker images
