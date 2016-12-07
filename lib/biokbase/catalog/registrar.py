@@ -131,9 +131,9 @@ class Registrar:
             ref_data_ver = None
             compilation_report = None
             if not Registrar._TEST_WITHOUT_DOCKER:
-                # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
+                # timeout set to 24 hours because we often get timeouts if multiple people try to push at the same time
                 dockerclient = None
-                docker_timeout = 1800
+                docker_timeout = 86400
                 if len(str(self.docker_base_url)) > 0:
                     dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=docker_timeout)
                 else:
@@ -610,7 +610,7 @@ class Registrar:
 
 
     def run_docker_container(self, dockerclient, image_name, token, 
-                             kbase_endpoint, binds, work_dir, command):
+                             kbase_endpoint, binds, work_dir, command, print_details=False):
         cnt_id = None
         try:
             token_file = os.path.join(work_dir, "token")
@@ -630,6 +630,14 @@ class Registrar:
                     host_config=dockerclient.create_host_config(binds=binds))
             cnt_id = container.get('Id')
             self.log('Running "' + command + '" entry-point command, container Id=' + cnt_id)
+            if print_details:
+                self.log("Command details:")
+                self.log("    Image name: " + image_name)
+                self.log("    Binds: " + str(binds))
+                self.log("    KBase-endpoint: " + kbase_endpoint)
+                self.log("    Necessary files in '" + work_dir + "': 'token', 'config.properties'")
+                self.log("    Tty: True")
+                self.log("    Docker command: " + command)
             dockerclient.start(container=cnt_id)
             stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
             line = ""
@@ -670,7 +678,7 @@ class Registrar:
             temp_work_dir = os.path.join(temp_dir,registration_id,'ref_data_workdir')
             os.mkdir(temp_work_dir)
             self.run_docker_container(dockerclient, image_name, token, kbase_endpoint, 
-                                      binds, temp_work_dir, 'init')
+                                      binds, temp_work_dir, 'init', print_details=True)
             ready_file = os.path.join(temp_ref_data_dir, "__READY__")
             if os.path.exists(ready_file):
                 target_dir = os.path.join(upper_target_dir, ref_data_ver)
