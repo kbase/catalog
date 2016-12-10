@@ -9,6 +9,7 @@ import random
 import semantic_version
 import re
 import uuid
+import codecs
 
 import biokbase.catalog.version
 from biokbase.catalog.Client import Catalog
@@ -836,7 +837,8 @@ class CatalogController:
     # get the build log from file that it is being written to
     def get_build_log(self, registration_id):
         try:
-            with open(self.temp_dir+'/registration.log.'+str(registration_id)) as log_file:
+            with codecs.open(self.temp_dir+'/registration.log.'+str(registration_id), 'r', 
+                             'utf-8', errors='ignore') as log_file:
                 log = log_file.read()
         except:
             log = '[log not found - registration_id is invalid or the log has been deleted]'

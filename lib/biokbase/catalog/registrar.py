@@ -67,7 +67,7 @@ class Registrar:
 
     def start_registration(self):
         try:
-            self.logfile = open(self.temp_dir+'/registration.log.'+self.registration_id, 'w')
+            self.logfile = codecs.open(self.temp_dir+'/registration.log.'+self.registration_id, 'w', 'utf-8')
             self.log('Registration started on '+ str(datetime.datetime.now()) + ' by '+self.username)
             self.log('Registration ID: '+str(self.registration_id));
             self.log('Registration Parameters: '+str(self.params));
@@ -131,9 +131,9 @@ class Registrar:
             ref_data_ver = None
             compilation_report = None
             if not Registrar._TEST_WITHOUT_DOCKER:
-                # timeout set to 30 min because we often get timeouts if multiple people try to push at the same time
+                # timeout set to 24 hours because we often get timeouts if multiple people try to push at the same time
                 dockerclient = None
-                docker_timeout = 1800
+                docker_timeout = 86400
                 if len(str(self.docker_base_url)) > 0:
                     dockerclient = DockerClient(base_url = str(self.docker_base_url),timeout=docker_timeout)
                 else:
@@ -547,15 +547,16 @@ class Registrar:
         # examine stream to determine success/failure of build
         imageId=None
         last={}
-        for line in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
-            line_parse = json.loads(line)
-            log_line = ''
-            if 'stream' in line_parse:
-                self.log(line_parse['stream'],no_end_line=True)
-            if 'errorDetail' in line_parse:
-                self.log(str(line_parse),no_end_line=True)
-                raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
-            last=line_parse
+        for lines in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
+            for line in lines.strip().splitlines():
+                line_parse = json.loads(line.strip())
+                log_line = ''
+                if 'stream' in line_parse:
+                    self.log(line_parse['stream'],no_end_line=True)
+                if 'errorDetail' in line_parse:
+                    self.log(str(line_parse),no_end_line=True)
+                    raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
+                last=line_parse
         
         if 'stream' in last and last['stream'][:19]=='Successfully built ':
             imageId = docker_client.inspect_image(image_name)['Id']
@@ -579,36 +580,37 @@ class Registrar:
             print("Docker push: insecure_registry: "+ str(self.docker_push_allow_insecure))
         else:
             print("Docker push: insecure_registry: None")
-        for line in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
-            # example line:
-            #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
-            line_parse = json.loads(line)
-            log_line = ''
-            if 'id' in line_parse:
-                log_line += line_parse['id']+' - ';
-            if 'status' in line_parse:
-                log_line += line_parse['status']
-            if 'progress' in line_parse:
-                log_line += ' - ' + line_parse['progress']
-            #if 'progressDetail' in line_parse:
-            #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
+        for lines in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
+            for line in lines.strip().splitlines():
+                # example line:
+                #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
+                line_parse = json.loads(line)
+                log_line = ''
+                if 'id' in line_parse:
+                    log_line += line_parse['id']+' - ';
+                if 'status' in line_parse:
+                    log_line += line_parse['status']
+                if 'progress' in line_parse:
+                    log_line += ' - ' + line_parse['progress']
+                #if 'progressDetail' in line_parse:
+                #    self.log(' - ' + str(line_parse['progressDetail']),no_end_line=True)
 
-            # catch anything unexpected, we should probably throw an error here
-            for key in line_parse:
-                if key not in ['id','status','progress','progressDetail']:
-                    log_line += '['+key+'='+str(line_parse[key])+'] '
+                # catch anything unexpected, we should probably throw an error here
+                for key in line_parse:
+                    if key not in ['id','status','progress','progressDetail']:
+                        log_line += '['+key+'='+str(line_parse[key])+'] '
 
-            self.log(log_line)
+                self.log(log_line)
 
-            if 'error' in line_parse:
-                self.log(str(line_parse),no_end_line=True)
-                raise ValueError('Docker push failed: '+str(line_parse['error']))
+                if 'error' in line_parse:
+                    self.log(str(line_parse),no_end_line=True)
+                    raise ValueError('Docker push failed: '+str(line_parse['error']))
 
         self.log('done pushing docker image to registry for ' + image_name+'\n');
 
 
     def run_docker_container(self, dockerclient, image_name, token, 
-                             kbase_endpoint, binds, work_dir, command):
+                             kbase_endpoint, binds, work_dir, command, print_details=False):
         cnt_id = None
         try:
             token_file = os.path.join(work_dir, "token")
@@ -628,6 +630,14 @@ class Registrar:
                     host_config=dockerclient.create_host_config(binds=binds))
             cnt_id = container.get('Id')
             self.log('Running "' + command + '" entry-point command, container Id=' + cnt_id)
+            if print_details:
+                self.log("Command details:")
+                self.log("    Image name: " + image_name)
+                self.log("    Binds: " + str(binds))
+                self.log("    KBase-endpoint: " + kbase_endpoint)
+                self.log("    Necessary files in '" + work_dir + "': 'token', 'config.properties'")
+                self.log("    Tty: True")
+                self.log("    Docker command: " + command)
             dockerclient.start(container=cnt_id)
             stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
             line = ""
@@ -668,7 +678,7 @@ class Registrar:
             temp_work_dir = os.path.join(temp_dir,registration_id,'ref_data_workdir')
             os.mkdir(temp_work_dir)
             self.run_docker_container(dockerclient, image_name, token, kbase_endpoint, 
-                                      binds, temp_work_dir, 'init')
+                                      binds, temp_work_dir, 'init', print_details=True)
             ready_file = os.path.join(temp_ref_data_dir, "__READY__")
             if os.path.exists(ready_file):
                 target_dir = os.path.join(upper_target_dir, ref_data_ver)
@@ -698,7 +708,7 @@ class Registrar:
                 self.log("Report file doesn't exist: " + report_file)
                 return None
             else:
-                with open(report_file) as f:    
+                with codecs.open(report_file, 'r', 'utf-8', errors='ignore') as f:    
                     return json.load(f)
         except Exception, e:
             self.log("Error preparing compilation log: " + str(e))

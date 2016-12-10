@@ -11,6 +11,10 @@ Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
 
+#### v2.0.6 - 12/7/16
+  - Bug is fixed in module registration related to docker client timeout happening 
+    for long reference-data stage
+
 #### v2.0.5 - 9/12/16
   - Added volume mount configuration
   - Modified client group configurations so that functions are specified, not app_ids
