@@ -722,6 +722,7 @@ ListModuleParams is a reference to a hash where the following keys are defined:
 boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	git_url has a value which is a string
 	language has a value which is a string
 	dynamic_service has a value which is a Catalog.boolean
@@ -750,6 +751,7 @@ ListModuleParams is a reference to a hash where the following keys are defined:
 boolean is an int
 BasicModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	git_url has a value which is a string
 	language has a value which is a string
 	dynamic_service has a value which is a Catalog.boolean
@@ -1286,6 +1288,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	git_url has a value which is a string
 	description has a value which is a string
 	language has a value which is a string
@@ -1309,6 +1312,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1345,6 +1349,7 @@ SelectOneModuleParams is a reference to a hash where the following keys are defi
 	git_url has a value which is a string
 ModuleInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	git_url has a value which is a string
 	description has a value which is a string
 	language has a value which is a string
@@ -1368,6 +1373,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1485,6 +1491,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1538,6 +1545,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1652,6 +1660,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1702,6 +1711,7 @@ ModuleVersionInfo is a reference to a hash where the following keys are defined:
 boolean is an int
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1806,6 +1816,7 @@ SelectModuleVersion is a reference to a hash where the following keys are define
 boolean is an int
 ModuleVersion is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	module_description has a value which is a string
 	git_url has a value which is a string
 	released has a value which is a Catalog.boolean
@@ -1824,6 +1835,7 @@ ModuleVersion is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1864,6 +1876,7 @@ SelectModuleVersion is a reference to a hash where the following keys are define
 boolean is an int
 ModuleVersion is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	module_description has a value which is a string
 	git_url has a value which is a string
 	released has a value which is a Catalog.boolean
@@ -1882,6 +1895,7 @@ ModuleVersion is a reference to a hash where the following keys are defined:
 	compilation_report has a value which is a Catalog.CompilationReport
 CompilationReport is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	sdk_version has a value which is a string
 	sdk_git_commit has a value which is a string
 	impl_file_path has a value which is a string
@@ -1982,6 +1996,7 @@ ListLocalFunctionParams is a reference to a hash where the following keys are de
 	module_names has a value which is a reference to a list where each element is a string
 LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
@@ -2010,6 +2025,7 @@ ListLocalFunctionParams is a reference to a hash where the following keys are de
 	module_names has a value which is a reference to a list where each element is a string
 LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
@@ -2109,6 +2125,7 @@ LocalFunctionDetails is a reference to a hash where the following keys are defin
 	long_description has a value which is a string
 LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
@@ -2144,6 +2161,7 @@ LocalFunctionDetails is a reference to a hash where the following keys are defin
 	long_description has a value which is a string
 LocalFunctionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	function_id has a value which is a string
 	git_commit_hash has a value which is a string
 	version has a value which is a string
@@ -2238,6 +2256,7 @@ ModuleVersionLookupParams is a reference to a hash where the following keys are 
 boolean is an int
 BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	docker_img_name has a value which is a string
@@ -2257,6 +2276,7 @@ ModuleVersionLookupParams is a reference to a hash where the following keys are 
 boolean is an int
 BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	docker_img_name has a value which is a string
@@ -2337,6 +2357,7 @@ ListServiceModuleParams is a reference to a hash where the following keys are de
 	tag has a value which is a string
 BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	docker_img_name has a value which is a string
@@ -2353,6 +2374,7 @@ ListServiceModuleParams is a reference to a hash where the following keys are de
 	tag has a value which is a string
 BasicModuleVersionInfo is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	kidl_module_name has a value which is a string
 	version has a value which is a string
 	git_commit_hash has a value which is a string
 	docker_img_name has a value which is a string
@@ -5090,8 +5112,10 @@ git_commit_hash has a value which is a string
 =item Description
 
 git_url is always returned.  Every other field
-may or may not exist depending on what has been registered or if
-certain registrations have failed
+    may or may not exist depending on what has been registered or if
+    certain registrations have failed,
+kidl_module_name - is module_name used for server stubs generation inside docker container (it
+    should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
 
 
 =item Definition
@@ -5101,6 +5125,7 @@ certain registrations have failed
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 git_url has a value which is a string
 language has a value which is a string
 dynamic_service has a value which is a Catalog.boolean
@@ -5118,6 +5143,7 @@ released_version_list has a value which is a reference to a list where each elem
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 git_url has a value which is a string
 language has a value which is a string
 dynamic_service has a value which is a Catalog.boolean
@@ -5419,6 +5445,12 @@ is_main has a value which is a Catalog.boolean
 
 
 
+=item Description
+
+kidl_module_name - is module_name used for server stubs generation inside docker container (it
+    should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+
+
 =item Definition
 
 =begin html
@@ -5426,6 +5458,7 @@ is_main has a value which is a Catalog.boolean
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 sdk_version has a value which is a string
 sdk_git_commit has a value which is a string
 impl_file_path has a value which is a string
@@ -5441,6 +5474,7 @@ spec_files has a value which is a reference to a list where each element is a Ca
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 sdk_version has a value which is a string
 sdk_git_commit has a value which is a string
 impl_file_path has a value which is a string
@@ -5526,6 +5560,12 @@ compilation_report has a value which is a Catalog.CompilationReport
 
 
 
+=item Description
+
+kidl_module_name - is module_name used for server stubs generation inside docker container (it
+    should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+
+
 =item Definition
 
 =begin html
@@ -5533,6 +5573,7 @@ compilation_report has a value which is a Catalog.CompilationReport
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 git_url has a value which is a string
 description has a value which is a string
 language has a value which is a string
@@ -5549,6 +5590,7 @@ dev has a value which is a Catalog.ModuleVersionInfo
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 git_url has a value which is a string
 description has a value which is a string
 language has a value which is a string
@@ -5627,6 +5669,8 @@ version has a value which is a string
 =item Description
 
 module_name            - the name of the module
+kidl_module_name       - is module_name used for server stubs generation inside docker container (it
+                         should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
 module_description     - (optionally returned) html description in KBase YAML of this module
 git_url                - the git url of the source for this module
 
@@ -5664,6 +5708,7 @@ compilation_report     - (optionally returned) summary of the KIDL specification
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 module_description has a value which is a string
 git_url has a value which is a string
 released has a value which is a Catalog.boolean
@@ -5689,6 +5734,7 @@ compilation_report has a value which is a Catalog.CompilationReport
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 module_description has a value which is a string
 git_url has a value which is a string
 released has a value which is a Catalog.boolean
@@ -5863,7 +5909,9 @@ output has a value which is a Catalog.IOTags
 
 =item Description
 
-todo: switch release_tag to release_tags
+kidl_module_name - is module_name used for server stubs generation inside docker container (it
+    should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+TODO: switch release_tag to release_tags
 
 
 =item Definition
@@ -5873,6 +5921,7 @@ todo: switch release_tag to release_tags
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 function_id has a value which is a string
 git_commit_hash has a value which is a string
 version has a value which is a string
@@ -5889,6 +5938,7 @@ tags has a value which is a Catalog.LocalFunctionTags
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 function_id has a value which is a string
 git_commit_hash has a value which is a string
 version has a value which is a string
@@ -6056,7 +6106,8 @@ functions has a value which is a reference to a list where each element is a Cat
 
 =item Description
 
-DYNAMIC SERVICES SUPPORT Methods
+kidl_module_name - is module_name used for server stubs generation inside docker container (it
+    should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
 
 
 =item Definition
@@ -6066,6 +6117,7 @@ DYNAMIC SERVICES SUPPORT Methods
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 docker_img_name has a value which is a string
@@ -6078,6 +6130,7 @@ docker_img_name has a value which is a string
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+kidl_module_name has a value which is a string
 version has a value which is a string
 git_commit_hash has a value which is a string
 docker_img_name has a value which is a string

@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: BasicModuleVersionInfo</p>
  * <pre>
- * DYNAMIC SERVICES SUPPORT Methods
+ * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+ *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
  * </pre>
  * 
  */
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
+    "kidl_module_name",
     "version",
     "git_commit_hash",
     "docker_img_name"
@@ -30,6 +32,8 @@ public class BasicModuleVersionInfo {
 
     @JsonProperty("module_name")
     private String moduleName;
+    @JsonProperty("kidl_module_name")
+    private String kidlModuleName;
     @JsonProperty("version")
     private String version;
     @JsonProperty("git_commit_hash")
@@ -50,6 +54,21 @@ public class BasicModuleVersionInfo {
 
     public BasicModuleVersionInfo withModuleName(String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public String getKidlModuleName() {
+        return kidlModuleName;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public void setKidlModuleName(String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
+    }
+
+    public BasicModuleVersionInfo withKidlModuleName(String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
         return this;
     }
 
@@ -110,7 +129,7 @@ public class BasicModuleVersionInfo {
 
     @Override
     public String toString() {
-        return ((((((((((("BasicModuleVersionInfo"+" [moduleName=")+ moduleName)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("BasicModuleVersionInfo"+" [moduleName=")+ moduleName)+", kidlModuleName=")+ kidlModuleName)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", dockerImgName=")+ dockerImgName)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

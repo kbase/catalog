@@ -16,6 +16,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>Original spec-file type: ModuleVersion</p>
  * <pre>
  * module_name            - the name of the module
+ * kidl_module_name       - is module_name used for server stubs generation inside docker container (it
+ *                          should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
  * module_description     - (optionally returned) html description in KBase YAML of this module
  * git_url                - the git url of the source for this module
  * released               - 1 if this version has been released, 0 otherwise
@@ -43,6 +45,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
+    "kidl_module_name",
     "module_description",
     "git_url",
     "released",
@@ -64,6 +67,8 @@ public class ModuleVersion {
 
     @JsonProperty("module_name")
     private java.lang.String moduleName;
+    @JsonProperty("kidl_module_name")
+    private java.lang.String kidlModuleName;
     @JsonProperty("module_description")
     private java.lang.String moduleDescription;
     @JsonProperty("git_url")
@@ -96,7 +101,10 @@ public class ModuleVersion {
     private java.lang.String dataVersion;
     /**
      * <p>Original spec-file type: CompilationReport</p>
-     * 
+     * <pre>
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * </pre>
      * 
      */
     @JsonProperty("compilation_report")
@@ -115,6 +123,21 @@ public class ModuleVersion {
 
     public ModuleVersion withModuleName(java.lang.String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public java.lang.String getKidlModuleName() {
+        return kidlModuleName;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public void setKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
+    }
+
+    public ModuleVersion withKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
         return this;
     }
 
@@ -345,7 +368,10 @@ public class ModuleVersion {
 
     /**
      * <p>Original spec-file type: CompilationReport</p>
-     * 
+     * <pre>
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * </pre>
      * 
      */
     @JsonProperty("compilation_report")
@@ -355,7 +381,10 @@ public class ModuleVersion {
 
     /**
      * <p>Original spec-file type: CompilationReport</p>
-     * 
+     * <pre>
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * </pre>
      * 
      */
     @JsonProperty("compilation_report")
@@ -380,7 +409,7 @@ public class ModuleVersion {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((((((((((((((((((((("ModuleVersion"+" [moduleName=")+ moduleName)+", moduleDescription=")+ moduleDescription)+", gitUrl=")+ gitUrl)+", released=")+ released)+", releaseTags=")+ releaseTags)+", timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", dynamicService=")+ dynamicService)+", narrativeAppIds=")+ narrativeAppIds)+", localFunctionIds=")+ localFunctionIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", compilationReport=")+ compilationReport)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((((((((((((((((((("ModuleVersion"+" [moduleName=")+ moduleName)+", kidlModuleName=")+ kidlModuleName)+", moduleDescription=")+ moduleDescription)+", gitUrl=")+ gitUrl)+", released=")+ released)+", releaseTags=")+ releaseTags)+", timestamp=")+ timestamp)+", registrationId=")+ registrationId)+", version=")+ version)+", gitCommitHash=")+ gitCommitHash)+", gitCommitMessage=")+ gitCommitMessage)+", dynamicService=")+ dynamicService)+", narrativeAppIds=")+ narrativeAppIds)+", localFunctionIds=")+ localFunctionIds)+", dockerImgName=")+ dockerImgName)+", dataFolder=")+ dataFolder)+", dataVersion=")+ dataVersion)+", compilationReport=")+ compilationReport)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

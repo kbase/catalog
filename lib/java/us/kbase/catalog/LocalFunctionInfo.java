@@ -15,7 +15,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: LocalFunctionInfo</p>
  * <pre>
- * todo: switch release_tag to release_tags
+ * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+ *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+ * TODO: switch release_tag to release_tags
  * </pre>
  * 
  */
@@ -23,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
+    "kidl_module_name",
     "function_id",
     "git_commit_hash",
     "version",
@@ -35,6 +38,8 @@ public class LocalFunctionInfo {
 
     @JsonProperty("module_name")
     private java.lang.String moduleName;
+    @JsonProperty("kidl_module_name")
+    private java.lang.String kidlModuleName;
     @JsonProperty("function_id")
     private java.lang.String functionId;
     @JsonProperty("git_commit_hash")
@@ -68,6 +73,21 @@ public class LocalFunctionInfo {
 
     public LocalFunctionInfo withModuleName(java.lang.String moduleName) {
         this.moduleName = moduleName;
+        return this;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public java.lang.String getKidlModuleName() {
+        return kidlModuleName;
+    }
+
+    @JsonProperty("kidl_module_name")
+    public void setKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
+    }
+
+    public LocalFunctionInfo withKidlModuleName(java.lang.String kidlModuleName) {
+        this.kidlModuleName = kidlModuleName;
         return this;
     }
 
@@ -198,7 +218,7 @@ public class LocalFunctionInfo {
 
     @Override
     public java.lang.String toString() {
-        return ((((((((((((((((((("LocalFunctionInfo"+" [moduleName=")+ moduleName)+", functionId=")+ functionId)+", gitCommitHash=")+ gitCommitHash)+", version=")+ version)+", releaseTag=")+ releaseTag)+", name=")+ name)+", shortDescription=")+ shortDescription)+", tags=")+ tags)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((("LocalFunctionInfo"+" [moduleName=")+ moduleName)+", kidlModuleName=")+ kidlModuleName)+", functionId=")+ functionId)+", gitCommitHash=")+ gitCommitHash)+", version=")+ version)+", releaseTag=")+ releaseTag)+", name=")+ name)+", shortDescription=")+ shortDescription)+", tags=")+ tags)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

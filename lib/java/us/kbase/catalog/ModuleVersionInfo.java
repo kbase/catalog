@@ -69,7 +69,10 @@ public class ModuleVersionInfo {
     private java.lang.String dataVersion;
     /**
      * <p>Original spec-file type: CompilationReport</p>
-     * 
+     * <pre>
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * </pre>
      * 
      */
     @JsonProperty("compilation_report")
@@ -243,7 +246,10 @@ public class ModuleVersionInfo {
 
     /**
      * <p>Original spec-file type: CompilationReport</p>
-     * 
+     * <pre>
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * </pre>
      * 
      */
     @JsonProperty("compilation_report")
@@ -253,7 +259,10 @@ public class ModuleVersionInfo {
 
     /**
      * <p>Original spec-file type: CompilationReport</p>
-     * 
+     * <pre>
+     * kidl_module_name - is module_name used for server stubs generation inside docker container (it
+     *     should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+     * </pre>
      * 
      */
     @JsonProperty("compilation_report")

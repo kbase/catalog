@@ -94,11 +94,14 @@ module Catalog {
 
     /*
         git_url is always returned.  Every other field
-        may or may not exist depending on what has been registered or if
-        certain registrations have failed
+            may or may not exist depending on what has been registered or if
+            certain registrations have failed,
+        kidl_module_name - is module_name used for server stubs generation inside docker container (it
+            should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
     */
     typedef structure {
         string module_name;
+        string kidl_module_name;
         string git_url;
 
         string language;
@@ -180,8 +183,13 @@ module Catalog {
         boolean is_main;
     } SpecFile;
 
+    /*
+        kidl_module_name - is module_name used for server stubs generation inside docker container (it
+            should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+    */
     typedef structure {
         string module_name;
+        string kidl_module_name;
         string sdk_version;
         string sdk_git_commit;
         string impl_file_path;
@@ -216,8 +224,13 @@ module Catalog {
         CompilationReport compilation_report;
     } ModuleVersionInfo;
 
+    /*
+        kidl_module_name - is module_name used for server stubs generation inside docker container (it
+            should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+    */
     typedef structure {
         string module_name;
+        string kidl_module_name;
         string git_url;
 
         string description;
@@ -266,6 +279,8 @@ module Catalog {
 
     /*
         module_name            - the name of the module
+        kidl_module_name       - is module_name used for server stubs generation inside docker container (it
+                                 should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
         module_description     - (optionally returned) html description in KBase YAML of this module
         git_url                - the git url of the source for this module
 
@@ -297,6 +312,7 @@ module Catalog {
     */
     typedef structure {
         string module_name;
+        string kidl_module_name;
         string module_description;
         string git_url;
 
@@ -388,9 +404,14 @@ module Catalog {
         IOTags output;
     } LocalFunctionTags;
 
-    /* todo: switch release_tag to release_tags */
+    /*
+        kidl_module_name - is module_name used for server stubs generation inside docker container (it
+            should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+        TODO: switch release_tag to release_tags
+    */
     typedef structure {
         string module_name;
+        string kidl_module_name;
         string function_id;
         string git_commit_hash;
 
@@ -446,8 +467,13 @@ module Catalog {
 
     /*  DYNAMIC SERVICES SUPPORT Methods */
 
+    /*
+        kidl_module_name - is module_name used for server stubs generation inside docker container (it
+            should be used as module name in JSON-RPC calls and in most cases it equals to module_name).
+    */
     typedef structure {
         string module_name;
+        string kidl_module_name;
         string version;
         string git_commit_hash;
         string docker_img_name;
