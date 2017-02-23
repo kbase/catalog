@@ -14,16 +14,16 @@ class Catalog:
     Service for managing, registering, and building KBase Modules using the KBase SDK.
     '''
 
-    ######## WARNING FOR GEVENT USERS #######
+    ######## WARNING FOR GEVENT USERS ####### noqa
     # Since asynchronous IO can lead to methods - even the same method -
     # interrupting each other, you must be *very* careful when using global
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
-    #########################################
+    ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/mrcreosote/catalog"
-    GIT_COMMIT_HASH = "e2e1ccec3e9441ec62d189962190a6bcd9ceb7a8"
-    
+    GIT_URL = "https://github.com/rsutormin/catalog"
+    GIT_COMMIT_HASH = "554f89662992b978951d94ec0672c00cf7de55f7"
+
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -42,7 +42,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
-    
+
 
     def version(self, ctx):
         """
@@ -1359,7 +1359,6 @@ class Catalog:
                              'returnVal is not type int as required.')
         # return the results
         return [returnVal]
-
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
