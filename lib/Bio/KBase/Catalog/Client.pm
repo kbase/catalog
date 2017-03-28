@@ -81,12 +81,19 @@ sub new
     # We create an auth token, passing through the arguments that we were (hopefully) given.
 
     {
-	my $token = Bio::KBase::AuthToken->new(@args);
+	my %arg_hash2 = @args;
+	if (exists $arg_hash2{"token"}) {
+	    $self->{token} = $arg_hash2{"token"};
+	} elsif (exists $arg_hash2{"user_id"}) {
+	    my $token = Bio::KBase::AuthToken->new(@args);
+	    if (!$token->error_message) {
+	        $self->{token} = $token->token;
+	    }
+	}
 	
-	if (!$token->error_message)
+	if (exists $self->{token})
 	{
-	    $self->{token} = $token->token;
-	    $self->{client}->{token} = $token->token;
+	    $self->{client}->{token} = $self->{token};
 	}
     }
 
@@ -3613,6 +3620,7 @@ LogExecStatsParams is a reference to a hash where the following keys are defined
 	exec_start_time has a value which is a float
 	finish_time has a value which is a float
 	is_error has a value which is a Catalog.boolean
+	job_id has a value which is a string
 boolean is an int
 
 </pre>
@@ -3633,6 +3641,7 @@ LogExecStatsParams is a reference to a hash where the following keys are defined
 	exec_start_time has a value which is a float
 	finish_time has a value which is a float
 	is_error has a value which is a Catalog.boolean
+	job_id has a value which is a string
 boolean is an int
 
 
@@ -4729,6 +4738,302 @@ returns true (1) if the user is an admin, false (0) otherwise
     }
 }
  
+
+
+=head2 set_hidden_config_params
+
+  $obj->set_hidden_config_params($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ModifyHiddenConfigParamsInput
+ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+HiddenConfigParameter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version_tag has a value which is a string
+	param_name has a value which is a string
+	is_password has a value which is a Catalog.boolean
+	param_value has a value which is a string
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ModifyHiddenConfigParamsInput
+ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+HiddenConfigParameter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version_tag has a value which is a string
+	param_name has a value which is a string
+	is_password has a value which is a Catalog.boolean
+	param_value has a value which is a string
+boolean is an int
+
+
+=end text
+
+=item Description
+
+Only admins can use this function.
+
+=back
+
+=cut
+
+ sub set_hidden_config_params
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function set_hidden_config_params (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to set_hidden_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'set_hidden_config_params');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.set_hidden_config_params",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'set_hidden_config_params',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_hidden_config_params",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'set_hidden_config_params',
+				       );
+    }
+}
+ 
+
+
+=head2 remove_hidden_config_params
+
+  $obj->remove_hidden_config_params($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.ModifyHiddenConfigParamsInput
+ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+HiddenConfigParameter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version_tag has a value which is a string
+	param_name has a value which is a string
+	is_password has a value which is a Catalog.boolean
+	param_value has a value which is a string
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.ModifyHiddenConfigParamsInput
+ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+HiddenConfigParameter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version_tag has a value which is a string
+	param_name has a value which is a string
+	is_password has a value which is a Catalog.boolean
+	param_value has a value which is a string
+boolean is an int
+
+
+=end text
+
+=item Description
+
+Only admins can use this function.
+
+=back
+
+=cut
+
+ sub remove_hidden_config_params
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function remove_hidden_config_params (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to remove_hidden_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'remove_hidden_config_params');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.remove_hidden_config_params",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'remove_hidden_config_params',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return;
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_hidden_config_params",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'remove_hidden_config_params',
+				       );
+    }
+}
+ 
+
+
+=head2 get_hidden_config_params
+
+  $return = $obj->get_hidden_config_params($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetHiddenConfigParamsInput
+$return is a reference to a list where each element is a Catalog.HiddenConfigParameter
+GetHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+HiddenConfigParameter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version_tag has a value which is a string
+	param_name has a value which is a string
+	is_password has a value which is a Catalog.boolean
+	param_value has a value which is a string
+boolean is an int
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetHiddenConfigParamsInput
+$return is a reference to a list where each element is a Catalog.HiddenConfigParameter
+GetHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+HiddenConfigParameter is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	version_tag has a value which is a string
+	param_name has a value which is a string
+	is_password has a value which is a Catalog.boolean
+	param_value has a value which is a string
+boolean is an int
+
+
+=end text
+
+=item Description
+
+Only admins can use this function.
+
+=back
+
+=cut
+
+ sub get_hidden_config_params
+{
+    my($self, @args) = @_;
+
+# Authentication: required
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_hidden_config_params (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_hidden_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_hidden_config_params');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_hidden_config_params",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_hidden_config_params',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_hidden_config_params",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_hidden_config_params',
+				       );
+    }
+}
+ 
   
 sub status
 {
@@ -4772,16 +5077,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'is_admin',
+                method_name => 'get_hidden_config_params',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method is_admin",
+            error => "Error invoking method get_hidden_config_params",
             status_line => $self->{client}->status_line,
-            method_name => 'is_admin',
+            method_name => 'get_hidden_config_params',
         );
     }
 }
@@ -6547,6 +6852,7 @@ creation_time has a value which is a float
 exec_start_time has a value which is a float
 finish_time has a value which is a float
 is_error has a value which is a Catalog.boolean
+job_id has a value which is a string
 
 </pre>
 
@@ -6565,6 +6871,7 @@ creation_time has a value which is a float
 exec_start_time has a value which is a float
 finish_time has a value which is a float
 is_error has a value which is a Catalog.boolean
+job_id has a value which is a string
 
 
 =end text
@@ -6986,6 +7293,111 @@ a reference to a hash where the following keys are defined:
 module_name has a value which is a string
 function_name has a value which is a string
 client_group has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 HiddenConfigParameter
+
+=over 4
+
+
+
+=item Description
+
+version_tag - optional version (commit hash, tag or semantic one) of module, if not set
+    then default "" value is used which means parameter is applied to any version;
+is_password - optional flag meaning to hide this parameter's value in UI.
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+version_tag has a value which is a string
+param_name has a value which is a string
+is_password has a value which is a Catalog.boolean
+param_value has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+version_tag has a value which is a string
+param_name has a value which is a string
+is_password has a value which is a Catalog.boolean
+param_value has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 ModifyHiddenConfigParamsInput
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+
+
+=end text
+
+=back
+
+
+
+=head2 GetHiddenConfigParamsInput
+
+=over 4
+
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
 
 
 =end text

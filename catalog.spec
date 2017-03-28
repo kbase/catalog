@@ -635,6 +635,7 @@ module Catalog {
         float exec_start_time;
         float finish_time;
         boolean is_error;
+        string job_id;
     } LogExecStatsParams;
 
     /*
@@ -782,5 +783,44 @@ module Catalog {
 
     /* returns true (1) if the user is an admin, false (0) otherwise */
     funcdef is_admin(string username) returns (boolean); 
+
+    /*
+        version_tag - optional version (commit hash, tag or semantic one) of module, if not set
+            then default "" value is used which means parameter is applied to any version;
+        is_password - optional flag meaning to hide this parameter's value in UI.
+    */
+    typedef structure {
+        string module_name;
+        string version_tag;
+        string param_name;
+        boolean is_password;
+        string param_value;
+    } HiddenConfigParameter;
+    
+    typedef structure {
+        list<HiddenConfigParameter> data;
+    } ModifyHiddenConfigParamsInput;
+
+    /*
+        Only admins can use this function.
+    */
+    funcdef set_hidden_config_params(ModifyHiddenConfigParamsInput params) 
+        returns () authentication required;
+
+    /*
+        Only admins can use this function.
+    */
+    funcdef remove_hidden_config_params(ModifyHiddenConfigParamsInput params) 
+        returns () authentication required;
+    
+    typedef structure {
+        string module_name;
+    } GetHiddenConfigParamsInput;
+
+    /*
+        Only admins can use this function.
+    */
+    funcdef get_hidden_config_params(GetHiddenConfigParamsInput params) 
+        returns (list<HiddenConfigParameter>) authentication required;
 
 };

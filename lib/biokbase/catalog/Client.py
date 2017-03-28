@@ -837,7 +837,7 @@ class Catalog(object):
            "func_name" of String, parameter "git_commit_hash" of String,
            parameter "creation_time" of Double, parameter "exec_start_time"
            of Double, parameter "finish_time" of Double, parameter "is_error"
-           of type "boolean" (@range [0,1])
+           of type "boolean" (@range [0,1]), parameter "job_id" of String
         """
         return self._client.call_method(
             'Catalog.log_exec_stats',
@@ -1008,6 +1008,60 @@ class Catalog(object):
         return self._client.call_method(
             'Catalog.is_admin',
             [username], self._service_ver, context)
+
+    def set_hidden_config_params(self, params, context=None):
+        """
+        Only admins can use this function.
+        :param params: instance of type "ModifyHiddenConfigParamsInput" ->
+           structure: parameter "data" of list of type
+           "HiddenConfigParameter" (version_tag - optional version (commit
+           hash, tag or semantic one) of module, if not set then default ""
+           value is used which means parameter is applied to any version;
+           is_password - optional flag meaning to hide this parameter's value
+           in UI.) -> structure: parameter "module_name" of String, parameter
+           "version_tag" of String, parameter "param_name" of String,
+           parameter "is_password" of type "boolean" (@range [0,1]),
+           parameter "param_value" of String
+        """
+        return self._client.call_method(
+            'Catalog.set_hidden_config_params',
+            [params], self._service_ver, context)
+
+    def remove_hidden_config_params(self, params, context=None):
+        """
+        Only admins can use this function.
+        :param params: instance of type "ModifyHiddenConfigParamsInput" ->
+           structure: parameter "data" of list of type
+           "HiddenConfigParameter" (version_tag - optional version (commit
+           hash, tag or semantic one) of module, if not set then default ""
+           value is used which means parameter is applied to any version;
+           is_password - optional flag meaning to hide this parameter's value
+           in UI.) -> structure: parameter "module_name" of String, parameter
+           "version_tag" of String, parameter "param_name" of String,
+           parameter "is_password" of type "boolean" (@range [0,1]),
+           parameter "param_value" of String
+        """
+        return self._client.call_method(
+            'Catalog.remove_hidden_config_params',
+            [params], self._service_ver, context)
+
+    def get_hidden_config_params(self, params, context=None):
+        """
+        Only admins can use this function.
+        :param params: instance of type "GetHiddenConfigParamsInput" ->
+           structure: parameter "module_name" of String
+        :returns: instance of list of type "HiddenConfigParameter"
+           (version_tag - optional version (commit hash, tag or semantic one)
+           of module, if not set then default "" value is used which means
+           parameter is applied to any version; is_password - optional flag
+           meaning to hide this parameter's value in UI.) -> structure:
+           parameter "module_name" of String, parameter "version_tag" of
+           String, parameter "param_name" of String, parameter "is_password"
+           of type "boolean" (@range [0,1]), parameter "param_value" of String
+        """
+        return self._client.call_method(
+            'Catalog.get_hidden_config_params',
+            [params], self._service_ver, context)
 
     def status(self, context=None):
         return self._client.call_method('Catalog.status',

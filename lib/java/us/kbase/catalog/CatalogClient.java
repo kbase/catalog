@@ -932,6 +932,56 @@ public class CatalogClient {
         return res.get(0);
     }
 
+    /**
+     * <p>Original spec-file function name: set_hidden_config_params</p>
+     * <pre>
+     * Only admins can use this function.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ModifyHiddenConfigParamsInput ModifyHiddenConfigParamsInput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setHiddenConfigParams(ModifyHiddenConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_hidden_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
+    }
+
+    /**
+     * <p>Original spec-file function name: remove_hidden_config_params</p>
+     * <pre>
+     * Only admins can use this function.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ModifyHiddenConfigParamsInput ModifyHiddenConfigParamsInput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void removeHiddenConfigParams(ModifyHiddenConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.remove_hidden_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_hidden_config_params</p>
+     * <pre>
+     * Only admins can use this function.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetHiddenConfigParamsInput GetHiddenConfigParamsInput}
+     * @return   instance of list of type {@link us.kbase.catalog.HiddenConfigParameter HiddenConfigParameter}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<HiddenConfigParameter> getHiddenConfigParams(GetHiddenConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<HiddenConfigParameter>>> retType = new TypeReference<List<List<HiddenConfigParameter>>>() {};
+        List<List<HiddenConfigParameter>> res = caller.jsonrpcCall("Catalog.get_hidden_config_params", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
     public Map<String, Object> status(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<Map<String, Object>>> retType = new TypeReference<List<Map<String, Object>>>() {};
