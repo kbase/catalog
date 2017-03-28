@@ -1475,8 +1475,8 @@ class CatalogController:
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
 
-        if 'function_name' not in params:
-            raise ValueError('function_name parameter field is required')
+        if 'module_name' not in params:
+            raise ValueError('module_name parameter field is required')
         if not isinstance(params['module_name'], basestring):
             raise ValueError('module_name parameter field must be a string')
         module_name = params['module_name']
