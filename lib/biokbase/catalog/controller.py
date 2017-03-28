@@ -1444,7 +1444,7 @@ class CatalogController:
         return self.db.list_volume_mounts(processed_filter)
 
 
-    def set_hidden_config_params(self, username, params):
+    def set_secure_config_params(self, username, params):
         if not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
@@ -1454,10 +1454,10 @@ class CatalogController:
         if not isinstance(params['data'], list):
             raise ValueError('data parameter field must be a list')
         data_list = params['data']
-        self.db.set_hidden_config_params(data_list)
+        self.db.set_secure_config_params(data_list)
 
 
-    def remove_hidden_config_params(self, username, params):
+    def remove_secure_config_params(self, username, params):
         if not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
@@ -1467,10 +1467,10 @@ class CatalogController:
         if not isinstance(params['data'], list):
             raise ValueError('data parameter field must be a list')
         data_list = params['data']
-        self.db.remove_hidden_config_params(data_list)
+        self.db.remove_secure_config_params(data_list)
 
 
-    def get_hidden_config_params(self, username, params):
+    def get_secure_config_params(self, username, params):
         if not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
@@ -1480,7 +1480,7 @@ class CatalogController:
         if not isinstance(params['module_name'], basestring):
             raise ValueError('module_name parameter field must be a string')
         module_name = params['module_name']
-        return self.db.get_hidden_config_params(module_name)
+        return self.db.get_secure_config_params(module_name)
 
 
 

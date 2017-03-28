@@ -933,52 +933,52 @@ public class CatalogClient {
     }
 
     /**
-     * <p>Original spec-file function name: set_hidden_config_params</p>
+     * <p>Original spec-file function name: set_secure_config_params</p>
      * <pre>
      * Only admins can use this function.
      * </pre>
-     * @param   params   instance of type {@link us.kbase.catalog.ModifyHiddenConfigParamsInput ModifyHiddenConfigParamsInput}
+     * @param   params   instance of type {@link us.kbase.catalog.ModifySecureConfigParamsInput ModifySecureConfigParamsInput}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public void setHiddenConfigParams(ModifyHiddenConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public void setSecureConfigParams(ModifySecureConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.set_hidden_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
+        caller.jsonrpcCall("Catalog.set_secure_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
-     * <p>Original spec-file function name: remove_hidden_config_params</p>
+     * <p>Original spec-file function name: remove_secure_config_params</p>
      * <pre>
      * Only admins can use this function.
      * </pre>
-     * @param   params   instance of type {@link us.kbase.catalog.ModifyHiddenConfigParamsInput ModifyHiddenConfigParamsInput}
+     * @param   params   instance of type {@link us.kbase.catalog.ModifySecureConfigParamsInput ModifySecureConfigParamsInput}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public void removeHiddenConfigParams(ModifyHiddenConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public void removeSecureConfigParams(ModifySecureConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
         TypeReference<Object> retType = new TypeReference<Object>() {};
-        caller.jsonrpcCall("Catalog.remove_hidden_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
+        caller.jsonrpcCall("Catalog.remove_secure_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
     }
 
     /**
-     * <p>Original spec-file function name: get_hidden_config_params</p>
+     * <p>Original spec-file function name: get_secure_config_params</p>
      * <pre>
      * Only admins can use this function.
      * </pre>
-     * @param   params   instance of type {@link us.kbase.catalog.GetHiddenConfigParamsInput GetHiddenConfigParamsInput}
-     * @return   instance of list of type {@link us.kbase.catalog.HiddenConfigParameter HiddenConfigParameter}
+     * @param   params   instance of type {@link us.kbase.catalog.GetSecureConfigParamsInput GetSecureConfigParamsInput}
+     * @return   instance of list of type {@link us.kbase.catalog.SecureConfigParameter SecureConfigParameter}
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public List<HiddenConfigParameter> getHiddenConfigParams(GetHiddenConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public List<SecureConfigParameter> getSecureConfigParams(GetSecureConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         args.add(params);
-        TypeReference<List<List<HiddenConfigParameter>>> retType = new TypeReference<List<List<HiddenConfigParameter>>>() {};
-        List<List<HiddenConfigParameter>> res = caller.jsonrpcCall("Catalog.get_hidden_config_params", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        TypeReference<List<List<SecureConfigParameter>>> retType = new TypeReference<List<List<SecureConfigParameter>>>() {};
+        List<List<SecureConfigParameter>> res = caller.jsonrpcCall("Catalog.get_secure_config_params", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

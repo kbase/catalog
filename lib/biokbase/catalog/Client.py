@@ -1009,12 +1009,12 @@ class Catalog(object):
             'Catalog.is_admin',
             [username], self._service_ver, context)
 
-    def set_hidden_config_params(self, params, context=None):
+    def set_secure_config_params(self, params, context=None):
         """
         Only admins can use this function.
-        :param params: instance of type "ModifyHiddenConfigParamsInput" ->
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "HiddenConfigParameter" (version_tag - optional version (commit
+           "SecureConfigParameter" (version_tag - optional version (commit
            hash, tag or semantic one) of module, if not set then default ""
            value is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
@@ -1024,15 +1024,15 @@ class Catalog(object):
            parameter "param_value" of String
         """
         return self._client.call_method(
-            'Catalog.set_hidden_config_params',
+            'Catalog.set_secure_config_params',
             [params], self._service_ver, context)
 
-    def remove_hidden_config_params(self, params, context=None):
+    def remove_secure_config_params(self, params, context=None):
         """
         Only admins can use this function.
-        :param params: instance of type "ModifyHiddenConfigParamsInput" ->
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "HiddenConfigParameter" (version_tag - optional version (commit
+           "SecureConfigParameter" (version_tag - optional version (commit
            hash, tag or semantic one) of module, if not set then default ""
            value is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
@@ -1042,15 +1042,15 @@ class Catalog(object):
            parameter "param_value" of String
         """
         return self._client.call_method(
-            'Catalog.remove_hidden_config_params',
+            'Catalog.remove_secure_config_params',
             [params], self._service_ver, context)
 
-    def get_hidden_config_params(self, params, context=None):
+    def get_secure_config_params(self, params, context=None):
         """
         Only admins can use this function.
-        :param params: instance of type "GetHiddenConfigParamsInput" ->
+        :param params: instance of type "GetSecureConfigParamsInput" ->
            structure: parameter "module_name" of String
-        :returns: instance of list of type "HiddenConfigParameter"
+        :returns: instance of list of type "SecureConfigParameter"
            (version_tag - optional version (commit hash, tag or semantic one)
            of module, if not set then default "" value is used which means
            parameter is applied to any version; is_password - optional flag
@@ -1060,7 +1060,7 @@ class Catalog(object):
            of type "boolean" (@range [0,1]), parameter "param_value" of String
         """
         return self._client.call_method(
-            'Catalog.get_hidden_config_params',
+            'Catalog.get_secure_config_params',
             [params], self._service_ver, context)
 
     def status(self, context=None):

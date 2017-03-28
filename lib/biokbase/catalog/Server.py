@@ -517,18 +517,18 @@ class Application(object):
                              name='Catalog.is_admin',
                              types=[basestring])
         self.method_authentication['Catalog.is_admin'] = 'none'  # noqa
-        self.rpc_service.add(impl_Catalog.set_hidden_config_params,
-                             name='Catalog.set_hidden_config_params',
+        self.rpc_service.add(impl_Catalog.set_secure_config_params,
+                             name='Catalog.set_secure_config_params',
                              types=[dict])
-        self.method_authentication['Catalog.set_hidden_config_params'] = 'required'  # noqa
-        self.rpc_service.add(impl_Catalog.remove_hidden_config_params,
-                             name='Catalog.remove_hidden_config_params',
+        self.method_authentication['Catalog.set_secure_config_params'] = 'required'  # noqa
+        self.rpc_service.add(impl_Catalog.remove_secure_config_params,
+                             name='Catalog.remove_secure_config_params',
                              types=[dict])
-        self.method_authentication['Catalog.remove_hidden_config_params'] = 'required'  # noqa
-        self.rpc_service.add(impl_Catalog.get_hidden_config_params,
-                             name='Catalog.get_hidden_config_params',
+        self.method_authentication['Catalog.remove_secure_config_params'] = 'required'  # noqa
+        self.rpc_service.add(impl_Catalog.get_secure_config_params,
+                             name='Catalog.get_secure_config_params',
                              types=[dict])
-        self.method_authentication['Catalog.get_hidden_config_params'] = 'required'  # noqa
+        self.method_authentication['Catalog.get_secure_config_params'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.status,
                              name='Catalog.status',
                              types=[dict])

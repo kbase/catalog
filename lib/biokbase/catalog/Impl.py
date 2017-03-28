@@ -22,7 +22,7 @@ class Catalog:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/kbase/catalog"
-    GIT_COMMIT_HASH = "6858eb635ce51972b6e3b6dc6f8c367be6a79b75"
+    GIT_COMMIT_HASH = "0f72650848040b29e1a42bfa8287f98a6dc94abe"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -1361,12 +1361,12 @@ class Catalog:
         # return the results
         return [returnVal]
 
-    def set_hidden_config_params(self, ctx, params):
+    def set_secure_config_params(self, ctx, params):
         """
         Only admins can use this function.
-        :param params: instance of type "ModifyHiddenConfigParamsInput" ->
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "HiddenConfigParameter" (version_tag - optional version (commit
+           "SecureConfigParameter" (version_tag - optional version (commit
            hash, tag or semantic one) of module, if not set then default ""
            value is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
@@ -1376,17 +1376,17 @@ class Catalog:
            parameter "param_value" of String
         """
         # ctx is the context object
-        #BEGIN set_hidden_config_params
-        self.cc.set_hidden_config_params(ctx['user_id'], params)
-        #END set_hidden_config_params
+        #BEGIN set_secure_config_params
+        self.cc.set_secure_config_params(ctx['user_id'], params)
+        #END set_secure_config_params
         pass
 
-    def remove_hidden_config_params(self, ctx, params):
+    def remove_secure_config_params(self, ctx, params):
         """
         Only admins can use this function.
-        :param params: instance of type "ModifyHiddenConfigParamsInput" ->
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "HiddenConfigParameter" (version_tag - optional version (commit
+           "SecureConfigParameter" (version_tag - optional version (commit
            hash, tag or semantic one) of module, if not set then default ""
            value is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
@@ -1396,17 +1396,17 @@ class Catalog:
            parameter "param_value" of String
         """
         # ctx is the context object
-        #BEGIN remove_hidden_config_params
-        self.cc.remove_hidden_config_params(ctx['user_id'], params)
-        #END remove_hidden_config_params
+        #BEGIN remove_secure_config_params
+        self.cc.remove_secure_config_params(ctx['user_id'], params)
+        #END remove_secure_config_params
         pass
 
-    def get_hidden_config_params(self, ctx, params):
+    def get_secure_config_params(self, ctx, params):
         """
         Only admins can use this function.
-        :param params: instance of type "GetHiddenConfigParamsInput" ->
+        :param params: instance of type "GetSecureConfigParamsInput" ->
            structure: parameter "module_name" of String
-        :returns: instance of list of type "HiddenConfigParameter"
+        :returns: instance of list of type "SecureConfigParameter"
            (version_tag - optional version (commit hash, tag or semantic one)
            of module, if not set then default "" value is used which means
            parameter is applied to any version; is_password - optional flag
@@ -1417,13 +1417,13 @@ class Catalog:
         """
         # ctx is the context object
         # return variables are: returnVal
-        #BEGIN get_hidden_config_params
-        returnVal = self.cc.get_hidden_config_params(ctx['user_id'], params)
-        #END get_hidden_config_params
+        #BEGIN get_secure_config_params
+        returnVal = self.cc.get_secure_config_params(ctx['user_id'], params)
+        #END get_secure_config_params
 
         # At some point might do deeper type checking...
         if not isinstance(returnVal, list):
-            raise ValueError('Method get_hidden_config_params return value ' +
+            raise ValueError('Method get_secure_config_params return value ' +
                              'returnVal is not type list as required.')
         # return the results
         return [returnVal]

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: HiddenConfigParameter</p>
+ * <p>Original spec-file type: SecureConfigParameter</p>
  * <pre>
  * version_tag - optional version (commit hash, tag or semantic one) of module, if not set
  *     then default "" value is used which means parameter is applied to any version;
@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "is_password",
     "param_value"
 })
-public class HiddenConfigParameter {
+public class SecureConfigParameter {
 
     @JsonProperty("module_name")
     private String moduleName;
@@ -53,7 +53,7 @@ public class HiddenConfigParameter {
         this.moduleName = moduleName;
     }
 
-    public HiddenConfigParameter withModuleName(String moduleName) {
+    public SecureConfigParameter withModuleName(String moduleName) {
         this.moduleName = moduleName;
         return this;
     }
@@ -68,7 +68,7 @@ public class HiddenConfigParameter {
         this.versionTag = versionTag;
     }
 
-    public HiddenConfigParameter withVersionTag(String versionTag) {
+    public SecureConfigParameter withVersionTag(String versionTag) {
         this.versionTag = versionTag;
         return this;
     }
@@ -83,7 +83,7 @@ public class HiddenConfigParameter {
         this.paramName = paramName;
     }
 
-    public HiddenConfigParameter withParamName(String paramName) {
+    public SecureConfigParameter withParamName(String paramName) {
         this.paramName = paramName;
         return this;
     }
@@ -98,7 +98,7 @@ public class HiddenConfigParameter {
         this.isPassword = isPassword;
     }
 
-    public HiddenConfigParameter withIsPassword(Long isPassword) {
+    public SecureConfigParameter withIsPassword(Long isPassword) {
         this.isPassword = isPassword;
         return this;
     }
@@ -113,7 +113,7 @@ public class HiddenConfigParameter {
         this.paramValue = paramValue;
     }
 
-    public HiddenConfigParameter withParamValue(String paramValue) {
+    public SecureConfigParameter withParamValue(String paramValue) {
         this.paramValue = paramValue;
         return this;
     }
@@ -130,7 +130,7 @@ public class HiddenConfigParameter {
 
     @Override
     public String toString() {
-        return ((((((((((((("HiddenConfigParameter"+" [moduleName=")+ moduleName)+", versionTag=")+ versionTag)+", paramName=")+ paramName)+", isPassword=")+ isPassword)+", paramValue=")+ paramValue)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("SecureConfigParameter"+" [moduleName=")+ moduleName)+", versionTag=")+ versionTag)+", paramName=")+ paramName)+", isPassword=")+ isPassword)+", paramValue=")+ paramValue)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

@@ -795,32 +795,32 @@ module Catalog {
         string param_name;
         boolean is_password;
         string param_value;
-    } HiddenConfigParameter;
+    } SecureConfigParameter;
     
     typedef structure {
-        list<HiddenConfigParameter> data;
-    } ModifyHiddenConfigParamsInput;
+        list<SecureConfigParameter> data;
+    } ModifySecureConfigParamsInput;
 
     /*
         Only admins can use this function.
     */
-    funcdef set_hidden_config_params(ModifyHiddenConfigParamsInput params) 
+    funcdef set_secure_config_params(ModifySecureConfigParamsInput params) 
         returns () authentication required;
 
     /*
         Only admins can use this function.
     */
-    funcdef remove_hidden_config_params(ModifyHiddenConfigParamsInput params) 
+    funcdef remove_secure_config_params(ModifySecureConfigParamsInput params) 
         returns () authentication required;
     
     typedef structure {
         string module_name;
-    } GetHiddenConfigParamsInput;
+    } GetSecureConfigParamsInput;
 
     /*
         Only admins can use this function.
     */
-    funcdef get_hidden_config_params(GetHiddenConfigParamsInput params) 
-        returns (list<HiddenConfigParameter>) authentication required;
+    funcdef get_secure_config_params(GetSecureConfigParamsInput params) 
+        returns (list<SecureConfigParameter>) authentication required;
 
 };

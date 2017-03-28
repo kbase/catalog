@@ -2,6 +2,7 @@
 package us.kbase.catalog;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -12,33 +13,33 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * <p>Original spec-file type: GetHiddenConfigParamsInput</p>
+ * <p>Original spec-file type: ModifySecureConfigParamsInput</p>
  * 
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
-    "module_name"
+    "data"
 })
-public class GetHiddenConfigParamsInput {
+public class ModifySecureConfigParamsInput {
 
-    @JsonProperty("module_name")
-    private String moduleName;
+    @JsonProperty("data")
+    private List<SecureConfigParameter> data;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("module_name")
-    public String getModuleName() {
-        return moduleName;
+    @JsonProperty("data")
+    public List<SecureConfigParameter> getData() {
+        return data;
     }
 
-    @JsonProperty("module_name")
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    @JsonProperty("data")
+    public void setData(List<SecureConfigParameter> data) {
+        this.data = data;
     }
 
-    public GetHiddenConfigParamsInput withModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    public ModifySecureConfigParamsInput withData(List<SecureConfigParameter> data) {
+        this.data = data;
         return this;
     }
 
@@ -54,7 +55,7 @@ public class GetHiddenConfigParamsInput {
 
     @Override
     public String toString() {
-        return ((((("GetHiddenConfigParamsInput"+" [moduleName=")+ moduleName)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((("ModifySecureConfigParamsInput"+" [data=")+ data)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }

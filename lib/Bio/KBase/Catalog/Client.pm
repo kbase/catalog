@@ -4740,9 +4740,9 @@ returns true (1) if the user is an admin, false (0) otherwise
  
 
 
-=head2 set_hidden_config_params
+=head2 set_secure_config_params
 
-  $obj->set_hidden_config_params($params)
+  $obj->set_secure_config_params($params)
 
 =over 4
 
@@ -4751,10 +4751,10 @@ returns true (1) if the user is an admin, false (0) otherwise
 =begin html
 
 <pre>
-$params is a Catalog.ModifyHiddenConfigParamsInput
-ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
-	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
-HiddenConfigParameter is a reference to a hash where the following keys are defined:
+$params is a Catalog.ModifySecureConfigParamsInput
+ModifySecureConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
+SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version_tag has a value which is a string
 	param_name has a value which is a string
@@ -4768,10 +4768,10 @@ boolean is an int
 
 =begin text
 
-$params is a Catalog.ModifyHiddenConfigParamsInput
-ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
-	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
-HiddenConfigParameter is a reference to a hash where the following keys are defined:
+$params is a Catalog.ModifySecureConfigParamsInput
+ModifySecureConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
+SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version_tag has a value which is a string
 	param_name has a value which is a string
@@ -4790,7 +4790,7 @@ Only admins can use this function.
 
 =cut
 
- sub set_hidden_config_params
+ sub set_secure_config_params
 {
     my($self, @args) = @_;
 
@@ -4799,7 +4799,7 @@ Only admins can use this function.
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function set_hidden_config_params (received $n, expecting 1)");
+							       "Invalid argument count for function set_secure_config_params (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -4807,40 +4807,40 @@ Only admins can use this function.
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to set_hidden_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to set_secure_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'set_hidden_config_params');
+								   method_name => 'set_secure_config_params');
 	}
     }
 
     my $url = $self->{url};
     my $result = $self->{client}->call($url, $self->{headers}, {
-	    method => "Catalog.set_hidden_config_params",
+	    method => "Catalog.set_secure_config_params",
 	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'set_hidden_config_params',
+					       method_name => 'set_secure_config_params',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return;
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_hidden_config_params",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method set_secure_config_params",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'set_hidden_config_params',
+					    method_name => 'set_secure_config_params',
 				       );
     }
 }
  
 
 
-=head2 remove_hidden_config_params
+=head2 remove_secure_config_params
 
-  $obj->remove_hidden_config_params($params)
+  $obj->remove_secure_config_params($params)
 
 =over 4
 
@@ -4849,10 +4849,10 @@ Only admins can use this function.
 =begin html
 
 <pre>
-$params is a Catalog.ModifyHiddenConfigParamsInput
-ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
-	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
-HiddenConfigParameter is a reference to a hash where the following keys are defined:
+$params is a Catalog.ModifySecureConfigParamsInput
+ModifySecureConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
+SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version_tag has a value which is a string
 	param_name has a value which is a string
@@ -4866,10 +4866,10 @@ boolean is an int
 
 =begin text
 
-$params is a Catalog.ModifyHiddenConfigParamsInput
-ModifyHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
-	data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
-HiddenConfigParameter is a reference to a hash where the following keys are defined:
+$params is a Catalog.ModifySecureConfigParamsInput
+ModifySecureConfigParamsInput is a reference to a hash where the following keys are defined:
+	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
+SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version_tag has a value which is a string
 	param_name has a value which is a string
@@ -4888,7 +4888,7 @@ Only admins can use this function.
 
 =cut
 
- sub remove_hidden_config_params
+ sub remove_secure_config_params
 {
     my($self, @args) = @_;
 
@@ -4897,7 +4897,7 @@ Only admins can use this function.
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function remove_hidden_config_params (received $n, expecting 1)");
+							       "Invalid argument count for function remove_secure_config_params (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -4905,40 +4905,40 @@ Only admins can use this function.
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to remove_hidden_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to remove_secure_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'remove_hidden_config_params');
+								   method_name => 'remove_secure_config_params');
 	}
     }
 
     my $url = $self->{url};
     my $result = $self->{client}->call($url, $self->{headers}, {
-	    method => "Catalog.remove_hidden_config_params",
+	    method => "Catalog.remove_secure_config_params",
 	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'remove_hidden_config_params',
+					       method_name => 'remove_secure_config_params',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return;
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_hidden_config_params",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method remove_secure_config_params",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'remove_hidden_config_params',
+					    method_name => 'remove_secure_config_params',
 				       );
     }
 }
  
 
 
-=head2 get_hidden_config_params
+=head2 get_secure_config_params
 
-  $return = $obj->get_hidden_config_params($params)
+  $return = $obj->get_secure_config_params($params)
 
 =over 4
 
@@ -4947,11 +4947,11 @@ Only admins can use this function.
 =begin html
 
 <pre>
-$params is a Catalog.GetHiddenConfigParamsInput
-$return is a reference to a list where each element is a Catalog.HiddenConfigParameter
-GetHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+$params is a Catalog.GetSecureConfigParamsInput
+$return is a reference to a list where each element is a Catalog.SecureConfigParameter
+GetSecureConfigParamsInput is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-HiddenConfigParameter is a reference to a hash where the following keys are defined:
+SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version_tag has a value which is a string
 	param_name has a value which is a string
@@ -4965,11 +4965,11 @@ boolean is an int
 
 =begin text
 
-$params is a Catalog.GetHiddenConfigParamsInput
-$return is a reference to a list where each element is a Catalog.HiddenConfigParameter
-GetHiddenConfigParamsInput is a reference to a hash where the following keys are defined:
+$params is a Catalog.GetSecureConfigParamsInput
+$return is a reference to a list where each element is a Catalog.SecureConfigParameter
+GetSecureConfigParamsInput is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-HiddenConfigParameter is a reference to a hash where the following keys are defined:
+SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
 	version_tag has a value which is a string
 	param_name has a value which is a string
@@ -4988,7 +4988,7 @@ Only admins can use this function.
 
 =cut
 
- sub get_hidden_config_params
+ sub get_secure_config_params
 {
     my($self, @args) = @_;
 
@@ -4997,7 +4997,7 @@ Only admins can use this function.
     if ((my $n = @args) != 1)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function get_hidden_config_params (received $n, expecting 1)");
+							       "Invalid argument count for function get_secure_config_params (received $n, expecting 1)");
     }
     {
 	my($params) = @args;
@@ -5005,31 +5005,31 @@ Only admins can use this function.
 	my @_bad_arguments;
         (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
         if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to get_hidden_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    my $msg = "Invalid arguments passed to get_secure_config_params:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'get_hidden_config_params');
+								   method_name => 'get_secure_config_params');
 	}
     }
 
     my $url = $self->{url};
     my $result = $self->{client}->call($url, $self->{headers}, {
-	    method => "Catalog.get_hidden_config_params",
+	    method => "Catalog.get_secure_config_params",
 	    params => \@args,
     });
     if ($result) {
 	if ($result->is_error) {
 	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
 					       code => $result->content->{error}->{code},
-					       method_name => 'get_hidden_config_params',
+					       method_name => 'get_secure_config_params',
 					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
 					      );
 	} else {
 	    return wantarray ? @{$result->result} : $result->result->[0];
 	}
     } else {
-        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_hidden_config_params",
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_secure_config_params",
 					    status_line => $self->{client}->status_line,
-					    method_name => 'get_hidden_config_params',
+					    method_name => 'get_secure_config_params',
 				       );
     }
 }
@@ -5077,16 +5077,16 @@ sub version {
             Bio::KBase::Exceptions::JSONRPC->throw(
                 error => $result->error_message,
                 code => $result->content->{code},
-                method_name => 'get_hidden_config_params',
+                method_name => 'get_secure_config_params',
             );
         } else {
             return wantarray ? @{$result->result} : $result->result->[0];
         }
     } else {
         Bio::KBase::Exceptions::HTTP->throw(
-            error => "Error invoking method get_hidden_config_params",
+            error => "Error invoking method get_secure_config_params",
             status_line => $self->{client}->status_line,
-            method_name => 'get_hidden_config_params',
+            method_name => 'get_secure_config_params',
         );
     }
 }
@@ -7301,7 +7301,7 @@ client_group has a value which is a string
 
 
 
-=head2 HiddenConfigParameter
+=head2 SecureConfigParameter
 
 =over 4
 
@@ -7346,7 +7346,7 @@ param_value has a value which is a string
 
 
 
-=head2 ModifyHiddenConfigParamsInput
+=head2 ModifySecureConfigParamsInput
 
 =over 4
 
@@ -7358,7 +7358,7 @@ param_value has a value which is a string
 
 <pre>
 a reference to a hash where the following keys are defined:
-data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
 
 </pre>
 
@@ -7367,7 +7367,7 @@ data has a value which is a reference to a list where each element is a Catalog.
 =begin text
 
 a reference to a hash where the following keys are defined:
-data has a value which is a reference to a list where each element is a Catalog.HiddenConfigParameter
+data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
 
 
 =end text
@@ -7376,7 +7376,7 @@ data has a value which is a reference to a list where each element is a Catalog.
 
 
 
-=head2 GetHiddenConfigParamsInput
+=head2 GetSecureConfigParamsInput
 
 =over 4
 

@@ -125,7 +125,7 @@ class MongoCatalogDBI:
     _EXEC_STATS_RAW='exec_stats_raw'
     _EXEC_STATS_APPS='exec_stats_apps'
     _EXEC_STATS_USERS='exec_stats_users'
-    _HIDDEN_CONFIG_PARAMS='hidden_config_params'
+    _SECURE_CONFIG_PARAMS='secure_config_params'
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
 
@@ -152,7 +152,7 @@ class MongoCatalogDBI:
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
 
-        self.hidden_config_params = self.db[MongoCatalogDBI._HIDDEN_CONFIG_PARAMS]
+        self.secure_config_params = self.db[MongoCatalogDBI._SECURE_CONFIG_PARAMS]
 
         # check the db schema
         self.check_db_schema()
@@ -245,8 +245,8 @@ class MongoCatalogDBI:
                                            unique=True, sparse=False)
 
         # hidden configuration parameters
-        self.local_functions.ensure_index('module_name_lc')
-        self.local_functions.ensure_index([
+        self.secure_config_params.ensure_index('module_name_lc')
+        self.secure_config_params.ensure_index([
             ('module_name_lc',ASCENDING),
             ('version_tag',ASCENDING),
             ('param_name',ASCENDING)], 
@@ -1238,11 +1238,11 @@ class MongoCatalogDBI:
 
         
     
-    def set_hidden_config_params(self, data_list):
+    def set_secure_config_params(self, data_list):
         for param_data in data_list:
-            param_data['module_name_lc'] = param_data['module_name']
+            param_data['module_name_lc'] = param_data['module_name'].lower()
             param_data['version_tag'] = param_data.get('version_tag', '')
-            self.hidden_config_params.update(
+            self.secure_config_params.update(
                 {
                     'module_name_lc':param_data['module_name_lc'],
                     'version_tag':param_data['version_tag'],
@@ -1251,21 +1251,21 @@ class MongoCatalogDBI:
                 param_data,
                 upsert=True)
 
-    def remove_hidden_config_params(self, data_list):
+    def remove_secure_config_params(self, data_list):
         for param_data in data_list:
-            param_data['module_name_lc'] = param_data['module_name']
+            param_data['module_name_lc'] = param_data['module_name'].lower()
             param_data['version_tag'] = param_data.get('version_tag', '')
-            self.hidden_config_params.remove(
+            self.secure_config_params.remove(
                 {
                     'module_name_lc':param_data['module_name_lc'],
                     'version_tag':param_data['version_tag'],
                     'param_name':param_data['param_name']
                 })
 
-    def get_hidden_config_params(self, module_name):
+    def get_secure_config_params(self, module_name):
         selection = { "_id": 0, "module_name_lc": 0 }
         filter = { "module_name_lc": module_name.lower() }
-        return list(self.hidden_config_params.find(filter, selection))
+        return list(self.secure_config_params.find(filter, selection))
 
 
 
