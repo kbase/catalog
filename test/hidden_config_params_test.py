@@ -104,7 +104,7 @@ class HiddenConfigParamsTest(unittest.TestCase):
         params = self.catalog.get_secure_config_params(adminCtx, {'module_name': 'test3'})[0]
         self.assertEqual(len(params), 1)
         self.assertEqual(params[0]['param_name'], 'param0')
-        self.assertEqual(params[0]['param_value'], 'value0')
+        self.assertEqual(params[0]['param_value'], 'value1')
         self.assertEqual(params[0]['version_tag'], 'special_version')
 
         self.catalog.remove_secure_config_params(adminCtx, {'data': [{'module_name': 'Test3',
