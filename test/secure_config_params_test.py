@@ -80,6 +80,12 @@ class HiddenConfigParamsTest(unittest.TestCase):
         self.assertEqual(str(e.exception),
             'module_name parameter field must be a string');
 
+        with self.assertRaises(ValueError) as e:
+            self.catalog.get_secure_config_params(adminCtx, {'module_name': 'abc',
+                                                             'version': [1, 2, 3]})
+        self.assertEqual(str(e.exception),
+            'version parameter field must be a string');
+
 
     def test_no_data(self):
         adminCtx = self.cUtil.admin_ctx()
@@ -100,7 +106,7 @@ class HiddenConfigParamsTest(unittest.TestCase):
         self.assertEqual(params[0]['module_name'], 'Test1')
         self.assertEqual(params[0]['param_name'], 'param0')
         self.assertEqual(params[0]['param_value'], 'value0')
-        self.assertEqual(params[0]['version_tag'], '')
+        self.assertEqual(params[0]['version'], '')
 
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': 'Test1',
                                                                    'param_name': 'param0',
@@ -151,7 +157,7 @@ class HiddenConfigParamsTest(unittest.TestCase):
 
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': 'Test3',
                                                                    'param_name': 'param0',
-                                                                   'version_tag': 'special_version',
+                                                                   'version': 'special_version',
                                                                    'param_value': 'value1'}]})
         params = self.catalog.get_secure_config_params(adminCtx, {'module_name': 'test3',
                                                                   'load_all_versions': 1})[0]
@@ -165,11 +171,11 @@ class HiddenConfigParamsTest(unittest.TestCase):
         self.assertEqual(len(params), 1)
         self.assertEqual(params[0]['param_name'], 'param0')
         self.assertEqual(params[0]['param_value'], 'value1')
-        self.assertEqual(params[0]['version_tag'], 'special_version')
+        self.assertEqual(params[0]['version'], 'special_version')
 
         self.catalog.remove_secure_config_params(adminCtx, {'data': [{'module_name': 'Test3',
                                                                       'param_name': 'param0',
-                                                                      'version_tag': 'special_version'}]})
+                                                                      'version': 'special_version'}]})
 
         params = self.catalog.get_secure_config_params(adminCtx, {'module_name': 'test3',
                                                                   'load_all_versions': 1})[0]
@@ -192,20 +198,20 @@ class HiddenConfigParamsTest(unittest.TestCase):
                                                                    'param_value': 'value0'},
                                                                   {'module_name': module_name,
                                                                    'param_name': param_name,
-                                                                   'version_tag': garbage,
+                                                                   'version': garbage,
                                                                    'param_value': 'value1'}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value0')
 
         self.catalog.remove_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                       'param_name': param_name,
-                                                                      'version_tag': garbage}]})
+                                                                      'version': garbage}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value0')
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value0')
         self.check_secure_param_value(module_name, semantic_version, 'param0', 'value0')
         
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                    'param_name': param_name,
-                                                                   'version_tag': version_tag,
+                                                                   'version': version_tag,
                                                                    'param_value': 'value1'}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value1')
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value1')
@@ -213,12 +219,12 @@ class HiddenConfigParamsTest(unittest.TestCase):
 
         self.catalog.remove_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                       'param_name': param_name,
-                                                                      'version_tag': version_tag}]})
+                                                                      'version': version_tag}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value0')
 
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                    'param_name': param_name,
-                                                                   'version_tag': git_commit_hash,
+                                                                   'version': git_commit_hash,
                                                                    'param_value': 'value2'}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value2')
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value2')
@@ -226,12 +232,12 @@ class HiddenConfigParamsTest(unittest.TestCase):
 
         self.catalog.remove_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                       'param_name': param_name,
-                                                                      'version_tag': git_commit_hash}]})
+                                                                      'version': git_commit_hash}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value0')
 
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                    'param_name': param_name,
-                                                                   'version_tag': semantic_version,
+                                                                   'version': semantic_version,
                                                                    'param_value': 'value3'}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value3')
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value3')
@@ -239,10 +245,10 @@ class HiddenConfigParamsTest(unittest.TestCase):
 
 
 
-    def check_secure_param_value(self, module_name, version_tag, param_name, param_value):
+    def check_secure_param_value(self, module_name, version, param_name, param_value):
         params = self.catalog.get_secure_config_params(self.cUtil.admin_ctx(), 
                                                        {'module_name': module_name,
-                                                        'version_tag': version_tag})[0]
+                                                        'version': version})[0]
         self.assertEqual(len(params), 1)
         self.assertEqual(params[0]['param_name'], param_name)
         self.assertEqual(params[0]['param_value'], param_value)

@@ -14,13 +14,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: GetSecureConfigParamsInput</p>
  * <pre>
- * version_lookup - a lookup string, if empty will get the latest released module
- *             1) version tag = dev | beta | release
- *             2) semantic version match identifiier
- *             not supported yet: 3) exact commit hash
- *             not supported yet: 4) exact timestamp
- * load_all_versions - flag indicating that all parameter versions should be 
- *             loaded (version_lookup filter is not applied)
+ * version - optional version (commit hash, tag or semantic one) of module, if
+ *     not set then default "release" value is used;
+ * load_all_versions - optional flag indicating that all parameter versions 
+ *     should be loaded (version filter is not applied), default value is 0.
  * </pre>
  * 
  */
@@ -28,15 +25,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "version_lookup",
+    "version",
     "load_all_versions"
 })
 public class GetSecureConfigParamsInput {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("version_lookup")
-    private String versionLookup;
+    @JsonProperty("version")
+    private String version;
     @JsonProperty("load_all_versions")
     private Long loadAllVersions;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
@@ -56,18 +53,18 @@ public class GetSecureConfigParamsInput {
         return this;
     }
 
-    @JsonProperty("version_lookup")
-    public String getVersionLookup() {
-        return versionLookup;
+    @JsonProperty("version")
+    public String getVersion() {
+        return version;
     }
 
-    @JsonProperty("version_lookup")
-    public void setVersionLookup(String versionLookup) {
-        this.versionLookup = versionLookup;
+    @JsonProperty("version")
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public GetSecureConfigParamsInput withVersionLookup(String versionLookup) {
-        this.versionLookup = versionLookup;
+    public GetSecureConfigParamsInput withVersion(String version) {
+        this.version = version;
         return this;
     }
 
@@ -98,7 +95,7 @@ public class GetSecureConfigParamsInput {
 
     @Override
     public String toString() {
-        return ((((((((("GetSecureConfigParamsInput"+" [moduleName=")+ moduleName)+", versionLookup=")+ versionLookup)+", loadAllVersions=")+ loadAllVersions)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((("GetSecureConfigParamsInput"+" [moduleName=")+ moduleName)+", version=")+ version)+", loadAllVersions=")+ loadAllVersions)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
