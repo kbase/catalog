@@ -1445,7 +1445,7 @@ class CatalogController:
 
 
     def set_secure_config_params(self, username, params):
-        if not self.is_admin(username):
+        if username is None or not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
         
@@ -1458,7 +1458,7 @@ class CatalogController:
 
 
     def remove_secure_config_params(self, username, params):
-        if not self.is_admin(username):
+        if username is None or not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
 
@@ -1471,7 +1471,7 @@ class CatalogController:
 
 
     def get_secure_config_params(self, username, params):
-        if not self.is_admin(username):
+        if username is None or not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
                              'parameters.')
 

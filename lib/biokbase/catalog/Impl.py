@@ -1377,7 +1377,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_secure_config_params
-        self.cc.set_secure_config_params(ctx['user_id'], params)
+        self.cc.set_secure_config_params(ctx.get('user_id'), params)
         #END set_secure_config_params
         pass
 
@@ -1397,7 +1397,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN remove_secure_config_params
-        self.cc.remove_secure_config_params(ctx['user_id'], params)
+        self.cc.remove_secure_config_params(ctx.get('user_id'), params)
         #END remove_secure_config_params
         pass
 
@@ -1418,7 +1418,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN get_secure_config_params
-        returnVal = self.cc.get_secure_config_params(ctx['user_id'], params)
+        returnVal = self.cc.get_secure_config_params(ctx.get('user_id'), params)
         #END get_secure_config_params
 
         # At some point might do deeper type checking...
