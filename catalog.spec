@@ -812,9 +812,20 @@ module Catalog {
     */
     funcdef remove_secure_config_params(ModifySecureConfigParamsInput params) 
         returns () authentication required;
-    
+
+    /*
+        version - a lookup string, if empty will get the latest released module
+                    1) version tag = dev | beta | release
+                    2) semantic version match identifiier
+                    not supported yet: 3) exact commit hash
+                    not supported yet: 4) exact timestamp
+        load_all_versions - flag indicating that all parameter versions should be 
+                    loaded (version_lookup filter is not applied)
+    */    
     typedef structure {
         string module_name;
+        string version_lookup;
+        boolean load_all_versions;
     } GetSecureConfigParamsInput;
 
     /*

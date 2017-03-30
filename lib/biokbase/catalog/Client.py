@@ -1048,8 +1048,15 @@ class Catalog(object):
     def get_secure_config_params(self, params, context=None):
         """
         Only admins can use this function.
-        :param params: instance of type "GetSecureConfigParamsInput" ->
-           structure: parameter "module_name" of String
+        :param params: instance of type "GetSecureConfigParamsInput"
+           (version_lookup - a lookup string, if empty will get the latest
+           released module 1) version tag = dev | beta | release 2) semantic
+           version match identifiier not supported yet: 3) exact commit hash
+           not supported yet: 4) exact timestamp load_all_versions - flag
+           indicating that all parameter versions should be loaded
+           (version_lookup filter is not applied)) -> structure: parameter
+           "module_name" of String, parameter "version_lookup" of String,
+           parameter "load_all_versions" of type "boolean" (@range [0,1])
         :returns: instance of list of type "SecureConfigParameter"
            (version_tag - optional version (commit hash, tag or semantic one)
            of module, if not set then default "" value is used which means

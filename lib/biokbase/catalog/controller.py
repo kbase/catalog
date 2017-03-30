@@ -1477,10 +1477,31 @@ class CatalogController:
 
         if 'module_name' not in params:
             raise ValueError('module_name parameter field is required')
-        if not isinstance(params['module_name'], basestring):
-            raise ValueError('module_name parameter field must be a string')
         module_name = params['module_name']
-        return self.db.get_secure_config_params(module_name)
+        if not isinstance(module_name, basestring):
+            raise ValueError('module_name parameter field must be a string')
+        version_lookup = params.get('version_lookup')
+        if version_lookup and not isinstance(version_lookup, basestring):
+            raise ValueError('version_lookup parameter field must be a string')
+        load_all_versions = params.get('load_all_versions')
+        secure_param_list = self.db.get_secure_config_params(module_name)
+        if load_all_versions:
+            return secure_param_list
+        mv = self.get_module_version({'module_name': module_name, 'version': version})
+        param_map = {}
+        for secure_param in secure_param_list:
+            param_name = secure_param['param_name']
+            version_tag = secure_param.get('version_tag')
+            # If version_tag is defined and doesn't match any known version we skip it:
+            if version_tag and not (version_tag == mv['git_commit_hash'] or 
+                                    version_tag == mv['version'] or
+                                    version_tag in mv['release_tags']):
+                continue
+            # We may override previous param_name value if it had empty version_tag previously:
+            if param_name not in param_map or not param_map[param_name].get('version_tag'):
+                param_map[param_name] = secure_param
+        return [param_map[param_name] for param_name in param_map]
+
 
 
 
