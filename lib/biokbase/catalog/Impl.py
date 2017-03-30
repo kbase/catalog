@@ -21,8 +21,8 @@ class Catalog:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/rsutormin/catalog"
-    GIT_COMMIT_HASH = "554f89662992b978951d94ec0672c00cf7de55f7"
+    GIT_URL = "https://github.com/kbase/catalog"
+    GIT_COMMIT_HASH = "0f72650848040b29e1a42bfa8287f98a6dc94abe"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -1095,7 +1095,7 @@ class Catalog:
            "func_name" of String, parameter "git_commit_hash" of String,
            parameter "creation_time" of Double, parameter "exec_start_time"
            of Double, parameter "finish_time" of Double, parameter "is_error"
-           of type "boolean" (@range [0,1])
+           of type "boolean" (@range [0,1]), parameter "job_id" of String
         """
         # ctx is the context object
         #BEGIN log_exec_stats
@@ -1112,9 +1112,10 @@ class Catalog:
         exec_start_time = params['exec_start_time']
         finish_time = params['finish_time']
         is_error = params['is_error'] != 0
+        job_id = params.get('job_id')
         self.cc.log_exec_stats(admin_user_id, user_id, app_module_name, app_id, func_module_name,
                                func_name, git_commit_hash, creation_time, exec_start_time, 
-                               finish_time, is_error)
+                               finish_time, is_error, job_id)
         #END log_exec_stats
         pass
 
@@ -1357,6 +1358,73 @@ class Catalog:
         if not isinstance(returnVal, int):
             raise ValueError('Method is_admin return value ' +
                              'returnVal is not type int as required.')
+        # return the results
+        return [returnVal]
+
+    def set_secure_config_params(self, ctx, params):
+        """
+        Only admins can use this function.
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
+           structure: parameter "data" of list of type
+           "SecureConfigParameter" (version_tag - optional version (commit
+           hash, tag or semantic one) of module, if not set then default ""
+           value is used which means parameter is applied to any version;
+           is_password - optional flag meaning to hide this parameter's value
+           in UI.) -> structure: parameter "module_name" of String, parameter
+           "version_tag" of String, parameter "param_name" of String,
+           parameter "is_password" of type "boolean" (@range [0,1]),
+           parameter "param_value" of String
+        """
+        # ctx is the context object
+        #BEGIN set_secure_config_params
+        self.cc.set_secure_config_params(ctx.get('user_id'), params)
+        #END set_secure_config_params
+        pass
+
+    def remove_secure_config_params(self, ctx, params):
+        """
+        Only admins can use this function.
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
+           structure: parameter "data" of list of type
+           "SecureConfigParameter" (version_tag - optional version (commit
+           hash, tag or semantic one) of module, if not set then default ""
+           value is used which means parameter is applied to any version;
+           is_password - optional flag meaning to hide this parameter's value
+           in UI.) -> structure: parameter "module_name" of String, parameter
+           "version_tag" of String, parameter "param_name" of String,
+           parameter "is_password" of type "boolean" (@range [0,1]),
+           parameter "param_value" of String
+        """
+        # ctx is the context object
+        #BEGIN remove_secure_config_params
+        self.cc.remove_secure_config_params(ctx.get('user_id'), params)
+        #END remove_secure_config_params
+        pass
+
+    def get_secure_config_params(self, ctx, params):
+        """
+        Only admins can use this function.
+        :param params: instance of type "GetSecureConfigParamsInput" ->
+           structure: parameter "module_name" of String
+        :returns: instance of list of type "SecureConfigParameter"
+           (version_tag - optional version (commit hash, tag or semantic one)
+           of module, if not set then default "" value is used which means
+           parameter is applied to any version; is_password - optional flag
+           meaning to hide this parameter's value in UI.) -> structure:
+           parameter "module_name" of String, parameter "version_tag" of
+           String, parameter "param_name" of String, parameter "is_password"
+           of type "boolean" (@range [0,1]), parameter "param_value" of String
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN get_secure_config_params
+        returnVal = self.cc.get_secure_config_params(ctx.get('user_id'), params)
+        #END get_secure_config_params
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, list):
+            raise ValueError('Method get_secure_config_params return value ' +
+                             'returnVal is not type list as required.')
         # return the results
         return [returnVal]
     def status(self, ctx):

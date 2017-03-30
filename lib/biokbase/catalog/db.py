@@ -125,6 +125,7 @@ class MongoCatalogDBI:
     _EXEC_STATS_RAW='exec_stats_raw'
     _EXEC_STATS_APPS='exec_stats_apps'
     _EXEC_STATS_USERS='exec_stats_users'
+    _SECURE_CONFIG_PARAMS='secure_config_params'
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
 
@@ -150,6 +151,8 @@ class MongoCatalogDBI:
         self.exec_stats_raw = self.db[MongoCatalogDBI._EXEC_STATS_RAW]
         self.exec_stats_apps = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
         self.exec_stats_users = self.db[MongoCatalogDBI._EXEC_STATS_USERS]
+
+        self.secure_config_params = self.db[MongoCatalogDBI._SECURE_CONFIG_PARAMS]
 
         # check the db schema
         self.check_db_schema()
@@ -240,6 +243,14 @@ class MongoCatalogDBI:
                                             ('module_name_lc', ASCENDING),
                                             ('function_name', ASCENDING)], 
                                            unique=True, sparse=False)
+
+        # hidden configuration parameters
+        self.secure_config_params.ensure_index('module_name_lc')
+        self.secure_config_params.ensure_index([
+            ('module_name_lc',ASCENDING),
+            ('version_tag',ASCENDING),
+            ('param_name',ASCENDING)], 
+            unique=True, sparse=False)
 
 
     def is_registered(self,module_name='',git_url=''):
@@ -1083,7 +1094,8 @@ class MongoCatalogDBI:
         return '{}'
 
     def add_exec_stats_raw(self, user_id, app_module_name, app_id, func_module_name, func_name, 
-                           git_commit_hash, creation_time, exec_start_time, finish_time, is_error):
+                           git_commit_hash, creation_time, exec_start_time, finish_time, is_error,
+                           job_id):
         stats = {
             'user_id': user_id,
             'app_module_name': app_module_name,
@@ -1094,7 +1106,8 @@ class MongoCatalogDBI:
             'creation_time': creation_time,
             'exec_start_time': exec_start_time,
             'finish_time': finish_time,
-            'is_error': is_error
+            'is_error': is_error,
+            'job_id': job_id
         }
         self.exec_stats_raw.insert(stats)
 
@@ -1225,6 +1238,35 @@ class MongoCatalogDBI:
 
         
     
+    def set_secure_config_params(self, data_list):
+        for param_data in data_list:
+            param_data['module_name_lc'] = param_data['module_name'].lower()
+            param_data['version_tag'] = param_data.get('version_tag', '')
+            self.secure_config_params.update(
+                {
+                    'module_name_lc':param_data['module_name_lc'],
+                    'version_tag':param_data['version_tag'],
+                    'param_name':param_data['param_name']
+                },
+                param_data,
+                upsert=True)
+
+    def remove_secure_config_params(self, data_list):
+        for param_data in data_list:
+            param_data['module_name_lc'] = param_data['module_name'].lower()
+            param_data['version_tag'] = param_data.get('version_tag', '')
+            self.secure_config_params.remove(
+                {
+                    'module_name_lc':param_data['module_name_lc'],
+                    'version_tag':param_data['version_tag'],
+                    'param_name':param_data['param_name']
+                })
+
+    def get_secure_config_params(self, module_name):
+        selection = { "_id": 0, "module_name_lc": 0 }
+        filter = { "module_name_lc": module_name.lower() }
+        return list(self.secure_config_params.find(filter, selection))
+
 
 
     # DB version handling

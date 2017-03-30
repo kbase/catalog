@@ -1174,12 +1174,12 @@ class CatalogController:
 
     def log_exec_stats(self, admin_user_id, user_id, app_module_name, app_id, func_module_name,
                        func_name, git_commit_hash, creation_time, exec_start_time, finish_time,
-                       is_error):
+                       is_error, job_id):
         if not self.is_admin(admin_user_id):
             raise ValueError('You do not have permission to log execution statistics.')
         self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name, 
                                    git_commit_hash, creation_time, exec_start_time, finish_time, 
-                                   is_error)
+                                   is_error, job_id)
         parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
@@ -1444,10 +1444,43 @@ class CatalogController:
         return self.db.list_volume_mounts(processed_filter)
 
 
+    def set_secure_config_params(self, username, params):
+        if username is None or not self.is_admin(username):
+            raise ValueError('You do not have permission to work with hidden configuration ' +
+                             'parameters.')
+        
+        if 'data' not in params:
+            raise ValueError('data parameter field is required')
+        if not isinstance(params['data'], list):
+            raise ValueError('data parameter field must be a list')
+        data_list = params['data']
+        self.db.set_secure_config_params(data_list)
 
 
+    def remove_secure_config_params(self, username, params):
+        if username is None or not self.is_admin(username):
+            raise ValueError('You do not have permission to work with hidden configuration ' +
+                             'parameters.')
+
+        if 'data' not in params:
+            raise ValueError('data parameter field is required')
+        if not isinstance(params['data'], list):
+            raise ValueError('data parameter field must be a list')
+        data_list = params['data']
+        self.db.remove_secure_config_params(data_list)
 
 
+    def get_secure_config_params(self, username, params):
+        if username is None or not self.is_admin(username):
+            raise ValueError('You do not have permission to work with hidden configuration ' +
+                             'parameters.')
+
+        if 'module_name' not in params:
+            raise ValueError('module_name parameter field is required')
+        if not isinstance(params['module_name'], basestring):
+            raise ValueError('module_name parameter field must be a string')
+        module_name = params['module_name']
+        return self.db.get_secure_config_params(module_name)
 
 
 
