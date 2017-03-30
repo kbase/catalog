@@ -185,15 +185,13 @@ class HiddenConfigParamsTest(unittest.TestCase):
     def test_module_versions(self):
         adminCtx = self.cUtil.admin_ctx()
         module_name = 'onerepotest'
-        version_tag = 'dev'
+        version_tag = 'release'
         mv = self.catalog.get_module_version(adminCtx, {'module_name': module_name,
                                                         'version': version_tag})[0]
         git_commit_hash = mv['git_commit_hash']
         semantic_version = mv['version']
-        print("[DEBUG] Before semantic: " + str(mv))
         mv2 = self.catalog.get_module_version(adminCtx, {'module_name': module_name,
                                                          'version': semantic_version})[0]
-        print("[DEBUG] After semantic: " + str(mv2))
 
         garbage = 'garbage'
         param_name = 'param0'
@@ -219,7 +217,7 @@ class HiddenConfigParamsTest(unittest.TestCase):
                                                                    'param_value': 'value1'}]})
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value1')
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value1')
-        #self.check_secure_param_value(module_name, semantic_version, 'param0', 'value1')
+        self.check_secure_param_value(module_name, semantic_version, 'param0', 'value1')
 
         self.catalog.remove_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                       'param_name': param_name,
@@ -260,7 +258,7 @@ class HiddenConfigParamsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        print('++++++++++++ RUNNING client_group_test.py +++++++++++')
+        print('++++++++++++ RUNNING secure_config_params.py +++++++++++')
         cls.cUtil = CatalogTestUtil('.') # TODO: pass in test directory from outside
         cls.cUtil.setUp()
         cls.catalog = Catalog(cls.cUtil.getCatalogConfig())
