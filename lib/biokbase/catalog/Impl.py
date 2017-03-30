@@ -22,7 +22,7 @@ class Catalog:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/kbase/catalog"
-    GIT_COMMIT_HASH = "0f72650848040b29e1a42bfa8287f98a6dc94abe"
+    GIT_COMMIT_HASH = "1d3fa708d1642a1988bac99b35ce20f2d730a322"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -1366,14 +1366,14 @@ class Catalog:
         Only admins can use this function.
         :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "SecureConfigParameter" (version_tag - optional version (commit
-           hash, tag or semantic one) of module, if not set then default ""
-           value is used which means parameter is applied to any version;
+           "SecureConfigParameter" (version - optional version (commit hash,
+           tag or semantic one) of module, if not set then default "" value
+           is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
            in UI.) -> structure: parameter "module_name" of String, parameter
-           "version_tag" of String, parameter "param_name" of String,
-           parameter "is_password" of type "boolean" (@range [0,1]),
-           parameter "param_value" of String
+           "version" of String, parameter "param_name" of String, parameter
+           "is_password" of type "boolean" (@range [0,1]), parameter
+           "param_value" of String
         """
         # ctx is the context object
         #BEGIN set_secure_config_params
@@ -1386,14 +1386,14 @@ class Catalog:
         Only admins can use this function.
         :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "SecureConfigParameter" (version_tag - optional version (commit
-           hash, tag or semantic one) of module, if not set then default ""
-           value is used which means parameter is applied to any version;
+           "SecureConfigParameter" (version - optional version (commit hash,
+           tag or semantic one) of module, if not set then default "" value
+           is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
            in UI.) -> structure: parameter "module_name" of String, parameter
-           "version_tag" of String, parameter "param_name" of String,
-           parameter "is_password" of type "boolean" (@range [0,1]),
-           parameter "param_value" of String
+           "version" of String, parameter "param_name" of String, parameter
+           "is_password" of type "boolean" (@range [0,1]), parameter
+           "param_value" of String
         """
         # ctx is the context object
         #BEGIN remove_secure_config_params
@@ -1404,16 +1404,22 @@ class Catalog:
     def get_secure_config_params(self, ctx, params):
         """
         Only admins can use this function.
-        :param params: instance of type "GetSecureConfigParamsInput" ->
-           structure: parameter "module_name" of String
-        :returns: instance of list of type "SecureConfigParameter"
-           (version_tag - optional version (commit hash, tag or semantic one)
-           of module, if not set then default "" value is used which means
-           parameter is applied to any version; is_password - optional flag
-           meaning to hide this parameter's value in UI.) -> structure:
-           parameter "module_name" of String, parameter "version_tag" of
-           String, parameter "param_name" of String, parameter "is_password"
-           of type "boolean" (@range [0,1]), parameter "param_value" of String
+        :param params: instance of type "GetSecureConfigParamsInput" (version
+           - optional version (commit hash, tag or semantic one) of module,
+           if not set then default "release" value is used; load_all_versions
+           - optional flag indicating that all parameter versions should be
+           loaded (version filter is not applied), default value is 0.) ->
+           structure: parameter "module_name" of String, parameter "version"
+           of String, parameter "load_all_versions" of type "boolean" (@range
+           [0,1])
+        :returns: instance of list of type "SecureConfigParameter" (version -
+           optional version (commit hash, tag or semantic one) of module, if
+           not set then default "" value is used which means parameter is
+           applied to any version; is_password - optional flag meaning to
+           hide this parameter's value in UI.) -> structure: parameter
+           "module_name" of String, parameter "version" of String, parameter
+           "param_name" of String, parameter "is_password" of type "boolean"
+           (@range [0,1]), parameter "param_value" of String
         """
         # ctx is the context object
         # return variables are: returnVal

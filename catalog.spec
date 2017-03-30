@@ -785,13 +785,13 @@ module Catalog {
     funcdef is_admin(string username) returns (boolean); 
 
     /*
-        version_tag - optional version (commit hash, tag or semantic one) of module, if not set
+        version - optional version (commit hash, tag or semantic one) of module, if not set
             then default "" value is used which means parameter is applied to any version;
         is_password - optional flag meaning to hide this parameter's value in UI.
     */
     typedef structure {
         string module_name;
-        string version_tag;
+        string version;
         string param_name;
         boolean is_password;
         string param_value;
@@ -812,9 +812,17 @@ module Catalog {
     */
     funcdef remove_secure_config_params(ModifySecureConfigParamsInput params) 
         returns () authentication required;
-    
+
+    /*
+        version - optional version (commit hash, tag or semantic one) of module, if
+            not set then default "release" value is used;
+        load_all_versions - optional flag indicating that all parameter versions 
+            should be loaded (version filter is not applied), default value is 0.
+    */    
     typedef structure {
         string module_name;
+        string version;
+        boolean load_all_versions;
     } GetSecureConfigParamsInput;
 
     /*

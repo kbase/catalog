@@ -248,7 +248,7 @@ class MongoCatalogDBI:
         self.secure_config_params.ensure_index('module_name_lc')
         self.secure_config_params.ensure_index([
             ('module_name_lc',ASCENDING),
-            ('version_tag',ASCENDING),
+            ('version',ASCENDING),
             ('param_name',ASCENDING)], 
             unique=True, sparse=False)
 
@@ -1241,12 +1241,12 @@ class MongoCatalogDBI:
     def set_secure_config_params(self, data_list):
         for param_data in data_list:
             param_data['module_name_lc'] = param_data['module_name'].lower()
-            param_data['version_tag'] = param_data.get('version_tag', '')
+            param_data['version'] = param_data.get('version', '')
             self.secure_config_params.update(
                 {
-                    'module_name_lc':param_data['module_name_lc'],
-                    'version_tag':param_data['version_tag'],
-                    'param_name':param_data['param_name']
+                    'module_name_lc': param_data['module_name_lc'],
+                    'version': param_data['version'],
+                    'param_name': param_data['param_name']
                 },
                 param_data,
                 upsert=True)
@@ -1254,11 +1254,11 @@ class MongoCatalogDBI:
     def remove_secure_config_params(self, data_list):
         for param_data in data_list:
             param_data['module_name_lc'] = param_data['module_name'].lower()
-            param_data['version_tag'] = param_data.get('version_tag', '')
+            param_data['version'] = param_data.get('version', '')
             self.secure_config_params.remove(
                 {
                     'module_name_lc':param_data['module_name_lc'],
-                    'version_tag':param_data['version_tag'],
+                    'version':param_data['version'],
                     'param_name':param_data['param_name']
                 })
 

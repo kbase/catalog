@@ -4756,7 +4756,7 @@ ModifySecureConfigParamsInput is a reference to a hash where the following keys 
 	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
 SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	version_tag has a value which is a string
+	version has a value which is a string
 	param_name has a value which is a string
 	is_password has a value which is a Catalog.boolean
 	param_value has a value which is a string
@@ -4773,7 +4773,7 @@ ModifySecureConfigParamsInput is a reference to a hash where the following keys 
 	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
 SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	version_tag has a value which is a string
+	version has a value which is a string
 	param_name has a value which is a string
 	is_password has a value which is a Catalog.boolean
 	param_value has a value which is a string
@@ -4854,7 +4854,7 @@ ModifySecureConfigParamsInput is a reference to a hash where the following keys 
 	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
 SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	version_tag has a value which is a string
+	version has a value which is a string
 	param_name has a value which is a string
 	is_password has a value which is a Catalog.boolean
 	param_value has a value which is a string
@@ -4871,7 +4871,7 @@ ModifySecureConfigParamsInput is a reference to a hash where the following keys 
 	data has a value which is a reference to a list where each element is a Catalog.SecureConfigParameter
 SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	version_tag has a value which is a string
+	version has a value which is a string
 	param_name has a value which is a string
 	is_password has a value which is a Catalog.boolean
 	param_value has a value which is a string
@@ -4951,13 +4951,15 @@ $params is a Catalog.GetSecureConfigParamsInput
 $return is a reference to a list where each element is a Catalog.SecureConfigParameter
 GetSecureConfigParamsInput is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	version has a value which is a string
+	load_all_versions has a value which is a Catalog.boolean
+boolean is an int
 SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	version_tag has a value which is a string
+	version has a value which is a string
 	param_name has a value which is a string
 	is_password has a value which is a Catalog.boolean
 	param_value has a value which is a string
-boolean is an int
 
 </pre>
 
@@ -4969,13 +4971,15 @@ $params is a Catalog.GetSecureConfigParamsInput
 $return is a reference to a list where each element is a Catalog.SecureConfigParameter
 GetSecureConfigParamsInput is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
+	version has a value which is a string
+	load_all_versions has a value which is a Catalog.boolean
+boolean is an int
 SecureConfigParameter is a reference to a hash where the following keys are defined:
 	module_name has a value which is a string
-	version_tag has a value which is a string
+	version has a value which is a string
 	param_name has a value which is a string
 	is_password has a value which is a Catalog.boolean
 	param_value has a value which is a string
-boolean is an int
 
 
 =end text
@@ -7309,7 +7313,7 @@ client_group has a value which is a string
 
 =item Description
 
-version_tag - optional version (commit hash, tag or semantic one) of module, if not set
+version - optional version (commit hash, tag or semantic one) of module, if not set
     then default "" value is used which means parameter is applied to any version;
 is_password - optional flag meaning to hide this parameter's value in UI.
 
@@ -7321,7 +7325,7 @@ is_password - optional flag meaning to hide this parameter's value in UI.
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
-version_tag has a value which is a string
+version has a value which is a string
 param_name has a value which is a string
 is_password has a value which is a Catalog.boolean
 param_value has a value which is a string
@@ -7334,7 +7338,7 @@ param_value has a value which is a string
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
-version_tag has a value which is a string
+version has a value which is a string
 param_name has a value which is a string
 is_password has a value which is a Catalog.boolean
 param_value has a value which is a string
@@ -7382,6 +7386,14 @@ data has a value which is a reference to a list where each element is a Catalog.
 
 
 
+=item Description
+
+version - optional version (commit hash, tag or semantic one) of module, if
+    not set then default "release" value is used;
+load_all_versions - optional flag indicating that all parameter versions 
+    should be loaded (version filter is not applied), default value is 0.
+
+
 =item Definition
 
 =begin html
@@ -7389,6 +7401,8 @@ data has a value which is a reference to a list where each element is a Catalog.
 <pre>
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+version has a value which is a string
+load_all_versions has a value which is a Catalog.boolean
 
 </pre>
 
@@ -7398,6 +7412,8 @@ module_name has a value which is a string
 
 a reference to a hash where the following keys are defined:
 module_name has a value which is a string
+version has a value which is a string
+load_all_versions has a value which is a Catalog.boolean
 
 
 =end text

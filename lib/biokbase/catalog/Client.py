@@ -1014,14 +1014,14 @@ class Catalog(object):
         Only admins can use this function.
         :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "SecureConfigParameter" (version_tag - optional version (commit
-           hash, tag or semantic one) of module, if not set then default ""
-           value is used which means parameter is applied to any version;
+           "SecureConfigParameter" (version - optional version (commit hash,
+           tag or semantic one) of module, if not set then default "" value
+           is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
            in UI.) -> structure: parameter "module_name" of String, parameter
-           "version_tag" of String, parameter "param_name" of String,
-           parameter "is_password" of type "boolean" (@range [0,1]),
-           parameter "param_value" of String
+           "version" of String, parameter "param_name" of String, parameter
+           "is_password" of type "boolean" (@range [0,1]), parameter
+           "param_value" of String
         """
         return self._client.call_method(
             'Catalog.set_secure_config_params',
@@ -1032,14 +1032,14 @@ class Catalog(object):
         Only admins can use this function.
         :param params: instance of type "ModifySecureConfigParamsInput" ->
            structure: parameter "data" of list of type
-           "SecureConfigParameter" (version_tag - optional version (commit
-           hash, tag or semantic one) of module, if not set then default ""
-           value is used which means parameter is applied to any version;
+           "SecureConfigParameter" (version - optional version (commit hash,
+           tag or semantic one) of module, if not set then default "" value
+           is used which means parameter is applied to any version;
            is_password - optional flag meaning to hide this parameter's value
            in UI.) -> structure: parameter "module_name" of String, parameter
-           "version_tag" of String, parameter "param_name" of String,
-           parameter "is_password" of type "boolean" (@range [0,1]),
-           parameter "param_value" of String
+           "version" of String, parameter "param_name" of String, parameter
+           "is_password" of type "boolean" (@range [0,1]), parameter
+           "param_value" of String
         """
         return self._client.call_method(
             'Catalog.remove_secure_config_params',
@@ -1048,16 +1048,22 @@ class Catalog(object):
     def get_secure_config_params(self, params, context=None):
         """
         Only admins can use this function.
-        :param params: instance of type "GetSecureConfigParamsInput" ->
-           structure: parameter "module_name" of String
-        :returns: instance of list of type "SecureConfigParameter"
-           (version_tag - optional version (commit hash, tag or semantic one)
-           of module, if not set then default "" value is used which means
-           parameter is applied to any version; is_password - optional flag
-           meaning to hide this parameter's value in UI.) -> structure:
-           parameter "module_name" of String, parameter "version_tag" of
-           String, parameter "param_name" of String, parameter "is_password"
-           of type "boolean" (@range [0,1]), parameter "param_value" of String
+        :param params: instance of type "GetSecureConfigParamsInput" (version
+           - optional version (commit hash, tag or semantic one) of module,
+           if not set then default "release" value is used; load_all_versions
+           - optional flag indicating that all parameter versions should be
+           loaded (version filter is not applied), default value is 0.) ->
+           structure: parameter "module_name" of String, parameter "version"
+           of String, parameter "load_all_versions" of type "boolean" (@range
+           [0,1])
+        :returns: instance of list of type "SecureConfigParameter" (version -
+           optional version (commit hash, tag or semantic one) of module, if
+           not set then default "" value is used which means parameter is
+           applied to any version; is_password - optional flag meaning to
+           hide this parameter's value in UI.) -> structure: parameter
+           "module_name" of String, parameter "version" of String, parameter
+           "param_name" of String, parameter "is_password" of type "boolean"
+           (@range [0,1]), parameter "param_value" of String
         """
         return self._client.call_method(
             'Catalog.get_secure_config_params',

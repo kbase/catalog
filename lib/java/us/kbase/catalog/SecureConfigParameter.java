@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: SecureConfigParameter</p>
  * <pre>
- * version_tag - optional version (commit hash, tag or semantic one) of module, if not set
+ * version - optional version (commit hash, tag or semantic one) of module, if not set
  *     then default "" value is used which means parameter is applied to any version;
  * is_password - optional flag meaning to hide this parameter's value in UI.
  * </pre>
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @Generated("com.googlecode.jsonschema2pojo")
 @JsonPropertyOrder({
     "module_name",
-    "version_tag",
+    "version",
     "param_name",
     "is_password",
     "param_value"
@@ -33,8 +33,8 @@ public class SecureConfigParameter {
 
     @JsonProperty("module_name")
     private String moduleName;
-    @JsonProperty("version_tag")
-    private String versionTag;
+    @JsonProperty("version")
+    private String version;
     @JsonProperty("param_name")
     private String paramName;
     @JsonProperty("is_password")
@@ -58,18 +58,18 @@ public class SecureConfigParameter {
         return this;
     }
 
-    @JsonProperty("version_tag")
-    public String getVersionTag() {
-        return versionTag;
+    @JsonProperty("version")
+    public String getVersion() {
+        return version;
     }
 
-    @JsonProperty("version_tag")
-    public void setVersionTag(String versionTag) {
-        this.versionTag = versionTag;
+    @JsonProperty("version")
+    public void setVersion(String version) {
+        this.version = version;
     }
 
-    public SecureConfigParameter withVersionTag(String versionTag) {
-        this.versionTag = versionTag;
+    public SecureConfigParameter withVersion(String version) {
+        this.version = version;
         return this;
     }
 
@@ -130,7 +130,7 @@ public class SecureConfigParameter {
 
     @Override
     public String toString() {
-        return ((((((((((((("SecureConfigParameter"+" [moduleName=")+ moduleName)+", versionTag=")+ versionTag)+", paramName=")+ paramName)+", isPassword=")+ isPassword)+", paramValue=")+ paramValue)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((("SecureConfigParameter"+" [moduleName=")+ moduleName)+", version=")+ version)+", paramName=")+ paramName)+", isPassword=")+ isPassword)+", paramValue=")+ paramValue)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
