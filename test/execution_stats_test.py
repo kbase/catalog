@@ -105,8 +105,9 @@ class BasicCatalogTest(unittest.TestCase):
         start_delay = 50
         end_delay = 500
 
-        total_success = 0;
-        total_error = 0;
+        total_success = 0
+        total_error = 0
+        weird_job_id = "test_job_12345"
         for s in stats_to_add:
             #typedef structure {
             #    string user_id;
@@ -134,6 +135,8 @@ class BasicCatalogTest(unittest.TestCase):
                 record['creation_time'] = random.randint(s['s'], s['e'])
                 record['exec_start_time'] = record['creation_time'] + start_delay
                 record['finish_time'] = record['exec_start_time'] + end_delay
+                if s['s'] > 1461169999 and s['s'] < 1461170101:
+                    record['job_id'] = weird_job_id
                 self.catalog.log_exec_stats(adminCtx, record)
             total_error += s['n_error']
             for n in range(0,s['n_error']):
@@ -163,6 +166,9 @@ class BasicCatalogTest(unittest.TestCase):
 
         restricted_stats = self.catalog.get_exec_raw_stats(adminCtx, {'begin': 1461169999, 'end': 1461170101})[0]
         self.assertEquals(len(restricted_stats), 20)
+        for row in restricted_stats:
+            self.assertTrue('job_id' in row)
+            self.assertEqual(row['job_id'], weird_job_id)
 
 
         # make sure we can get aggregations of things

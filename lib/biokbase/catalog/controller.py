@@ -9,6 +9,7 @@ import random
 import semantic_version
 import re
 import uuid
+import codecs
 
 import biokbase.catalog.version
 from biokbase.catalog.Client import Catalog
@@ -836,7 +837,8 @@ class CatalogController:
     # get the build log from file that it is being written to
     def get_build_log(self, registration_id):
         try:
-            with open(self.temp_dir+'/registration.log.'+str(registration_id)) as log_file:
+            with codecs.open(self.temp_dir+'/registration.log.'+str(registration_id), 'r', 
+                             'utf-8', errors='ignore') as log_file:
                 log = log_file.read()
         except:
             log = '[log not found - registration_id is invalid or the log has been deleted]'
@@ -1172,12 +1174,12 @@ class CatalogController:
 
     def log_exec_stats(self, admin_user_id, user_id, app_module_name, app_id, func_module_name,
                        func_name, git_commit_hash, creation_time, exec_start_time, finish_time,
-                       is_error):
+                       is_error, job_id):
         if not self.is_admin(admin_user_id):
             raise ValueError('You do not have permission to log execution statistics.')
         self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name, 
                                    git_commit_hash, creation_time, exec_start_time, finish_time, 
-                                   is_error)
+                                   is_error, job_id)
         parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time, 
@@ -1442,9 +1444,63 @@ class CatalogController:
         return self.db.list_volume_mounts(processed_filter)
 
 
+    def set_secure_config_params(self, username, params):
+        if username is None or not self.is_admin(username):
+            raise ValueError('You do not have permission to work with hidden configuration ' +
+                             'parameters.')
+        
+        if 'data' not in params:
+            raise ValueError('data parameter field is required')
+        if not isinstance(params['data'], list):
+            raise ValueError('data parameter field must be a list')
+        data_list = params['data']
+        self.db.set_secure_config_params(data_list)
 
 
+    def remove_secure_config_params(self, username, params):
+        if username is None or not self.is_admin(username):
+            raise ValueError('You do not have permission to work with hidden configuration ' +
+                             'parameters.')
 
+        if 'data' not in params:
+            raise ValueError('data parameter field is required')
+        if not isinstance(params['data'], list):
+            raise ValueError('data parameter field must be a list')
+        data_list = params['data']
+        self.db.remove_secure_config_params(data_list)
+
+
+    def get_secure_config_params(self, username, params):
+        if username is None or not self.is_admin(username):
+            raise ValueError('You do not have permission to work with hidden configuration ' +
+                             'parameters.')
+
+        if 'module_name' not in params:
+            raise ValueError('module_name parameter field is required')
+        module_name = params['module_name']
+        if not isinstance(module_name, basestring):
+            raise ValueError('module_name parameter field must be a string')
+        version_filter = params.get('version')
+        if version_filter and not isinstance(version_filter, basestring):
+            raise ValueError('version parameter field must be a string')
+        load_all_versions = params.get('load_all_versions')
+        secure_param_list = self.db.get_secure_config_params(module_name)
+        if load_all_versions:
+            return secure_param_list
+        mv = self.get_module_version({'module_name': module_name, 'version': version_filter})
+        param_map = {}
+        for secure_param in secure_param_list:
+            param_name = secure_param['param_name']
+            param_version = secure_param.get('version')
+            # If version is defined and doesn't match any known version we skip it:
+            if param_version and not (param_version == mv['git_commit_hash'] or 
+                                      param_version == mv['version'] or
+                                      param_version in mv['release_tags']):
+                continue
+            # We may override previous param_name value if it had empty version previously:
+            if param_name not in param_map or not param_map[param_name].get('version'):
+                param_map[param_name] = secure_param
+        return [param_map[param_name] for param_name in param_map]
 
 
 

@@ -20,7 +20,7 @@ from biokbase.catalog.authclient import KBaseAuth as _KBaseAuth
 
 DEPLOY = 'KB_DEPLOYMENT_CONFIG'
 SERVICE = 'KB_SERVICE_NAME'
-AUTH = 'auth-server-url'
+AUTH = 'auth-service-url'
 
 # Note that the error fields do not match the 2.0 JSONRPC spec
 
@@ -45,7 +45,7 @@ def get_config():
 
 config = get_config()
 
-from biokbase.catalog.Impl import Catalog  # @IgnorePep8
+from biokbase.catalog.Impl import Catalog  # noqa @IgnorePep8
 impl_Catalog = Catalog(config)
 
 
@@ -109,7 +109,11 @@ class JSONRPCServiceCustom(JSONRPCService):
             # Exception was raised inside the method.
             newerr = JSONServerError()
             newerr.trace = traceback.format_exc()
-            newerr.data = e.message
+            if isinstance(e.message, basestring):
+                newerr.data = e.message
+            else:
+                # Some exceptions embed other exceptions as the message
+                newerr.data = repr(e.message)
             raise newerr
         return result
 
@@ -171,7 +175,7 @@ class JSONRPCServiceCustom(JSONRPCService):
 
     def _handle_request(self, ctx, request):
         """Handles given request and returns its response."""
-        if self.method_data[request['method']].has_key('types'): # @IgnorePep8
+        if self.method_data[request['method']].has_key('types'):  # noqa @IgnorePep8
             self._validate_params_types(request['method'], request['params'])
 
         result = self._call_method(ctx, request)
@@ -332,187 +336,199 @@ class Application(object):
         self.rpc_service.add(impl_Catalog.version,
                              name='Catalog.version',
                              types=[])
-        self.method_authentication['Catalog.version'] = 'none'
+        self.method_authentication['Catalog.version'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.is_registered,
                              name='Catalog.is_registered',
                              types=[dict])
-        self.method_authentication['Catalog.is_registered'] = 'none'
+        self.method_authentication['Catalog.is_registered'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.register_repo,
                              name='Catalog.register_repo',
                              types=[dict])
-        self.method_authentication['Catalog.register_repo'] = 'required'
+        self.method_authentication['Catalog.register_repo'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.push_dev_to_beta,
                              name='Catalog.push_dev_to_beta',
                              types=[dict])
-        self.method_authentication['Catalog.push_dev_to_beta'] = 'required'
+        self.method_authentication['Catalog.push_dev_to_beta'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.request_release,
                              name='Catalog.request_release',
                              types=[dict])
-        self.method_authentication['Catalog.request_release'] = 'required'
+        self.method_authentication['Catalog.request_release'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.list_requested_releases,
                              name='Catalog.list_requested_releases',
                              types=[])
-        self.method_authentication['Catalog.list_requested_releases'] = 'none'
+        self.method_authentication['Catalog.list_requested_releases'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.review_release_request,
                              name='Catalog.review_release_request',
                              types=[dict])
-        self.method_authentication['Catalog.review_release_request'] = 'required'
+        self.method_authentication['Catalog.review_release_request'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.list_basic_module_info,
                              name='Catalog.list_basic_module_info',
                              types=[dict])
-        self.method_authentication['Catalog.list_basic_module_info'] = 'none'
+        self.method_authentication['Catalog.list_basic_module_info'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.add_favorite,
                              name='Catalog.add_favorite',
                              types=[dict])
-        self.method_authentication['Catalog.add_favorite'] = 'required'
+        self.method_authentication['Catalog.add_favorite'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.remove_favorite,
                              name='Catalog.remove_favorite',
                              types=[dict])
-        self.method_authentication['Catalog.remove_favorite'] = 'required'
+        self.method_authentication['Catalog.remove_favorite'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.list_favorites,
                              name='Catalog.list_favorites',
                              types=[basestring])
-        self.method_authentication['Catalog.list_favorites'] = 'none'
+        self.method_authentication['Catalog.list_favorites'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_app_favorites,
                              name='Catalog.list_app_favorites',
                              types=[dict])
-        self.method_authentication['Catalog.list_app_favorites'] = 'none'
+        self.method_authentication['Catalog.list_app_favorites'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_favorite_counts,
                              name='Catalog.list_favorite_counts',
                              types=[dict])
-        self.method_authentication['Catalog.list_favorite_counts'] = 'none'
+        self.method_authentication['Catalog.list_favorite_counts'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_module_info,
                              name='Catalog.get_module_info',
                              types=[dict])
-        self.method_authentication['Catalog.get_module_info'] = 'none'
+        self.method_authentication['Catalog.get_module_info'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_version_info,
                              name='Catalog.get_version_info',
                              types=[dict])
-        self.method_authentication['Catalog.get_version_info'] = 'none'
+        self.method_authentication['Catalog.get_version_info'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_released_module_versions,
                              name='Catalog.list_released_module_versions',
                              types=[dict])
-        self.method_authentication['Catalog.list_released_module_versions'] = 'none'
+        self.method_authentication['Catalog.list_released_module_versions'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_module_version,
                              name='Catalog.get_module_version',
                              types=[dict])
-        self.method_authentication['Catalog.get_module_version'] = 'none'
+        self.method_authentication['Catalog.get_module_version'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_local_functions,
                              name='Catalog.list_local_functions',
                              types=[dict])
-        self.method_authentication['Catalog.list_local_functions'] = 'none'
+        self.method_authentication['Catalog.list_local_functions'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_local_function_details,
                              name='Catalog.get_local_function_details',
                              types=[dict])
-        self.method_authentication['Catalog.get_local_function_details'] = 'none'
+        self.method_authentication['Catalog.get_local_function_details'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.module_version_lookup,
                              name='Catalog.module_version_lookup',
                              types=[dict])
-        self.method_authentication['Catalog.module_version_lookup'] = 'none'
+        self.method_authentication['Catalog.module_version_lookup'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_service_modules,
                              name='Catalog.list_service_modules',
                              types=[dict])
-        self.method_authentication['Catalog.list_service_modules'] = 'none'
+        self.method_authentication['Catalog.list_service_modules'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.set_registration_state,
                              name='Catalog.set_registration_state',
                              types=[dict])
-        self.method_authentication['Catalog.set_registration_state'] = 'required'
+        self.method_authentication['Catalog.set_registration_state'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.get_module_state,
                              name='Catalog.get_module_state',
                              types=[dict])
-        self.method_authentication['Catalog.get_module_state'] = 'none'
+        self.method_authentication['Catalog.get_module_state'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_build_log,
                              name='Catalog.get_build_log',
                              types=[basestring])
-        self.method_authentication['Catalog.get_build_log'] = 'none'
+        self.method_authentication['Catalog.get_build_log'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_parsed_build_log,
                              name='Catalog.get_parsed_build_log',
                              types=[dict])
-        self.method_authentication['Catalog.get_parsed_build_log'] = 'none'
+        self.method_authentication['Catalog.get_parsed_build_log'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_builds,
                              name='Catalog.list_builds',
                              types=[dict])
-        self.method_authentication['Catalog.list_builds'] = 'none'
+        self.method_authentication['Catalog.list_builds'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.delete_module,
                              name='Catalog.delete_module',
                              types=[dict])
-        self.method_authentication['Catalog.delete_module'] = 'required'
+        self.method_authentication['Catalog.delete_module'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.migrate_module_to_new_git_url,
                              name='Catalog.migrate_module_to_new_git_url',
                              types=[dict])
-        self.method_authentication['Catalog.migrate_module_to_new_git_url'] = 'required'
+        self.method_authentication['Catalog.migrate_module_to_new_git_url'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.set_to_active,
                              name='Catalog.set_to_active',
                              types=[dict])
-        self.method_authentication['Catalog.set_to_active'] = 'required'
+        self.method_authentication['Catalog.set_to_active'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.set_to_inactive,
                              name='Catalog.set_to_inactive',
                              types=[dict])
-        self.method_authentication['Catalog.set_to_inactive'] = 'required'
+        self.method_authentication['Catalog.set_to_inactive'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.is_approved_developer,
                              name='Catalog.is_approved_developer',
                              types=[list])
-        self.method_authentication['Catalog.is_approved_developer'] = 'none'
+        self.method_authentication['Catalog.is_approved_developer'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.list_approved_developers,
                              name='Catalog.list_approved_developers',
                              types=[])
-        self.method_authentication['Catalog.list_approved_developers'] = 'none'
+        self.method_authentication['Catalog.list_approved_developers'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.approve_developer,
                              name='Catalog.approve_developer',
                              types=[basestring])
-        self.method_authentication['Catalog.approve_developer'] = 'required'
+        self.method_authentication['Catalog.approve_developer'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.revoke_developer,
                              name='Catalog.revoke_developer',
                              types=[basestring])
-        self.method_authentication['Catalog.revoke_developer'] = 'required'
+        self.method_authentication['Catalog.revoke_developer'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.log_exec_stats,
                              name='Catalog.log_exec_stats',
                              types=[dict])
-        self.method_authentication['Catalog.log_exec_stats'] = 'required'
+        self.method_authentication['Catalog.log_exec_stats'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.get_exec_aggr_stats,
                              name='Catalog.get_exec_aggr_stats',
                              types=[dict])
-        self.method_authentication['Catalog.get_exec_aggr_stats'] = 'none'
+        self.method_authentication['Catalog.get_exec_aggr_stats'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.get_exec_aggr_table,
                              name='Catalog.get_exec_aggr_table',
                              types=[dict])
-        self.method_authentication['Catalog.get_exec_aggr_table'] = 'required'
+        self.method_authentication['Catalog.get_exec_aggr_table'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.get_exec_raw_stats,
                              name='Catalog.get_exec_raw_stats',
                              types=[dict])
-        self.method_authentication['Catalog.get_exec_raw_stats'] = 'required'
+        self.method_authentication['Catalog.get_exec_raw_stats'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.get_client_groups,
                              name='Catalog.get_client_groups',
                              types=[dict])
-        self.method_authentication['Catalog.get_client_groups'] = 'none'
+        self.method_authentication['Catalog.get_client_groups'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.set_client_group_config,
                              name='Catalog.set_client_group_config',
                              types=[dict])
-        self.method_authentication['Catalog.set_client_group_config'] = 'required'
+        self.method_authentication['Catalog.set_client_group_config'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.remove_client_group_config,
                              name='Catalog.remove_client_group_config',
                              types=[dict])
-        self.method_authentication['Catalog.remove_client_group_config'] = 'required'
+        self.method_authentication['Catalog.remove_client_group_config'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.list_client_group_configs,
                              name='Catalog.list_client_group_configs',
                              types=[dict])
-        self.method_authentication['Catalog.list_client_group_configs'] = 'none'
+        self.method_authentication['Catalog.list_client_group_configs'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.set_volume_mount,
                              name='Catalog.set_volume_mount',
                              types=[dict])
-        self.method_authentication['Catalog.set_volume_mount'] = 'required'
+        self.method_authentication['Catalog.set_volume_mount'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.remove_volume_mount,
                              name='Catalog.remove_volume_mount',
                              types=[dict])
-        self.method_authentication['Catalog.remove_volume_mount'] = 'required'
+        self.method_authentication['Catalog.remove_volume_mount'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.list_volume_mounts,
                              name='Catalog.list_volume_mounts',
                              types=[dict])
-        self.method_authentication['Catalog.list_volume_mounts'] = 'required'
+        self.method_authentication['Catalog.list_volume_mounts'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.is_admin,
                              name='Catalog.is_admin',
                              types=[basestring])
-        self.method_authentication['Catalog.is_admin'] = 'none'
+        self.method_authentication['Catalog.is_admin'] = 'none'  # noqa
+        self.rpc_service.add(impl_Catalog.set_secure_config_params,
+                             name='Catalog.set_secure_config_params',
+                             types=[dict])
+        self.method_authentication['Catalog.set_secure_config_params'] = 'required'  # noqa
+        self.rpc_service.add(impl_Catalog.remove_secure_config_params,
+                             name='Catalog.remove_secure_config_params',
+                             types=[dict])
+        self.method_authentication['Catalog.remove_secure_config_params'] = 'required'  # noqa
+        self.rpc_service.add(impl_Catalog.get_secure_config_params,
+                             name='Catalog.get_secure_config_params',
+                             types=[dict])
+        self.method_authentication['Catalog.get_secure_config_params'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.status,
                              name='Catalog.status',
                              types=[dict])
@@ -568,7 +584,8 @@ class Application(object):
                         if token is None and auth_req == 'required':
                             err = JSONServerError()
                             err.data = (
-                                'Authentication required for Catalog ' +
+                                'Authentication required for ' +
+                                'Catalog ' +
                                 'but no authentication header was passed')
                             raise err
                         elif token is None and auth_req == 'optional':
@@ -600,7 +617,7 @@ class Application(object):
                            }
                     trace = jre.trace if hasattr(jre, 'trace') else None
                     rpc_result = self.process_error(err, ctx, req, trace)
-                except Exception, e:
+                except Exception:
                     err = {'error': {'code': 0,
                                      'name': 'Unexpected Server Error',
                                      'message': 'An unexpected server error ' +
@@ -610,10 +627,10 @@ class Application(object):
                     rpc_result = self.process_error(err, ctx, req,
                                                     traceback.format_exc())
 
-        # print 'The request method was %s\n' % environ['REQUEST_METHOD']
-        # print 'The environment dictionary is:\n%s\n' % pprint.pformat(environ) @IgnorePep8
-        # print 'The request body was: %s' % request_body
-        # print 'The result from the method call is:\n%s\n' % \
+        # print 'Request method was %s\n' % environ['REQUEST_METHOD']
+        # print 'Environment dictionary is:\n%s\n' % pprint.pformat(environ)
+        # print 'Request body was: %s' % request_body
+        # print 'Result from the method call is:\n%s\n' % \
         #    pprint.pformat(rpc_result)
 
         if rpc_result:
@@ -649,11 +666,12 @@ class Application(object):
         return json.dumps(error)
 
     def now_in_utc(self):
-        # Taken from http://stackoverflow.com/questions/3401428/how-to-get-an-isoformat-datetime-string-including-the-default-timezone @IgnorePep8
+        # noqa Taken from http://stackoverflow.com/questions/3401428/how-to-get-an-isoformat-datetime-string-including-the-default-timezone @IgnorePep8
         dtnow = datetime.datetime.now()
         dtutcnow = datetime.datetime.utcnow()
         delta = dtnow - dtutcnow
-        hh, mm = divmod((delta.days * 24*60*60 + delta.seconds + 30) // 60, 60)
+        hh, mm = divmod((delta.days * 24 * 60 * 60 + delta.seconds + 30) // 60,
+                        60)
         return "%s%+02d:%02d" % (dtnow.isoformat(), hh, mm)
 
 application = Application()
@@ -682,9 +700,7 @@ try:
         print "Monkeypatching std libraries for async"
         from gevent import monkey
         monkey.patch_all()
-    uwsgi.applications = {
-        '': application
-        }
+    uwsgi.applications = {'': application}
 except ImportError:
     # Not available outside of wsgi, ignore
     pass

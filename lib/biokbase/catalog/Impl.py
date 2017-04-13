@@ -14,16 +14,16 @@ class Catalog:
     Service for managing, registering, and building KBase Modules using the KBase SDK.
     '''
 
-    ######## WARNING FOR GEVENT USERS #######
+    ######## WARNING FOR GEVENT USERS ####### noqa
     # Since asynchronous IO can lead to methods - even the same method -
     # interrupting each other, you must be *very* careful when using global
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
-    #########################################
+    ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/mrcreosote/catalog"
-    GIT_COMMIT_HASH = "e2e1ccec3e9441ec62d189962190a6bcd9ceb7a8"
-    
+    GIT_URL = "https://github.com/kbase/catalog"
+    GIT_COMMIT_HASH = "1d3fa708d1642a1988bac99b35ce20f2d730a322"
+
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
 
@@ -42,7 +42,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
-    
+
 
     def version(self, ctx):
         """
@@ -1095,7 +1095,7 @@ class Catalog:
            "func_name" of String, parameter "git_commit_hash" of String,
            parameter "creation_time" of Double, parameter "exec_start_time"
            of Double, parameter "finish_time" of Double, parameter "is_error"
-           of type "boolean" (@range [0,1])
+           of type "boolean" (@range [0,1]), parameter "job_id" of String
         """
         # ctx is the context object
         #BEGIN log_exec_stats
@@ -1112,9 +1112,10 @@ class Catalog:
         exec_start_time = params['exec_start_time']
         finish_time = params['finish_time']
         is_error = params['is_error'] != 0
+        job_id = params.get('job_id')
         self.cc.log_exec_stats(admin_user_id, user_id, app_module_name, app_id, func_module_name,
                                func_name, git_commit_hash, creation_time, exec_start_time, 
-                               finish_time, is_error)
+                               finish_time, is_error, job_id)
         #END log_exec_stats
         pass
 
@@ -1360,6 +1361,78 @@ class Catalog:
         # return the results
         return [returnVal]
 
+    def set_secure_config_params(self, ctx, params):
+        """
+        Only admins can use this function.
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
+           structure: parameter "data" of list of type
+           "SecureConfigParameter" (version - optional version (commit hash,
+           tag or semantic one) of module, if not set then default "" value
+           is used which means parameter is applied to any version;
+           is_password - optional flag meaning to hide this parameter's value
+           in UI.) -> structure: parameter "module_name" of String, parameter
+           "version" of String, parameter "param_name" of String, parameter
+           "is_password" of type "boolean" (@range [0,1]), parameter
+           "param_value" of String
+        """
+        # ctx is the context object
+        #BEGIN set_secure_config_params
+        self.cc.set_secure_config_params(ctx.get('user_id'), params)
+        #END set_secure_config_params
+        pass
+
+    def remove_secure_config_params(self, ctx, params):
+        """
+        Only admins can use this function.
+        :param params: instance of type "ModifySecureConfigParamsInput" ->
+           structure: parameter "data" of list of type
+           "SecureConfigParameter" (version - optional version (commit hash,
+           tag or semantic one) of module, if not set then default "" value
+           is used which means parameter is applied to any version;
+           is_password - optional flag meaning to hide this parameter's value
+           in UI.) -> structure: parameter "module_name" of String, parameter
+           "version" of String, parameter "param_name" of String, parameter
+           "is_password" of type "boolean" (@range [0,1]), parameter
+           "param_value" of String
+        """
+        # ctx is the context object
+        #BEGIN remove_secure_config_params
+        self.cc.remove_secure_config_params(ctx.get('user_id'), params)
+        #END remove_secure_config_params
+        pass
+
+    def get_secure_config_params(self, ctx, params):
+        """
+        Only admins can use this function.
+        :param params: instance of type "GetSecureConfigParamsInput" (version
+           - optional version (commit hash, tag or semantic one) of module,
+           if not set then default "release" value is used; load_all_versions
+           - optional flag indicating that all parameter versions should be
+           loaded (version filter is not applied), default value is 0.) ->
+           structure: parameter "module_name" of String, parameter "version"
+           of String, parameter "load_all_versions" of type "boolean" (@range
+           [0,1])
+        :returns: instance of list of type "SecureConfigParameter" (version -
+           optional version (commit hash, tag or semantic one) of module, if
+           not set then default "" value is used which means parameter is
+           applied to any version; is_password - optional flag meaning to
+           hide this parameter's value in UI.) -> structure: parameter
+           "module_name" of String, parameter "version" of String, parameter
+           "param_name" of String, parameter "is_password" of type "boolean"
+           (@range [0,1]), parameter "param_value" of String
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN get_secure_config_params
+        returnVal = self.cc.get_secure_config_params(ctx.get('user_id'), params)
+        #END get_secure_config_params
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, list):
+            raise ValueError('Method get_secure_config_params return value ' +
+                             'returnVal is not type list as required.')
+        # return the results
+        return [returnVal]
     def status(self, ctx):
         #BEGIN_STATUS
         returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 

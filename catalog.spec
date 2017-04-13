@@ -635,6 +635,7 @@ module Catalog {
         float exec_start_time;
         float finish_time;
         boolean is_error;
+        string job_id;
     } LogExecStatsParams;
 
     /*
@@ -782,5 +783,52 @@ module Catalog {
 
     /* returns true (1) if the user is an admin, false (0) otherwise */
     funcdef is_admin(string username) returns (boolean); 
+
+    /*
+        version - optional version (commit hash, tag or semantic one) of module, if not set
+            then default "" value is used which means parameter is applied to any version;
+        is_password - optional flag meaning to hide this parameter's value in UI.
+    */
+    typedef structure {
+        string module_name;
+        string version;
+        string param_name;
+        boolean is_password;
+        string param_value;
+    } SecureConfigParameter;
+    
+    typedef structure {
+        list<SecureConfigParameter> data;
+    } ModifySecureConfigParamsInput;
+
+    /*
+        Only admins can use this function.
+    */
+    funcdef set_secure_config_params(ModifySecureConfigParamsInput params) 
+        returns () authentication required;
+
+    /*
+        Only admins can use this function.
+    */
+    funcdef remove_secure_config_params(ModifySecureConfigParamsInput params) 
+        returns () authentication required;
+
+    /*
+        version - optional version (commit hash, tag or semantic one) of module, if
+            not set then default "release" value is used;
+        load_all_versions - optional flag indicating that all parameter versions 
+            should be loaded (version filter is not applied), default value is 0.
+    */    
+    typedef structure {
+        string module_name;
+        string version;
+        boolean load_all_versions;
+    } GetSecureConfigParamsInput;
+
+    /*
+        Only admins can use this function.
+    */
+    funcdef get_secure_config_params(GetSecureConfigParamsInput params) 
+        returns (list<SecureConfigParameter>) authentication required;
 
 };
