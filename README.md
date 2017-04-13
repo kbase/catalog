@@ -10,6 +10,13 @@ develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop
 Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
+#### v2.1.0 - 4/13/17
+  - No change from 2.0.7, but upgraded minor version number because many new features
+    now exist since the initial 2.0.x release.
+
+#### v2.0.7 - 3/28/17
+  - Added job_id field to raw execution statistics
+  - Support for hidden configuration parameters
 
 #### v2.0.6 - 12/7/16
   - Bug is fixed in module registration related to docker client timeout happening 

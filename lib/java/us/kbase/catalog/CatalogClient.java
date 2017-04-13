@@ -932,6 +932,56 @@ public class CatalogClient {
         return res.get(0);
     }
 
+    /**
+     * <p>Original spec-file function name: set_secure_config_params</p>
+     * <pre>
+     * Only admins can use this function.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ModifySecureConfigParamsInput ModifySecureConfigParamsInput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void setSecureConfigParams(ModifySecureConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.set_secure_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
+    }
+
+    /**
+     * <p>Original spec-file function name: remove_secure_config_params</p>
+     * <pre>
+     * Only admins can use this function.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.ModifySecureConfigParamsInput ModifySecureConfigParamsInput}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public void removeSecureConfigParams(ModifySecureConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<Object> retType = new TypeReference<Object>() {};
+        caller.jsonrpcCall("Catalog.remove_secure_config_params", args, retType, false, true, jsonRpcContext, this.serviceVersion);
+    }
+
+    /**
+     * <p>Original spec-file function name: get_secure_config_params</p>
+     * <pre>
+     * Only admins can use this function.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetSecureConfigParamsInput GetSecureConfigParamsInput}
+     * @return   instance of list of type {@link us.kbase.catalog.SecureConfigParameter SecureConfigParameter}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public List<SecureConfigParameter> getSecureConfigParams(GetSecureConfigParamsInput params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<List<SecureConfigParameter>>> retType = new TypeReference<List<List<SecureConfigParameter>>>() {};
+        List<List<SecureConfigParameter>> res = caller.jsonrpcCall("Catalog.get_secure_config_params", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
     public Map<String, Object> status(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<Map<String, Object>>> retType = new TypeReference<List<Map<String, Object>>>() {};

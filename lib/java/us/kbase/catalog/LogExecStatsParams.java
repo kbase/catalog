@@ -40,7 +40,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "creation_time",
     "exec_start_time",
     "finish_time",
-    "is_error"
+    "is_error",
+    "job_id"
 })
 public class LogExecStatsParams {
 
@@ -64,6 +65,8 @@ public class LogExecStatsParams {
     private Double finishTime;
     @JsonProperty("is_error")
     private Long isError;
+    @JsonProperty("job_id")
+    private String jobId;
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("user_id")
@@ -216,6 +219,21 @@ public class LogExecStatsParams {
         return this;
     }
 
+    @JsonProperty("job_id")
+    public String getJobId() {
+        return jobId;
+    }
+
+    @JsonProperty("job_id")
+    public void setJobId(String jobId) {
+        this.jobId = jobId;
+    }
+
+    public LogExecStatsParams withJobId(String jobId) {
+        this.jobId = jobId;
+        return this;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
@@ -228,7 +246,7 @@ public class LogExecStatsParams {
 
     @Override
     public String toString() {
-        return ((((((((((((((((((((((("LogExecStatsParams"+" [userId=")+ userId)+", appModuleName=")+ appModuleName)+", appId=")+ appId)+", funcModuleName=")+ funcModuleName)+", funcName=")+ funcName)+", gitCommitHash=")+ gitCommitHash)+", creationTime=")+ creationTime)+", execStartTime=")+ execStartTime)+", finishTime=")+ finishTime)+", isError=")+ isError)+", additionalProperties=")+ additionalProperties)+"]");
+        return ((((((((((((((((((((((((("LogExecStatsParams"+" [userId=")+ userId)+", appModuleName=")+ appModuleName)+", appId=")+ appId)+", funcModuleName=")+ funcModuleName)+", funcName=")+ funcName)+", gitCommitHash=")+ gitCommitHash)+", creationTime=")+ creationTime)+", execStartTime=")+ execStartTime)+", finishTime=")+ finishTime)+", isError=")+ isError)+", jobId=")+ jobId)+", additionalProperties=")+ additionalProperties)+"]");
     }
 
 }
