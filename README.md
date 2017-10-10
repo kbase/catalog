@@ -10,6 +10,10 @@ develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop
 Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
+
+#### v2.1.1 - 6/26/17
+  - Bugfix for change in docker build log
+
 #### v2.1.0 - 4/13/17
   - No change from 2.0.7, but upgraded minor version number because many new features
     now exist since the initial 2.0.x release.

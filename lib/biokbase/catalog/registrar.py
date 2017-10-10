@@ -542,35 +542,31 @@ class Registrar:
             shutil.rmtree(os.path.join(self.temp_dir,self.registration_id))
 
     def build_docker_image(self, docker_client, image_name, basedir):
-        self.log('\nBuilding the docker image for ' + image_name);
+        self.log('\nBuilding the docker image for ' + image_name)
 
         # examine stream to determine success/failure of build
-        imageId=None
-        last={}
-        for lines in docker_client.build(path=basedir,rm=True,tag=image_name, pull=False):
+        imageId = None
+        for lines in docker_client.build(path=basedir, rm=True, tag=image_name, pull=False):
             for line in lines.strip().splitlines():
                 line_parse = json.loads(line.strip())
-                log_line = ''
                 if 'stream' in line_parse:
-                    self.log(line_parse['stream'],no_end_line=True)
+                    self.log(line_parse['stream'], no_end_line=True)
                 if 'errorDetail' in line_parse:
-                    self.log(str(line_parse),no_end_line=True)
-                    raise ValueError('Docker build failed: '+str(line_parse['errorDetail']))
-                last=line_parse
-        
-        if 'stream' in last and last['stream'][:19]=='Successfully built ':
-            imageId = docker_client.inspect_image(image_name)['Id']
+                    self.log(str(line_parse), no_end_line=True)
+                    raise ValueError('Docker build failed: ' + str(line_parse['errorDetail']))
+
+        imageId = docker_client.inspect_image(image_name)['Id']
 
         self.log('Docker build successful.')
-        self.log('    Image Id:   ' + imageId)
-        self.log('    Image Name: ' + image_name+'\n\n')
+        self.log('    Image Id:   ' + str(imageId))
+        self.log('    Image Name: ' + str(image_name) + '\n\n')
         return imageId
 
     def push_docker_image(self, docker_client, image_name):
-        self.log('\nPushing docker image to registry for ' + image_name);
-        colon_pos = image_name.rfind(':')  # This logic supports images with "host:port/" prefix for private registry 
-        image=image_name[:colon_pos]
-        tag=image_name[colon_pos+1:]
+        self.log('\nPushing docker image to registry for ' + image_name)
+        colon_pos = image_name.rfind(':')  # This logic supports images with "host:port/" prefix for private registry
+        image = image_name[:colon_pos]
+        tag = image_name[colon_pos + 1:]
         #response = [ line for line in docker_client.push(image, tag=tag, stream=True) ]
         #response_stream = response
         #self.log(str(response_stream))
