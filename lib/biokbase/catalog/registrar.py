@@ -1,5 +1,4 @@
 import re
-import sys
 import os
 import traceback
 import shutil
@@ -13,12 +12,10 @@ import semantic_version
 #import git
 import subprocess
 import yaml
-import requests
 from urlparse import urlparse
 from docker import Client as DockerClient
 from docker.tls import TLSConfig as DockerTLSConfig
 
-from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.catalog.local_function_reader import LocalFunctionReader
 from biokbase.narrative_method_store.client import NarrativeMethodStore
 
@@ -437,15 +434,15 @@ class Registrar:
                         display_yaml = display_yaml_file.read()
 
                     # gather any extra html files
-                    extraFiles = {}
+                    extra_files = {}
                     for extra_file_name in os.listdir(os.path.join(method_path)):
                         if not os.path.isfile(os.path.join(method_path,extra_file_name)): break
                         if not extra_file_name.endswith('.html'): break
-                        with codecs.open(oos.path.join(method_path,extra_file_name), 'r', "utf-8", errors='ignore') as extra_file: 
-                            extrafiles[extra_file_name] = extra_file.read()
+                        with codecs.open(os.path.join(method_path,extra_file_name), 'r', "utf-8", errors='ignore') as extra_file:
+                            extra_files[extra_file_name] = extra_file.read()
 
                     # validate against the NMS target endpoint
-                    result = self.nms.validate_method({'id':m, 'spec_json':spec_json, 'display_yaml':display_yaml, 'extra_files':extraFiles});
+                    result = self.nms.validate_method({'id':m, 'spec_json':spec_json, 'display_yaml':display_yaml, 'extra_files':extra_files})
     
                     # inspect results
                     if result['is_valid']>0:
@@ -467,11 +464,6 @@ class Registrar:
 
         else:
             self.log('    - no ui/narrative/methods directory found, so no narrative methods will be deployed')
-
-
-
-
-
 
     def get_required_field_as_string(self, kb_yaml, field_name):
         if field_name not in kb_yaml:
@@ -496,8 +488,6 @@ class Registrar:
         if not type(value) is dict:
             raise ValueError('kbase.yaml file "'+field_name+'" optional field must be a dict')
         return value
-
-
 
     def log(self, message, no_end_line=False, is_error=False):
         if no_end_line:
@@ -546,7 +536,7 @@ class Registrar:
 
         # examine stream to determine success/failure of build
         imageId = None
-        for lines in docker_client.build(path=basedir, rm=True, tag=image_name, pull=False):
+        for lines in docker_client.build(path=basedir, rm=True, tag=image_name, pull=True):
             for line in lines.strip().splitlines():
                 line_parse = json.loads(line.strip())
                 if 'stream' in line_parse:
