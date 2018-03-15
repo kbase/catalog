@@ -436,14 +436,16 @@ class Registrar:
                     # gather any extra html files
                     extra_files = {}
                     for extra_file_name in os.listdir(os.path.join(method_path)):
-                        if not os.path.isfile(os.path.join(method_path,extra_file_name)): break
-                        if not extra_file_name.endswith('.html'): break
+                        if not os.path.isfile(os.path.join(method_path,extra_file_name)):
+                            continue
+                        if not extra_file_name.endswith('.html'):
+                            continue
                         with codecs.open(os.path.join(method_path,extra_file_name), 'r', "utf-8", errors='ignore') as extra_file:
                             extra_files[extra_file_name] = extra_file.read()
 
                     # validate against the NMS target endpoint
                     result = self.nms.validate_method({'id':m, 'spec_json':spec_json, 'display_yaml':display_yaml, 'extra_files':extra_files})
-    
+
                     # inspect results
                     if result['is_valid']>0:
                         self.log('        - valid!')
@@ -458,7 +460,7 @@ class Registrar:
                                 for e in result['errors']:
                                     self.log('        - error: '+e, is_error=True)
                         else:
-                            self.log('        - error is undefined!'+e,  is_error=True)
+                            self.log('        - error is undefined!',  is_error=True)
 
                         raise ValueError('Invalid narrative method specification ('+m+')')
 

@@ -7,6 +7,7 @@ import datetime
 from pprint import pprint, pformat
 from ConfigParser import ConfigParser
 from pymongo import MongoClient
+from docker import Client as DockerAPIClient
 
 
 from biokbase.catalog.db import MongoCatalogDBI
@@ -81,6 +82,7 @@ class CatalogTestUtil:
             'kbase-endpoint':self.test_cfg['kbase-endpoint'],
             'auth-service-url': self.test_cfg.get('auth-service-url', '')
         }
+        self.dockerclient = DockerAPIClient(base_url=self.catalog_cfg['docker-base-url'])
 
     def _init_db_handles(self):
         # 2 check that db exists and collections are empty
@@ -222,11 +224,16 @@ class CatalogTestUtil:
 
     def tearDown(self):
         self.log("tearDown()")
-        self._clear_db();
-        
+        self._clear_db()
+
+        # remove testing images
+        for image in self.dockerclient.images(
+                name=self.catalog_cfg['docker-registry-host']+"/kbase"):
+            print image
+            self.dockerclient.remove_image(image['Id'])
+
         # make sure NMS is clean after each test
         self.mongo.drop_database(self.nms_test_cfg['method-spec-mongo-dbname'])
-
 
     def log(self, mssg):
         # uncomment to debug test rig- warning: on travis this may print any passwords in your config
