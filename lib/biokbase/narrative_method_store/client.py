@@ -25,8 +25,7 @@ _URL_SCHEME = frozenset(['http', 'https'])
 
 
 def _get_token(user_id, password,
-               auth_svc='https://nexus.api.globusonline.org/goauth/token?' +
-                        'grant_type=client_credentials'):
+               auth_svc="https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login"):
     # This is bandaid helper function until we get a full
     # KBase python auth client released
     auth = _base64.b64encode(user_id + ':' + password)

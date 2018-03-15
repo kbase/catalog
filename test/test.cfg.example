@@ -64,5 +64,5 @@ method-spec-git-repo-refresh-rate = 2000
 method-spec-cache-size = 5000
 method-spec-mongo-dbname = method_store_repo_db
 
-
-
+# The KBase auth server url.
+auth-service-url=https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login

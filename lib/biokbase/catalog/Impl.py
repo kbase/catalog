@@ -21,8 +21,8 @@ class Catalog:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbase/catalog"
-    GIT_COMMIT_HASH = "1d3fa708d1642a1988bac99b35ce20f2d730a322"
+    GIT_URL = "https://github.com/JamesJeffryes/catalog.git"
+    GIT_COMMIT_HASH = "4fa904121eaec7f5af1f7322363e3adbaf1d523d"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -33,7 +33,7 @@ class Catalog:
         #BEGIN_CONSTRUCTOR
         print('Starting the Catalog service.  Service configuration:')
         for c in config:
-            if c == 'nms-admin-psswd':
+            if c == 'nms-admin-psswd' or c == 'nms-admin-token':
                 print('  '+c+'=****')
                 continue
             print('  '+c+'='+config[c])
