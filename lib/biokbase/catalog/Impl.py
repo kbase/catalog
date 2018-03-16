@@ -33,7 +33,7 @@ class Catalog:
         #BEGIN_CONSTRUCTOR
         print('Starting the Catalog service.  Service configuration:')
         for c in config:
-            if c == 'nms-admin-psswd' or c == 'nms-admin-token':
+            if c == 'nms-admin-token':
                 print('  '+c+'=****')
                 continue
             print('  '+c+'='+config[c])

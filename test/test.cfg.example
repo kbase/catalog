@@ -41,8 +41,6 @@ docker-push-allow-insecure = 0
 # Narrative Method Store configuration. Provide either a token or a uid/pwd.
 # If both are provided, the token is used.
 nms-url = http://localhost:7125
-nms-admin-user = wstester4
-nms-admin-psswd =
 nms-admin-token = 
 
 # configs for reference data
