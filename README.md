@@ -14,7 +14,7 @@ Code coverage: (develop branch)
 #### v2.1.2 - 3/16/18
   - Pull a new base image if possible each time a module is registered
   - Fix the logic that allows additional html files to be passed from a method's 
-  ui specification directory to the narrative method service
+  ui specification directory to the narrative method service during method validation
 
 #### v2.1.1 - 6/26/17
   - Bugfix for change in docker build log
