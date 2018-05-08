@@ -3,3 +3,4 @@ docker-py
 gitpython
 pyyaml
 semantic_version
+coverage

@@ -11,6 +11,11 @@ Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
 
+#### v2.1.2 - 3/16/18
+  - Pull a new base image if possible each time a module is registered
+  - Fix the logic that allows additional html files to be passed from a method's 
+  ui specification directory to the narrative method service during method validation
+
 #### v2.1.1 - 6/26/17
   - Bugfix for change in docker build log
 

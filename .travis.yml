@@ -29,7 +29,7 @@ install:
 
 script:
     - cp -n test/test.cfg.example test/test.cfg
-    - sed -i 's/^nms-admin-psswd.*/nms-admin-psswd = '$NMS_ADMIN_PWD'/' test/test.cfg
+    - sed -i 's/^nms-admin-toke.*/nms-admin-token = '$NMS_ADMIN_TOKEN'/' test/test.cfg
     - make test
 
 after_success:
@@ -38,5 +38,5 @@ after_success:
 
 env:
   global:
-    - secure: "wYp9dN9eMga877iX8TUbO6AN/oMUpsmoVmcmNhUup1D/uMrPF1g2nqqKADV9APcuM1fu7t60nV3NdjyiZByc1YpWVeBYKKLheV6xosLKw1N7T62Ksb1euFSvVAX6OEmr+eaUTTSXwtrHyYhutgL/IWeiqanJRBBH1L7p5M7SJZTOhAtmW+/RElASwmPBxVQCY6vrehUcJ+2H49RnhQPc1ZD1c+favJfl4FMJ2MuYhvD+YBEY+GRyA8yYI46EwXUXitm2/ER24xl2/yggtiwIVC15k7ZH6DjuwXiem2QsMHhZTA38Kahh3YeB+MJAb5uJ4OCIKn04vfZEg/0rNHWcW5sAveI8ogRFtgYXcm/bB1tI7idvJI/87oz9sqqesUgi8/smMyTsERywU3D87VR4Yuh5SJXGWqLpqdmXlXHZTKaUc6YAlus2CyURz2gJjzGKOLc5craNN7Bxz00DluyfcBRYRErEDB8IJldWhxXwgFEsvmlQ9bwquvZsucNg51AsR7fnTY42trY4UDOi2Zvg2G6Wf0oXrkEitxLwD7vjjOmP8lTA+C2wwrUWmgceBNd9o0wNmEEIvhMe3GDAqySznGJALbl1xnuQEXO9ChyZAluDOKi212dtT2hDEa59Mha+A1AiIsp5xmwv+as/vAXv9aOZ+lp1ncdOHr5VMH02/kE="
+    - secure: "kWcr8w+RfPFkoSCCHJzdsKszvq8d85MZi/okV4EnkDXQ0iy7lQRT4OR16bpJ0n9qym40/2Q7mWdTPZN9+iU6DS/bQqdXDpGffXOokRu9VAjPlrFdzjfqrOy4Nury0N9VBEjwQNAFf67zAW0BhzB9zTMWt5Dbm+vRFagweY4btzi/nEY9UPELHGVK/TW9WZ96WdhqrfN/3Xnm7ECzUjv6HqBATY8ugywN3cQZ4ytf0vQfgyx8GbhIMe9tJCWQZqFfzXpRCuZimJ4bPby4UNHv54G1L/2BOgNPSio7U/1DKfDVYIktupPOhsRBkWunxwi0kcU8GCWsDzyD3bjpVwlmvP9TVz8ymAXUTdJ3dp8W1WPj/OLBjx8W9I7K/Q3PGHQf+9HcpSCzWOGvKI/3Vc6mOBxk5pcBFa6edRv3J47FNFBaVj+O9XJ7ytr2yiZQh0C4DmXvO2VqbOm0yRLBuAutEtM5xkSk9zoKx+ZCU1OdLUSQ6GKPfCHv0vlSKyS3pm8BP84aHlozW7s8USoUNtXKAzgjmqxUUVWHc1iGgwASQGEI8JMv7w0AcNhCfeEUR8Nr7BD6YbbMAT8mEwS/NkHHarKiDKywUNhLjRRuZR1nJ6xMEb9CaQ0msJC/Lgxho9lKbeRe16Y82cb1eCV8Rdk/jMVCl7oyaSQlgt81rqrf4Cc="
     - MONGODB_VERSION=2.7

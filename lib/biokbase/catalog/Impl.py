@@ -20,9 +20,9 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbase/catalog"
-    GIT_COMMIT_HASH = "1d3fa708d1642a1988bac99b35ce20f2d730a322"
+    VERSION = "2.1.2"
+    GIT_URL = "https://github.com/JamesJeffryes/catalog.git"
+    GIT_COMMIT_HASH = "82480c4f938d5d1d5a85668a0ebaf1f27bf793f3"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -33,7 +33,7 @@ class Catalog:
         #BEGIN_CONSTRUCTOR
         print('Starting the Catalog service.  Service configuration:')
         for c in config:
-            if c == 'nms-admin-psswd':
+            if c == 'nms-admin-token':
                 print('  '+c+'=****')
                 continue
             print('  '+c+'='+config[c])
