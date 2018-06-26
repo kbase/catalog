@@ -101,27 +101,12 @@ class CatalogController:
             raise ValueError('"nms-url" config variable must be defined to start a CatalogController!')
         self.nms_url = config['nms-url']
         nmstoken = config.get('nms-admin-token')
-        if nmstoken:  # pragma: no cover
+        if nmstoken:
             self.nms_token = nmstoken
         else:  # pragma: no cover
-            nmsuser = config.get('nms-admin-user')
-            nmspwd = config.get('nms-admin-psswd')
-            if not nmsuser or not nmspwd:  # pragma: no cover
-                raise ValueError('if nms-admin-token is not specified in ' +
-                                 'the config, nms-admin-user and ' +
-                                 'nms-admin-psswd must be')
-            self.nms_token = self.get_token(nmsuser, nmspwd,
-                                            config.get('auth-server-url'))
-
+            raise ValueError('The nms-admin-token is required but is not '
+                             'specified in the config')
         self.nms = NarrativeMethodStore(self.nms_url, token=self.nms_token)
-
-    def get_token(self, user, pwd, authurl):
-        if authurl:  # pragma: no cover
-            nms = Catalog(self.nms_url, user_id=user,
-                          password=pwd, auth_svc=authurl)
-        else:
-            nms = Catalog(self.nms_url, user_id=user, password=pwd)
-        return nms._client._headers['AUTHORIZATION']
 
     def register_repo(self, params, username, token):
 

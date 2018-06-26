@@ -655,7 +655,29 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(str(e.exception),
             'Cannot delete module that has been released.  Make it inactive instead.');
 
+    def test_extra_files(self):
+        # (1) register the test repo
+        giturl = self.cUtil.get_test_repo_1()
+        githash = 'd384fab'  # branch simple_good_repo
+        registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
+                                                     {'git_url': giturl,
+                                                      'git_commit_hash': githash})[
+            0]
+        timestamp = int(registration_id.split('_')[0])
 
+        # (2) check state until error or complete, must be complete, and make sure this was relatively fast
+        start = time()
+        timeout = 60  # seconds
+        while True:
+            state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
+                                                  {'git_url': giturl})[0]
+            if state['registration'] in ['complete', 'error']:
+                pprint(state)
+                break
+            self.assertTrue(time() - start < timeout,
+                            'simple registration build exceeded timeout of ' + str(
+                                timeout) + 's')
+        self.assertEqual(state['registration'], 'complete')
 
     @classmethod
     def setUpClass(cls):

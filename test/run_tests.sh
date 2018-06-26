@@ -16,7 +16,7 @@ java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 712
 NMS_PID=$!
 
 echo 'Waiting for NMS to start...'
-sleep 30
+sleep 15
 curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125
 if [ $? -ne 0 ]; then
     kill -9 $NMS_PID
@@ -57,6 +57,7 @@ kill -9 $NMS_PID
 
 # stop Docker Registry
 docker stop registry
+docker rm registry
 
 
 exit ${TEST_RETURN_CODE}
