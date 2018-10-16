@@ -12,7 +12,7 @@
 [catalog-test]
 
 # The KBase auth server url.
-# auth-server-url = https://kbase.us/services/authorization/Sessions/Login
+auth-server-url = https://kbase.us/services/authorization/Sessions/Login
 
 # user accounts for testing (should be different accounts)
 test-user-1 = wstester1
