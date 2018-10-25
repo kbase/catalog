@@ -7,6 +7,7 @@ from pprint import pprint
 
 from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
+from biokbase.catalog.version import CATALOG_VERSION
 
 
 # tests all the basic get methods
@@ -14,7 +15,7 @@ class BasicCatalogTest(unittest.TestCase):
 
 
     def test_version(self):
-        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),['2.1.0'])
+        self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),[CATALOG_VERSION])
 
 
     def test_is_registered(self):
