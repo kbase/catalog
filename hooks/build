@@ -5,7 +5,6 @@
 echo "Build hook running"
 echo "IMAGE_NAME = ${IMAGE_NAME}"
 echo "DOCKER_REPO = ${DOCKER_REPO}"
-echo "CACHE_TAG = ${CACHE_TAG}"
 export BRANCH=${SOURCE_BRANCH:-`git symbolic-ref --short HEAD`}
 
 export DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
