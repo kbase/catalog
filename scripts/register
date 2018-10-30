@@ -29,7 +29,7 @@ VERSION
 """
 
 import sys, os, traceback, time, subprocess
-from docker import Client
+from docker import APIClient
 from docker import utils
 import yaml
 import string

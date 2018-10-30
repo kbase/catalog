@@ -7,7 +7,7 @@ import datetime
 from pprint import pprint, pformat
 from ConfigParser import ConfigParser
 from pymongo import MongoClient
-from docker import Client as DockerAPIClient
+from docker import APIClient as DockerAPIClient
 
 
 from biokbase.catalog.db import MongoCatalogDBI

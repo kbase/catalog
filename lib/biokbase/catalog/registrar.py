@@ -13,7 +13,7 @@ import semantic_version
 import subprocess
 import yaml
 from urlparse import urlparse
-from docker import Client as DockerClient
+from docker import APIClient as DockerClient
 from docker.tls import TLSConfig as DockerTLSConfig
 
 from biokbase.catalog.local_function_reader import LocalFunctionReader
