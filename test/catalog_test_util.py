@@ -7,7 +7,7 @@ import datetime
 from pprint import pprint, pformat
 from ConfigParser import ConfigParser
 from pymongo import MongoClient
-from docker import Client as DockerAPIClient
+from docker import APIClient as DockerAPIClient
 
 
 from biokbase.catalog.db import MongoCatalogDBI
@@ -73,7 +73,6 @@ class CatalogTestUtil:
             'temp-dir':self.scratch_dir,
             'docker-base-url':self.test_cfg['docker-base-url'],
             'docker-registry-host':self.test_cfg['docker-registry-host'],
-            'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
             'nms-url':self.test_cfg['nms-url'],
             'nms-admin-user':self.test_cfg.get('nms-admin-user', ''),
             'nms-admin-psswd':self.test_cfg.get('nms-admin-psswd', ''),

@@ -35,9 +35,6 @@ mongodb-database = catalog-test
 # Path to docker socket/host - you can leave this blank if you have the appropriate docker env variables defined
 docker-base-url = unix://var/run/docker.sock
 
-# temporary fix for travis- no longer needed
-docker-push-allow-insecure = 0
-
 # Narrative Method Store configuration. Please provide a token.
 # If both are provided, the token is used.
 nms-url = http://localhost:7125

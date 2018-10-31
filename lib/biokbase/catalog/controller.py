@@ -81,13 +81,8 @@ class CatalogController:
         self.docker_registry_host = config['docker-registry-host']
         print('Docker registry host config = '+ self.docker_registry_host)
         
-        self.docker_push_allow_insecure = None # none should just set this to default?
         if 'docker-push-allow-insecure' in config:
-            print('Docker docker-push-allow-insecure = '+ config['docker-push-allow-insecure'])
-            if config['docker-push-allow-insecure'].strip() == "1": # pragma: no cover
-                self.docker_push_allow_insecure = True;
-                print('WARNING!! - Docker push is set to allow insecure connections.  This should never be on in production.')
-
+            print('WARNING!! Docker docker-push-allow-insecure found in configuration. This is no longer supported - use --insecure-registry on dockerd')
 
         if 'ref-data-base' not in config: # pragma: no cover
             raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')
@@ -181,7 +176,7 @@ class CatalogController:
         # first set the dev current_release timestamp
 
         t = threading.Thread(target=_start_registration, args=(params,registration_id,timestamp,username,self.is_admin(username),token,self.db, self.temp_dir, self.docker_base_url, 
-            self.docker_registry_host, self.docker_push_allow_insecure, self.nms_url, self.nms_token, module_details, self.ref_data_base, self.kbase_endpoint,
+            self.docker_registry_host, self.nms_url, self.nms_token, module_details, self.ref_data_base, self.kbase_endpoint,
             prev_dev_version))
         t.start()
 
@@ -1492,10 +1487,8 @@ class CatalogController:
 
 # NOT PART OF CLASS CATALOG!!
 def _start_registration(params,registration_id, timestamp,username,is_admin,token, db, temp_dir, docker_base_url, docker_registry_host,
-                        docker_push_allow_insecure,
                         nms_url, nms_admin_token, module_details, ref_data_base, kbase_endpoint, prev_dev_version):
-    registrar = Registrar(params, registration_id, timestamp, username, is_admin,token, db, temp_dir, docker_base_url, docker_registry_host,
-                            docker_push_allow_insecure, 
+    registrar = Registrar(params, registration_id, timestamp, username, is_admin,token, db, temp_dir, docker_base_url, docker_registry_host, 
                             nms_url, nms_admin_token, module_details, ref_data_base, kbase_endpoint, prev_dev_version)
     registrar.start_registration()
 
