@@ -26,7 +26,7 @@ class Registrar:
     # params is passed in from the controller, should be the same as passed into the spec
     # db is a reference to the Catalog DB interface (usually a MongoCatalogDBI instance)
     def __init__(self, params, registration_id, timestamp, username, is_admin,token, db, temp_dir, docker_base_url, 
-                    docker_registry_host, docker_push_allow_insecure, nms_url, nms_admin_token, module_details,
+                    docker_registry_host, nms_url, nms_admin_token, module_details,
                     ref_data_base, kbase_endpoint, prev_dev_version):
         self.db = db
         self.params = params
@@ -42,7 +42,6 @@ class Registrar:
         self.temp_dir = temp_dir
         self.docker_base_url = docker_base_url
         self.docker_registry_host = docker_registry_host
-        self.docker_push_allow_insecure = docker_push_allow_insecure
 
         self.nms_url = nms_url
 
@@ -564,11 +563,7 @@ class Registrar:
         #self.log(str(response_stream))
 
         # to do: examine stream to determine success/failure of build
-        if self.docker_push_allow_insecure:
-            print("Docker push: insecure_registry: "+ str(self.docker_push_allow_insecure))
-        else:
-            print("Docker push: insecure_registry: None")
-        for lines in docker_client.push(image, tag=tag, stream=True, insecure_registry = self.docker_push_allow_insecure):
+        for lines in docker_client.push(image, tag=tag, stream=True):
             for line in lines.strip().splitlines():
                 # example line:
                 #'{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'

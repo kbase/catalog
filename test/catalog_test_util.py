@@ -73,7 +73,6 @@ class CatalogTestUtil:
             'temp-dir':self.scratch_dir,
             'docker-base-url':self.test_cfg['docker-base-url'],
             'docker-registry-host':self.test_cfg['docker-registry-host'],
-            'docker-push-allow-insecure':self.test_cfg['docker-push-allow-insecure'],
             'nms-url':self.test_cfg['nms-url'],
             'nms-admin-user':self.test_cfg.get('nms-admin-user', ''),
             'nms-admin-psswd':self.test_cfg.get('nms-admin-psswd', ''),
