@@ -35,6 +35,4 @@ ENTRYPOINT [ "/kb/deployment/bin/dockerize" ]
 # Here are some default params passed to dockerize. They would typically
 # be overidden by docker-compose at startup
 CMD [ "-template", "/kb/deployment/conf/.templates/deploy.cfg.templ:/kb/deployment/conf/deploy.cfg", \
-      "-poll", \
-      "-stderr", "/kb/deployment/services/catalog/error.log", \
       "/kb/deployment/services/catalog/start_service" ]
