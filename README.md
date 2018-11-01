@@ -11,6 +11,12 @@ Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
 
+#### v2.1.3 - 11/16/18
+  - Update docker-py client code to current 3.x API
+  - Get Travis-CI tests working again
+  - Convert to dockerhub image builds
+  - Change start script to keep service running in foreground
+
 #### v2.1.2 - 3/16/18
   - Pull a new base image if possible each time a module is registered
   - Fix the logic that allows additional html files to be passed from a method's 
