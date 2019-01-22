@@ -150,94 +150,94 @@ class MongoCatalogDBI:
         self.check_db_schema()
 
         # Make sure we have an index on module and git_repo_url
-        self.module_versions.ensure_index('module_name_lc', sparse=False)
-        self.module_versions.ensure_index('git_commit_hash', sparse=False)
-        self.module_versions.ensure_index([
+        self.module_versions.create_index('module_name_lc', sparse=False)
+        self.module_versions.create_index('git_commit_hash', sparse=False)
+        self.module_versions.create_index([
             ('module_name_lc',ASCENDING),
             ('git_commit_hash',ASCENDING)], 
             unique=True, sparse=False)
 
         # Make sure we have a unique index on module_name_lc and git_commit_hash
-        self.local_functions.ensure_index('function_id')
-        self.local_functions.ensure_index([
+        self.local_functions.create_index('function_id')
+        self.local_functions.create_index([
             ('module_name_lc',ASCENDING),
             ('function_id',ASCENDING),
             ('git_commit_hash',ASCENDING)], 
             unique=True, sparse=False)
 
         # local function indecies
-        self.local_functions.ensure_index('module_name_lc')
-        self.local_functions.ensure_index('git_commit_hash')
-        self.local_functions.ensure_index('function_id')
-        self.local_functions.ensure_index([
+        self.local_functions.create_index('module_name_lc')
+        self.local_functions.create_index('git_commit_hash')
+        self.local_functions.create_index('function_id')
+        self.local_functions.create_index([
             ('module_name_lc',ASCENDING),
             ('function_id',ASCENDING),
             ('git_commit_hash',ASCENDING)], 
             unique=True, sparse=False)
 
         # developers indecies
-        self.developers.ensure_index('kb_username', unique=True)
+        self.developers.create_index('kb_username', unique=True)
 
-        self.build_logs.ensure_index('registration_id',unique=True)
-        self.build_logs.ensure_index('module_name_lc')
-        self.build_logs.ensure_index('timestamp')
-        self.build_logs.ensure_index('registration')
-        self.build_logs.ensure_index('git_url')
-        self.build_logs.ensure_index('current_versions.release.release_timestamp')
+        self.build_logs.create_index('registration_id',unique=True)
+        self.build_logs.create_index('module_name_lc')
+        self.build_logs.create_index('timestamp')
+        self.build_logs.create_index('registration')
+        self.build_logs.create_index('git_url')
+        self.build_logs.create_index('current_versions.release.release_timestamp')
 
         # for favorites
-        self.favorites.ensure_index('user')
-        self.favorites.ensure_index('module_name_lc')
-        self.favorites.ensure_index('id')
+        self.favorites.create_index('user')
+        self.favorites.create_index('module_name_lc')
+        self.favorites.create_index('id')
         # you can only favorite a method once, so put a unique index on the triple
-        self.favorites.ensure_index([
+        self.favorites.create_index([
             ('user',ASCENDING),
             ('id',ASCENDING),
             ('module_name_lc',ASCENDING)], 
             unique=True, sparse=False)
 
         # execution stats
-        self.exec_stats_raw.ensure_index('user_id', 
+        self.exec_stats_raw.create_index('user_id',
                                          unique=False, sparse=False)
-        self.exec_stats_raw.ensure_index([('app_module_name', ASCENDING), 
+        self.exec_stats_raw.create_index([('app_module_name', ASCENDING),
                                           ('app_id', ASCENDING)], 
                                          unique=False, sparse=True)
-        self.exec_stats_raw.ensure_index([('func_module_name', ASCENDING),
+        self.exec_stats_raw.create_index([('func_module_name', ASCENDING),
                                           ('func_name', ASCENDING)], 
                                          unique=False, sparse=True)
-        self.exec_stats_raw.ensure_index('creation_time', 
+        self.exec_stats_raw.create_index('creation_time',
                                          unique=False, sparse=False)
-        self.exec_stats_raw.ensure_index('finish_time', 
+        self.exec_stats_raw.create_index('finish_time',
                                          unique=False, sparse=False)
         
-        self.exec_stats_apps.ensure_index('module_name', 
+        self.exec_stats_apps.create_index('module_name',
                                           unique=False, sparse=True)
-        self.exec_stats_apps.ensure_index([('full_app_id', ASCENDING),
+        self.exec_stats_apps.create_index([('full_app_id', ASCENDING),
                                            ('type', ASCENDING),
                                            ('time_range', ASCENDING)], 
                                           unique=True, sparse=False)
-        self.exec_stats_apps.ensure_index([('type', ASCENDING),
+        self.exec_stats_apps.create_index([('type', ASCENDING),
                                            ('time_range', ASCENDING)], 
                                           unique=False, sparse=False)
 
-        self.exec_stats_users.ensure_index([('user_id', ASCENDING), 
+        self.exec_stats_users.create_index([('user_id', ASCENDING),
                                             ('type', ASCENDING),
                                             ('time_range', ASCENDING)], 
                                            unique=True, sparse=False)
 
         # client groups and volume mounts
-        self.client_groups.ensure_index([('module_name_lc', ASCENDING),
+        self.client_groups.create_index([('module_name_lc', ASCENDING),
                                             ('function_name', ASCENDING)], 
                                            unique=True, sparse=False)
 
-        self.volume_mounts.ensure_index([('client_group', ASCENDING), 
+        self.volume_mounts.create_index([('client_group', ASCENDING),
                                             ('module_name_lc', ASCENDING),
                                             ('function_name', ASCENDING)], 
                                            unique=True, sparse=False)
 
         # hidden configuration parameters
-        self.secure_config_params.ensure_index('module_name_lc')
-        self.secure_config_params.ensure_index([
+        self.secure_config_params.create_index('module_name_lc')
+        self.secure_config_params.create_index([
             ('module_name_lc',ASCENDING),
             ('version',ASCENDING),
             ('param_name',ASCENDING)], 
@@ -247,7 +247,7 @@ class MongoCatalogDBI:
         if not module_name and not git_url:
             return False
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        module = self.modules.find_one(query, fields=['_id'])
+        module = self.modules.find_one(query, ['_id'])
         if module is not None:
             return True
         return False
@@ -255,7 +255,7 @@ class MongoCatalogDBI:
     def module_name_lc_exists(self,module_name_lc=''):
         if not module_name_lc:
             return False
-        module = self.modules.find_one({'module_name_lc':module_name_lc.lower()}, fields=['_id'])
+        module = self.modules.find_one({'module_name_lc':module_name_lc.lower()}, ['_id'])
         if module is not None:
             return True
         return False
@@ -270,25 +270,25 @@ class MongoCatalogDBI:
             'error_message':'',
             'log':[]
         }
-        self.build_logs.insert(build_log)
+        self.build_logs.insert_one(build_log)
 
     def delete_build_log(self, registration_id):
-        self.build_logs.remove({'registration_id':registration_id})
+        self.build_logs.delete_one({'registration_id':registration_id})
 
     # new_lines is a list to objects, each representing a line
     # the object structure is : {'content':... 'error':True/False}
     def append_to_build_log(self,registration_id, new_lines):
-        result = self.build_logs.update({'registration_id':registration_id}, 
+        result = self.build_logs.update_one({'registration_id':registration_id},
             { '$push':{ 'log':{'$each':new_lines} } })
         return self._check_update_result(result)
 
     def set_build_log_state(self, registration_id, registration_state, error_message=''):
-        result = self.build_logs.update({'registration_id':registration_id}, 
+        result = self.build_logs.update_one({'registration_id':registration_id},
                     {'$set':{'registration':registration_state, 'error_message':error_message}})
         return self._check_update_result(result)
 
     def set_build_log_module_name(self, registration_id, module_name):
-        result = self.build_logs.update({'registration_id':registration_id}, 
+        result = self.build_logs.update_one({'registration_id':registration_id},
                     {'$set':{'module_name_lc':module_name.lower()}})
         return self._check_update_result(result)
 
@@ -374,7 +374,7 @@ class MongoCatalogDBI:
             },
             'release_version_list': []
         }
-        self.modules.insert(module)
+        self.modules.insert_one(module)
 
     # last_state is for concurency control.  If set, it will match on state as well, and will fail if the
     # last_state does not match indicating another process changed the state
@@ -383,7 +383,7 @@ class MongoCatalogDBI:
             query = self._get_mongo_query(module_name=module_name, git_url=git_url)
             if last_state:
                 query['state.registration'] = last_state
-            result = self.modules.update(query, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
+            result = self.modules.update_one(query, {'$set':{'state.registration':new_state, 'state.error_message':error_message}})
             return self._check_update_result(result)
         return False
 
@@ -392,7 +392,7 @@ class MongoCatalogDBI:
             query = self._get_mongo_query(module_name=module_name, git_url=git_url)
             if last_state:
                 query['state.release_approval'] = last_state
-            result = self.modules.update(query, {'$set':{'state.release_approval':new_state, 'state.review_message':review_message}})
+            result = self.modules.update_one(query, {'$set':{'state.release_approval':new_state, 'state.review_message':review_message}})
             return self._check_update_result(result)
         return False
 
@@ -405,14 +405,14 @@ class MongoCatalogDBI:
             raise ValueError('internal error- timestamp not set in push_beta_to_release')
 
         # update the module version record with released=True, and the release_timestamp
-        result = self.module_versions.update( { 'git_commit_hash':beta_tag['git_commit_hash'] }, 
+        result = self.module_versions.update_one( { 'git_commit_hash':beta_tag['git_commit_hash'] },
                         { '$set': { 'released': 1, 'release_timestamp': release_timestamp } })
         if self._check_update_result(result) is not None:
             return self._check_update_result(result)
 
         # update the tags in the module document
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        result = self.modules.update(query, {'$set':{
+        result = self.modules.update_one(query, {'$set':{
                                                 'state.released':True,
                                                 'current_versions.release':beta_tag
                                                 },
@@ -425,7 +425,7 @@ class MongoCatalogDBI:
         current_versions = self.get_module_current_versions(module_name=module_name, git_url=git_url, substitute_versions=False)
         dev_tag = current_versions['dev']
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        result = self.modules.update(query, {'$set':{'current_versions.beta':dev_tag}})
+        result = self.modules.update_one(query, {'$set':{'current_versions.beta':dev_tag}})
 
         return self._check_update_result(result)
 
@@ -436,11 +436,11 @@ class MongoCatalogDBI:
                 # try to insert
                 try:
                     v_info_copy = copy.deepcopy(version_info) # copy because insert has side effects on the data if it fails, stupid mongo!
-                    self.module_versions.insert(v_info_copy)
+                    self.module_versions.insert_one(v_info_copy)
                 # if that doesn't work, try to update (NOTE: by now this version should only be updatable if it is a dev or orphan version, and
                 # we assume that check has already been made)
                 except:
-                    result = self.module_versions.update( {
+                    result = self.module_versions.replace_one( {
                                                     'module_name_lc':version_info['module_name_lc'],
                                                     'git_commit_hash':version_info['git_commit_hash']
                                                 },
@@ -448,7 +448,7 @@ class MongoCatalogDBI:
                     if self._check_update_result(result) is not None:
                         return self._check_update_result(result)
                 query = self._get_mongo_query(module_name=version_info['module_name_lc'])
-                result = self.modules.update(query, {'$set':{'current_versions.dev':{'git_commit_hash':version_info['git_commit_hash']}}})
+                result = self.modules.update_one(query, {'$set':{'current_versions.dev':{'git_commit_hash':version_info['git_commit_hash']}}})
                 return self._check_update_result(result)
             else:
                 raise ValueError('git_commit_hash is required to register a new version')
@@ -460,7 +460,7 @@ class MongoCatalogDBI:
             matcher = {'module_name_lc':l['module_name_lc'], 'function_id':l['function_id'], 'git_commit_hash':l['git_commit_hash']}
             # insert or update- allows us to capture the latest info if a specific commit is reregistered without adding a duplicate
             # or throwing an error
-            result = self.local_functions.update(matcher, l, upsert=True)
+            result = self.local_functions.update_one(matcher, l, upsert=True)
             if self._check_update_result(result):
                 error = self._check_update_result(result)
                 error['mssg'] = 'An insert/upsert did not work on ' + l['function_id']
@@ -649,7 +649,7 @@ class MongoCatalogDBI:
         if not module_name:
             raise ValueError('module_name must be defined to set a module name')
         query = self._get_mongo_query(git_url=git_url)
-        result = self.modules.update(query, {'$set':{'module_name':module_name,'module_name_lc':module_name.lower()}})
+        result = self.modules.update_one(query, {'$set':{'module_name':module_name,'module_name_lc':module_name.lower()}})
         return self._check_update_result(result)
 
     def set_module_info(self, info, module_name='', git_url=''):
@@ -658,7 +658,7 @@ class MongoCatalogDBI:
         if type(info) is not dict:
             raise ValueError('info must be a dictionary')
         query = self._get_mongo_query(git_url=git_url, module_name=module_name)
-        result = self.modules.update(query, {'$set':{'info':info}})
+        result = self.modules.update_one(query, {'$set':{'info':info}})
         return self._check_update_result(result)
 
     def set_module_owners(self, owners, module_name='', git_url=''):
@@ -667,34 +667,35 @@ class MongoCatalogDBI:
         if type(owners) is not list:
             raise ValueError('owners must be a list')
         query = self._get_mongo_query(git_url=git_url, module_name=module_name)
-        result = self.modules.update(query, {'$set':{'owners':owners}})
+        result = self.modules.update_one(query, {'$set':{'owners':owners}})
         return self._check_update_result(result)
 
     # active = True | False
     def set_module_active_state(self, active, module_name='', git_url=''):
         query = self._get_mongo_query(git_url=git_url, module_name=module_name)
-        result = self.modules.update(query, {'$set':{'state.active':active}})
+        result = self.modules.update_one(query, {'$set':{'state.active':active}})
         return self._check_update_result(result)
 
     #### GET methods
     def get_module_state(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        return self.modules.find_one(query, fields=['state'])['state']
+        return self.modules.find_one(query, ['state'])['state']
 
     def get_module_current_versions(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        module_document = self.modules.find_one(query, fields=['module_name_lc','current_versions'])
+        module_document = self.modules.find_one(query, ['module_name_lc','current_versions'])
         if substitute_versions and 'module_name_lc' in module_document:
             self.substitute_hashes_for_version_info([module_document])
         return module_document['current_versions']
 
     def get_module_owners(self, module_name='', git_url=''):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        return self.modules.find_one(query, fields=['owners'])['owners']
+        return self.modules.find_one(query, ['owners'])['owners']
 
     def get_module_details(self, module_name='', git_url='', substitute_versions=True):
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
-        module_details = self.modules.find_one(query, fields=['module_name','module_name_lc','git_url','info','owners','state', 'current_versions'])
+        module_details = self.modules.find_one(query, ['module_name','module_name_lc','git_url',
+                                                       'info','owners','state', 'current_versions'])
         if substitute_versions and 'module_name_lc' in module_details:
             self.substitute_hashes_for_version_info([module_details])
         return module_details
@@ -808,20 +809,20 @@ class MongoCatalogDBI:
         # if the developer is already on the list, just return
         if self.is_approved_developer([developer])[0]:
             return
-        self.developers.insert({'kb_username':developer})
+        self.developers.insert_one({'kb_username':developer})
 
     def revoke_developer(self, developer):
         # if the developer is not on the list, throw an error (maybe a typo, so let's catch it)
         if not self.is_approved_developer([developer])[0]:
             raise ValueError('Cannot revoke "'+developer+'", that developer was not found.')
-        self.developers.remove({'kb_username':developer})
+        self.developers.delete_one({'kb_username':developer})
 
     def is_approved_developer(self, usernames):
         #TODO: optimize, but I expect the list of usernames will be fairly small, so we can loop.  Regardless, in
         # old mongo (2.x) I think this is even faster in most cases than using $in within a very large list
         is_approved = []
         for u in usernames:
-            count = self.developers.find({'kb_username':u}).count()
+            count = self.developers.count_documents({'kb_username':u})
             if count>0:
                 is_approved.append(True)
             else:
@@ -835,10 +836,10 @@ class MongoCatalogDBI:
         if not new_git_url.strip():
             raise ValueError('New git url is required to migrate_module_to_new_git_url.')
         query = self._get_mongo_query(module_name=module_name, git_url=current_git_url)
-        record = self.modules.find_one(query, fields=['_id'])
+        record = self.modules.find_one(query, ['_id'])
         if not record:
             raise ValueError('Cannot migrate git_url, no module found with the given name and current url.')
-        result = self.modules.update(query, {'$set':{'git_url':new_git_url.strip()}})
+        result = self.modules.update_one(query, {'$set':{'git_url':new_git_url.strip()}})
         return self._check_update_result(result)
 
     def delete_module(self,module_name, git_url):
@@ -855,7 +856,7 @@ class MongoCatalogDBI:
         if module_details['release_version_list']:
             raise ValueError('Cannot delete module that has released versions.  Make it inactive instead.')
 
-        result = self.modules.remove({'_id':module_details['_id']})
+        result = self.modules.delete_one({'_id':module_details['_id']})
         return self._check_update_result(result)
 
     def add_favorite(self, module_name, app_id, username, timestamp):
@@ -870,7 +871,7 @@ class MongoCatalogDBI:
             return None
         # keep a timestamp
         favoriteAddition['timestamp']= timestamp
-        self.favorites.insert(favoriteAddition)
+        self.favorites.insert_one(favoriteAddition)
 
     def remove_favorite(self, module_name, app_id, username):
         favoriteAddition = {
@@ -883,7 +884,7 @@ class MongoCatalogDBI:
             # wasn't a favorite, so do nothing
             return None
 
-        result = self.favorites.remove({'_id':found['_id']})
+        result = self.favorites.delete_one({'_id':found['_id']})
         return self._check_update_result(result)
 
     def list_user_favorites(self, username):
@@ -934,7 +935,7 @@ class MongoCatalogDBI:
 
         # figure out and return results
         counts = []
-        for c in result['result']:
+        for c in result:
             counts.append({
                 'module_name_lc':c['_id']['m'],
                 'id' : c['_id']['a'],
@@ -972,7 +973,7 @@ class MongoCatalogDBI:
 
     def set_client_group_config(self, config):
         config['module_name_lc'] = config['module_name'].lower()
-        return self._check_update_result(self.client_groups.update(
+        return self._check_update_result(self.client_groups.replace_one(
                 {
                     'module_name_lc':config['module_name_lc'],
                     'function_name':config['function_name']
@@ -983,7 +984,7 @@ class MongoCatalogDBI:
 
     def remove_client_group_config(self, config):
         config['module_name_lc'] = config['module_name'].lower()
-        return self._check_update_result(self.client_groups.remove(
+        return self._check_update_result(self.client_groups.delete_one(
                 {
                     'module_name_lc':config['module_name_lc'],
                     'function_name':config['function_name']
@@ -999,7 +1000,7 @@ class MongoCatalogDBI:
 
     def set_volume_mount(self, volume_mount):
         volume_mount['module_name_lc'] = volume_mount['module_name'].lower()
-        return self._check_update_result(self.volume_mounts.update(
+        return self._check_update_result(self.volume_mounts.replace_one(
                 {
                     'module_name_lc':volume_mount['module_name_lc'],
                     'function_name':volume_mount['function_name'],
@@ -1011,7 +1012,7 @@ class MongoCatalogDBI:
 
     def remove_volume_mount(self, volume_mount):
         volume_mount['module_name_lc'] = volume_mount['module_name'].lower()
-        return self._check_update_result(self.volume_mounts.remove(
+        return self._check_update_result(self.volume_mounts.delete_one(
                 {
                     'module_name_lc':volume_mount['module_name_lc'],
                     'function_name':volume_mount['function_name'],
@@ -1037,7 +1038,11 @@ class MongoCatalogDBI:
 
     # if it worked, return None.  If it didn't return something indicating an error
     def _check_update_result(self, result):
+        # TODO: This is an odd function. I modded it to maintain compatability but it seems like it should be rethought
         if result:
+            # downgrades new DeleteResult and UpdateResult to old behavior
+            if hasattr(result, "raw_result"):
+                result = result.raw_result
             # Can't check for nModified because KBase prod mongo is 2.4!! (as of 10/13/15)
             # we can only check for 'n'!!
             nModified = 0
@@ -1066,7 +1071,7 @@ class MongoCatalogDBI:
             'is_error': is_error,
             'job_id': job_id
         }
-        self.exec_stats_raw.insert(stats)
+        self.exec_stats_raw.insert_one(stats)
 
     def add_exec_stats_apps(self, app_module_name, app_id, creation_time, exec_start_time, 
                             finish_time, is_error, type, time_range):
@@ -1086,7 +1091,7 @@ class MongoCatalogDBI:
             'total_queue_time': queue_time,
             'total_exec_time': exec_time
         }
-        self.exec_stats_apps.update({'full_app_id': full_app_id, 'type': type, 'time_range': time_range}, 
+        self.exec_stats_apps.update_one({'full_app_id': full_app_id, 'type': type, 'time_range': time_range},
                                     {'$setOnInsert': new_data, '$inc': inc_data}, upsert=True)
 
     def add_exec_stats_users(self, user_id, creation_time, exec_start_time, 
@@ -1099,7 +1104,7 @@ class MongoCatalogDBI:
             'total_queue_time': queue_time,
             'total_exec_time': exec_time
         }
-        self.exec_stats_users.update({'user_id': user_id, 'type': type, 'time_range': time_range}, 
+        self.exec_stats_users.update_one({'user_id': user_id, 'type': type, 'time_range': time_range},
                                      {'$inc': inc_data}, upsert=True)
 
     def get_exec_stats_apps(self, full_app_ids, type, time_range):
@@ -1162,7 +1167,7 @@ class MongoCatalogDBI:
 
         # process the result
         counts = []
-        for c in result['result']:
+        for c in result:
             full_id = c['_id']['a']
             if c['_id']['m']:
                 full_id = c['_id']['m'] + '/' + c['_id']['a']
@@ -1175,7 +1180,6 @@ class MongoCatalogDBI:
                 })
 
         return counts
-
 
     def get_exec_raw_stats(self, minTime, maxTime):
 
@@ -1196,7 +1200,7 @@ class MongoCatalogDBI:
         for param_data in data_list:
             param_data['module_name_lc'] = param_data['module_name'].lower()
             param_data['version'] = param_data.get('version', '')
-            self.secure_config_params.update(
+            self.secure_config_params.replace_one(
                 {
                     'module_name_lc': param_data['module_name_lc'],
                     'version': param_data['version'],
@@ -1209,7 +1213,7 @@ class MongoCatalogDBI:
         for param_data in data_list:
             param_data['module_name_lc'] = param_data['module_name'].lower()
             param_data['version'] = param_data.get('version', '')
-            self.secure_config_params.remove(
+            self.secure_config_params.delete_one(
                 {
                     'module_name_lc':param_data['module_name_lc'],
                     'version':param_data['version'],
@@ -1220,8 +1224,6 @@ class MongoCatalogDBI:
         selection = { "_id": 0, "module_name_lc": 0 }
         filter = { "module_name_lc": module_name.lower() }
         return list(self.secure_config_params.find(filter, selection))
-
-
 
     # DB version handling
 
@@ -1255,7 +1257,6 @@ class MongoCatalogDBI:
             raise IOError('Incompatible DB versions.  Expecting DB V4, found DV V'+str(db_version) + 
                 '. You are probably running an old version of the service.  Start up failed.')
 
-
     def get_db_version(self):
         # version is a collection that should only have a single 
         version_collection = self.db[MongoCatalogDBI._DB_VERSION]
@@ -1270,16 +1271,9 @@ class MongoCatalogDBI:
     def update_db_version(self, version):
         # make sure we can't have two version documents
         version_collection = self.db[MongoCatalogDBI._DB_VERSION]
-        version_collection.ensure_index('version_doc', unique=True, sparse=False)
-
-        # try to insert the version doc, which will fail if the version doc exists
-        # if it exists, then update
-        try:
-            version_collection.insert({'version_doc':True, 'version':version})
-        except:
-            version_collection.update({'version_doc':True}, {'$set':{'version':version}})
-
-
+        version_collection.create_index('version_doc', unique=True, sparse=False)
+        version_collection.update_one({'version_doc': True}, {'$set': {'version': version}},
+                                      upsert=True)
 
     # version 1 kept released module versions in a map, version 2 updates that to a list
     # and adds dynamic service tags
@@ -1290,7 +1284,7 @@ class MongoCatalogDBI:
                 m['release_versions'][timestamp]['dynamic_service'] = 0
                 release_version_list.append(m['release_versions'][timestamp])
 
-            self.modules.update(
+            self.modules.update_one(
                 {'_id':m['_id']},
                 {
                     '$unset':{'release_versions':''},
@@ -1299,35 +1293,35 @@ class MongoCatalogDBI:
 
             # make sure everything has the dynamic service flag
             if not 'dynamic_service' in m['info']:
-                    self.modules.update(
+                    self.modules.update_one(
                         {'_id':m['_id']},
                         {'$set':{'info.dynamic_service':0}})
 
             if m['current_versions']['release']:
                 if not 'dynamic_service' in m['current_versions']['release']:
-                    self.modules.update(
+                    self.modules.update_one(
                         {'_id':m['_id']},
                         {'$set':{'current_versions.release.dynamic_service':0}})
 
             if m['current_versions']['beta']:
                 if not 'dynamic_service' in m['current_versions']['beta']:
-                    self.modules.update(
+                    self.modules.update_one(
                         {'_id':m['_id']},
                         {'$set':{'current_versions.beta.dynamic_service':0}})
 
             if m['current_versions']['dev']:
                 if not 'dynamic_service' in m['current_versions']['dev']:
-                    self.modules.update(
+                    self.modules.update_one(
                         {'_id':m['_id']},
                         {'$set':{'current_versions.dev.dynamic_service':0}})
 
         # also ensure the execution stats fields have correct names
-        self.exec_stats_apps.update({'avg_queue_time': {'$exists' : True}}, 
-                                    {'$rename': {'avg_queue_time': 'total_queue_time',
-                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
-        self.exec_stats_users.update({'avg_queue_time': {'$exists' : True}}, 
-                                    {'$rename': {'avg_queue_time': 'total_queue_time',
-                                                 'avg_exec_time': 'total_exec_time'}}, multi=True)
+        self.exec_stats_apps.update_many({'avg_queue_time': {'$exists': True}},
+                                         {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                      'avg_exec_time': 'total_exec_time'}})
+        self.exec_stats_users.update_many({'avg_queue_time': {'$exists' : True}},
+                                          {'$rename': {'avg_queue_time': 'total_queue_time',
+                                                       'avg_exec_time': 'total_exec_time'}})
 
 
 
@@ -1335,9 +1329,9 @@ class MongoCatalogDBI:
     # a separate module versions collection.  
     def update_db_2_to_3(self):
 
-        self.module_versions.ensure_index('module_name_lc', sparse=False)
-        self.module_versions.ensure_index('git_commit_hash', sparse=False)
-        self.module_versions.ensure_index([
+        self.module_versions.create_index('module_name_lc', sparse=False)
+        self.module_versions.create_index('git_commit_hash', sparse=False)
+        self.module_versions.create_index([
             ('module_name_lc',ASCENDING),
             ('git_commit_hash',ASCENDING)], 
             unique=True, sparse=False)
@@ -1359,13 +1353,13 @@ class MongoCatalogDBI:
                 rVer['released'] = 1
                 self.prepare_version_doc_for_db_2_to_3_update(rVer, m)
                 try:
-                    self.module_versions.insert(rVer)
+                    self.module_versions.insert_one(rVer)
                 except:
                     print(' - Warning - '+rVer['module_name'] + '.' + rVer['git_commit_hash'] + ' already inserted, skipping.')
                 new_release_version_list.append({
                     'git_commit_hash':rVer['git_commit_hash']
                 })
-            self.modules.update(
+            self.modules.update_one(
                     {'_id':m['_id']},
                     {'$set':{ 'release_version_list':new_release_version_list } }
                 )
@@ -1377,16 +1371,16 @@ class MongoCatalogDBI:
                     self.prepare_version_doc_for_db_2_to_3_update(modVer, m)
                     if 'git_commit_hash' in modVer and modVer['git_commit_hash'] is not None:
                         try:
-                            self.module_versions.insert(modVer)
+                            self.module_versions.insert_one(modVer)
                         except Exception as e:
                             # we expect this to happen for all 'release' tags and if, say, a version still tagged as dev/beta has been released
                             print(' - Warning - '+tag+ ' ver of ' + modVer['module_name'] + '.' + modVer['git_commit_hash'] + ' already inserted, skipping.')
-                        self.modules.update(
+                        self.modules.update_one(
                             {'_id':m['_id']},
                             {'$set':{ 'current_versions.'+tag: {'git_commit_hash':modVer['git_commit_hash']} } }
                         )
                     else:
-                        self.modules.update(
+                        self.modules.update_one(
                             {'_id':m['_id']},
                             {'$set':{ 'current_versions.'+tag: None } }
                         )
@@ -1420,14 +1414,14 @@ class MongoCatalogDBI:
         # update the volume_mounts, just need to rename app_id to function_name
         for vm in self.volume_mounts.find({}):
             if 'app_id' in vm and 'function_name' not in vm:
-                self.volume_mounts.update(
+                self.volume_mounts.update_one(
                         {'_id':vm['_id']},
                         {'$set':{ 'function_name':vm['app_id'] }, '$unset':{ 'app_id':1 } }
                     )
 
         for cg in self.client_groups.find({}):
             if 'app_id' in cg:
-                self.client_groups.remove({'_id':cg['_id']})
+                self.client_groups.delete_one({'_id':cg['_id']})
                 tokens = cg['app_id'].split('/')
                 if(len(tokens) != 2):
                     print('   When updating client groups, bad app_id found.  Record will be lost:')
@@ -1438,7 +1432,4 @@ class MongoCatalogDBI:
                     'function_name' : tokens[1],
                     'client_groups' : cg['client_groups']
                 }
-                self.client_groups.insert(new_cg)
-
-
-
+                self.client_groups.insert_one(new_cg)

@@ -1,4 +1,4 @@
-pymongo==2.8
+pymongo==3.7
 docker>=3.5
 gitpython
 pyyaml
