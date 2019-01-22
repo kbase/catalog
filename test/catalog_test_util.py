@@ -1,14 +1,11 @@
-
-
-import os
-import json
 import datetime
+import json
+import os
+from configparser import ConfigParser
+from pprint import pformat
 
-from pprint import pprint, pformat
-from ConfigParser import ConfigParser
-from pymongo import MongoClient
 from docker import APIClient as DockerAPIClient
-
+from pymongo import MongoClient
 
 from biokbase.catalog.db import MongoCatalogDBI
 
@@ -228,7 +225,7 @@ class CatalogTestUtil:
         # remove testing images
         for image in self.dockerclient.images(
                 name=self.catalog_cfg['docker-registry-host']+"/kbase"):
-            print image
+            print(image)
             self.dockerclient.remove_image(image['Id'])
 
         # make sure NMS is clean after each test

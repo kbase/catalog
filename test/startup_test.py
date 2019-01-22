@@ -1,18 +1,13 @@
-
-
 import unittest
-import os
 
-from pprint import pprint
 import semantic_version
 
-from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
+from catalog_test_util import CatalogTestUtil
 
 
 # tests all the basic get methods
 class StartupTest(unittest.TestCase):
-
 
     def test_startups(self):
 
@@ -42,7 +37,6 @@ class StartupTest(unittest.TestCase):
             catalog = Catalog(self.cUtil.getCatalogConfig())
         self.assertEqual(str(e.exception),
             'Incompatible DB versions.  Expecting DB V4, found DV V2525. You are probably running an old version of the service.  Start up failed.');
-
 
     @classmethod
     def setUpClass(cls):

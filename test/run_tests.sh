@@ -16,7 +16,7 @@ java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 712
 NMS_PID=$!
 
 echo 'Waiting for NMS to start...'
-sleep 15
+sleep 30
 curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125
 if [ $? -ne 0 ]; then
     kill -9 $NMS_PID

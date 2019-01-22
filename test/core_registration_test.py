@@ -1,19 +1,14 @@
-
-
 import unittest
-import os
-
 from pprint import pprint
 from time import time, sleep
 
-from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
 from biokbase.narrative_method_store.client import NarrativeMethodStore
+from catalog_test_util import CatalogTestUtil
 
 
 # tests all the basic get methods
 class CoreRegistrationTest(unittest.TestCase):
-
 
     # assumes no developers have been added yet
     def test_full_module_lifecycle(self):
@@ -52,7 +47,7 @@ class CoreRegistrationTest(unittest.TestCase):
         raw_log = self.catalog.get_build_log(self.cUtil.anonymous_ctx(),registration_id)[0]
         self.assertTrue(raw_log is not None)
 
-        log_lines = raw_log.splitlines();
+        log_lines = raw_log.splitlines()
         self.assertTrue(log_lines, parsed_log['log'])
 
         # check getting specific lines
@@ -105,12 +100,12 @@ class CoreRegistrationTest(unittest.TestCase):
             parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
                             {'registration_id':registration_id, 'skip':4 })[0]
         self.assertEqual(str(e.exception),
-            'Cannot specify the skip argument without a limit- blame Mongo');
+            'Cannot specify the skip argument without a limit- blame Mongo')
         with self.assertRaises(ValueError) as e:
             parsed_log_subset = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
                             {'registration_id':registration_id, 'first_n':4, 'last_n':2 })[0]
         self.assertEqual(str(e.exception),
-            'Cannot combine skip/limit/first_n with last_n parameters');
+            'Cannot combine skip/limit/first_n with last_n parameters')
 
         # (3) get module info
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),{'git_url':giturl})[0]
@@ -277,7 +272,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(info['release']['narrative_methods'],['test_method_1'])
         self.assertEqual(info['release']['version'],'0.0.1')
         self.assertEqual(info['release']['timestamp'],timestamp)
-        self.assertTrue(info['release']['release_timestamp']>info['release']['timestamp']);
+        self.assertTrue(info['release']['release_timestamp']>info['release']['timestamp'])
         self.assertEqual(info['release']['docker_img_name'].split('/')[1],'kbase:' + module_name.lower()+'.'+githash)
 
         versions = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),{'module_name':module_name})[0]
@@ -474,27 +469,12 @@ class CoreRegistrationTest(unittest.TestCase):
         # TODO test method store to be sure we can get old method specs by commit hash
         #pprint(info)
 
-
     def validate_basic_test_module_info_fields(self,info,giturl,module_name,owners):
         self.assertEqual(info['git_url'],giturl)
         self.assertEqual(info['module_name'],module_name)
         self.assertEqual(info['owners'],owners)
         self.assertEqual(info['language'],'python')
         self.assertEqual(info['description'],'A test module')
-
-#{'beta': None,
-# 'description': u'A test module',
-# 'dev': {u'git_commit_hash': u'4ada53f318f69a38276e82d0e841e685aa0c2362',
-#         u'git_commit_message': u'added some basic things',
-#         u'narrative_methods': [u'test_method_1'],
-#         u'timestamp': 1445888811416L,
-#         u'version': u'0.0.1'},
-# 'git_url': u'https://github.com/kbaseIncubator/catalog_test_module',
-# 'language': u'python',
-# 'module_name': u'CatalogTestModule',
-# 'owners': [u'wstester1'],
-# 'release': None}
-
 
     def test_module_with_bad_spec(self):
 
@@ -518,8 +498,6 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertTrue(log is not None)
         self.assertTrue('param0_that_is_not_defined_in_yaml' in log)
 
-
-
     def test_active_inactive_remove_module(self):
 
         # we cannot delete modules unles we are an admin user
@@ -527,7 +505,7 @@ class CoreRegistrationTest(unittest.TestCase):
             self.catalog.delete_module(self.cUtil.user_ctx(),
                 {'module_name':'registration_error'})
         self.assertEqual(str(e.exception),
-            'Only Admin users can delete modules.');
+            'Only Admin users can delete modules.')
 
         method_list = self.nms.list_methods({'tag':'dev'})
 
@@ -555,17 +533,16 @@ class CoreRegistrationTest(unittest.TestCase):
                 foundMeth = True
         self.assertTrue(foundMeth,'Make sure we found the method in NMS')
 
-
         # next make sure we get an error if we are not an admin if we try to make the repo active or inactive
         params = { 'git_url':giturl }
         with self.assertRaises(ValueError) as e:
             self.catalog.set_to_active(self.cUtil.user_ctx(),params)
         self.assertEqual(str(e.exception),
-            'Only Admin users can set a module to be active/inactive.');
+            'Only Admin users can set a module to be active/inactive.')
         with self.assertRaises(ValueError) as e:
             self.catalog.set_to_inactive(self.cUtil.user_ctx(),params)
         self.assertEqual(str(e.exception),
-            'Only Admin users can set a module to be active/inactive.');
+            'Only Admin users can set a module to be active/inactive.')
 
         # module should start as active, but it should be fine to set it again
         state = self.catalog.get_module_state(self.cUtil.admin_ctx(),params)[0]
@@ -601,16 +578,15 @@ class CoreRegistrationTest(unittest.TestCase):
                 foundMeth = True
         self.assertFalse(foundMeth,'Make sure we did not find the method in NMS again')
 
-
         # these still shouldn't work
         with self.assertRaises(ValueError) as e:
             self.catalog.set_to_active(self.cUtil.user_ctx(),params)
         self.assertEqual(str(e.exception),
-            'Only Admin users can set a module to be active/inactive.');
+            'Only Admin users can set a module to be active/inactive.')
         with self.assertRaises(ValueError) as e:
             self.catalog.set_to_inactive(self.cUtil.user_ctx(),params)
         self.assertEqual(str(e.exception),
-            'Only Admin users can set a module to be active/inactive.');
+            'Only Admin users can set a module to be active/inactive.')
 
         # make it active one more time and make sure the method specs reappear
         self.catalog.set_to_active(self.cUtil.admin_ctx(),params)
@@ -622,7 +598,6 @@ class CoreRegistrationTest(unittest.TestCase):
             if meth['id']=='CatalogTestModule2/test_method_1' and meth['namespace']=='CatalogTestModule2':
                 foundMeth = True
         self.assertTrue(foundMeth,'Make sure we found the method in NMS after reactivation')
-
 
         # delete it.
         self.catalog.delete_module(self.cUtil.admin_ctx(),
@@ -637,7 +612,6 @@ class CoreRegistrationTest(unittest.TestCase):
                 foundMeth = True
         self.assertFalse(foundMeth,'Make sure we did not find the method in NMS')
 
-
         # we cannot remove modules that have been released
         self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
         with self.assertRaises(ValueError) as e:
@@ -645,7 +619,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 {'module_name':'onerepotest'})
         self.assertEqual(self.catalog.is_registered({},{'module_name':'onerepotest'})[0],1)
         self.assertEqual(str(e.exception),
-            'Cannot delete module that has been released.  Make it inactive instead.');
+            'Cannot delete module that has been released.  Make it inactive instead.')
         self.assertEqual(self.catalog.is_registered({},{'git_url':'https://github.com/kbaseIncubator/release_history'})[0],1)
 
         with self.assertRaises(ValueError) as e:
@@ -653,7 +627,7 @@ class CoreRegistrationTest(unittest.TestCase):
                 {'git_url':'https://github.com/kbaseIncubator/release_history'})
         self.assertEqual(self.catalog.is_registered({},{'git_url':'https://github.com/kbaseIncubator/release_history'})[0],1)
         self.assertEqual(str(e.exception),
-            'Cannot delete module that has been released.  Make it inactive instead.');
+            'Cannot delete module that has been released.  Make it inactive instead.')
 
     def test_extra_files(self):
         # (1) register the test repo
@@ -698,7 +672,6 @@ class CoreRegistrationTest(unittest.TestCase):
         cls.nms = NarrativeMethodStore(cls.cUtil.getCatalogConfig()['nms-url'])
 
         
-
     @classmethod
     def tearDownClass(cls):
         cls.cUtil.tearDown()

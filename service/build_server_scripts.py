@@ -18,16 +18,15 @@ LICENSE
 
    See LICENSE.md
 """
-
-from __future__ import print_function
-
-import os, sys, traceback
-from ConfigParser import ConfigParser
+import sys
+import traceback
 
 DEPLOY_CFG = 'KB_DEPLOYMENT_CONFIG'
 
+
 def usage():
     print('Usage: python get_kb_config.py  [START_TEMPLATE] [STOP_TEMPLATE] [SERVICE_NAME] [KB_RUNTIME] [KB_TOP] [SERVICE_DIR] [OUTPUTDIR]')
+
 
 def main ():
     if len(sys.argv)<8:
@@ -71,12 +70,12 @@ if __name__ == '__main__':
     try:
         main()
         sys.exit(0)
-    except KeyboardInterrupt, e: # Ctrl-C
+    except KeyboardInterrupt as e: # Ctrl-C
         raise e
-    except SystemExit, e: # sys.exit()
+    except SystemExit as e: # sys.exit()
         raise e
-    except Exception, e:
-        print('ERROR: ' + str(e), file=sys.stderr)
+    except Exception as e:
+        print(f'ERROR: {e}', file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)
 
