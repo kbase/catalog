@@ -79,7 +79,8 @@ class Registrar:
             self.log('git clone ' + self.git_url)
             subprocess.check_call( ['git','clone',self.git_url, basedir ] )
             # try to get hash from repo
-            git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
+            git_commit_hash = subprocess.check_output(
+                ['git','log', '--pretty=%H', '-n', '1'], cwd=basedir).decode().strip()
             self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
@@ -87,8 +88,6 @@ class Registrar:
                     self.log('git checkout ' + git_commit_hash)
                     subprocess.check_call ( ['git', 'checkout', '--quiet', git_commit_hash ], cwd=basedir )
 
-
-            self.log("got here")
             # check if this was a git_commit_hash that was already released- if so, we abort for now (we could just update the dev tag in the future)
             for r in self.module_details['release_version_list']:
                 if r['git_commit_hash'] == git_commit_hash:
