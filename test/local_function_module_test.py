@@ -66,7 +66,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         self.assertIsNotNone(info['kidl'])
         self.assertIsNotNone(info['kidl']['parse'])
         self.assertEqual(specs[0]['long_description'],
-                          '<b> some html here </b> <br><br> more here!')
+                         '<b> some html here </b> <br><br> more here!')
 
         # trying to get the release tag should not return anything
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions': [
@@ -129,7 +129,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         self.assertIsNotNone(info['kidl'])
         self.assertIsNotNone(info['kidl']['parse'])
         self.assertEqual(specs[0]['long_description'],
-                          '<b> some html here </b> <br><br> more here!')
+                         '<b> some html here </b> <br><br> more here!')
 
         # test out some additional ways to get the results
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions': [
@@ -191,7 +191,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         self.assertIsNotNone(info['kidl'])
         self.assertIsNotNone(info['kidl']['parse'])
         self.assertEqual(specs[0]['long_description'],
-                          '<b> some html here </b> <br><br> more here!')
+                         '<b> some html here </b> <br><br> more here!')
 
         # handle some other cases where we expect to get nothing
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions': [
