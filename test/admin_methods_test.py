@@ -1,12 +1,7 @@
-
-
 import unittest
-import os
 
-from pprint import pprint
-
-from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
+from catalog_test_util import CatalogTestUtil
 
 
 class AdminMethodsTest(unittest.TestCase):

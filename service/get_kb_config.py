@@ -19,17 +19,20 @@ LICENSE
    See LICENSE.md
 """
 
-from __future__ import print_function
 
-import os, sys, traceback
-from ConfigParser import ConfigParser
+import os
+import sys
+import traceback
+from configparser import ConfigParser
 
 DEPLOY_CFG = 'KB_DEPLOYMENT_CONFIG'
+
 
 def usage():
     print('Usage: python get_kb_config.py [CFG_SECTION] [CFG_OPTION]')
 
-def main ():
+
+def main():
     if DEPLOY_CFG not in os.environ:
         print('Please define $'+DEPLOY_CFG+' environment variable to point to the kbase deployment.cfg or deploy.cfg file.')
         sys.exit(1)
@@ -47,22 +50,23 @@ def main ():
     try:
         config = ConfigParser()
         config.read(os.environ[DEPLOY_CFG])
-    except Exception, e:
+    except Exception as e:
         print('Error reading config file.  Check environment variable $'+DEPLOY_CFG, file=sys.stderr)
         print(str(e))
         sys.exit(1)
 
     print(config.get(sys.argv[1],sys.argv[2]))
 
+
 if __name__ == '__main__':
     try:
         main()
         sys.exit(0)
-    except KeyboardInterrupt, e: # Ctrl-C
+    except KeyboardInterrupt as e: # Ctrl-C
         raise e
-    except SystemExit, e: # sys.exit()
+    except SystemExit as e: # sys.exit()
         raise e
-    except Exception, e:
+    except Exception as e:
         print('ERROR: ' + str(e), file=sys.stderr)
         traceback.print_exc(file=sys.stderr)
         sys.exit(1)

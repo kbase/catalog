@@ -1,30 +1,20 @@
-
-
-import warnings
-import threading
-import time
-import copy
-import os
-import random
-import semantic_version
-import re
-import uuid
 import codecs
+import os
+import threading
+import uuid
+import warnings
+from datetime import datetime
+from urllib.parse import urlparse
+
+import semantic_version
 
 import biokbase.catalog.version
-from biokbase.catalog.Client import Catalog
-
-from pprint import pprint
-from datetime import datetime
-from urlparse import urlparse
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.catalog.registrar import Registrar
 from biokbase.narrative_method_store.client import NarrativeMethodStore
 
 
-
 class CatalogController:
-
 
     def __init__(self, config):
 
@@ -82,7 +72,8 @@ class CatalogController:
         print('Docker registry host config = '+ self.docker_registry_host)
         
         if 'docker-push-allow-insecure' in config:
-            print('WARNING!! Docker docker-push-allow-insecure found in configuration. This is no longer supported - use --insecure-registry on dockerd')
+            print('WARNING!! Docker docker-push-allow-insecure found in configuration. '
+                  'This is no longer supported - use --insecure-registry on dockerd')
 
         if 'ref-data-base' not in config: # pragma: no cover
             raise ValueError('"ref-data-base" config variable must be defined to start a CatalogController!')
@@ -113,7 +104,6 @@ class CatalogController:
 
         # TODO: normalize github urls
 
-
         # generate a unique registration ID based on a timestamp in ms + a UUID
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
         registration_id = str(timestamp)+'_'+str(uuid.uuid4())
@@ -133,7 +123,7 @@ class CatalogController:
         prev_dev_version = None
 
         # 1) If the repo does not yet exist, then create it.  No additional permission checks needed
-        if not self.db.is_registered(git_url=git_url) : 
+        if not self.db.is_registered(git_url=git_url):
             self.db.register_new_module(git_url, username, timestamp, 'waiting to start', registration_id)
             module_details = self.db.get_module_full_details(git_url=git_url)
         
@@ -183,8 +173,6 @@ class CatalogController:
         # 4) provide the registration_id 
         return registration_id
 
-
-
     def set_registration_state(self, params, username):
         # first some error handling
         if not self.is_admin(username):
@@ -209,8 +197,7 @@ class CatalogController:
                     new_state=params['registration_state'],
                     error_message=error_message)
         if error is not None:
-            raise ValueError('Registration failed for git repo ('+git_url+')- some unknown database error: ' + error)
-
+            raise ValueError('Registration failed for git repo - some unknown database error: ' + error)
 
     def push_dev_to_beta(self, params, username):
         # first make sure everything exists and we have permissions
@@ -269,7 +256,6 @@ class CatalogController:
             #if beta_sv < semantic_version.Version('1.0.0'):
             #    raise ValueError('Cannot request release - beta semantic version must be greater than 1.0.0')
 
-
         # ok, do it.
         error = self.db.set_module_release_state(
                         module_name=params['module_name'],git_url=params['git_url'],
@@ -298,7 +284,6 @@ class CatalogController:
                     'owners':owners
                 })
         return requested_releases
-
 
     def review_release_request(self, review, username):
         if not self.is_admin(username):
@@ -350,11 +335,9 @@ class CatalogController:
         if error is not None:
             raise ValueError('Release review update failed - some unknown database error. ' + error)
 
-
     def get_module_state(self, params):
         params = self.filter_module_or_repo_selection(params)
         return self.db.get_module_state(module_name=params['module_name'],git_url=params['git_url'])
-
 
     def get_module_info(self, params):
         params = self.filter_module_or_repo_selection(params)
@@ -398,10 +381,10 @@ class CatalogController:
             # if timestamp or git_commit_hash is given, those need to match as well
             if 'timestamp' in params:
                 if v['timestamp'] != params['timestamp'] :
-                    return None;
+                    return None
             if 'git_commit_hash' in params:
                 if v['git_commit_hash'] != params['git_commit_hash'] :
-                    return None;
+                    return None
             return v
 
         if 'timestamp' in params:
@@ -411,7 +394,7 @@ class CatalogController:
                     v = current_version[version]
                     if 'git_commit_hash' in params:
                         if v['git_commit_hash'] != params['git_commit_hash'] :
-                            return None;
+                            return None
                     return v
             # if we get here, we have to look in full history
             details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
@@ -420,7 +403,7 @@ class CatalogController:
                 if v['timestamp'] == params['timestamp']:
                     if 'git_commit_hash' in params:
                         if v['git_commit_hash'] != params['git_commit_hash'] :
-                            return None;
+                            return None
                     return v
             return None
 
@@ -442,7 +425,6 @@ class CatalogController:
 
         # didn't get nothing, so return
         return None
-
 
     def get_module_version(self, params):
 
@@ -469,7 +451,6 @@ class CatalogController:
             excluded_fields.append('module_description')
         if not ('include_compilation_report' in params and str(params['include_compilation_report']).strip()=='1'):
             excluded_fields.append('compilation_report')
-
 
         # no version string specified, so default to returning release, beta, or dev in that order
         if 'version' not in params or params['version'] is None or params['version'].strip() is '':
@@ -503,7 +484,6 @@ class CatalogController:
                 return v
             return None
 
-
         # because this is the most common option, just assume it is a git commit hash and try to fetch before we deal with semantic version logic
         versions = self.db.lookup_module_versions(
                                 module_name_lc,
@@ -515,7 +495,6 @@ class CatalogController:
             return v
         elif len(versions)>1:
             raise ValueError('Catalog DB Error: could not identify proper version - N version documents found: ' + str(len(versions)))
-
 
         # ok, didn't work.  let's try it as a semantic version, which only works on released modules.  First let's try to parse
         spec = None
@@ -572,7 +551,6 @@ class CatalogController:
 
         return None
 
-
     def prepare_version_for_return(self, version, module_details):
 
         # remove module_name_lc if it exists (should always be there, but if it was already removed don't worry)
@@ -600,13 +578,10 @@ class CatalogController:
             else:
                 version['release_timestamp'] = None
 
-
-
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)
         details = self.db.get_module_full_details(module_name=params['module_name'], git_url=params['git_url'])
         return sorted(details['release_version_list'], key= lambda v: v['timestamp'])
-
 
     def is_registered(self,params):
         if 'git_url' not in params:
@@ -679,38 +654,13 @@ class CatalogController:
 
         return final_modList
 
-
-
-
-#    typedef structure {
-#        string release_tag;
-#        list<string> module_name;
-#    } ListLocalFunctionParams;
-
-#    funcdef list_local_functions(ListLocalFunctionParams params) returns (list<LocalFunctionInfo> info_list);
-
-
-
-#    typedef structure {
-#        string module_name;
-#        string function_id;
-#        string release_tag;
-#        string git_commit_hash;
-#    } SelectOneLocalFunction;
-
-#    typedef structure {
-#        list<SelectOneLocalFunction> functions;
-#    } GetLocalFunctionDetails;
-
-
-
     def list_local_functions(self, params):
 
         module_names = []
         if 'module_names' in params:
             if isinstance(params['module_names'], list):
                 for m in params['module_names']:
-                    if not isinstance(m,basestring):
+                    if not isinstance(m,str):
                         raise ValueError('module_names parameter field must be a list of module names (list of strings)')
                 module_names = params['module_names']
             else:
@@ -721,7 +671,7 @@ class CatalogController:
         else:
             release_tag = 'release'
         if 'release_tag' in params:
-            if not isinstance(params['release_tag'],basestring):
+            if not isinstance(params['release_tag'],str):
                 raise ValueError('release_tag parameter field must be a string (release | beta | dev)')
             if not params['release_tag'] in ['dev','beta','release']:
                 raise ValueError('release_tag parameter field must be either: "release" | "beta" | "dev"')
@@ -749,24 +699,23 @@ class CatalogController:
             # must have module_name and function_id
             if 'module_name' not in f:
                 raise ValueError('All functions specified must specify a "module_name"')
-            if not isinstance(f['module_name'],basestring):
+            if not isinstance(f['module_name'],str):
                 raise ValueError('"module_name" in function specification must be a string')
             if 'function_id' not in f:
                 raise ValueError('All functions specified must specify a "function_id"')
-            if not isinstance(f['function_id'],basestring):
+            if not isinstance(f['function_id'],str):
                 raise ValueError('"function_id" in function specification must be a string')
             # optionally, release tag or git_commit_hash must be strings
             if 'release_tag' in f:
-                if not isinstance(f['release_tag'],basestring):
+                if not isinstance(f['release_tag'],str):
                     raise ValueError('"release_tag" in function specification must be a string')
                 if f['release_tag'] not in ['dev','beta','release']:
                     raise ValueError('"release_tag" must be one of dev | beta | release')
             if 'git_commit_hash' in f:
-                if not isinstance(f['git_commit_hash'],basestring):
+                if not isinstance(f['git_commit_hash'],str):
                     raise ValueError('"git_commit_hash" in function specification must be a string')
 
         return self.db.get_local_function_spec(params['functions'])
-
 
     def set_module_active_state(self, active, params, username):
         params = self.filter_module_or_repo_selection(params)
@@ -783,7 +732,6 @@ class CatalogController:
         # if set to active, enable the repo
         else:
             self.nms.enable_repo({'module_name':module_details['module_name']})
-
 
     def approve_developer(self, developer, username):
         if not developer:
@@ -896,7 +844,6 @@ class CatalogController:
                 only_complete = only_complete
             )
 
-
     def delete_module(self,params,username):
         if not self.is_admin(username):
             raise ValueError('Only Admin users can delete modules.')
@@ -908,7 +855,6 @@ class CatalogController:
         if error is not None:
             raise ValueError('Delete operation failed - some unknown database error: '+error)
         self.nms.disable_repo({'module_name':module_details['module_name']})
-
 
     def migrate_module_to_new_git_url(self, params, username):
         if not self.is_admin(username):
@@ -924,8 +870,6 @@ class CatalogController:
         error = self.db.migrate_module_to_new_git_url(params['module_name'],params['current_git_url'],params['new_git_url'])
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: '+error)
-
-
 
     def add_favorite(self, params, username):
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds()*1000)
@@ -999,9 +943,6 @@ class CatalogController:
 
         return self.db.aggregate_favorites_over_apps(module_names_lc)
 
-
-
-
     def list_service_modules(self, filter):
         # if we have the tag flag, then return the specific tagged version
         if 'tag' in filter:
@@ -1012,8 +953,6 @@ class CatalogController:
         # otherwise we need to go through everything that has been released
         mods = self.db.list_all_released_service_module_versions()
         return mods
-
-
 
     def module_version_lookup(self, selection):
 
@@ -1043,7 +982,6 @@ class CatalogController:
                     'git_commit_hash':version['git_commit_hash'],
                     'docker_img_name':version['docker_img_name']
                 }
-
 
         # assume semantic versioning which only can select released versions
         # we should optimize to fetch only the details/versions we need from mongo.
@@ -1116,10 +1054,6 @@ class CatalogController:
         raise ValueError('No suitable version matches your lookup.')
         return None
 
-
-
-
-
     # Some utility methods
 
     def filter_module_or_repo_selection(self, params):
@@ -1131,7 +1065,6 @@ class CatalogController:
             raise ValueError('Operation failed - module/repo is not registered.')
         return params
 
-
     # always true if the user is in the admin list
     def has_permission(self, username, owners):
         if self.is_admin(username):
@@ -1141,16 +1074,13 @@ class CatalogController:
                 return True
         return False
 
-
     def is_admin(self, username):
         if username in self.adminList:
             return True
         return False
 
-
     def version(self):
         return biokbase.catalog.version.CATALOG_VERSION
-
 
     def log_exec_stats(self, admin_user_id, user_id, app_module_name, app_id, func_module_name,
                        func_name, git_commit_hash, creation_time, exec_start_time, finish_time,
@@ -1171,12 +1101,10 @@ class CatalogController:
         self.db.add_exec_stats_users(user_id, creation_time, exec_start_time, 
                                     finish_time, is_error, "w", week_time_range)
 
-
     def get_exec_aggr_stats(self, full_app_ids, per_week):
         type = "w" if per_week else "a"
         time_range = None if per_week else "*"
         return self.db.get_exec_stats_apps(full_app_ids, type, time_range)
-
 
     def get_exec_aggr_table(self, requesting_user, params):
         if not self.is_admin(requesting_user):
@@ -1191,7 +1119,6 @@ class CatalogController:
 
         return self.db.aggr_exec_stats_table(minTime, maxTime)
 
-
     def get_exec_raw_stats(self, requesting_user, params):
         if not self.is_admin(requesting_user):
             raise ValueError('You do not have permission to view this data.')
@@ -1205,8 +1132,6 @@ class CatalogController:
 
         return self.db.get_exec_raw_stats(minTime, maxTime)
 
-
-
     def set_client_group_config(self, username, config):
 
         if not self.is_admin(username):
@@ -1216,13 +1141,13 @@ class CatalogController:
 
         if 'module_name' not in config:
             raise ValueError('module_name parameter field is required')
-        if not isinstance(config['module_name'],basestring):
+        if not isinstance(config['module_name'],str):
             raise ValueError('module_name parameter field must be a string')
         record['module_name'] = config['module_name'].strip()
 
         if 'function_name' not in config:
             raise ValueError('function_name parameter field is required')
-        if not isinstance(config['function_name'],basestring):
+        if not isinstance(config['function_name'],str):
             raise ValueError('function_name parameter field must be a string')
         record['function_name'] = config['function_name'].strip()
 
@@ -1232,7 +1157,7 @@ class CatalogController:
             raise ValueError('client_groups parameter field must be a list')
 
         for c in config['client_groups']:
-            if not isinstance(c,basestring):
+            if not isinstance(c,str):
                 raise ValueError('client_groups must be a list of strings') 
         record['client_groups'] = config['client_groups']
 
@@ -1249,13 +1174,13 @@ class CatalogController:
 
         if 'module_name' not in config:
             raise ValueError('module_name parameter field is required')
-        if not isinstance(config['module_name'],basestring):
+        if not isinstance(config['module_name'],str):
             raise ValueError('module_name parameter field must be a string')
         selection['module_name'] = config['module_name'].strip()
 
         if 'function_name' not in config:
             raise ValueError('function_name parameter field is required')
-        if not isinstance(config['function_name'],basestring):
+        if not isinstance(config['function_name'],str):
             raise ValueError('function_name parameter field must be a string')
         selection['function_name'] = config['function_name'].strip()
 
@@ -1267,24 +1192,23 @@ class CatalogController:
         processed_filter = {}
         if filter:
             if 'module_name' in filter:
-                if not isinstance(filter['module_name'],basestring):
+                if not isinstance(filter['module_name'],str):
                     raise ValueError('module_name parameter field must be a string')
                 processed_filter['module_name'] = filter['module_name'].strip()
 
             if 'function_name' in filter:
-                if not isinstance(filter['function_name'],basestring):
+                if not isinstance(filter['function_name'],str):
                     raise ValueError('function_name parameter field must be a string')
                 processed_filter['function_name'] = filter['function_name'].strip()
 
         return self.db.list_client_group_configs(processed_filter)
 
-
     def get_client_groups(self, params):
         app_ids = None
         if 'app_ids' in params:
             if not isinstance(params['app_ids'], list):
-                raise ValueError('app_ids parameter must be a list');
-            app_ids = [];
+                raise ValueError('app_ids parameter must be a list')
+            app_ids = []
             for a in params['app_ids']:
                 tokens = a.strip().split('/')
                 if len(tokens)==2:
@@ -1299,7 +1223,6 @@ class CatalogController:
 
         return groups
 
-
     def set_volume_mount(self, username, config):
         # must be an admin
         if not self.is_admin(username):
@@ -1310,19 +1233,19 @@ class CatalogController:
 
         if 'module_name' not in config:
             raise ValueError('module_name parameter field is required')
-        if not isinstance(config['module_name'],basestring):
+        if not isinstance(config['module_name'],str):
             raise ValueError('module_name parameter field must be a string')
         record['module_name'] = config['module_name'].strip()
 
         if 'function_name' not in config:
             raise ValueError('function_name parameter field is required')
-        if not isinstance(config['function_name'],basestring):
+        if not isinstance(config['function_name'],str):
             raise ValueError('function_name parameter field must be a string')
         record['function_name'] = config['function_name'].strip()
 
         if 'client_group' not in config:
             raise ValueError('client_group parameter field is required')
-        if not isinstance(config['client_group'],basestring):
+        if not isinstance(config['client_group'],str):
             raise ValueError('client_group parameter field must be a string')
         record['client_group'] = config['client_group'].strip()
 
@@ -1336,19 +1259,19 @@ class CatalogController:
             vm = {}
             if 'host_dir' not in v:
                 raise ValueError('host_dir parameter field is required in all volume_mount configurations')
-            if not isinstance(v['host_dir'],basestring):
+            if not isinstance(v['host_dir'],str):
                 raise ValueError('host_dir parameter field in volume_mount list must be a string')
             vm['host_dir'] = v['host_dir'].strip()
 
             if 'container_dir' not in v:
                 raise ValueError('container_dir parameter field is required in all volume_mount configurations')
-            if not isinstance(v['container_dir'],basestring):
+            if not isinstance(v['container_dir'],str):
                 raise ValueError('container_dir parameter field in volume_mount list must be a string')
             vm['container_dir'] = v['container_dir'].strip()
 
             if 'read_only' not in v:
                 raise ValueError('read_only parameter field is required in all volume_mount configurations')
-            if not isinstance(str(v['read_only']),basestring):
+            if not isinstance(str(v['read_only']),str):
                 raise ValueError('read_only parameter field in volume_mount list must be either 1 (true) or 0 (false)')
 
             if str(v['read_only']) not in ['0', '1']:
@@ -1364,7 +1287,6 @@ class CatalogController:
         if error is not None:
             raise ValueError('Insert/update probably failed, blame mongo: upsert operation returned: '+error)
 
-
     def remove_volume_mount(self, username, config):
         # do some parameter checks
         if not self.is_admin(username):
@@ -1374,26 +1296,25 @@ class CatalogController:
 
         if 'module_name' not in config:
             raise ValueError('module_name parameter field is required')
-        if not isinstance(config['module_name'],basestring):
+        if not isinstance(config['module_name'],str):
             raise ValueError('module_name parameter field must be a string')
         selection['module_name'] = config['module_name'].strip()
 
         if 'function_name' not in config:
             raise ValueError('function_name parameter field is required')
-        if not isinstance(config['function_name'],basestring):
+        if not isinstance(config['function_name'],str):
             raise ValueError('function_name parameter field must be a string')
         selection['function_name'] = config['function_name'].strip()
 
         if 'client_group' not in config:
             raise ValueError('client_group parameter field is required')
-        if not isinstance(config['client_group'],basestring):
+        if not isinstance(config['client_group'],str):
             raise ValueError('client_group parameter field must be a string')
         selection['client_group'] = config['client_group'].strip()
 
         error = self.db.remove_volume_mount(selection)
         if error is not None:
             raise ValueError('Removal probably failed, blame mongo: remove operation returned: '+error)
-
 
     def list_volume_mounts(self, username, filter):
         # add some checks on the filter
@@ -1403,26 +1324,24 @@ class CatalogController:
         processed_filter = {}
         if filter:
             if 'module_name' in filter:
-                if not isinstance(filter['module_name'],basestring):
+                if not isinstance(filter['module_name'],str):
                     raise ValueError('module_name parameter field must be a string')
                 processed_filter['module_name'] = filter['module_name'].strip()
 
             if 'function_name' in filter:
-                if not isinstance(filter['function_name'],basestring):
+                if not isinstance(filter['function_name'],str):
                     raise ValueError('function_name parameter field must be a string')
                 processed_filter['function_name'] = filter['function_name'].strip()
 
             if 'client_group' in filter:
-                if not isinstance(filter['client_group'],basestring):
+                if not isinstance(filter['client_group'],str):
                     raise ValueError('client_group parameter field must be a string')
                 processed_filter['client_group'] = filter['client_group'].strip()
 
             if 'app_id' in filter:
                 raise ValueError('cannot filter by app_id - use function_name instead')
 
-
         return self.db.list_volume_mounts(processed_filter)
-
 
     def set_secure_config_params(self, username, params):
         if username is None or not self.is_admin(username):
@@ -1436,7 +1355,6 @@ class CatalogController:
         data_list = params['data']
         self.db.set_secure_config_params(data_list)
 
-
     def remove_secure_config_params(self, username, params):
         if username is None or not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
@@ -1449,7 +1367,6 @@ class CatalogController:
         data_list = params['data']
         self.db.remove_secure_config_params(data_list)
 
-
     def get_secure_config_params(self, username, params):
         if username is None or not self.is_admin(username):
             raise ValueError('You do not have permission to work with hidden configuration ' +
@@ -1458,10 +1375,10 @@ class CatalogController:
         if 'module_name' not in params:
             raise ValueError('module_name parameter field is required')
         module_name = params['module_name']
-        if not isinstance(module_name, basestring):
+        if not isinstance(module_name, str):
             raise ValueError('module_name parameter field must be a string')
         version_filter = params.get('version')
-        if version_filter and not isinstance(version_filter, basestring):
+        if version_filter and not isinstance(version_filter, str):
             raise ValueError('version parameter field must be a string')
         load_all_versions = params.get('load_all_versions')
         secure_param_list = self.db.get_secure_config_params(module_name)
@@ -1481,8 +1398,6 @@ class CatalogController:
             if param_name not in param_map or not param_map[param_name].get('version'):
                 param_map[param_name] = secure_param
         return [param_map[param_name] for param_name in param_map]
-
-
 
 
 # NOT PART OF CLASS CATALOG!!

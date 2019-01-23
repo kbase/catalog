@@ -1,22 +1,15 @@
-
-
 import unittest
-import os
 
-from pprint import pprint
-
-from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
 from biokbase.catalog.version import CATALOG_VERSION
+from catalog_test_util import CatalogTestUtil
 
 
 # tests all the basic get methods
 class BasicCatalogTest(unittest.TestCase):
 
-
     def test_version(self):
         self.assertEqual(self.catalog.version(self.cUtil.anonymous_ctx()),[CATALOG_VERSION])
-
 
     def test_is_registered(self):
         self.assertEqual(self.catalog.is_registered(self.cUtil.anonymous_ctx(),
@@ -44,7 +37,6 @@ class BasicCatalogTest(unittest.TestCase):
             {}),
             [0])
 
-
     def test_list_requested_releases(self):
         requested_releases = self.catalog.list_requested_releases(self.cUtil.anonymous_ctx())[0]
         found_modules = []
@@ -70,25 +62,23 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertIn('pending_first_release',found_modules)
         self.assertIn('pending_second_release',found_modules)
 
-
-
     def test_list_basic_module_info(self):
 
         # default should include all modules that are released
         default = self.catalog.list_basic_module_info(self.cUtil.anonymous_ctx(),
             {})[0]
         module_names = []
-        found_dynamic_service = False;
+        found_dynamic_service = False
         for m in default:
             module_names.append(m['module_name'])
             if m['module_name'] == 'DynamicService':
-                self.assertEquals(m['dev'],{'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128'})
-                self.assertEquals(m['beta'],{'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6'})
-                self.assertEquals(m['release'],{'git_commit_hash':'49dc505febb8f4cccb2078c58ded0de3320534d7'})
-                self.assertEquals(sorted(m['owners']),['rsutormin','wstester2'])
-                self.assertEquals(m['language'],'python')
-                self.assertEquals(m['dynamic_service'],1)
-                self.assertEquals(len(m['release_version_list']),4)
+                self.assertEqual(m['dev'],{'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128'})
+                self.assertEqual(m['beta'],{'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6'})
+                self.assertEqual(m['release'],{'git_commit_hash':'49dc505febb8f4cccb2078c58ded0de3320534d7'})
+                self.assertEqual(sorted(m['owners']),['rsutormin','wstester2'])
+                self.assertEqual(m['language'],'python')
+                self.assertEqual(m['dynamic_service'],1)
+                self.assertEqual(len(m['release_version_list']),4)
                 found_dynamic_service = True
 
         self.assertTrue(found_dynamic_service)
@@ -193,7 +183,6 @@ class BasicCatalogTest(unittest.TestCase):
             ",".join(['denied_release','onerepotest','pending_first_release','pending_second_release','registration_error','registration_in_progress'])
             )
 
-
     def test_get_module_state(self):
         state = self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'onerepotest'})[0]
@@ -232,28 +221,27 @@ class BasicCatalogTest(unittest.TestCase):
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'not_a_module'})
         self.assertEqual(str(e.exception),
-            'Operation failed - module/repo is not registered.');
+            'Operation failed - module/repo is not registered.')
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'git_url':'not_a_giturl'})
         self.assertEqual(str(e.exception),
-            'Operation failed - module/repo is not registered.');
+            'Operation failed - module/repo is not registered.')
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {})
         self.assertEqual(str(e.exception),
-            'Operation failed - module/repo is not registered.');
+            'Operation failed - module/repo is not registered.')
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'not_a_module','git_url':'https://github.com/kbaseIncubator/registration_in_progress'})
         self.assertEqual(str(e.exception),
-            'Operation failed - module/repo is not registered.');
+            'Operation failed - module/repo is not registered.')
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_state(self.cUtil.anonymous_ctx(),
             {'module_name':'onerepotest','git_url':'not_a_url'})
         self.assertEqual(str(e.exception),
-            'Operation failed - module/repo is not registered.');
-
+            'Operation failed - module/repo is not registered.')
 
     def test_get_module_info(self):
         info = self.catalog.get_module_info(self.cUtil.anonymous_ctx(),
@@ -292,8 +280,6 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(info['owners'],['kbasetest'])
         self.assertEqual(info['language'],'perl')
         self.assertTrue(info['release'] is None)
-
-
 
     def test_get_module_version(self):
 
@@ -426,42 +412,40 @@ class BasicCatalogTest(unittest.TestCase):
             self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
                 {})
         self.assertEqual(str(e.exception),
-            'Missing required fields git_url or module_name');
+            'Missing required fields git_url or module_name')
 
         # cannot find the right module
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
                 {'module_name':'made_up_module'})
         self.assertEqual(str(e.exception),
-            'Module cannot be found based on module_name or git_url parameters.');
+            'Module cannot be found based on module_name or git_url parameters.')
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
                 {'git_url':'not_a_url'})
         self.assertEqual(str(e.exception),
-            'Module cannot be found based on module_name or git_url parameters.');
+            'Module cannot be found based on module_name or git_url parameters.')
 
         # no release version exists
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
                 {'module_name':'pending_first_release', 'version':'release' })
         self.assertEqual(str(e.exception),
-            'No module version found that matches your criteria!');
+            'No module version found that matches your criteria!')
 
          # does not have any valid versions
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
                 {'git_url':'https://github.com/jplfaria/ElectronicAnnotationMethods-'})
         self.assertEqual(str(e.exception),
-            'Module was never properly registered, and has no available versions.');
+            'Module was never properly registered, and has no available versions.')
 
         # didn't give a proper version matcher
         with self.assertRaises(ValueError) as e:
             self.catalog.get_module_version(self.cUtil.anonymous_ctx(),
                 {'module_name':'pending_first_release', 'version':'the best version'})
         self.assertEqual(str(e.exception),
-            'No module version found that matches your criteria!');
-
-
+            'No module version found that matches your criteria!')
 
     def test_get_version_info(self):
 
@@ -522,21 +506,21 @@ class BasicCatalogTest(unittest.TestCase):
             self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                 {'module_name':'release_history', 'version':'not_a_Version'})
         self.assertEqual(str(e.exception),
-            'invalid version selection, valid versions are: "dev" | "beta" | "release"');
+            'invalid version selection, valid versions are: "dev" | "beta" | "release"')
         # test wrong git commit hash
         with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'version':'release',
                     'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128'})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
+            'No version found that matches all your criteria!')
         # test wrong timestamp
         with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
                     {'module_name':'release_history', 'version':'release',
                     'timestamp':1445024094055})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
+            'No version found that matches all your criteria!')
         # right git commit, wrong timestamp
         with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
@@ -544,7 +528,7 @@ class BasicCatalogTest(unittest.TestCase):
                     'git_commit_hash':'b06c5f9daf603a4d206071787c3f6184000bf128',
                     'timestamp':1445024094055})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
+            'No version found that matches all your criteria!')
         # right timestamp, wrong git commit hash
         with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
@@ -552,7 +536,7 @@ class BasicCatalogTest(unittest.TestCase):
                     'git_commit_hash':'b843888e962642d665a3b0bd701ee630c01835e6',
                     'timestamp':1445022818884})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
+            'No version found that matches all your criteria!')
 
         #########
         # now we test with a timestamp retrieval, first from one of the currents
@@ -578,7 +562,7 @@ class BasicCatalogTest(unittest.TestCase):
                     {'module_name':'release_history', 'timestamp':1445022818884,
                     'git_commit_hash':"49dc505febb8f4cccb2078c51ded0de3320534d7"})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
+            'No version found that matches all your criteria!')
 
         # now with something in the history
         vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
@@ -604,16 +588,14 @@ class BasicCatalogTest(unittest.TestCase):
                     {'module_name':'release_history',
                     'timestamp':1445024094078})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
+            'No version found that matches all your criteria!')
 
         with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
-                    {'module_name':'release_history', 'timestamp':1445022818000, 
+                    {'module_name':'release_history', 'timestamp':1445022818000,
                     'git_commit_hash':"49dc505febb8f4cccb2078c51ded0de3320534d7"})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
-
-
+            'No version found that matches all your criteria!')
 
         #########
         # now we test with a git commit hash retrieval, first from one of the currents
@@ -637,12 +619,10 @@ class BasicCatalogTest(unittest.TestCase):
         # test wrong git commit hash
         with self.assertRaises(ValueError) as e:
             vinfo = self.catalog.get_version_info(self.cUtil.anonymous_ctx(),
-                    {'module_name':'release_history', 
+                    {'module_name':'release_history',
                     'git_commit_hash':'b06c5f9daf603a4d202071787c3f6184000bf128'})[0]
         self.assertEqual(str(e.exception),
-            'No version found that matches all your criteria!');
-
-
+            'No version found that matches all your criteria!')
 
     def test_list_released_module_versions(self):
         # history should return versions sorted by timestamp
@@ -672,8 +652,6 @@ class BasicCatalogTest(unittest.TestCase):
         history = self.catalog.list_released_module_versions(self.cUtil.anonymous_ctx(),
             {'git_url':'https://github.com/kbaseIncubator/pending_Release'})[0]
         self.assertEqual(history,[])
-
-    
 
     @classmethod
     def setUpClass(cls):

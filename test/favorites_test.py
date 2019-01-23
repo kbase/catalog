@@ -1,17 +1,12 @@
-
-
-import unittest
-import os
-
-from pprint import pprint
-
-from catalog_test_util import CatalogTestUtil
-from biokbase.catalog.Impl import Catalog
 import time
+import unittest
+
+from biokbase.catalog.Impl import Catalog
+from catalog_test_util import CatalogTestUtil
+
 
 # tests all the basic get methods
 class BasicCatalogTest(unittest.TestCase):
-
 
     def test_add_remove_aggregate_favorites(self):
 
@@ -29,7 +24,6 @@ class BasicCatalogTest(unittest.TestCase):
             if f['module_name_lc'] +'/'+ f['id'] == 'megahit/run_megahit' :
                 found = True
         self.assertFalse(found)
-
 
         # add a couple and check that they appear correctly
         self.catalog.add_favorite(ctx,
@@ -87,7 +81,6 @@ class BasicCatalogTest(unittest.TestCase):
         self.assertEqual(favs6[0]['id'],'run_megahit')
         self.assertIsNotNone(favs6[0]['timestamp'])
 
-
         # let joe add a favorite for megahit too
         self.catalog.add_favorite({'user_id':'joe'},
             {'module_name':'MegaHit', 'id':'run_megahit'})
@@ -108,7 +101,6 @@ class BasicCatalogTest(unittest.TestCase):
         fav_counts = self.catalog.list_favorite_counts({},{'modules':['megAhit']})[0]
         for f in fav_counts:
             self.assertEqual(f['module_name_lc'],'megahit')
-
 
     @classmethod
     def setUpClass(cls):
