@@ -34,217 +34,224 @@ from docker import utils
 import yaml
 import string
 
-BASE='kbase/depl:latest'
+BASE = 'kbase/depl:latest'
 
 
 def read_config(file):
     with open(file, 'r') as stream:
-      config=yaml.load(stream)
+        config = yaml.load(stream)
     return config
-    
-"""
-   Do precheck - Check that required files are present and other goodness.
-"""
+
 
 def precheck():
+    """
+       Do precheck - Check that required files are present and other goodness.
+    """
     # Check for required files (Dockerfile)
-    for file in ['Dockerfile','kbase.yaml','README.md']:
-      if not os.path.isfile(file):
-        print "Mising %s file"%(file)
-        sys.exit(1)
-      else:
-        print "- Has %s"%(file)
-    config=read_yaml()
-    print "- Valid yaml file"
+    for file in ['Dockerfile', 'kbase.yaml', 'README.md']:
+        if not os.path.isfile(file):
+            print("Mising %s file" % (file))
+            sys.exit(1)
+        else:
+            print("- Has %s" % (file))
+    config = read_yaml()
+    print("- Valid yaml file")
     check_dockerfile()
 
-"""
-   Check Dockerfile - For now just make sure FROM is good
-"""
 
 def check_dockerfile():
-    with open('Dockerfile','r') as f:
-      for line in f:
-        if line[:5].lower()=='from ':
-          base=line[5:].rstrip('\n')
-          if base!=BASE:
-            raise AssertionError('Dockerfile FROM must use %s not %s'%(BASE,base))
+    """
+       Check Dockerfile - For now just make sure FROM is good
+    """
+    with open('Dockerfile', 'r') as f:
+        for line in f:
+            if line[:5].lower() == 'from ':
+                base = line[5:].rstrip('\n')
+                if base != BASE:
+                    raise AssertionError('Dockerfile FROM must use %s not %s' % (BASE, base))
 
-"""
-  Read kbase.yaml file
-"""
+
 def read_yaml():
+    """
+      Read kbase.yaml file
+    """
     with open("kbase.yaml", 'r') as stream:
-      config=yaml.load(stream)
-    for p in ['module-name','module-version']:
-      if p not in config:
-        raise AssertionError('Missing %s in kbase.yaml'%(p))
+        config = yaml.load(stream)
+    for p in ['module-name', 'module-version']:
+        if p not in config:
+            raise AssertionError('Missing %s in kbase.yaml' % (p))
     return config
 
-"""
-   Do the docker build
-"""
 
 def build():
-    mod=read_yaml()
-    #module=mod['module-name'].lower()
-    module=os.getcwd().split('/')[-1] 
-    version=mod['module-version']
-    c = Client(base_url='unix://var/run/docker.sock')
-    tag='temp/%s:%s'%(module,version)
-    last=''
-    for line in c.build( path='.', rm=True, decode=True, tag=tag):
-      if 'errorDetail' in line:
-        sys.exit(1)
-      last=line
-    if 'stream' in last and last['stream'][:19]=='Successfully built ':
-      return c.inspect_image(tag)['Id']
-       
-"""
-   Run a test of the built image
-"""
+    """
+       Do the docker build
+    """
+    mod = read_yaml()
+    # module=mod['module-name'].lower()
+    module = os.getcwd().split('/')[-1]
+    version = mod['module-version']
+    c = APIClient(base_url='unix://var/run/docker.sock')
+    tag = 'temp/%s:%s' % (module, version)
+    last = ''
+    for line in c.build(path='.', rm=True, decode=True, tag=tag):
+        if 'errorDetail' in line:
+            sys.exit(1)
+        last = line
+    if 'stream' in last and last['stream'][:19] == 'Successfully built ':
+        return c.inspect_image(tag)['Id']
 
-def test(image,config):
-    c = Client(base_url='unix://var/run/docker.sock')
-    env={"TEST_USER":config['test_user'],"TEST_TOKEN":config['test_token'],"TEST_WSURL":config['test_wsurl']}
-    container = c.create_container(image=image,command="test",environment=env)
-    id=container.get('Id')
-    response=c.start(container=id)
-    status=dict()
-    status['Running']=True
-    while status['Running']==True:
-      status=c.inspect_container(id)['State']
-      time.sleep(1)
+
+def test(image, config):
+    """
+       Run a test of the built image
+    """
+    c = APIClient(base_url='unix://var/run/docker.sock')
+    env = {"TEST_USER": config['test_user'], "TEST_TOKEN": config['test_token'],
+           "TEST_WSURL": config['test_wsurl']}
+    container = c.create_container(image=image, command="test", environment=env)
+    id = container.get('Id')
+    response = c.start(container=id)
+    status = dict()
+    status['Running'] = True
+    while status['Running'] == True:
+        status = c.inspect_container(id)['State']
+        time.sleep(1)
     c.remove_container(container=id)
-    if status['Running']==False:
-      print "Exited with %d"%(status['ExitCode'])
-      sys.exit(status['ExitCode'])
-    return retval
+    if status['Running'] == False:
+        print("Exited with %d" % (status['ExitCode']))
+        sys.exit(status['ExitCode'])
+    return
 
-"""
-   Figure out container name from image name
-"""
 
 def container_name(image):
-    return image.replace('/','-').replace(':','-'),
+    """
+       Figure out container name from image name
+    """
+    return image.replace('/', '-').replace(':', '-'),
 
-"""
-   Run the service using the built image.
-"""
 
 def run(image):
-    c = Client(base_url='unix://var/run/docker.sock')
-    hc=utils.create_host_config(port_bindings={5000: None})
+    """
+       Run the service using the built image.
+    """
+    c = APIClient(base_url='unix://var/run/docker.sock')
+    hc = utils.create_host_config(port_bindings={5000: None})
     container = c.create_container(image=image,
-                            detach=True,ports=[5000],
-                            name=container_name(image),
-                            host_config=hc)
-    id=container.get('Id')
-    response=c.start(container=id)
-    st=c.inspect_container(id)['State']
-    if st['Running']=='False':
-      print "Failed to start"
-      raise SystemError('Failed to start')
+                                   detach=True, ports=[5000],
+                                   name=container_name(image),
+                                   host_config=hc)
+    id = container.get('Id')
+    response = c.start(container=id)
+    st = c.inspect_container(id)['State']
+    if st['Running'] == 'False':
+        print("Failed to start")
+        raise SystemError('Failed to start')
     return id
 
-def update_nms(config):
-    nms=config['narrative_method_specs']
-    p = subprocess.Popen(['/bin/cp', '-a', 'ui/narrative/methods/','%s/'%(nms)])
-    os.chdir(nms)
-    p = subprocess.Popen(['git','add','methods'])
-    time.sleep(1)
-    p = subprocess.Popen(['git','commit','-m','catalog update'])
-    p = subprocess.Popen(['git','push'])
-     
 
-def generate_nginx_deploydev(id,config):
-    directory=config['deploy_dev']
+def update_nms(config):
+    nms = config['narrative_method_specs']
+    p = subprocess.Popen(['/bin/cp', '-a', 'ui/narrative/methods/', '%s/' % (nms)])
+    os.chdir(nms)
+    p = subprocess.Popen(['git', 'add', 'methods'])
+    time.sleep(1)
+    p = subprocess.Popen(['git', 'commit', '-m', 'catalog update'])
+    p = subprocess.Popen(['git', 'push'])
+
+
+def generate_nginx_deploydev(id, config):
+    directory = config['deploy_dev']
     # cd to directory
     os.chdir(directory)
-    with open('proxy/default.conf','r') as f:
-      lines=f.readlines()
+    with open('proxy/default.conf', 'r') as f:
+        lines = f.readlines()
 
-    c = Client(base_url='unix://var/run/docker.sock')
-    con=c.inspect_container(id)
-    ip=con['NetworkSettings']['IPAddress']
-    url=con['Config']['Image'].split('/')[1].replace(':','-')
-    inblock=False
-    with open('proxy/default.conf','w') as f:
-      for line in lines:
-        if line.find('%BEGIN%')>0:
-          inblock=True
-          f.write(line)
-          f.write("          location /services/%s/ {\n"%(url))
-          f.write("                proxy_pass http://%s:%d/;\n"%(ip,5000))
-          f.write("                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n")
-          f.write("                proxy_set_header X-Real-IP $remote_addr;\n")
-          f.write("                proxy_set_header Host $http_host;\n")
-          f.write("                proxy_set_header X-Forwarded-Proto $scheme;\n")
-          f.write("          }\n")
-          # dump
-        elif line.find('%END%')>0:
-          inblock=False
-          #
-        if not inblock: 
-          f.write(line)
+    c = APIClient(base_url='unix://var/run/docker.sock')
+    con = c.inspect_container(id)
+    ip = con['NetworkSettings']['IPAddress']
+    url = con['Config']['Image'].split('/')[1].replace(':', '-')
+    inblock = False
+    with open('proxy/default.conf', 'w') as f:
+        for line in lines:
+            if line.find('%BEGIN%') > 0:
+                inblock = True
+                f.write(line)
+                f.write("          location /services/%s/ {\n" % (url))
+                f.write("                proxy_pass http://%s:%d/;\n" % (ip, 5000))
+                f.write(
+                    "                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n")
+                f.write("                proxy_set_header X-Real-IP $remote_addr;\n")
+                f.write("                proxy_set_header Host $http_host;\n")
+                f.write("                proxy_set_header X-Forwarded-Proto $scheme;\n")
+                f.write("          }\n")
+                # dump
+            elif line.find('%END%') > 0:
+                inblock = False
+                #
+            if not inblock:
+                f.write(line)
 
-# some code here
-    with open('/dev/null','w') as dn:
-      p = subprocess.Popen(['docker-compose', 'build','www'], stdout=dn, stderr=dn)
-      p = subprocess.Popen(['docker-compose', 'up','-d','www'], stdout=dn, stderr=dn)
+    # some code here
+    with open('/dev/null', 'w') as dn:
+        p = subprocess.Popen(['docker-compose', 'build', 'www'], stdout=dn, stderr=dn)
+        p = subprocess.Popen(['docker-compose', 'up', '-d', 'www'], stdout=dn, stderr=dn)
     # docker-compose build www
     # docker-compose up -d www
     return
 
-def usage():
-    print 'Usage: register [build|run <image name> <deploy_dev dir>]'
 
-"""
-   Main entrypoint
-"""
-def main ():
+def usage():
+    print('Usage: register [build|run <image name> <deploy_dev dir>]')
+
+
+def main():
+    """
+       Main entrypoint
+    """
     if 'CAT_CONFIG' not in os.environ:
-      print "Please define CAT_CONFIG to point to your config.yaml"
-      sys.exit(1)
-    config=read_config(os.environ['CAT_CONFIG'])
-    if len(sys.argv)<2:
-      usage()
-      return
-    elif sys.argv[1]=='build':
-      print 'Checking'
-      precheck()
-      print 'Building'
-      id=build()
-      print id
-      print 'Running Test'
-      test(id,config)
-    elif sys.argv[1]=='nms':
-      update_nms(config)
-    elif sys.argv[1]=='run':
-      print 'Running service'
-      if len(sys.argv)<3:
+        print("Please define CAT_CONFIG to point to your config.yaml")
+        sys.exit(1)
+    config = read_config(os.environ['CAT_CONFIG'])
+    if len(sys.argv) < 2:
         usage()
         return
-      image=sys.argv[2]
-      id=run(image)
-      generate_nginx_deploydev(id,config)
-    elif sys.argv[1]=='gen':
-      id=sys.argv[2]
-      generate_nginx_deploydev(id,config)
+    elif sys.argv[1] == 'build':
+        print('Checking')
+        precheck()
+        print('Building')
+        id = build()
+        print(id)
+        print('Running Test')
+        test(id, config)
+    elif sys.argv[1] == 'nms':
+        update_nms(config)
+    elif sys.argv[1] == 'run':
+        print('Running service')
+        if len(sys.argv) < 3:
+            usage()
+            return
+        image = sys.argv[2]
+        id = run(image)
+        generate_nginx_deploydev(id, config)
+    elif sys.argv[1] == 'gen':
+        id = sys.argv[2]
+        generate_nginx_deploydev(id, config)
     else:
-      print "Unknown command"
-      sys.exit(1)
+        print("Unknown command")
+        sys.exit(1)
+
 
 if __name__ == '__main__':
     try:
         main()
         sys.exit(0)
-    except KeyboardInterrupt, e: # Ctrl-C
+    except KeyboardInterrupt as e:  # Ctrl-C
         raise e
-    except SystemExit, e: # sys.exit()
+    except SystemExit as e:  # sys.exit()
         raise e
-    except Exception, e:
-        print 'ERROR, UNEXPECTED EXCEPTION'
-        print str(e)
+    except Exception as e:
+        print('ERROR, UNEXPECTED EXCEPTION')
+        print(str(e))
         traceback.print_exc()
         os._exit(1)

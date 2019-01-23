@@ -1,17 +1,11 @@
-
-
 import unittest
-import os
 
-from pprint import pprint
-
-from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
+from catalog_test_util import CatalogTestUtil
 
 
 # tests all the basic get methods
 class DynamicServiceSupportTest(unittest.TestCase):
-
 
     def test_list_dynamic_modules(self):
 
@@ -50,7 +44,6 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['version'],'0.0.5')
         self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.b06c5f9daf603a4d206071787c3f6184000bf128')
 
-
         # get all beta services
         mods = self.catalog.list_service_modules(self.cUtil.anonymous_ctx(),
             {'tag':'beta'})[0]
@@ -60,7 +53,6 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['git_commit_hash'],'39dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[0]['version'],'1.5.1')
         self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice2.39dc505febb8f4cccb2078c58ded0de3320534d7')
-
 
         # get all released versions
         mods = self.catalog.list_service_modules(self.cUtil.anonymous_ctx(),
@@ -73,12 +65,10 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(mods[0]['version'],'1.5.0')
         self.assertEqual(mods[0]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice2.29dc505febb8f4cccb2078c58ded0de3320534d7')
 
-
         self.assertEqual(mods[1]['module_name'],'DynamicService')
         self.assertEqual(mods[1]['git_commit_hash'],'49dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(mods[1]['version'],'2.1.8')
         self.assertEqual(mods[1]['docker_img_name'],'dockerhub-ci.kbase.us/kbase:dynamicservice.49dc505febb8f4cccb2078c58ded0de3320534d7')
-
 
         # make sure bad tag throws an error
         with self.assertRaises(ValueError) as e:
@@ -86,8 +76,6 @@ class DynamicServiceSupportTest(unittest.TestCase):
                 {'tag':'badtag'})[0]
         self.assertEqual(str(e.exception),
             'tag parameter must be either "dev", "beta", or "release".');
-
-
 
     def test_version_fetch_basics(self):
 
@@ -151,7 +139,6 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(ver['module_name'],'DynamicService2')
         self.assertEqual(ver['git_commit_hash'],'29dc505febb8f4cccb2078c58ded0de3320534d7')
         self.assertEqual(ver['version'],'1.5.0')
-
 
         # now the interesting part, getting things by semantic version
         ver = self.catalog.module_version_lookup(self.cUtil.anonymous_ctx(),
@@ -236,9 +223,6 @@ class DynamicServiceSupportTest(unittest.TestCase):
         self.assertEqual(ver['module_name'],'DynamicService')
         self.assertEqual(ver['git_commit_hash'],'d6cd1e2bd19e03a81132a23b2025920577f84e37')
         self.assertEqual(ver['version'],'1.1.0')
-
-
-
 
     @classmethod
     def setUpClass(cls):

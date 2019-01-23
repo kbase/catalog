@@ -1,18 +1,17 @@
-import re
-import os
-import traceback
-import shutil
-import time
-import datetime
-import pprint
-import json
 import codecs
-import semantic_version
-
-#import git
+import datetime
+import json
+import os
+import pprint
+import re
+import shutil
 import subprocess
+import time
+import traceback
+from urllib.parse import urlparse
+
+import semantic_version
 import yaml
-from urlparse import urlparse
 from docker import APIClient as DockerClient
 from docker.tls import TLSConfig as DockerTLSConfig
 
@@ -20,7 +19,6 @@ from biokbase.catalog.local_function_reader import LocalFunctionReader
 from biokbase.narrative_method_store.client import NarrativeMethodStore
 
 
-    
 class Registrar:
 
     # params is passed in from the controller, should be the same as passed into the spec
@@ -52,7 +50,7 @@ class Registrar:
         # (most) of the mongo document for this module snapshot before this registration
         self.module_details = module_details
 
-        self.log_buffer = [];
+        self.log_buffer = []
         self.last_log_time = time.time() # in seconds
         self.log_interval = 1.0 # save log to mongo every second
         
@@ -60,13 +58,12 @@ class Registrar:
         self.kbase_endpoint = kbase_endpoint
         self.prev_dev_version = prev_dev_version
 
-
     def start_registration(self):
         try:
             self.logfile = codecs.open(self.temp_dir+'/registration.log.'+self.registration_id, 'w', 'utf-8')
             self.log('Registration started on '+ str(datetime.datetime.now()) + ' by '+self.username)
-            self.log('Registration ID: '+str(self.registration_id));
-            self.log('Registration Parameters: '+str(self.params));
+            self.log('Registration ID: '+str(self.registration_id))
+            self.log('Registration Parameters: '+str(self.params))
 
             ##############################
             # 1 - clone the repo into the temp directory that should already be reserved for us
@@ -78,17 +75,18 @@ class Registrar:
 
             parsed_url=urlparse(self.git_url)
 
-            self.log('Attempting to clone into: '+basedir);
+            self.log('Attempting to clone into: '+basedir)
             self.log('git clone ' + self.git_url)
             subprocess.check_call( ['git','clone',self.git_url, basedir ] )
             # try to get hash from repo
-            git_commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
+            git_commit_hash = subprocess.check_output(
+                ['git','log', '--pretty=%H', '-n', '1'], cwd=basedir).decode().strip()
             self.log('current commit hash at HEAD:' + git_commit_hash)
             if 'git_commit_hash' in self.params:
                 if self.params['git_commit_hash']:
-                    self.log('git checkout ' + self.params['git_commit_hash'].strip())
-                    subprocess.check_call ( ['git', 'checkout', '--quiet', self.params['git_commit_hash'] ], cwd=basedir )
                     git_commit_hash = self.params['git_commit_hash'].strip()
+                    self.log('git checkout ' + git_commit_hash)
+                    subprocess.check_call ( ['git', 'checkout', '--quiet', git_commit_hash ], cwd=basedir )
 
             # check if this was a git_commit_hash that was already released- if so, we abort for now (we could just update the dev tag in the future)
             for r in self.module_details['release_version_list']:
@@ -223,9 +221,9 @@ class Registrar:
                          self.prev_dev_version['git_commit_message'])
                 self.db.update_dev_version(self.prev_dev_version, git_url=self.git_url)
         finally:
-            self.flush_log_to_db();
-            self.logfile.close();
-            self.cleanup();
+            self.flush_log_to_db()
+            self.logfile.close()
+            self.cleanup()
 
 
 
@@ -271,7 +269,7 @@ class Registrar:
                                     'Module names are permanent- if this is a problem, contact a kbase admin.')
         else:
             # This must be the first registration, so the module must not exist yet
-            self.check_that_module_name_is_valid(module_name);
+            self.check_that_module_name_is_valid(module_name)
 
         # associate the module_name with the log file for easier searching (if we fail sooner, then the module name
         # cannot be used to lookup this log)
@@ -310,8 +308,10 @@ class Registrar:
 
     def update_the_catalog(self, basedir, ref_data_folder, ref_data_ver, compilation_report):
         # get the basic info that we need
-        commit_hash = str( subprocess.check_output ( ['git','log', '--pretty=%H', '-n', '1' ], cwd=basedir ) ).rstrip()
-        commit_message = str( subprocess.check_output ( ['git','log', '--pretty=%B', '-n', '1' ], cwd=basedir ) ).rstrip()
+        commit_hash = subprocess.check_output(
+            ['git', 'log', '--pretty=%H', '-n', '1'], cwd=basedir).decode().strip()
+        commit_message = subprocess.check_output(
+            ['git', 'log', '--pretty=%B', '-n', '1'], cwd=basedir).decode().strip()
 
         module_name = self.get_required_field_as_string(self.kb_yaml,'module-name')
         module_description = self.get_required_field_as_string(self.kb_yaml,'module-description')
@@ -407,6 +407,7 @@ class Registrar:
 
         #push to NMS
         self.log('registering specs with NMS')
+        self.log("NMS: " + commit_hash)
         self.nms.register_repo({'git_url':self.git_url, 'git_commit_hash':commit_hash})
 
         self.log('\ndone')
@@ -498,7 +499,7 @@ class Registrar:
         self.logfile.write(content)
         self.logfile.flush()
 
-        lines = content.splitlines();
+        lines = content.splitlines()
         for l in lines:
             # add each line to the buffer
             if len(l)>1000 :
@@ -507,14 +508,13 @@ class Registrar:
 
         # save the buffer to mongo if enough time has elapsed, or the buffer is more than 1000 lines
         if (time.time() - self.last_log_time > self.log_interval) or (len(self.log_buffer)>1000):
-            self.flush_log_to_db();
+            self.flush_log_to_db()
 
     def flush_log_to_db(self):
         # todo: if we lose log lines, that's ok.  Make sure we handle case if log is larger than mongo doc size
         self.db.append_to_build_log(self.registration_id, self.log_buffer)
         self.log_buffer = [] #clear the buffer
         self.last_log_time = time.time() # reset the log timer
-
 
     def set_build_step(self, step):
         self.db.set_module_registration_state(git_url=self.git_url, new_state='building: '+step)
@@ -570,7 +570,7 @@ class Registrar:
                 line_parse = json.loads(line)
                 log_line = ''
                 if 'id' in line_parse:
-                    log_line += line_parse['id']+' - ';
+                    log_line += line_parse['id']+' - '
                 if 'status' in line_parse:
                     log_line += line_parse['status']
                 if 'progress' in line_parse:
@@ -589,7 +589,7 @@ class Registrar:
                     self.log(str(line_parse),no_end_line=True)
                     raise ValueError('Docker push failed: '+str(line_parse['error']))
 
-        self.log('done pushing docker image to registry for ' + image_name+'\n');
+        self.log('done pushing docker image to registry for ' + image_name+'\n')
 
 
     def run_docker_container(self, dockerclient, image_name, token, 
@@ -693,7 +693,7 @@ class Registrar:
             else:
                 with codecs.open(report_file, 'r', 'utf-8', errors='ignore') as f:    
                     return json.load(f)
-        except Exception, e:
+        except Exception as e:
             self.log("Error preparing compilation log: " + str(e))
         return None
 

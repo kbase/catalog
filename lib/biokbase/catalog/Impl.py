@@ -20,9 +20,9 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "2.1.2"
-    GIT_URL = "https://github.com/JamesJeffryes/catalog.git"
-    GIT_COMMIT_HASH = "82480c4f938d5d1d5a85668a0ebaf1f27bf793f3"
+    VERSION = "0.0.1"
+    GIT_URL = "https://github.com/kbase/catalog.git"
+    GIT_COMMIT_HASH = "83fec5967d709dadf8b7592e98e5b49a2b2cc1e9"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -56,9 +56,9 @@ class Catalog:
         #END version
 
         # At some point might do deeper type checking...
-        if not isinstance(version, basestring):
+        if not isinstance(version, str):
             raise ValueError('Method version return value ' +
-                             'version is not type basestring as required.')
+                             'version is not type str as required.')
         # return the results
         return [version]
 
@@ -109,9 +109,9 @@ class Catalog:
         #END register_repo
 
         # At some point might do deeper type checking...
-        if not isinstance(registration_id, basestring):
+        if not isinstance(registration_id, str):
             raise ValueError('Method register_repo return value ' +
-                             'registration_id is not type basestring as required.')
+                             'registration_id is not type str as required.')
         # return the results
         return [registration_id]
 
@@ -876,9 +876,9 @@ class Catalog:
         #END get_build_log
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, basestring):
+        if not isinstance(returnVal, str):
             raise ValueError('Method get_build_log return value ' +
-                             'returnVal is not type basestring as required.')
+                             'returnVal is not type str as required.')
         # return the results
         return [returnVal]
 

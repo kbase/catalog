@@ -1,21 +1,12 @@
-
-
-import unittest
-import os
-import json
 import random
+import unittest
 
-from pprint import pprint
-
-from catalog_test_util import CatalogTestUtil
 from biokbase.catalog.Impl import Catalog
+from catalog_test_util import CatalogTestUtil
 
 
 # tests all the basic get methods
 class BasicCatalogTest(unittest.TestCase):
-
-
-
     def test_stats_permissions(self):
         # tests to make sure normal users cannot log stats nor get raw stats
         
@@ -35,7 +26,6 @@ class BasicCatalogTest(unittest.TestCase):
             self.catalog.get_exec_aggr_table(usrCtx, {})
         self.assertEqual(str(e.exception),
             'You do not have permission to view this data.');
-
 
     def test_stats(self):
 
@@ -146,12 +136,10 @@ class BasicCatalogTest(unittest.TestCase):
                 record['finish_time'] = record['exec_start_time'] + end_delay
                 self.catalog.log_exec_stats(adminCtx, record)
 
-
         # make sure we get the correct results
-
         # make sure all the stats we added appear in the raw stats:
         all_stats = self.catalog.get_exec_raw_stats(adminCtx, {})[0]
-        self.assertEquals(len(all_stats), total_success + total_error)
+        self.assertEqual(len(all_stats), total_success + total_error)
 
         e_count = 0
         s_count = 0
@@ -161,46 +149,40 @@ class BasicCatalogTest(unittest.TestCase):
             else:
                 s_count+=1
 
-        self.assertEquals(e_count, total_error)
-        self.assertEquals(s_count, total_success)
+        self.assertEqual(e_count, total_error)
+        self.assertEqual(s_count, total_success)
 
         restricted_stats = self.catalog.get_exec_raw_stats(adminCtx, {'begin': 1461169999, 'end': 1461170101})[0]
-        self.assertEquals(len(restricted_stats), 20)
+        self.assertEqual(len(restricted_stats), 20)
         for row in restricted_stats:
             self.assertTrue('job_id' in row)
             self.assertEqual(row['job_id'], weird_job_id)
 
-
         # make sure we can get aggregations of things
-
-
         stats = self.catalog.get_exec_aggr_stats({}, {})[0]
-        self.assertEquals(len(stats), 5)
+        self.assertEqual(len(stats), 5)
         foundRunStuff = False
         for s in stats:
             if s['full_app_id'] == 'FBA/run_stuff':
                 foundRunStuff = True
-                self.assertEquals(s['module_name'], 'FBA')
-                self.assertEquals(s['number_of_calls'], 55)
-                self.assertEquals(s['number_of_errors'], 5)
-                self.assertEquals(s['time_range'], '*')
-                self.assertEquals(s['total_exec_time'], 27500)
-                self.assertEquals(s['total_queue_time'], 2750)
-                self.assertEquals(s['type'], 'a')
+                self.assertEqual(s['module_name'], 'FBA')
+                self.assertEqual(s['number_of_calls'], 55)
+                self.assertEqual(s['number_of_errors'], 5)
+                self.assertEqual(s['time_range'], '*')
+                self.assertEqual(s['total_exec_time'], 27500)
+                self.assertEqual(s['total_queue_time'], 2750)
+                self.assertEqual(s['type'], 'a')
 
         self.assertTrue(foundRunStuff)
 
         stats = self.catalog.get_exec_aggr_table(adminCtx,{})[0]
-        self.assertEquals(len(stats), 6)
+        self.assertEqual(len(stats), 6)
         foundRandelClustalRuns = True
         for s in stats:
             if s['app'] == 'Clustal/run_clustal' and s['user'] == 'randel':
-                self.assertEquals(s['n'],21)
+                self.assertEqual(s['n'],21)
                 foundRandelClustalRuns = True
         self.assertTrue(foundRandelClustalRuns)
-
-
-
 
     @classmethod
     def setUpClass(cls):
