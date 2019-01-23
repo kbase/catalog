@@ -460,7 +460,7 @@ class MongoCatalogDBI:
             matcher = {'module_name_lc':l['module_name_lc'], 'function_id':l['function_id'], 'git_commit_hash':l['git_commit_hash']}
             # insert or update- allows us to capture the latest info if a specific commit is reregistered without adding a duplicate
             # or throwing an error
-            result = self.local_functions.update_one(matcher, l, upsert=True)
+            result = self.local_functions.replace_one(matcher, l, upsert=True)
             if self._check_update_result(result):
                 error = self._check_update_result(result)
                 error['mssg'] = 'An insert/upsert did not work on ' + l['function_id']
