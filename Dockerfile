@@ -4,7 +4,7 @@ FROM kbase/sdkbase2:latest AS build
 COPY . /tmp/catalog
 RUN cd /tmp/catalog && make deploy-service deploy-server-control-scripts
 
-FROM kbase/kb_python:latest
+FROM kbase/sdkbase2:python
 # These ARGs values are passed in via the docker build command
 ARG BUILD_DATE
 ARG VCS_REF
