@@ -18,9 +18,7 @@ COPY --from=build /tmp/catalog/deployment/conf /kb/deployment/conf
 
 SHELL ["/bin/bash", "-c"]
 RUN source activate root && \
-    conda install -c anaconda semantic_version pymongo=2.8 && \
-    pip install docker && \
-    ln -s /usr/lib/python2.7/plat-*/_sysconfigdata_nd.py /usr/lib/python2.7/
+    pip install -r requirements.txt
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/kbase/catalog.git" \
