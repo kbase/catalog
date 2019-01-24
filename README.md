@@ -1,6 +1,7 @@
 # KBase Catalog
 
 KBase core service to manage app and module information, registration, and release.
+Administrators need to be set separately for the job stats page by being added to [deploy.cfg.](https://github.com/kbaseapps/kb_Metrics/blob/master/deploy.cfg)
 
 Build status:
 master:  [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=master)](https://travis-ci.org/kbase/catalog)
