@@ -45,6 +45,7 @@ echo '\n\nstarting tests'
 export PYTHONPATH=pylib:$PYTHONPATH
 coverage run --source=pylib/biokbase/catalog --omit=*Client.py,*Server.py -m unittest discover -p "*_test.py"
 TEST_RETURN_CODE=$?
+coverage report
 echo "unit tests returned with error code=${TEST_RETURN_CODE}"
 
 

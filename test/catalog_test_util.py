@@ -12,7 +12,6 @@ from biokbase.catalog.db import MongoCatalogDBI
 
 class CatalogTestUtil:
 
-
     def __init__(self, test_dir):
         self.test_dir = os.path.abspath(test_dir)
 
@@ -24,8 +23,7 @@ class CatalogTestUtil:
         self._clear_db()
 
         if db_version is not None:
-            self.db_version.insert({'version_doc':True, 'version':db_version})
-
+            self.db_version.insert_one({'version_doc':True, 'version':db_version})
 
     def setUp(self):
         self.log("setUp()")
@@ -130,7 +128,7 @@ class CatalogTestUtil:
                 with open(document_path) as document_file:
                     document = document_file.read()
                 parsed_document = json.loads(document)
-                self.modules.insert(parsed_document)
+                self.modules.insert_one(parsed_document)
                 load_count+=1
 
         logs_document_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._BUILD_LOGS)
@@ -140,7 +138,7 @@ class CatalogTestUtil:
                 with open(document_path) as document_file:
                     document = document_file.read()
                 parsed_document = json.loads(document)
-                self.build_logs.insert(parsed_document)
+                self.build_logs.insert_one(parsed_document)
                 load_count+=1
 
         favorites_document_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._FAVORITES)
@@ -152,10 +150,10 @@ class CatalogTestUtil:
                 parsed_document = json.loads(document)
                 if isinstance(parsed_document,list):
                     for p in parsed_document:
-                        self.favorites.insert(p)
+                        self.favorites.insert_one(p)
                         load_count+=1
                 else:
-                    self.favorites.insert(parsed_document)
+                    self.favorites.insert_one(parsed_document)
                     load_count+=1
 
         volume_mounts_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._VOLUME_MOUNTS)
@@ -167,10 +165,10 @@ class CatalogTestUtil:
                 parsed_document = json.loads(document)
                 if isinstance(parsed_document,list):
                     for p in parsed_document:
-                        self.volume_mounts.insert(p)
+                        self.volume_mounts.insert_one(p)
                         load_count+=1
                 else:
-                    self.volume_mounts.insert(parsed_document)
+                    self.volume_mounts.insert_one(parsed_document)
                     load_count+=1
 
         client_groups_dir = os.path.join(self.test_dir, 'initial_mongo_state', MongoCatalogDBI._CLIENT_GROUPS)
@@ -182,10 +180,10 @@ class CatalogTestUtil:
                 parsed_document = json.loads(document)
                 if isinstance(parsed_document,list):
                     for p in parsed_document:
-                        self.client_groups.insert(p)
+                        self.client_groups.insert_one(p)
                         load_count+=1
                 else:
-                    self.client_groups.insert(parsed_document)
+                    self.client_groups.insert_one(parsed_document)
                     load_count+=1
 
         self.log(str(load_count)+" documents loaded")
