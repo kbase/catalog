@@ -1,4 +1,4 @@
-FROM kbase/sdkbase2:latest AS build
+FROM kbase/sdkbase2:python AS build
 
 
 COPY . /tmp/catalog
@@ -17,6 +17,7 @@ COPY --from=build /kb/deployment/services /kb/deployment/services
 COPY --from=build /tmp/catalog/deployment/conf /kb/deployment/conf
 
 SHELL ["/bin/bash", "-c"]
+COPY requirements.txt requirements.txt
 RUN source activate root && \
     pip install -r requirements.txt
 
