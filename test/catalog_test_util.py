@@ -199,15 +199,13 @@ class CatalogTestUtil:
     def user_ctx(self):
         return {
             "user_id": self.test_user_1,
-            "token": 'fake_token'
-            # TODO: authenticate and add real token, but not required yet
+            "token": 'user_token'
         }
 
     def admin_ctx(self):
         return {
             "user_id": self.test_user_2,
-            "token": 'fake_token'
-            # TODO: authenticate and add real token, but not required yet
+            "token": 'admin_token'
         }
 
     def get_test_repo_1(self):

@@ -37,7 +37,7 @@ class BasicCatalogTest(unittest.TestCase):
         time.sleep(1)  # force different timestamps so sort works
         self.catalog.add_favorite(ctx,
                                   {'module_name': 'MegaHit', 'id': 'run_megahit_2'})
-        favs2 = self.catalog.list_favorites({}, user)[0]
+        favs2 = self.catalog.list_favorites(ctx, user)[0]
         favs2.sort(key=lambda x: x['timestamp'], reverse=True)
         self.assertEqual(len(favs2), 2)
         self.assertEqual(favs2[0]['module_name_lc'], 'megahit')
