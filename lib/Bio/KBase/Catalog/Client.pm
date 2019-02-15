@@ -4658,7 +4658,7 @@ boolean is an int
 
 =head2 is_admin
 
-  $return = $obj->is_admin($username)
+  $return = $obj->is_admin()
 
 =over 4
 
@@ -4667,7 +4667,6 @@ boolean is an int
 =begin html
 
 <pre>
-$username is a string
 $return is a Catalog.boolean
 boolean is an int
 
@@ -4677,7 +4676,6 @@ boolean is an int
 
 =begin text
 
-$username is a string
 $return is a Catalog.boolean
 boolean is an int
 
@@ -4696,23 +4694,12 @@ returns true (1) if the user is an admin, false (0) otherwise
 {
     my($self, @args) = @_;
 
-# Authentication: none
+# Authentication: required
 
-    if ((my $n = @args) != 1)
+    if ((my $n = @args) != 0)
     {
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
-							       "Invalid argument count for function is_admin (received $n, expecting 1)");
-    }
-    {
-	my($username) = @args;
-
-	my @_bad_arguments;
-        (!ref($username)) or push(@_bad_arguments, "Invalid type for argument 1 \"username\" (value was \"$username\")");
-        if (@_bad_arguments) {
-	    my $msg = "Invalid arguments passed to is_admin:\n" . join("", map { "\t$_\n" } @_bad_arguments);
-	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-								   method_name => 'is_admin');
-	}
+							       "Invalid argument count for function is_admin (received $n, expecting 0)");
     }
 
     my $url = $self->{url};

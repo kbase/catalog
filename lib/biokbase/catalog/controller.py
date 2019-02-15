@@ -18,18 +18,8 @@ from biokbase.narrative_method_store.client import NarrativeMethodStore
 class CatalogController:
 
     def __init__(self, config):
-
-        # first grab the admin list
-        self.adminList = []
         self.auth_url = config['auth-service-url']
-        self.admin_roles = config.get('admin-roles', "").split(',')
-        if 'admin-users' in config:
-            tokens = config['admin-users'].split(',')
-            for t in tokens:
-                if t.strip():
-                    self.adminList.append(t.strip())
-        if not self.adminList:  # pragma: no cover
-            warnings.warn('no "admin-users" are set in config of CatalogController.')
+        self.admin_roles = set(config.get('admin-roles', "").split(','))
 
         # make sure the minimal mongo settings are in place
         if 'mongodb-host' not in config:  # pragma: no cover
@@ -1154,7 +1144,6 @@ class CatalogController:
 
         # if we got here and didn't find anything, throw an error.
         raise ValueError('No suitable version matches your lookup.')
-        return None
 
     # Some utility methods
 
@@ -1177,9 +1166,9 @@ class CatalogController:
         return False
 
     def is_admin(self, username, token):
-        #r = requests.get(self.auth_url + 'api/V2/me', headers={'Authorization': token})
-
-        if username in self.adminList:
+        r = requests.get(self.auth_url + '/api/V2/me', headers={'Authorization': token})
+        roles = r.json().get('customroles', [])
+        if any((r in self.admin_roles for r in roles)):
             return True
         return False
 

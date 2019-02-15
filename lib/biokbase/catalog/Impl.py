@@ -21,7 +21,7 @@ class Catalog:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/kbase/catalog.git"
-    GIT_COMMIT_HASH = "83fec5967d709dadf8b7592e98e5b49a2b2cc1e9"
+    GIT_COMMIT_HASH = "45437dca268d2b42cabf1850666fa9da125cf3a2"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -41,6 +41,7 @@ class Catalog:
         print('Initialization complete.')
         #END_CONSTRUCTOR
         pass
+
 
     def version(self, ctx):
         """
@@ -1335,20 +1336,18 @@ class Catalog:
         # return the results
         return [volume_mount_configs]
 
-    def is_admin(self, ctx, username):
+    def is_admin(self, ctx):
         """
         returns true (1) if the user is an admin, false (0) otherwise
-        :param username: instance of String
         :returns: instance of type "boolean" (@range [0,1])
         """
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN is_admin
-        returnVal = 0
-        if username and username != ctx.get('user_id'):
-            raise ValueError("Can only check on own admin status")
         if self.cc.is_admin(ctx.get('user_id'), ctx.get('token')):
             returnVal = 1
+        else:
+            returnVal = 0
         #END is_admin
 
         # At some point might do deeper type checking...

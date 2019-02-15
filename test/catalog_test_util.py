@@ -75,7 +75,9 @@ class CatalogTestUtil:
             'nms-admin-token': self.test_cfg.get('nms-admin-token', ''),
             'ref-data-base': self.test_cfg['ref-data-base'],
             'kbase-endpoint': self.test_cfg['kbase-endpoint'],
-            'auth-service-url': self.test_cfg.get('auth-service-url', '')
+            'admin-roles': self.test_cfg['admin-roles'],
+            # this points to the mocked Auth API running in a docker container
+            'auth-service-url': 'http://localhost:7777'
         }
         self.dockerclient = DockerAPIClient(base_url=self.catalog_cfg['docker-base-url'])
 
@@ -199,7 +201,7 @@ class CatalogTestUtil:
     def user_ctx(self):
         return {
             "user_id": self.test_user_1,
-            "token": 'user_token'
+            "token": 'non_admin_token'
         }
 
     def admin_ctx(self):

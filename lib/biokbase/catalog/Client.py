@@ -954,14 +954,13 @@ class Catalog(object):
         return self._client.call_method('Catalog.list_volume_mounts',
                                         [filter], self._service_ver, context)
 
-    def is_admin(self, username, context=None):
+    def is_admin(self, context=None):
         """
         returns true (1) if the user is an admin, false (0) otherwise
-        :param username: instance of String
         :returns: instance of type "boolean" (@range [0,1])
         """
         return self._client.call_method('Catalog.is_admin',
-                                        [username], self._service_ver, context)
+                                        [], self._service_ver, context)
 
     def set_secure_config_params(self, params, context=None):
         """
