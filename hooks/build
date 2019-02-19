@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# $IMAGE_NAME var is injected into the build so the tag is correct.
+
+echo "Build hook running"
+echo "IMAGE_NAME = ${IMAGE_NAME}"
+echo "DOCKER_REPO = ${DOCKER_REPO}"
+export BRANCH=${SOURCE_BRANCH:-`git symbolic-ref --short HEAD`}
+
+export DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+export COMMIT=${SOURCE_COMMIT:-`git rev-parse --short HEAD`}
+docker build --build-arg BUILD_DATE=$DATE \
+             --build-arg VCS_REF=$COMMIT \
+             --build-arg BRANCH=$BRANCH \
+             -t ${IMAGE_NAME} . && \
+echo "Built and tagged ${IMAGE_NAME}"

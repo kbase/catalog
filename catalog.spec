@@ -782,7 +782,7 @@ module Catalog {
                 returns (list<VolumeMountConfig> volume_mount_configs) authentication required;
 
     /* returns true (1) if the user is an admin, false (0) otherwise */
-    funcdef is_admin(string username) returns (boolean); 
+    funcdef is_admin() returns (boolean) authentication required;
 
     /*
         version - optional version (commit hash, tag or semantic one) of module, if not set

@@ -1,7 +1,7 @@
 sudo: required
 language: python
 python:
-    - '2.7'
+    - '3.6'
 services:
     - docker
 
@@ -12,7 +12,7 @@ before_install:
     - mongo --eval "printjson(db.serverStatus())"
 
 install:
-    - pip install -r travis_requirements.txt
+    - pip install -r requirements.txt
     - pip install python-coveralls
     - pip install coverage
     - cd ..
@@ -25,7 +25,6 @@ install:
     - docker images
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
-    - make
 
 script:
     - cp -n test/test.cfg.example test/test.cfg
@@ -38,5 +37,5 @@ after_success:
 
 env:
   global:
-    - secure: "kWcr8w+RfPFkoSCCHJzdsKszvq8d85MZi/okV4EnkDXQ0iy7lQRT4OR16bpJ0n9qym40/2Q7mWdTPZN9+iU6DS/bQqdXDpGffXOokRu9VAjPlrFdzjfqrOy4Nury0N9VBEjwQNAFf67zAW0BhzB9zTMWt5Dbm+vRFagweY4btzi/nEY9UPELHGVK/TW9WZ96WdhqrfN/3Xnm7ECzUjv6HqBATY8ugywN3cQZ4ytf0vQfgyx8GbhIMe9tJCWQZqFfzXpRCuZimJ4bPby4UNHv54G1L/2BOgNPSio7U/1DKfDVYIktupPOhsRBkWunxwi0kcU8GCWsDzyD3bjpVwlmvP9TVz8ymAXUTdJ3dp8W1WPj/OLBjx8W9I7K/Q3PGHQf+9HcpSCzWOGvKI/3Vc6mOBxk5pcBFa6edRv3J47FNFBaVj+O9XJ7ytr2yiZQh0C4DmXvO2VqbOm0yRLBuAutEtM5xkSk9zoKx+ZCU1OdLUSQ6GKPfCHv0vlSKyS3pm8BP84aHlozW7s8USoUNtXKAzgjmqxUUVWHc1iGgwASQGEI8JMv7w0AcNhCfeEUR8Nr7BD6YbbMAT8mEwS/NkHHarKiDKywUNhLjRRuZR1nJ6xMEb9CaQ0msJC/Lgxho9lKbeRe16Y82cb1eCV8Rdk/jMVCl7oyaSQlgt81rqrf4Cc="
+    - secure: "o0xBDxPBVpqmezRtuDf4gdFYUIlFReH3kV1BOx75taCqzMvsvNnIDHzLITFTvGhNBzOT/hG/eEVDiKx/bnFoq0HJWsKYeKahOsiMlFavIR5jTIdMLq2zbZDkxV/+e0HoRRArWj53NV9wx0pWTv3DYxqbzPR1uu5letxdWnY3DQXggspcnJuAVYGn6LtgNM7MV+h3jdHe/E61LkwMff8KwpoBF+64AKbsZv1ddcFo0gbo9Z9CjLeBq4le2TwziLeuUYV885mPsRCvhToRMzpeVlbiNkzf7w5oh5g3FFsPOOYFeu22a+RrmKoM0hv9/pTTYG0G8/ylzOMIKWJvVrOJYptRvyQKmpmdcN7/CPYIQkf6ZBp0rP6G30Q2xt49+ST40ko1L0jhL42FfwXSmuNjklRMZAjpMNRZM2fIazEhDw3ND9l4T6HZnIwr/SQvKCs4rYBjqmSLo/dMISiFDLjWpMor5ew9fpZSLwJcPglGT0Anh4OIZUY2JGlO4TuOkq3m5kvXjjKLBc3Domd10c+DLfkldwwt6uqShsDECqFwSMf/liPEtLfi+03djrWvP26QeiEKL93ujAMS4oXAYxdquOy2Ib9ihd3XWTJzYc4s1H7furYqAbQDAhU0Dx3nvcyEsu5djdRAFe0eKUdjdAqsMAxe84h/EHZHrlE+KOOZo8s="
     - MONGODB_VERSION=2.7

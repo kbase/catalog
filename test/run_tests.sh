@@ -15,8 +15,11 @@ classpath=`cat ../narrative_method_store/dist/jar.classpath.txt`
 java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 7125 > nms/error.log 2>&1 &
 NMS_PID=$!
 
+echo 'Starting Mock Auth API...'
+docker run -d --rm -v ${PWD}/mock_auth:/config -p 7777:5000 --name mock-auth mockservices/mock_json_service
+
 echo 'Waiting for NMS to start...'
-sleep 15
+sleep 25
 curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125
 if [ $? -ne 0 ]; then
     kill -9 $NMS_PID
@@ -25,7 +28,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo '\nStarting local Docker Registry...'
-docker run -d -p 5000:5000 --name registry registry:2
+docker run -d --rm -p 5000:5000 --name registry registry:2
 if [ $? -ne 0 ]; then
     docker start registry
     if [ $? -ne 0 ]; then
@@ -45,6 +48,7 @@ echo '\n\nstarting tests'
 export PYTHONPATH=pylib:$PYTHONPATH
 coverage run --source=pylib/biokbase/catalog --omit=*Client.py,*Server.py -m unittest discover -p "*_test.py"
 TEST_RETURN_CODE=$?
+coverage report
 echo "unit tests returned with error code=${TEST_RETURN_CODE}"
 
 
@@ -55,9 +59,8 @@ echo "unit tests returned with error code=${TEST_RETURN_CODE}"
 # stop NMS
 kill -9 $NMS_PID
 
-# stop Docker Registry
+#stop Docker containers
+docker stop mock-auth
 docker stop registry
-docker rm registry
-
 
 exit ${TEST_RETURN_CODE}
