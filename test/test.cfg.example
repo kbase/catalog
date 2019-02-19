@@ -13,6 +13,7 @@
 
 # The KBase auth server url.
 auth-server-url = https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login
+admin-roles = KBASE_ADMIN,CATALOG_ADMIN
 
 # user accounts for testing (should be different accounts)
 test-user-1 = wstester1
