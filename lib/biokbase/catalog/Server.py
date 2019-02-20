@@ -520,8 +520,8 @@ class Application(object):
         self.method_authentication['Catalog.list_volume_mounts'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.is_admin,
                              name='Catalog.is_admin',
-                             types=[])
-        self.method_authentication['Catalog.is_admin'] = 'required'  # noqa
+                             types=[str])
+        self.method_authentication['Catalog.is_admin'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.set_secure_config_params,
                              name='Catalog.set_secure_config_params',
                              types=[dict])
