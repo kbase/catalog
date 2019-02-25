@@ -785,7 +785,7 @@ module Catalog {
        NOTE: username is now ignored (it checks the token) but retained for back compatibility
     */
 
-    funcdef is_admin(string username) returns (boolean); 
+    funcdef is_admin(string username) returns (boolean) authentication optional;
 
     /*
         version - optional version (commit hash, tag or semantic one) of module, if not set

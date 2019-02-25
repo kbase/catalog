@@ -956,7 +956,8 @@ class Catalog(object):
 
     def is_admin(self, username, context=None):
         """
-        returns true (1) if the user is an admin, false (0) otherwise
+        returns true (1) if the user is an admin, false (0) otherwise.
+        NOTE: username is now ignored (it checks the token) but retained for back compatibility
         :param username: instance of String
         :returns: instance of type "boolean" (@range [0,1])
         """

@@ -23,7 +23,7 @@ class Catalog:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/kbase/catalog.git"
-    GIT_COMMIT_HASH = "c8ec57c862629b9ac606c3ed405981aef1b7e22d"
+    GIT_COMMIT_HASH = "c8dcc107f40a9f9a9816c9a5150ee23690a61d6a"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -1338,7 +1338,8 @@ class Catalog:
 
     def is_admin(self, ctx, username):
         """
-        returns true (1) if the user is an admin, false (0) otherwise
+        returns true (1) if the user is an admin, false (0) otherwise.
+        NOTE: username is now ignored (it checks the token) but retained for back compatibility
         :param username: instance of String
         :returns: instance of type "boolean" (@range [0,1])
         """
