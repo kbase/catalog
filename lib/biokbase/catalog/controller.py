@@ -18,8 +18,8 @@ from biokbase.narrative_method_store.client import NarrativeMethodStore
 class CatalogController:
 
     def __init__(self, config):
-        self.auth_url = config['auth-service-url']
-        self.admin_roles = set(config.get('admin-roles', "").split(','))
+        self.auth_api = config['auth-service-api']
+        self.admin_roles = set(config['admin-roles'].split(','))
 
         # make sure the minimal mongo settings are in place
         if 'mongodb-host' not in config:  # pragma: no cover
@@ -1166,7 +1166,7 @@ class CatalogController:
         return False
 
     def is_admin(self, username, token):
-        r = requests.get(self.auth_url + '/api/V2/me', headers={'Authorization': token})
+        r = requests.get(self.auth_api + '/api/V2/me', headers={'Authorization': token})
         roles = r.json().get('customroles', [])
         if any((r in self.admin_roles for r in roles)):
             return True

@@ -14,6 +14,8 @@ mongodb-pwd = {{ default .Env.mongodb_pwd "" }}
 
 # The KBase auth server url.
 auth-service-url = {{ default .Env.auth_service_url "https://kbase.us/services/authorization/Sessions/Login" }}
+# The KBase auth API.
+auth-service-api = {{ default .Env.auth_service_url "https://ci.kbase.us/services/auth" }}
 
 # Path to docker socket/host
 docker-base-url = {{ default .Env.docker_base_url "unix://var/run/docker.sock" }}
