@@ -1,4 +1,6 @@
 import codecs
+import functools
+import logging
 import os
 import threading
 import uuid
@@ -6,13 +8,26 @@ import warnings
 from datetime import datetime
 from urllib.parse import urlparse
 
-import semantic_version
 import requests
+import semantic_version
 
 import biokbase.catalog.version
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.catalog.registrar import Registrar
 from biokbase.narrative_method_store.client import NarrativeMethodStore
+
+
+def log(func):
+
+    ENTRY_MSG = "Entering {}"
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        logging.info(ENTRY_MSG.format(func.__name__))
+        result = func(*args, **kwargs)
+        return result
+
+    return wrapper
 
 
 class CatalogController:
@@ -97,6 +112,7 @@ class CatalogController:
                              'specified in the config')
         self.nms = NarrativeMethodStore(self.nms_url, token=self.nms_token)
 
+    @log
     def register_repo(self, params, username, token):
 
         if 'git_url' not in params:
@@ -193,6 +209,7 @@ class CatalogController:
         # 4) provide the registration_id
         return registration_id
 
+    @log
     def set_registration_state(self, params, username, token):
         # first some error handling
         if not self.is_admin(username, token):
@@ -223,6 +240,7 @@ class CatalogController:
             raise ValueError(
                 'Registration failed for git repo - some unknown database error: ' + error)
 
+    @log
     def push_dev_to_beta(self, params, username, token):
         # first make sure everything exists and we have permissions
         params = self.filter_module_or_repo_selection(params)
@@ -251,6 +269,7 @@ class CatalogController:
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: ' + error)
 
+    @log
     def request_release(self, params, username, token):
         # first make sure everything exists and we have permissions
         params = self.filter_module_or_repo_selection(params)
@@ -305,6 +324,7 @@ class CatalogController:
         if error is not None:
             raise ValueError('Release request failed - some unknown database error.' + error)
 
+    @log
     def list_requested_releases(self):
         query = {'state.release_approval': 'under_review'}
         results = self.db.find_current_versions_and_owners(query)
@@ -325,6 +345,7 @@ class CatalogController:
             })
         return requested_releases
 
+    @log
     def review_release_request(self, review, username, token):
         if not self.is_admin(username, token):
             raise ValueError('You do not have permission to review a release request.')
@@ -384,6 +405,7 @@ class CatalogController:
         return self.db.get_module_state(module_name=params['module_name'],
                                         git_url=params['git_url'])
 
+    @log
     def get_module_info(self, params):
         params = self.filter_module_or_repo_selection(params)
         details = self.db.get_module_details(module_name=params['module_name'],
@@ -408,6 +430,7 @@ class CatalogController:
         }
         return info
 
+    @log
     def get_version_info(self, params):
         params = self.filter_module_or_repo_selection(params)
         current_version = self.db.get_module_current_versions(module_name=params['module_name'],
@@ -477,6 +500,7 @@ class CatalogController:
         # didn't get nothing, so return
         return None
 
+    @log
     def get_module_version(self, params):
 
         # Make sure the git_url and/or module_name are set
@@ -649,6 +673,7 @@ class CatalogController:
             else:
                 version['release_timestamp'] = None
 
+    @log
     def list_released_versions(self, params):
         params = self.filter_module_or_repo_selection(params)
         details = self.db.get_module_full_details(module_name=params['module_name'],
@@ -665,6 +690,7 @@ class CatalogController:
         return False
 
     # note: maybe a little too mongo centric, but ok for now...
+    @log
     def list_basic_module_info(self, params):
         query = {'state.active': True, 'state.released': True}
 
@@ -726,6 +752,7 @@ class CatalogController:
 
         return final_modList
 
+    @log
     def list_local_functions(self, params):
 
         module_names = []
@@ -755,6 +782,7 @@ class CatalogController:
 
         return self.db.list_local_function_info(module_names=module_names, release_tag=release_tag)
 
+    @log
     def get_local_function_details(self, params):
 
         # info_list = self.cc.list_local_functions(params)
@@ -793,6 +821,7 @@ class CatalogController:
 
         return self.db.get_local_function_spec(params['functions'])
 
+    @log
     def set_module_active_state(self, active, params, username, token):
         params = self.filter_module_or_repo_selection(params)
         if not self.is_admin(username, token):
@@ -811,6 +840,7 @@ class CatalogController:
         else:
             self.nms.enable_repo({'module_name': module_details['module_name']})
 
+    @log
     def approve_developer(self, developer, username, token):
         if not developer:
             raise ValueError('No username provided')
@@ -820,7 +850,8 @@ class CatalogController:
             raise ValueError('Only Admin users can approve or revoke developers.')
         self.db.approve_developer(developer)
 
-    def revoke_developer(self, developer, username, token):
+    @log
+    def revoke_developer(self, developer, username, token=None):
         if not developer:
             raise ValueError('No username provided')
         if not developer.strip():
@@ -851,6 +882,7 @@ class CatalogController:
         return log
 
     # get the parsed build log from mongo
+    @log
     def get_parsed_build_log(self, params):
         if 'registration_id' not in params:
             raise ValueError('You must specify a registration_id to retrieve a build log')
@@ -873,6 +905,7 @@ class CatalogController:
 
         return self.db.get_parsed_build_log(params['registration_id'], slice_arg=slice_arg)
 
+    @log
     def list_builds(self, params):
 
         only_running = False
@@ -923,6 +956,7 @@ class CatalogController:
             only_complete=only_complete
         )
 
+    @log
     def delete_module(self, params, username, token):
         if not self.is_admin(username, token):
             raise ValueError('Only Admin users can delete modules.')
@@ -937,6 +971,7 @@ class CatalogController:
             raise ValueError('Delete operation failed - some unknown database error: ' + error)
         self.nms.disable_repo({'module_name': module_details['module_name']})
 
+    @log
     def migrate_module_to_new_git_url(self, params, username, token):
         if not self.is_admin(username, token):
             raise ValueError('Only Admin users can migrate module git urls.')
@@ -954,6 +989,7 @@ class CatalogController:
         if error is not None:
             raise ValueError('Update operation failed - some unknown database error: ' + error)
 
+    @log
     def add_favorite(self, params, username, token):
         timestamp = int((datetime.utcnow() - datetime.utcfromtimestamp(0)).total_seconds() * 1000)
 
@@ -978,6 +1014,7 @@ class CatalogController:
             raise ValueError(
                 'Add favorite operation failed - some unknown database error: ' + error)
 
+    @log
     def remove_favorite(self, params, username, token):
         if 'module_name' not in params:
             module_name = 'nms.legacy'
@@ -1000,9 +1037,11 @@ class CatalogController:
             raise ValueError(
                 'Remove favorite operation failed - some unknown database error: ' + error)
 
+    @log
     def list_user_favorites(self, username, token):
         return self.db.list_user_favorites(username)
 
+    @log
     def list_app_favorites(self, item):
         if 'module_name' not in item:
             module_name = 'nms.legacy'
@@ -1028,6 +1067,7 @@ class CatalogController:
 
         return self.db.aggregate_favorites_over_apps(module_names_lc)
 
+    @log
     def list_service_modules(self, filter):
         # if we have the tag flag, then return the specific tagged version
         if 'tag' in filter:
@@ -1039,6 +1079,7 @@ class CatalogController:
         mods = self.db.list_all_released_service_module_versions()
         return mods
 
+    @log
     def module_version_lookup(self, selection):
 
         # todo: speed up queries by doing more work in Mongo??
@@ -1165,8 +1206,11 @@ class CatalogController:
                 return True
         return False
 
+    @log
     def is_admin(self, username, token):
+        logging.info("URL:" + self.auth_api + '/api/V2/me')
         r = requests.get(self.auth_api + '/api/V2/me', headers={'Authorization': token})
+        logging.info(r.json())
         roles = r.json().get('customroles', [])
         if any((r in self.admin_roles for r in roles)):
             return True
@@ -1194,11 +1238,13 @@ class CatalogController:
         self.db.add_exec_stats_users(user_id, creation_time, exec_start_time,
                                      finish_time, is_error, "w", week_time_range)
 
+    @log
     def get_exec_aggr_stats(self, full_app_ids, per_week):
         type = "w" if per_week else "a"
         time_range = None if per_week else "*"
         return self.db.get_exec_stats_apps(full_app_ids, type, time_range)
 
+    @log
     def get_exec_aggr_table(self, username, token, params):
         if not self.is_admin(username, token):
             raise ValueError('You do not have permission to view this data.')
@@ -1212,6 +1258,7 @@ class CatalogController:
 
         return self.db.aggr_exec_stats_table(minTime, maxTime)
 
+    @log
     def get_exec_raw_stats(self, username, token, params):
         if not self.is_admin(username, token):
             raise ValueError('You do not have permission to view this data.')
@@ -1225,6 +1272,7 @@ class CatalogController:
 
         return self.db.get_exec_raw_stats(minTime, maxTime)
 
+    @log
     def set_client_group_config(self, username, token, config):
 
         if not self.is_admin(username, token):
@@ -1259,6 +1307,7 @@ class CatalogController:
             raise ValueError(
                 'Update probably failed, blame mongo: update operation returned: ' + error)
 
+    @log
     def remove_client_group_config(self, username, token, config):
         # do some parameter checks
         if not self.is_admin(username, token):
@@ -1283,6 +1332,7 @@ class CatalogController:
             raise ValueError(
                 'Removal probably failed, blame mongo: remove operation returned: ' + error)
 
+    @log
     def list_client_group_configs(self, filter):
         processed_filter = {}
         if filter:
@@ -1298,6 +1348,7 @@ class CatalogController:
 
         return self.db.list_client_group_configs(processed_filter)
 
+    @log
     def get_client_groups(self, params):
         app_ids = None
         if 'app_ids' in params:
@@ -1318,6 +1369,7 @@ class CatalogController:
 
         return groups
 
+    @log
     def set_volume_mount(self, username, token, config):
         # must be an admin
         if not self.is_admin(username, token):
@@ -1389,6 +1441,7 @@ class CatalogController:
             raise ValueError(
                 'Insert/update probably failed, blame mongo: upsert operation returned: ' + error)
 
+    @log
     def remove_volume_mount(self, username, token, config):
         # do some parameter checks
         if not self.is_admin(username, token):
@@ -1419,6 +1472,7 @@ class CatalogController:
             raise ValueError(
                 'Removal probably failed, blame mongo: remove operation returned: ' + error)
 
+    @log
     def list_volume_mounts(self, username, token, filter):
         # add some checks on the filter
         if not self.is_admin(username, token):
@@ -1446,6 +1500,7 @@ class CatalogController:
 
         return self.db.list_volume_mounts(processed_filter)
 
+    @log
     def set_secure_config_params(self, username, token, params):
         if username is None or not self.is_admin(username, token):
             raise ValueError('You do not have permission to work with hidden configuration ' +
@@ -1458,6 +1513,7 @@ class CatalogController:
         data_list = params['data']
         self.db.set_secure_config_params(data_list)
 
+    @log
     def remove_secure_config_params(self, username, token, params):
         if username is None or not self.is_admin(username, token):
             raise ValueError('You do not have permission to work with hidden configuration ' +
@@ -1470,6 +1526,7 @@ class CatalogController:
         data_list = params['data']
         self.db.remove_secure_config_params(data_list)
 
+    @log
     def get_secure_config_params(self, username, token, params):
         if username is None or not self.is_admin(username, token):
             raise ValueError('You do not have permission to work with hidden configuration ' +

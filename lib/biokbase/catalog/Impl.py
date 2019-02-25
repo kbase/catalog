@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
+import logging
+
 from biokbase.catalog.controller import CatalogController
 #END_HEADER
 
@@ -30,15 +32,13 @@ class Catalog:
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
-        print('Starting the Catalog service.  Service configuration:')
-        for c in config:
-            if c == 'nms-admin-token':
-                print('  '+c+'=****')
-                continue
-            print('  '+c+'='+config[c])
-        print('Initializing the Catalog Controller...')
-        self.cc = CatalogController(config);
-        print('Initialization complete.')
+        logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
+                            level=logging.INFO)
+        logging.info('Starting the Catalog service.  Service configuration:\n'
+                     "\n".join('  '+c+'='+config[c]) for c in config if c != 'nms-admin-token')
+        logging.info('Initializing the Catalog Controller...')
+        self.cc = CatalogController(config)
+        logging.info('Initialization complete.')
         #END_CONSTRUCTOR
         pass
 
