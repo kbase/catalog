@@ -521,7 +521,7 @@ class Application(object):
         self.rpc_service.add(impl_Catalog.is_admin,
                              name='Catalog.is_admin',
                              types=[str])
-        self.method_authentication['Catalog.is_admin'] = 'none'  # noqa
+        self.method_authentication['Catalog.is_admin'] = 'optional'  # noqa
         self.rpc_service.add(impl_Catalog.set_secure_config_params,
                              name='Catalog.set_secure_config_params',
                              types=[dict])
