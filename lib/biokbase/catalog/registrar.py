@@ -671,7 +671,10 @@ class Registrar:
                     self.log(line)
                     line = ""
                 else:
-                    line += char
+                    try:
+                        line += char
+                    except TypeError:
+                        line += char.decode('utf-8')
             if len(line) > 0:
                 self.log(line)
         finally:
