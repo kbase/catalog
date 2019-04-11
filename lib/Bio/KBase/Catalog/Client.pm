@@ -4686,7 +4686,8 @@ boolean is an int
 
 =item Description
 
-returns true (1) if the user is an admin, false (0) otherwise
+returns true (1) if the user is an admin, false (0) otherwise.
+NOTE: username is now ignored (it checks the token) but retained for back compatibility
 
 =back
 
@@ -4696,7 +4697,7 @@ returns true (1) if the user is an admin, false (0) otherwise
 {
     my($self, @args) = @_;
 
-# Authentication: none
+# Authentication: optional
 
     if ((my $n = @args) != 1)
     {

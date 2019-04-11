@@ -1,10 +1,10 @@
-FROM kbase/sdkbase2:latest AS build
+FROM kbase/sdkbase2:python AS build
 
 
 COPY . /tmp/catalog
 RUN cd /tmp/catalog && make deploy-service deploy-server-control-scripts
 
-FROM kbase/kb_python:latest
+FROM kbase/sdkbase2:python
 # These ARGs values are passed in via the docker build command
 ARG BUILD_DATE
 ARG VCS_REF
@@ -17,10 +17,9 @@ COPY --from=build /kb/deployment/services /kb/deployment/services
 COPY --from=build /tmp/catalog/deployment/conf /kb/deployment/conf
 
 SHELL ["/bin/bash", "-c"]
+COPY requirements.txt requirements.txt
 RUN source activate root && \
-    conda install -c anaconda semantic_version pymongo=2.8 && \
-    pip install docker && \
-    ln -s /usr/lib/python2.7/plat-*/_sysconfigdata_nd.py /usr/lib/python2.7/
+    pip install -r requirements.txt
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/kbase/catalog.git" \

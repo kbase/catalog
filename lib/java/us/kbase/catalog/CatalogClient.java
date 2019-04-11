@@ -917,7 +917,8 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: is_admin</p>
      * <pre>
-     * returns true (1) if the user is an admin, false (0) otherwise
+     * returns true (1) if the user is an admin, false (0) otherwise.
+     * NOTE: username is now ignored (it checks the token) but retained for back compatibility
      * </pre>
      * @param   username   instance of String
      * @return   instance of original type "boolean" (@range [0,1])
