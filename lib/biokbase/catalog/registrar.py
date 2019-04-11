@@ -663,20 +663,18 @@ class Registrar:
                 self.log("    Docker command: " + command)
             dockerclient.start(container=cnt_id)
             stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
-            line = ""
+            line = []
             for char in stream:
+                char = char.decode('utf-8')
                 if char == '\r':
                     continue
                 if char == '\n':
-                    self.log(line)
-                    line = ""
+                    self.log(''.join(line))
+                    line = []
                 else:
-                    try:
-                        line += char
-                    except TypeError:
-                        line += char.decode('utf-8')
+                    line.append(char)
             if len(line) > 0:
-                self.log(line)
+                self.log(''.join(line))
         finally:
             # cleaning up the container
             try:
