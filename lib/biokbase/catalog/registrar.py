@@ -665,7 +665,10 @@ class Registrar:
             stream = dockerclient.logs(container=cnt_id, stdout=True, stderr=True, stream=True)
             line = []
             for char in stream:
-                char = char.decode('utf-8')
+                try:
+                    char = char.decode('utf-8')
+                except AttributeError:
+                    pass
                 if char == '\r':
                     continue
                 if char == '\n':
