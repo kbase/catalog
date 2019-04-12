@@ -1,8 +1,8 @@
 
 import sys
-from biokbase.catalog.Client import Catalog
 from pprint import pprint
 
+from biokbase.catalog.Client import Catalog
 
 catalog = Catalog('http://localhost:5000',user_id='wstester1',password='Catfasta11')
 catalogAdmin = Catalog('http://localhost:5000',user_id='wstester2',password='Catfasta22')

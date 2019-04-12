@@ -1,6 +1,7 @@
 # KBase Catalog
 
 KBase core service to manage app and module information, registration, and release.
+Administrators need to be set separately for the job stats page by being added to [deploy.cfg.](https://github.com/kbaseapps/kb_Metrics/blob/master/deploy.cfg)
 
 Build status:
 master:  [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=master)](https://travis-ci.org/kbase/catalog)
@@ -10,7 +11,9 @@ develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop
 Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
-
+#### v2.2.0 - 1/23/19
+  - Update code to run on Python 3
+  
 #### v2.1.3 - 11/16/18
   - Update docker-py client code to current 3.x API
   - Get Travis-CI tests working again

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
-from pprint import pprint
+import logging
+
 from biokbase.catalog.controller import CatalogController
 #END_HEADER
 
@@ -20,9 +21,9 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "2.1.2"
-    GIT_URL = "https://github.com/JamesJeffryes/catalog.git"
-    GIT_COMMIT_HASH = "82480c4f938d5d1d5a85668a0ebaf1f27bf793f3"
+    VERSION = "0.0.1"
+    GIT_URL = "https://github.com/kbase/catalog.git"
+    GIT_COMMIT_HASH = "c8dcc107f40a9f9a9816c9a5150ee23690a61d6a"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -31,15 +32,13 @@ class Catalog:
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
-        print('Starting the Catalog service.  Service configuration:')
-        for c in config:
-            if c == 'nms-admin-token':
-                print('  '+c+'=****')
-                continue
-            print('  '+c+'='+config[c])
-        print('Initializing the Catalog Controller...')
-        self.cc = CatalogController(config);
-        print('Initialization complete.')
+        logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
+                            level=logging.INFO)
+        logging.info('Starting the Catalog service.  Service configuration:\n'
+                     "\n".join('  '+c+'='+config[c]) for c in config if c != 'nms-admin-token')
+        logging.info('Initializing the Catalog Controller...')
+        self.cc = CatalogController(config)
+        logging.info('Initialization complete.')
         #END_CONSTRUCTOR
         pass
 
@@ -56,9 +55,9 @@ class Catalog:
         #END version
 
         # At some point might do deeper type checking...
-        if not isinstance(version, basestring):
+        if not isinstance(version, str):
             raise ValueError('Method version return value ' +
-                             'version is not type basestring as required.')
+                             'version is not type str as required.')
         # return the results
         return [version]
 
@@ -105,13 +104,13 @@ class Catalog:
         # ctx is the context object
         # return variables are: registration_id
         #BEGIN register_repo
-        registration_id = self.cc.register_repo(params, ctx['user_id'], ctx['token'])
+        registration_id = self.cc.register_repo(params, ctx.get('user_id'), ctx.get('token'))
         #END register_repo
 
         # At some point might do deeper type checking...
-        if not isinstance(registration_id, basestring):
+        if not isinstance(registration_id, str):
             raise ValueError('Method register_repo return value ' +
-                             'registration_id is not type basestring as required.')
+                             'registration_id is not type str as required.')
         # return the results
         return [registration_id]
 
@@ -127,7 +126,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN push_dev_to_beta
-        self.cc.push_dev_to_beta(params,ctx['user_id'])
+        self.cc.push_dev_to_beta(params, ctx.get('user_id'), ctx.get('token'))
         #END push_dev_to_beta
         pass
 
@@ -142,7 +141,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN request_release
-        self.cc.request_release(params,ctx['user_id'])
+        self.cc.request_release(params, ctx.get('user_id'), ctx.get('token'))
         #END request_release
         pass
 
@@ -176,7 +175,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN review_release_request
-        self.cc.review_release_request(review, ctx['user_id'])
+        self.cc.review_release_request(review,  ctx.get('user_id'), ctx.get('token'))
         #END review_release_request
         pass
 
@@ -233,7 +232,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN add_favorite
-        self.cc.add_favorite(params,ctx['user_id'])
+        self.cc.add_favorite(params, ctx.get('user_id'), ctx.get('token'))
         #END add_favorite
         pass
 
@@ -245,7 +244,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN remove_favorite
-        self.cc.remove_favorite(params,ctx['user_id'])
+        self.cc.remove_favorite(params, ctx.get('user_id'), ctx.get('token'))
         #END remove_favorite
         pass
 
@@ -259,7 +258,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: favorites
         #BEGIN list_favorites
-        favorites = self.cc.list_user_favorites(username)
+        favorites = self.cc.list_user_favorites(username, ctx.get('token'))
         #END list_favorites
 
         # At some point might do deeper type checking...
@@ -818,7 +817,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_registration_state
-        self.cc.set_registration_state(params, ctx['user_id'])
+        self.cc.set_registration_state(params,  ctx.get('user_id'), ctx.get('token'))
         #END set_registration_state
         pass
 
@@ -876,9 +875,9 @@ class Catalog:
         #END get_build_log
 
         # At some point might do deeper type checking...
-        if not isinstance(returnVal, basestring):
+        if not isinstance(returnVal, str):
             raise ValueError('Method get_build_log return value ' +
-                             'returnVal is not type basestring as required.')
+                             'returnVal is not type str as required.')
         # return the results
         return [returnVal]
 
@@ -960,7 +959,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN delete_module
-        self.cc.delete_module(params,ctx['user_id'])
+        self.cc.delete_module(params, ctx.get('user_id'), ctx.get('token'))
         #END delete_module
         pass
 
@@ -977,7 +976,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN migrate_module_to_new_git_url
-        self.cc.migrate_module_to_new_git_url(params,ctx['user_id'])
+        self.cc.migrate_module_to_new_git_url(params, ctx.get('user_id'), ctx.get('token'))
         #END migrate_module_to_new_git_url
         pass
 
@@ -992,7 +991,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_to_active
-        self.cc.set_module_active_state(True, params, ctx['user_id'])
+        self.cc.set_module_active_state(True, params,  ctx.get('user_id'), ctx.get('token'))
         #END set_to_active
         pass
 
@@ -1006,7 +1005,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_to_inactive
-        self.cc.set_module_active_state(False, params, ctx['user_id'])
+        self.cc.set_module_active_state(False, params,  ctx.get('user_id'), ctx.get('token'))
         #END set_to_inactive
         pass
 
@@ -1058,7 +1057,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN approve_developer
-        usernames = self.cc.approve_developer(username, ctx['user_id'])
+        usernames = self.cc.approve_developer(username,  ctx.get('user_id'), ctx.get('token'))
         #END approve_developer
         pass
 
@@ -1068,7 +1067,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN revoke_developer
-        usernames = self.cc.revoke_developer(username, ctx['user_id'])
+        usernames = self.cc.revoke_developer(username,  ctx.get('user_id'), ctx.get('token'))
         #END revoke_developer
         pass
 
@@ -1099,21 +1098,19 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN log_exec_stats
-        admin_user_id = ctx['user_id']
-        if not self.cc.is_admin(admin_user_id):
-            raise ValueError('You do not have permission to log execution statistics.')
-        user_id = params['user_id']
-        app_module_name = None if 'app_module_name' not in params else params['app_module_name']
-        app_id = None if 'app_id' not in params else params['app_id']
-        func_module_name = None if 'func_module_name' not in params else params['func_module_name']
-        func_name = params['func_name']
-        git_commit_hash = None if 'git_commit_hash' not in params else params['git_commit_hash']
-        creation_time = params['creation_time']
-        exec_start_time = params['exec_start_time']
-        finish_time = params['finish_time']
-        is_error = params['is_error'] != 0
+        admin_user_id = ctx.get('user_id')
+        user_id = params.get('user_id')
+        app_module_name = params.get('app_module_name')
+        app_id = params.get('app_id')
+        func_module_name = params.get('func_module_name')
+        func_name = params.get('func_name')
+        git_commit_hash = params.get('git_commit_hash')
+        creation_time = params.get('creation_time')
+        exec_start_time = params.get('exec_start_time')
+        finish_time = params.get('finish_time')
+        is_error = params.get('is_error') != 0
         job_id = params.get('job_id')
-        self.cc.log_exec_stats(admin_user_id, user_id, app_module_name, app_id, func_module_name,
+        self.cc.log_exec_stats(admin_user_id, ctx.get('token'), user_id, app_module_name, app_id, func_module_name,
                                func_name, git_commit_hash, creation_time, exec_start_time, 
                                finish_time, is_error, job_id)
         #END log_exec_stats
@@ -1169,7 +1166,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: table
         #BEGIN get_exec_aggr_table
-        table = self.cc.get_exec_aggr_table(ctx['user_id'], params)
+        table = self.cc.get_exec_aggr_table(ctx.get('user_id'), ctx.get('token'), params)
         #END get_exec_aggr_table
 
         # At some point might do deeper type checking...
@@ -1189,7 +1186,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: records
         #BEGIN get_exec_raw_stats
-        records = self.cc.get_exec_raw_stats(ctx['user_id'], params)
+        records = self.cc.get_exec_raw_stats(ctx.get('user_id'), ctx.get('token'), params)
         #END get_exec_raw_stats
 
         # At some point might do deeper type checking...
@@ -1232,7 +1229,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_client_group_config
-        self.cc.set_client_group_config(ctx['user_id'], config)
+        self.cc.set_client_group_config(ctx.get('user_id'), ctx.get('token'), config)
         #END set_client_group_config
         pass
 
@@ -1244,7 +1241,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN remove_client_group_config
-        self.cc.remove_client_group_config(ctx['user_id'], config)
+        self.cc.remove_client_group_config(ctx.get('user_id'), ctx.get('token'), config)
         #END remove_client_group_config
         pass
 
@@ -1284,7 +1281,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_volume_mount
-        self.cc.set_volume_mount(ctx['user_id'], config)
+        self.cc.set_volume_mount(ctx.get('user_id'), ctx.get('token'), config)
         #END set_volume_mount
         pass
 
@@ -1302,7 +1299,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN remove_volume_mount
-        self.cc.remove_volume_mount(ctx['user_id'], config)
+        self.cc.remove_volume_mount(ctx.get('user_id'), ctx.get('token'), config)
         #END remove_volume_mount
         pass
 
@@ -1329,7 +1326,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: volume_mount_configs
         #BEGIN list_volume_mounts
-        volume_mount_configs = self.cc.list_volume_mounts(ctx['user_id'], filter)
+        volume_mount_configs = self.cc.list_volume_mounts(ctx.get('user_id'), ctx.get('token'), filter)
         #END list_volume_mounts
 
         # At some point might do deeper type checking...
@@ -1341,17 +1338,20 @@ class Catalog:
 
     def is_admin(self, ctx, username):
         """
-        returns true (1) if the user is an admin, false (0) otherwise
+        returns true (1) if the user is an admin, false (0) otherwise.
+        NOTE: username is now ignored (it checks the token) but retained for back compatibility
         :param username: instance of String
         :returns: instance of type "boolean" (@range [0,1])
         """
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN is_admin
-        returnVal = 0
-        if username:
-            if self.cc.is_admin(username):
-                returnVal = 1
+        if username and ctx.get('user_id') and username != ctx['user_id']:
+            raise ValueError("Can only check on own admin status")
+        if self.cc.is_admin(ctx.get('user_id'), ctx.get('token')):
+            returnVal = 1
+        else:
+            returnVal = 0
         #END is_admin
 
         # At some point might do deeper type checking...
@@ -1377,7 +1377,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN set_secure_config_params
-        self.cc.set_secure_config_params(ctx.get('user_id'), params)
+        self.cc.set_secure_config_params(ctx.get('user_id'), ctx.get('token'), params)
         #END set_secure_config_params
         pass
 
@@ -1397,7 +1397,7 @@ class Catalog:
         """
         # ctx is the context object
         #BEGIN remove_secure_config_params
-        self.cc.remove_secure_config_params(ctx.get('user_id'), params)
+        self.cc.remove_secure_config_params(ctx.get('user_id'), ctx.get('token'), params)
         #END remove_secure_config_params
         pass
 
@@ -1424,7 +1424,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN get_secure_config_params
-        returnVal = self.cc.get_secure_config_params(ctx.get('user_id'), params)
+        returnVal = self.cc.get_secure_config_params(ctx.get('user_id'), ctx.get('token'), params)
         #END get_secure_config_params
 
         # At some point might do deeper type checking...

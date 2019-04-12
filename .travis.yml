@@ -1,7 +1,7 @@
 sudo: required
 language: python
 python:
-    - '2.7'
+    - '3.6'
 services:
     - docker
 
@@ -12,7 +12,7 @@ before_install:
     - mongo --eval "printjson(db.serverStatus())"
 
 install:
-    - pip install -r travis_requirements.txt
+    - pip install -r requirements.txt
     - pip install python-coveralls
     - pip install coverage
     - cd ..
@@ -25,7 +25,6 @@ install:
     - docker images
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
-    - make
 
 script:
     - cp -n test/test.cfg.example test/test.cfg

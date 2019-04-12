@@ -6,46 +6,43 @@ from biokbase.catalog.Impl import Catalog
 
 class HiddenConfigParamsTest(unittest.TestCase):
 
-
     # assumes no client groups exist
     def test_permissions(self):
-
         anonCtx = self.cUtil.anonymous_ctx()
         userCtx = self.cUtil.user_ctx()
 
         # set_secure_config_params
         with self.assertRaises(ValueError) as e:
             self.catalog.set_secure_config_params(anonCtx, {})
-        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' + 
-                         'configuration parameters.');
+        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' +
+                         'configuration parameters.')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.set_secure_config_params(userCtx, {})
-        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' + 
-                         'configuration parameters.');
+        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' +
+                         'configuration parameters.')
 
         # remove_secure_config_params
         with self.assertRaises(ValueError) as e:
             self.catalog.remove_secure_config_params(anonCtx, {})
-        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' + 
-                         'configuration parameters.');
+        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' +
+                         'configuration parameters.')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.remove_secure_config_params(userCtx, {})
-        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' + 
-                         'configuration parameters.');
+        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' +
+                         'configuration parameters.')
 
         # get_secure_config_params
         with self.assertRaises(ValueError) as e:
             self.catalog.get_secure_config_params(anonCtx, {})
-        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' + 
-                         'configuration parameters.');
+        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' +
+                         'configuration parameters.')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.get_secure_config_params(userCtx, {})
-        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' + 
-                         'configuration parameters.');
-
+        self.assertEqual(str(e.exception), 'You do not have permission to work with hidden ' +
+                         'configuration parameters.')
 
     def test_errors(self):
         adminCtx = self.cUtil.admin_ctx()
@@ -53,39 +50,38 @@ class HiddenConfigParamsTest(unittest.TestCase):
         with self.assertRaises(ValueError) as e:
             self.catalog.set_secure_config_params(adminCtx, {})
         self.assertEqual(str(e.exception),
-            'data parameter field is required');
+                         'data parameter field is required')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.set_secure_config_params(adminCtx, {'data': "test"})
         self.assertEqual(str(e.exception),
-            'data parameter field must be a list');
+                         'data parameter field must be a list')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.remove_secure_config_params(adminCtx, {})
         self.assertEqual(str(e.exception),
-            'data parameter field is required');
+                         'data parameter field is required')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.remove_secure_config_params(adminCtx, {'data': "test"})
         self.assertEqual(str(e.exception),
-            'data parameter field must be a list');
+                         'data parameter field must be a list')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.get_secure_config_params(adminCtx, {})
         self.assertEqual(str(e.exception),
-            'module_name parameter field is required');
+                         'module_name parameter field is required')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.get_secure_config_params(adminCtx, {'module_name': [1, 2, 3]})
         self.assertEqual(str(e.exception),
-            'module_name parameter field must be a string');
+                         'module_name parameter field must be a string')
 
         with self.assertRaises(ValueError) as e:
             self.catalog.get_secure_config_params(adminCtx, {'module_name': 'abc',
                                                              'version': [1, 2, 3]})
         self.assertEqual(str(e.exception),
-            'version parameter field must be a string');
-
+                         'version parameter field must be a string')
 
     def test_no_data(self):
         adminCtx = self.cUtil.admin_ctx()
@@ -93,7 +89,6 @@ class HiddenConfigParamsTest(unittest.TestCase):
         params = self.catalog.get_secure_config_params(adminCtx, {'module_name': 'test0',
                                                                   'load_all_versions': 1})[0]
         self.assertEqual(len(params), 0)
-        
 
     def test_set_parameters(self):
         adminCtx = self.cUtil.admin_ctx()
@@ -123,7 +118,6 @@ class HiddenConfigParamsTest(unittest.TestCase):
                                                                   'load_all_versions': 1})[0]
         self.assertEqual(len(params), 2)
 
-
     def test_remove_parameters(self):
         adminCtx = self.cUtil.admin_ctx()
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': 'Test2',
@@ -144,7 +138,6 @@ class HiddenConfigParamsTest(unittest.TestCase):
         self.assertEqual(len(params), 1)
         self.assertEqual(params[0]['param_name'], 'param0')
         self.assertEqual(params[0]['param_value'], 'value0')
-
 
     def test_versions(self):
         adminCtx = self.cUtil.admin_ctx()
@@ -181,7 +174,6 @@ class HiddenConfigParamsTest(unittest.TestCase):
                                                                   'load_all_versions': 1})[0]
         self.assertEqual(len(params), 0)
 
-
     def test_module_versions(self):
         adminCtx = self.cUtil.admin_ctx()
         module_name = 'onerepotest'
@@ -210,7 +202,7 @@ class HiddenConfigParamsTest(unittest.TestCase):
         self.check_secure_param_value(module_name, version_tag, 'param0', 'value0')
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value0')
         self.check_secure_param_value(module_name, semantic_version, 'param0', 'value0')
-        
+
         self.catalog.set_secure_config_params(adminCtx, {'data': [{'module_name': module_name,
                                                                    'param_name': param_name,
                                                                    'version': version_tag,
@@ -245,21 +237,18 @@ class HiddenConfigParamsTest(unittest.TestCase):
         self.check_secure_param_value(module_name, git_commit_hash, 'param0', 'value3')
         self.check_secure_param_value(module_name, semantic_version, 'param0', 'value3')
 
-
-
     def check_secure_param_value(self, module_name, version, param_name, param_value):
-        params = self.catalog.get_secure_config_params(self.cUtil.admin_ctx(), 
+        params = self.catalog.get_secure_config_params(self.cUtil.admin_ctx(),
                                                        {'module_name': module_name,
                                                         'version': version})[0]
         self.assertEqual(len(params), 1)
         self.assertEqual(params[0]['param_name'], param_name)
         self.assertEqual(params[0]['param_value'], param_value)
 
-
     @classmethod
     def setUpClass(cls):
         print('++++++++++++ RUNNING secure_config_params.py +++++++++++')
-        cls.cUtil = CatalogTestUtil('.') # TODO: pass in test directory from outside
+        cls.cUtil = CatalogTestUtil('.')  # TODO: pass in test directory from outside
         cls.cUtil.setUp()
         cls.catalog = Catalog(cls.cUtil.getCatalogConfig())
         print('ready')
@@ -267,7 +256,3 @@ class HiddenConfigParamsTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.cUtil.tearDown()
-
-
-
-
