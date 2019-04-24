@@ -12,9 +12,11 @@ class AdminMethodsTest(unittest.TestCase):
         userName = self.cUtil.user_ctx()['user_id']
         adminName = self.cUtil.admin_ctx()['user_id']
 
-        self.assertEqual(self.catalog.is_admin(self.cUtil.anonymous_ctx())[0], 0)
-        self.assertEqual(self.catalog.is_admin(self.cUtil.user_ctx())[0], 0)
-        self.assertEqual(self.catalog.is_admin(self.cUtil.admin_ctx())[0], 1)
+        with self.assertRaisesRegex(ValueError, 'Can only check on own admin status'):
+            self.assertEqual(self.catalog.is_admin(self.cUtil.user_ctx(), adminName)[0], 0)
+        self.assertEqual(self.catalog.is_admin(self.cUtil.anonymous_ctx(), madeUpName)[0], 0)
+        self.assertEqual(self.catalog.is_admin(self.cUtil.user_ctx(), userName)[0], 0)
+        self.assertEqual(self.catalog.is_admin(self.cUtil.admin_ctx(), adminName)[0], 1)
 
     # assumes no developers have been added yet
     def test_add_remove_developers(self):

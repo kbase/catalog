@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 #BEGIN_HEADER
+import logging
+
 from biokbase.catalog.controller import CatalogController
 #END_HEADER
 
@@ -21,7 +23,7 @@ class Catalog:
     ######################################### noqa
     VERSION = "0.0.1"
     GIT_URL = "https://github.com/kbase/catalog.git"
-    GIT_COMMIT_HASH = "45437dca268d2b42cabf1850666fa9da125cf3a2"
+    GIT_COMMIT_HASH = "c8dcc107f40a9f9a9816c9a5150ee23690a61d6a"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -30,15 +32,13 @@ class Catalog:
     # be found
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
-        print('Starting the Catalog service.  Service configuration:')
-        for c in config:
-            if c == 'nms-admin-token':
-                print('  '+c+'=****')
-                continue
-            print('  '+c+'='+config[c])
-        print('Initializing the Catalog Controller...')
-        self.cc = CatalogController(config);
-        print('Initialization complete.')
+        logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
+                            level=logging.INFO)
+        logging.info('Starting the Catalog service.  Service configuration:\n'
+                     "\n".join('  '+c+'='+config[c]) for c in config if c != 'nms-admin-token')
+        logging.info('Initializing the Catalog Controller...')
+        self.cc = CatalogController(config)
+        logging.info('Initialization complete.')
         #END_CONSTRUCTOR
         pass
 
@@ -1336,14 +1336,18 @@ class Catalog:
         # return the results
         return [volume_mount_configs]
 
-    def is_admin(self, ctx):
+    def is_admin(self, ctx, username):
         """
-        returns true (1) if the user is an admin, false (0) otherwise
+        returns true (1) if the user is an admin, false (0) otherwise.
+        NOTE: username is now ignored (it checks the token) but retained for back compatibility
+        :param username: instance of String
         :returns: instance of type "boolean" (@range [0,1])
         """
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN is_admin
+        if username and ctx.get('user_id') and username != ctx['user_id']:
+            raise ValueError("Can only check on own admin status")
         if self.cc.is_admin(ctx.get('user_id'), ctx.get('token')):
             returnVal = 1
         else:

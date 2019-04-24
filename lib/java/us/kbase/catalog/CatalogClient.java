@@ -917,16 +917,19 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: is_admin</p>
      * <pre>
-     * returns true (1) if the user is an admin, false (0) otherwise
+     * returns true (1) if the user is an admin, false (0) otherwise.
+     * NOTE: username is now ignored (it checks the token) but retained for back compatibility
      * </pre>
+     * @param   username   instance of String
      * @return   instance of original type "boolean" (@range [0,1])
      * @throws IOException if an IO exception occurs
      * @throws JsonClientException if a JSON RPC exception occurs
      */
-    public Long isAdmin(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+    public Long isAdmin(String username, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
+        args.add(username);
         TypeReference<List<Long>> retType = new TypeReference<List<Long>>() {};
-        List<Long> res = caller.jsonrpcCall("Catalog.is_admin", args, retType, true, true, jsonRpcContext, this.serviceVersion);
+        List<Long> res = caller.jsonrpcCall("Catalog.is_admin", args, retType, true, false, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

@@ -77,7 +77,7 @@ class CatalogTestUtil:
             'kbase-endpoint': self.test_cfg['kbase-endpoint'],
             'admin-roles': self.test_cfg['admin-roles'],
             # this points to the mocked Auth API running in a docker container
-            'auth-service-url': 'http://localhost:7777'
+            'auth-service-api': self.test_cfg.get('auth-service-api', 'http://localhost:7777')
         }
         self.dockerclient = DockerAPIClient(base_url=self.catalog_cfg['docker-base-url'])
 
