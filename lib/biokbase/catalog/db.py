@@ -118,7 +118,7 @@ class MongoCatalogDBI:
     _EXEC_STATS_USERS = 'exec_stats_users'
     _SECURE_CONFIG_PARAMS = 'secure_config_params'
 
-    def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd):
+    def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd, mongo_authMechanism):
 
         # create the client
         self.mongo = MongoClient('mongodb://' + mongo_host)
@@ -128,7 +128,7 @@ class MongoCatalogDBI:
         # the MongoClient call failed
         # to do: add authMechanism as an argument
         if (mongo_user and mongo_psswd):
-            self.mongo[mongo_db].authenticate(mongo_user, mongo_psswd)
+            self.mongo[mongo_db].authenticate(mongo_user, mongo_psswd, mechanism=mongo_authMechanism)
 
         # Grab a handle to the database and collections
         self.db = self.mongo[mongo_db]
