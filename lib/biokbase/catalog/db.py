@@ -124,6 +124,9 @@ class MongoCatalogDBI:
         self.mongo = MongoClient('mongodb://' + mongo_host)
 
         # Try to authenticate, will throw an exception if the user/psswd is not valid for the db
+        # the pymongo docs say authenticate() is deprecated, but testing putting auth in
+        # the MongoClient call failed
+        # to do: add authMechanism as an argument
         if (mongo_user and mongo_psswd):
             self.mongo[mongo_db].authenticate(mongo_user, mongo_psswd)
 
