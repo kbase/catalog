@@ -44,7 +44,6 @@ class CatalogController:
             raise ValueError(
                 '"mongodb-database" config variable must be defined to start a CatalogController!')
 
-        warnings.warn(config.keys())
         # give warnings if no mongo user information is set
         if 'mongodb-user' not in config:  # pragma: no cover
             warnings.warn('"mongodb-user" is not set in config of CatalogController.')
@@ -53,9 +52,9 @@ class CatalogController:
         if 'mongodb-pwd' not in config:  # pragma: no cover
             warnings.warn('"mongodb-pwd" is not set in config of CatalogController.')
             config['mongodb-pwd'] = ''
-        if 'mongodb-authMechanism' not in config:  # pragma: no cover
-            warnings.warn('"mongodb-authMechanism" is not set in config of CatalogController, using DEFAULT.')
-            config['mongodb-authMechanism'] = 'DEFAULT'
+        if 'mongodb-authmechanism' not in config:  # pragma: no cover
+            warnings.warn('"mongodb-authmechanism" is not set in config of CatalogController, using DEFAULT.')
+            config['mongodb-authmechanism'] = 'DEFAULT'
 
         # instantiate the mongo client
         self.db = MongoCatalogDBI(
@@ -63,7 +62,7 @@ class CatalogController:
             config['mongodb-database'],
             config['mongodb-user'],
             config['mongodb-pwd'],
-            config['mongodb-authMechanism'])
+            config['mongodb-authmechanism'])
 
         # check for the temp directory and make sure it exists
         if 'temp-dir' not in config:  # pragma: no cover
