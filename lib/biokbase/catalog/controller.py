@@ -52,13 +52,17 @@ class CatalogController:
         if 'mongodb-pwd' not in config:  # pragma: no cover
             warnings.warn('"mongodb-pwd" is not set in config of CatalogController.')
             config['mongodb-pwd'] = ''
+        if 'mongodb-authMechanism' not in config:  # pragma: no cover
+            warnings.warn('"mongodb-authMechanism" is not set in config of CatalogController, using DEFAULT.')
+            config['mongodb-authMechanism'] = 'DEFAULT'
 
         # instantiate the mongo client
         self.db = MongoCatalogDBI(
             config['mongodb-host'],
             config['mongodb-database'],
             config['mongodb-user'],
-            config['mongodb-pwd'])
+            config['mongodb-pwd'],
+            config['mongodb-authMechanism'])
 
         # check for the temp directory and make sure it exists
         if 'temp-dir' not in config:  # pragma: no cover
