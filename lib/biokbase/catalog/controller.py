@@ -44,6 +44,7 @@ class CatalogController:
             raise ValueError(
                 '"mongodb-database" config variable must be defined to start a CatalogController!')
 
+        warnings.warn(config.keys())
         # give warnings if no mongo user information is set
         if 'mongodb-user' not in config:  # pragma: no cover
             warnings.warn('"mongodb-user" is not set in config of CatalogController.')
