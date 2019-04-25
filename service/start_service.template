@@ -22,13 +22,6 @@ threads="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME threads)"
 cheaper="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME cheaper)"
 http_timeout="$(python $KB_SERVICE_DIR/get_kb_config.py $KB_SERVICE_NAME http-timeout)"
 
-
-if [ -f $pid_file ] ; then 
-    echo "pid file already exists: $pid_file"
-    echo "Is $KB_SERVICE_NAME already running?  Either stop the service or delete the pid file."
-    exit 1
-fi
-
 uwsgi --master \
     --processes $processes \
     --threads $threads \
