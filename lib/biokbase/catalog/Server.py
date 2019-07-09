@@ -342,6 +342,10 @@ class Application(object):
                              name='Catalog.version',
                              types=[])
         self.method_authentication['Catalog.version'] = 'none'  # noqa
+        self.rpc_service.add(impl_Catalog.get_app_resource_estimator,
+                             name='Catalog.get_app_resource_estimator',
+                             types=[dict])
+        self.method_authentication['Catalog.get_app_resource_estimator'] = 'none'  # noqa
         self.rpc_service.add(impl_Catalog.is_registered,
                              name='Catalog.is_registered',
                              types=[dict])

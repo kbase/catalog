@@ -22,8 +22,8 @@ class Catalog:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbase/catalog.git"
-    GIT_COMMIT_HASH = "c8dcc107f40a9f9a9816c9a5150ee23690a61d6a"
+    GIT_URL = "https://github.com/briehl/catalog"
+    GIT_COMMIT_HASH = "306f2b00ba938d1a42f41237c2ca25b7816406f2"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -61,6 +61,34 @@ class Catalog:
         # return the results
         return [version]
 
+    def get_app_resource_estimator(self, ctx, params):
+        """
+        Look up the resource estimator for an app. Always returns the same structure, but the module
+        and method are nulls if no estimator is assigned to that app.
+        :param params: instance of type "GetAppResourceEstimatorParams"
+           (module_name - module with the app of interest app_id - app we're
+           interested in the estimator for tag - release, beta, dev) ->
+           structure: parameter "module_name" of String, parameter "app_id"
+           of String, parameter "tag" of String
+        :returns: instance of type "GetAppResourceEstimatorResults"
+           (estimator_module - module containing the estimator method
+           estimator_method - the estimator method to run tag - release,
+           beta, dev) -> structure: parameter "estimator_module" of String,
+           parameter "estimator_method" of String, parameter "tag" of String
+        """
+        # ctx is the context object
+        # return variables are: returnVal
+        #BEGIN get_app_resource_estimator
+        returnVal = self.cc.get_app_resource_estimator(params)
+        #END get_app_resource_estimator
+
+        # At some point might do deeper type checking...
+        if not isinstance(returnVal, dict):
+            raise ValueError('Method get_app_resource_estimator return value ' +
+                             'returnVal is not type dict as required.')
+        # return the results
+        return [returnVal]
+
     def is_registered(self, ctx, params):
         """
         returns true (1) if the module exists, false (2) otherwise
@@ -89,7 +117,7 @@ class Catalog:
 
     def register_repo(self, ctx, params):
         """
-        allow/require developer to supply git branch/git commit tag? 
+        allow/require developer to supply git branch/git commit tag?
         if this is a new module, creates the initial registration with the authenticated user as
         the sole owner, then launches a build to update the dev version of the module.  You can check
         the state of this build with the 'get_module_state' method passing in the git_url.  If the module
@@ -1111,7 +1139,7 @@ class Catalog:
         is_error = params.get('is_error') != 0
         job_id = params.get('job_id')
         self.cc.log_exec_stats(admin_user_id, ctx.get('token'), user_id, app_module_name, app_id, func_module_name,
-                               func_name, git_commit_hash, creation_time, exec_start_time, 
+                               func_name, git_commit_hash, creation_time, exec_start_time,
                                finish_time, is_error, job_id)
         #END log_exec_stats
         pass
@@ -1435,7 +1463,7 @@ class Catalog:
         return [returnVal]
     def status(self, ctx):
         #BEGIN_STATUS
-        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION, 
+        returnVal = {'state': "OK", 'message': "", 'version': self.VERSION,
                      'git_url': self.GIT_URL, 'git_commit_hash': self.GIT_COMMIT_HASH}
         #END_STATUS
         return [returnVal]

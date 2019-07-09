@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  *     or ISO-encoded week like "2016-W01")
  * total_queue_time - summarized time difference between exec_start_time and creation_time moments
  *     defined in seconds since Epoch (POSIX),
- * total_exec_time - summarized time difference between finish_time and exec_start_time moments 
+ * total_exec_time - summarized time difference between finish_time and exec_start_time moments
  *     defined in seconds since Epoch (POSIX).
  * </pre>
  * 

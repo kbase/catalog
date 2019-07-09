@@ -16,7 +16,7 @@ java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 712
 NMS_PID=$!
 
 echo 'Starting Mock Auth API...'
-docker run -d --rm -v ${PWD}/mock_auth:/config -p 7777:5000 --name mock-auth mockservices/mock_json_service
+docker run -d --rm -v ${PWD}/mock_auth:/config -p 7777:5000 --name mock-auth mockservices/mock_json_service:1
 
 echo 'Waiting for NMS to start...'
 sleep 25

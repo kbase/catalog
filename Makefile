@@ -25,7 +25,7 @@ DIR = $(shell pwd)
 
 LIB_DIR = lib
 
-PATH := kb_sdk/bin:$(PATH)
+# PATH := kb_sdk/bin:$(PATH)
 
 default: init
 

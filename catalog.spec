@@ -10,6 +10,35 @@ module Catalog {
     funcdef version() returns (string version);
 
     /*
+        module_name - module with the app of interest
+        app_id - app we're interested in the estimator for
+        tag - release, beta, dev
+    */
+    typedef structure {
+        string module_name;
+        string app_id;
+        string tag;
+    } GetAppResourceEstimatorParams;
+
+    /*
+        estimator_module - module containing the estimator method
+        estimator_method - the estimator method to run
+        tag - release, beta, dev
+    */
+    typedef structure {
+        string estimator_module;
+        string estimator_method;
+        string tag;
+    } GetAppResourceEstimatorResults;
+
+    /*
+        Look up the resource estimator for an app. Always returns the same structure, but the module
+        and method are nulls if no estimator is assigned to that app.
+    */
+    funcdef get_app_resource_estimator(GetAppResourceEstimatorParams params) returns (GetAppResourceEstimatorResults);
+
+
+    /*
         Describes how to find a single module/repository.
         module_name - name of module defined in kbase.yaml file;
         git_url - the url used to register the module
@@ -27,7 +56,7 @@ module Catalog {
         string git_commit_hash;
     } RegisterRepoParams;
 
-    /* allow/require developer to supply git branch/git commit tag? 
+    /* allow/require developer to supply git branch/git commit tag?
     if this is a new module, creates the initial registration with the authenticated user as
     the sole owner, then launches a build to update the dev version of the module.  You can check
     the state of this build with the 'get_module_state' method passing in the git_url.  If the module
@@ -58,7 +87,7 @@ module Catalog {
 
     /*
         decision - approved | denied
-        review_message - 
+        review_message -
     */
     typedef structure {
         string module_name;
@@ -138,7 +167,7 @@ module Catalog {
 
     /* if favorite item is given, will return stars just for that item.  If a module
     name is given, will return stars for all methods in that module.  If none of
-    those are given, then will return stars for every method that there is info on 
+    those are given, then will return stars for every method that there is info on
 
     parameters to add:
         list<FavoriteItem> items;
@@ -193,12 +222,12 @@ module Catalog {
     /*
         data_folder - optional field representing unique module name (like <module_name> transformed to
             lower cases) used for reference data purposes (see description for data_version field). This
-            value will be treated as part of file system path relative to the base that comes from the 
+            value will be treated as part of file system path relative to the base that comes from the
             config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-        data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+        data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
             key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
             should be initialized by running docker image with "init" target from catalog. And later when
-            async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+            async methods are run it should be mounted on AWE worker machine into "/data" folder inside
             docker container by execution engine.
     */
     typedef structure {
@@ -291,7 +320,7 @@ module Catalog {
         local_function_ids     - list of Local Function ids registered with this module version
 
         docker_img_name        - name of the docker image for this module created on registration
-        data_folder            - name of the data folder used 
+        data_folder            - name of the data folder used
 
         compilation_report     - (optionally returned) summary of the KIDL specification compilation
     */
@@ -581,7 +610,7 @@ module Catalog {
 
     funcdef list_builds(ListBuildParams params) returns (list<BuildInfo> builds);
 
-    
+
 
     /* all fields are required to make sure you update the right one */
     typedef structure {
@@ -647,7 +676,7 @@ module Catalog {
     /*
         full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
             slash in case of dynamically registered repo).
-        per_week - optional flag switching results to weekly data rather than one row per app for 
+        per_week - optional flag switching results to weekly data rather than one row per app for
             all time (default value is false)
     */
     typedef structure {
@@ -663,7 +692,7 @@ module Catalog {
             or ISO-encoded week like "2016-W01")
         total_queue_time - summarized time difference between exec_start_time and creation_time moments
             defined in seconds since Epoch (POSIX),
-        total_exec_time - summarized time difference between finish_time and exec_start_time moments 
+        total_exec_time - summarized time difference between finish_time and exec_start_time moments
             defined in seconds since Epoch (POSIX).
     */
     typedef structure {
@@ -707,7 +736,7 @@ module Catalog {
     */
 
 
-    /* app_id = full app id; if module name is used it will be case insensitive 
+    /* app_id = full app id; if module name is used it will be case insensitive
         this will overwrite all existing client groups (it won't just push what's on the list)
         If client_groups is empty or set to null, then the client_group mapping will be removed.
     */
@@ -777,7 +806,7 @@ module Catalog {
         string function_name;
         string client_group;
     } VolumeMountFilter;
-    
+
     funcdef list_volume_mounts(VolumeMountFilter filter)
                 returns (list<VolumeMountConfig> volume_mount_configs) authentication required;
 
@@ -799,7 +828,7 @@ module Catalog {
         boolean is_password;
         string param_value;
     } SecureConfigParameter;
-    
+
     typedef structure {
         list<SecureConfigParameter> data;
     } ModifySecureConfigParamsInput;
@@ -807,21 +836,21 @@ module Catalog {
     /*
         Only admins can use this function.
     */
-    funcdef set_secure_config_params(ModifySecureConfigParamsInput params) 
+    funcdef set_secure_config_params(ModifySecureConfigParamsInput params)
         returns () authentication required;
 
     /*
         Only admins can use this function.
     */
-    funcdef remove_secure_config_params(ModifySecureConfigParamsInput params) 
+    funcdef remove_secure_config_params(ModifySecureConfigParamsInput params)
         returns () authentication required;
 
     /*
         version - optional version (commit hash, tag or semantic one) of module, if
             not set then default "release" value is used;
-        load_all_versions - optional flag indicating that all parameter versions 
+        load_all_versions - optional flag indicating that all parameter versions
             should be loaded (version filter is not applied), default value is 0.
-    */    
+    */
     typedef structure {
         string module_name;
         string version;
@@ -831,7 +860,7 @@ module Catalog {
     /*
         Only admins can use this function.
     */
-    funcdef get_secure_config_params(GetSecureConfigParamsInput params) 
+    funcdef get_secure_config_params(GetSecureConfigParamsInput params)
         returns (list<SecureConfigParameter>) authentication required;
 
 };

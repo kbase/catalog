@@ -180,6 +180,25 @@ public class CatalogClient {
     }
 
     /**
+     * <p>Original spec-file function name: get_app_resource_estimator</p>
+     * <pre>
+     * Look up the resource estimator for an app. Always returns the same structure, but the module
+     * and method are nulls if no estimator is assigned to that app.
+     * </pre>
+     * @param   params   instance of type {@link us.kbase.catalog.GetAppResourceEstimatorParams GetAppResourceEstimatorParams}
+     * @return   instance of type {@link us.kbase.catalog.GetAppResourceEstimatorResults GetAppResourceEstimatorResults}
+     * @throws IOException if an IO exception occurs
+     * @throws JsonClientException if a JSON RPC exception occurs
+     */
+    public GetAppResourceEstimatorResults getAppResourceEstimator(GetAppResourceEstimatorParams params, RpcContext... jsonRpcContext) throws IOException, JsonClientException {
+        List<Object> args = new ArrayList<Object>();
+        args.add(params);
+        TypeReference<List<GetAppResourceEstimatorResults>> retType = new TypeReference<List<GetAppResourceEstimatorResults>>() {};
+        List<GetAppResourceEstimatorResults> res = caller.jsonrpcCall("Catalog.get_app_resource_estimator", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        return res.get(0);
+    }
+
+    /**
      * <p>Original spec-file function name: is_registered</p>
      * <pre>
      * returns true (1) if the module exists, false (2) otherwise
@@ -200,7 +219,7 @@ public class CatalogClient {
     /**
      * <p>Original spec-file function name: register_repo</p>
      * <pre>
-     * allow/require developer to supply git branch/git commit tag? 
+     * allow/require developer to supply git branch/git commit tag?
      * if this is a new module, creates the initial registration with the authenticated user as
      * the sole owner, then launches a build to update the dev version of the module.  You can check
      * the state of this build with the 'get_module_state' method passing in the git_url.  If the module
