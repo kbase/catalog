@@ -24,7 +24,7 @@ class AppEstimatorTestCase(unittest.TestCase):
         cls.cUtil.tearDown()
 
     def test_get_estimator_null(self):
-        app_id = "annotate_contigset"
+        app_id = "test_method_1"
         res = self.catalog.get_app_resource_estimator(self.cUtil.user_ctx(), {
             "app_id": app_id
         })[0]
@@ -41,10 +41,10 @@ class AppEstimatorTestCase(unittest.TestCase):
         self.assertIn(f"App {app_id} with tag release doesn't seem to exist.", str(e.exception))
 
     def test_get_estimator(self):
-        app_id = "annotate_contigset"
+        app_id = "test_method_11"
         res = self.catalog.get_app_resource_estimator(self.cUtil.user_ctx(), {
             "app_id": app_id
         })[0]
-        self.assertEqual(res.get("estimator_module"), "EstimatorModule")
-        self.assertEqual(res.get("estimator_method"), "estimate_resources")
+        self.assertEqual(res.get("estimator_module"), "SomeService")
+        self.assertEqual(res.get("estimator_method"), "estimator_method")
         self.assertEqual(res.get("tag"), "release")

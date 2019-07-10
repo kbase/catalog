@@ -19,7 +19,7 @@ echo 'Starting Mock Auth API...'
 docker run -d --rm -v ${PWD}/mock_auth:/config -p 7777:5000 --name mock-auth mockservices/mock_json_service:1
 
 echo 'Waiting for NMS to start...'
-sleep 25
+sleep 100
 curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125
 if [ $? -ne 0 ]; then
     kill -9 $NMS_PID
