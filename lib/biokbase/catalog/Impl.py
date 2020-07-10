@@ -22,8 +22,8 @@ class Catalog:
     # the latter method is running.
     ######################################### noqa
     VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbase/catalog.git"
-    GIT_COMMIT_HASH = "c8dcc107f40a9f9a9816c9a5150ee23690a61d6a"
+    GIT_URL = "https://github.com/kbase/catalog"
+    GIT_COMMIT_HASH = "fda05a2962373163e4983dc5187b1c51cd1455b1"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
