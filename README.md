@@ -11,8 +11,12 @@ develop: [![Build Status](https://travis-ci.org/kbase/catalog.svg?branch=develop
 Code coverage: (develop branch)
 [![Coverage Status](https://coveralls.io/repos/github/kbase/catalog/badge.svg?branch=develop)](https://coveralls.io/github/kbase/catalog?branch=develop)
 
+#### v2.2.1 - 7/10/2020
+   - Use auth role for list_approved_developers()
+
 #### v2.2.0 - 1/23/19
   - Update code to run on Python 3
+  - Use Auth Roles for Catalog Admin
   
 #### v2.1.3 - 11/16/18
   - Update docker-py client code to current 3.x API
