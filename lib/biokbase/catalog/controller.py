@@ -868,7 +868,7 @@ class CatalogController:
         if not usernames: return []
         return self.db.is_approved_developer(usernames)
 
-    def list_approved_developers(self):
+    def list_approved_developers(self, username, token=None):
         if not self.is_admin(username, token):
             raise ValueError('Only Admin users can list approved developers.')
 
