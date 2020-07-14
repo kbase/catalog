@@ -23,7 +23,7 @@ install:
     - git clone https://github.com/kbase/jars
     - docker images
     - export PATH=$(pwd)/bin:$PATH
-    - cd ../catalog
+    - cd catalog
 
 script:
     - cp -n test/test.cfg.example test/test.cfg
