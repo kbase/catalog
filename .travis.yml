@@ -11,6 +11,9 @@ before_install:
     - sleep 3
     - mongo --eval "printjson(db.serverStatus())"
     - sudo apt install ant
+    - mkdir $(pwd)/bin
+    - docker run kbase/kb-sdk genscript > $(pwd)/bin/kb-sdk
+    - chmod 755 $(pwd)/bin/kb-sdk
 
 install:
     - pip install -r requirements.txt
@@ -18,11 +21,6 @@ install:
     - pip install coverage
     - cd ..
     - git clone https://github.com/kbase/jars
-    - git clone https://github.com/kbase/kb_sdk
-    - cd kb_sdk
-    - git checkout 9b628a9
-    - make
-    - make sdkbase
     - docker images
     - export PATH=$(pwd)/bin:$PATH
     - cd ../catalog
