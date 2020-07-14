@@ -1041,7 +1041,7 @@ class Catalog:
         # ctx is the context object
         # return variables are: usernames
         #BEGIN list_approved_developers
-        usernames = self.cc.list_approved_developers()
+        usernames = self.cc.list_approved_developers(ctx.get('user_id'), ctx.get('token'))
         #END list_approved_developers
 
         # At some point might do deeper type checking...
