@@ -10,7 +10,7 @@ before_install:
     - docker run -p 27017:27017 --name mongo3.6 -d mongo:3.6
     - sleep 3
     - mongo --eval "printjson(db.serverStatus())"
-    - apt install ant
+    - sudo apt install ant
 
 install:
     - pip install -r requirements.txt
