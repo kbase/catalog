@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
  *     slash in case of dynamically registered repo).
- * per_week - optional flag switching results to weekly data rather than one row per app for 
+ * per_week - optional flag switching results to weekly data rather than one row per app for
  *     all time (default value is false)
  * </pre>
  * 

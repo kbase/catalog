@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * narrative_app_ids      - list of Narrative App ids registered with this module version
  * local_function_ids     - list of Local Function ids registered with this module version
  * docker_img_name        - name of the docker image for this module created on registration
- * data_folder            - name of the data folder used 
+ * data_folder            - name of the data folder used
  * compilation_report     - (optionally returned) summary of the KIDL specification compilation
  * </pre>
  * 

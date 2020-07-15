@@ -41,6 +41,24 @@ class Catalog(object):
         return self._client.call_method('Catalog.version',
                                         [], self._service_ver, context)
 
+    def get_app_resource_estimator(self, params, context=None):
+        """
+        Look up the resource estimator for an app. Always returns the same structure, but the module
+        and method are nulls if no estimator is assigned to that app.
+        :param params: instance of type "GetAppResourceEstimatorParams"
+           (module_name - module with the app of interest app_id - app we're
+           interested in the estimator for tag - release, beta, dev) ->
+           structure: parameter "module_name" of String, parameter "app_id"
+           of String, parameter "tag" of String
+        :returns: instance of type "GetAppResourceEstimatorResults"
+           (estimator_module - module containing the estimator method
+           estimator_method - the estimator method to run tag - release,
+           beta, dev) -> structure: parameter "estimator_module" of String,
+           parameter "estimator_method" of String, parameter "tag" of String
+        """
+        return self._client.call_method('Catalog.get_app_resource_estimator',
+                                        [params], self._service_ver, context)
+
     def is_registered(self, params, context=None):
         """
         returns true (1) if the module exists, false (2) otherwise
@@ -56,7 +74,7 @@ class Catalog(object):
 
     def register_repo(self, params, context=None):
         """
-        allow/require developer to supply git branch/git commit tag? 
+        allow/require developer to supply git branch/git commit tag?
         if this is a new module, creates the initial registration with the authenticated user as
         the sole owner, then launches a build to update the dev version of the module.  You can check
         the state of this build with the 'get_module_state' method passing in the git_url.  If the module

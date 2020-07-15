@@ -46,12 +46,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -63,12 +63,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -80,12 +80,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -174,12 +174,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -194,12 +194,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -219,12 +219,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -239,12 +239,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -264,12 +264,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 
@@ -284,12 +284,12 @@ public class ModuleInfo {
      * <pre>
      * data_folder - optional field representing unique module name (like <module_name> transformed to
      *     lower cases) used for reference data purposes (see description for data_version field). This
-     *     value will be treated as part of file system path relative to the base that comes from the 
+     *     value will be treated as part of file system path relative to the base that comes from the
      *     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+     * data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
      *     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
      *     should be initialized by running docker image with "init" target from catalog. And later when
-     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+     *     async methods are run it should be mounted on AWE worker machine into "/data" folder inside
      *     docker container by execution engine.
      * </pre>
      * 

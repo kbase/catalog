@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * if favorite item is given, will return stars just for that item.  If a module
  * name is given, will return stars for all methods in that module.  If none of
- * those are given, then will return stars for every method that there is info on 
+ * those are given, then will return stars for every method that there is info on
  * parameters to add:
  *     list<FavoriteItem> items;
  * </pre>

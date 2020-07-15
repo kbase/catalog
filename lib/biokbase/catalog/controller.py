@@ -15,7 +15,7 @@ import biokbase.catalog.version
 from biokbase.catalog.db import MongoCatalogDBI
 from biokbase.catalog.registrar import Registrar
 from biokbase.narrative_method_store.client import NarrativeMethodStore
-
+from biokbase.narrative_method_store.baseclient import ServerError as NMSServerError
 
 def log(func):
 
@@ -115,6 +115,34 @@ class CatalogController:
             raise ValueError('The nms-admin-token is required but is not '
                              'specified in the config')
         self.nms = NarrativeMethodStore(self.nms_url, token=self.nms_token)
+
+    @log
+    def get_app_resource_estimator(self, params):
+        if params.get("app_id") is None:
+            raise ValueError("app_id not defined, required for looking up an app's resource estimator method")
+
+        app_id = params["app_id"]
+        if params.get("module_name"):
+            app_id = f'{params["module_name"]}/{app_id}'
+        ret_val = {
+            "estimator_module": None,
+            "estimator_method": None
+        }
+
+        tag = params.get("tag", "release")
+        try:
+            spec = self.nms.get_method_spec({
+                "ids": [app_id],
+                "tag": tag
+            })[0]
+        except NMSServerError as e:
+            raise ValueError(f"App {app_id} with tag {tag} doesn't seem to exist.")
+
+        ret_val["estimator_module"] = spec.get("behavior", {}).get("resource_estimator_module")
+        ret_val["estimator_method"] = spec.get("behavior", {}).get("resource_estimator_method")
+        ret_val["tag"] = tag if ret_val["estimator_method"] else None
+
+        return ret_val
 
     @log
     def register_repo(self, params, username, token):

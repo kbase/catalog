@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <pre>
  * version - optional version (commit hash, tag or semantic one) of module, if
  *     not set then default "release" value is used;
- * load_all_versions - optional flag indicating that all parameter versions 
+ * load_all_versions - optional flag indicating that all parameter versions
  *     should be loaded (version filter is not applied), default value is 0.
  * </pre>
  * 

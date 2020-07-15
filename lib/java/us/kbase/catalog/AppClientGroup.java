@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * <p>Original spec-file type: AppClientGroup</p>
  * <pre>
- * app_id = full app id; if module name is used it will be case insensitive 
+ * app_id = full app id; if module name is used it will be case insensitive
  * this will overwrite all existing client groups (it won't just push what's on the list)
  * If client_groups is empty or set to null, then the client_group mapping will be removed.
  * </pre>

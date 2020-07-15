@@ -177,6 +177,105 @@ Get the version of the deployed catalog service endpoint.
  
 
 
+=head2 get_app_resource_estimator
+
+  $return = $obj->get_app_resource_estimator($params)
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$params is a Catalog.GetAppResourceEstimatorParams
+$return is a Catalog.GetAppResourceEstimatorResults
+GetAppResourceEstimatorParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	tag has a value which is a string
+GetAppResourceEstimatorResults is a reference to a hash where the following keys are defined:
+	estimator_module has a value which is a string
+	estimator_method has a value which is a string
+	tag has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$params is a Catalog.GetAppResourceEstimatorParams
+$return is a Catalog.GetAppResourceEstimatorResults
+GetAppResourceEstimatorParams is a reference to a hash where the following keys are defined:
+	module_name has a value which is a string
+	app_id has a value which is a string
+	tag has a value which is a string
+GetAppResourceEstimatorResults is a reference to a hash where the following keys are defined:
+	estimator_module has a value which is a string
+	estimator_method has a value which is a string
+	tag has a value which is a string
+
+
+=end text
+
+=item Description
+
+Look up the resource estimator for an app. Always returns the same structure, but the module
+and method are nulls if no estimator is assigned to that app.
+
+=back
+
+=cut
+
+ sub get_app_resource_estimator
+{
+    my($self, @args) = @_;
+
+# Authentication: none
+
+    if ((my $n = @args) != 1)
+    {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error =>
+							       "Invalid argument count for function get_app_resource_estimator (received $n, expecting 1)");
+    }
+    {
+	my($params) = @args;
+
+	my @_bad_arguments;
+        (ref($params) eq 'HASH') or push(@_bad_arguments, "Invalid type for argument 1 \"params\" (value was \"$params\")");
+        if (@_bad_arguments) {
+	    my $msg = "Invalid arguments passed to get_app_resource_estimator:\n" . join("", map { "\t$_\n" } @_bad_arguments);
+	    Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+								   method_name => 'get_app_resource_estimator');
+	}
+    }
+
+    my $url = $self->{url};
+    my $result = $self->{client}->call($url, $self->{headers}, {
+	    method => "Catalog.get_app_resource_estimator",
+	    params => \@args,
+    });
+    if ($result) {
+	if ($result->is_error) {
+	    Bio::KBase::Exceptions::JSONRPC->throw(error => $result->error_message,
+					       code => $result->content->{error}->{code},
+					       method_name => 'get_app_resource_estimator',
+					       data => $result->content->{error}->{error} # JSON::RPC::ReturnObject only supports JSONRPC 1.1 or 1.O
+					      );
+	} else {
+	    return wantarray ? @{$result->result} : $result->result->[0];
+	}
+    } else {
+        Bio::KBase::Exceptions::HTTP->throw(error => "Error invoking method get_app_resource_estimator",
+					    status_line => $self->{client}->status_line,
+					    method_name => 'get_app_resource_estimator',
+				       );
+    }
+}
+ 
+
+
 =head2 is_registered
 
   $return = $obj->is_registered($params)
@@ -301,7 +400,7 @@ RegisterRepoParams is a reference to a hash where the following keys are defined
 
 =item Description
 
-allow/require developer to supply git branch/git commit tag? 
+allow/require developer to supply git branch/git commit tag?
 if this is a new module, creates the initial registration with the authenticated user as
 the sole owner, then launches a build to update the dev version of the module.  You can check
 the state of this build with the 'get_module_state' method passing in the git_url.  If the module
@@ -5159,6 +5258,88 @@ an int
 
 
 
+=head2 GetAppResourceEstimatorParams
+
+=over 4
+
+
+
+=item Description
+
+module_name - module with the app of interest
+app_id - app we're interested in the estimator for
+tag - release, beta, dev
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+tag has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+module_name has a value which is a string
+app_id has a value which is a string
+tag has a value which is a string
+
+
+=end text
+
+=back
+
+
+
+=head2 GetAppResourceEstimatorResults
+
+=over 4
+
+
+
+=item Description
+
+estimator_module - module containing the estimator method
+estimator_method - the estimator method to run
+tag - release, beta, dev
+
+
+=item Definition
+
+=begin html
+
+<pre>
+a reference to a hash where the following keys are defined:
+estimator_module has a value which is a string
+estimator_method has a value which is a string
+tag has a value which is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+a reference to a hash where the following keys are defined:
+estimator_module has a value which is a string
+estimator_method has a value which is a string
+tag has a value which is a string
+
+
+=end text
+
+=back
+
+
+
 =head2 SelectOneModuleParams
 
 =over 4
@@ -5523,7 +5704,7 @@ timestamp has a value which is a string
 
 if favorite item is given, will return stars just for that item.  If a module
 name is given, will return stars for all methods in that module.  If none of
-those are given, then will return stars for every method that there is info on 
+those are given, then will return stars for every method that there is info on
 
 parameters to add:
     list<FavoriteItem> items;
@@ -5775,12 +5956,12 @@ spec_files has a value which is a reference to a list where each element is a Ca
 
 data_folder - optional field representing unique module name (like <module_name> transformed to
     lower cases) used for reference data purposes (see description for data_version field). This
-    value will be treated as part of file system path relative to the base that comes from the 
+    value will be treated as part of file system path relative to the base that comes from the
     config (currently base is supposed to be "/kb/data" defined in "ref-data-base" parameter).
-data_version - optional field, reflects version of data defined in kbase.yml (see "data-version" 
+data_version - optional field, reflects version of data defined in kbase.yml (see "data-version"
     key). In case this field is set data folder with path "/kb/data/<data_folder>/<data_version>"
     should be initialized by running docker image with "init" target from catalog. And later when
-    async methods are run it should be mounted on AWE worker machine into "/data" folder inside 
+    async methods are run it should be mounted on AWE worker machine into "/data" folder inside
     docker container by execution engine.
 
 
@@ -5962,7 +6143,7 @@ narrative_app_ids      - list of Narrative App ids registered with this module v
 local_function_ids     - list of Local Function ids registered with this module version
 
 docker_img_name        - name of the docker image for this module created on registration
-data_folder            - name of the data folder used 
+data_folder            - name of the data folder used
 
 compilation_report     - (optionally returned) summary of the KIDL specification compilation
 
@@ -6895,7 +7076,7 @@ job_id has a value which is a string
 
 full_app_ids - list of fully qualified app IDs (including module_name prefix followed by
     slash in case of dynamically registered repo).
-per_week - optional flag switching results to weekly data rather than one row per app for 
+per_week - optional flag switching results to weekly data rather than one row per app for
     all time (default value is false)
 
 
@@ -6940,7 +7121,7 @@ time_range - one of supported time ranges (currently it could be either '*' for 
     or ISO-encoded week like "2016-W01")
 total_queue_time - summarized time difference between exec_start_time and creation_time moments
     defined in seconds since Epoch (POSIX),
-total_exec_time - summarized time difference between finish_time and exec_start_time moments 
+total_exec_time - summarized time difference between finish_time and exec_start_time moments
     defined in seconds since Epoch (POSIX).
 
 
@@ -7060,7 +7241,7 @@ end has a value which is an int
 
 =item Description
 
-app_id = full app id; if module name is used it will be case insensitive 
+app_id = full app id; if module name is used it will be case insensitive
 this will overwrite all existing client groups (it won't just push what's on the list)
 If client_groups is empty or set to null, then the client_group mapping will be removed.
 
@@ -7391,7 +7572,7 @@ data has a value which is a reference to a list where each element is a Catalog.
 
 version - optional version (commit hash, tag or semantic one) of module, if
     not set then default "release" value is used;
-load_all_versions - optional flag indicating that all parameter versions 
+load_all_versions - optional flag indicating that all parameter versions
     should be loaded (version filter is not applied), default value is 0.
 
 
