@@ -22,7 +22,7 @@ class AdminMethodsTest(unittest.TestCase):
     def test_add_remove_developers(self):
 
         # nothing there yet
-        devs = self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0]
+        devs = self.catalog.list_approved_developers(self.cUtil.admin_ctx())[0]
         self.assertEqual(devs, [])
         is_approved = self.catalog.is_approved_developer([], self.cUtil.anonymous_ctx())[0]
         self.assertEqual(is_approved, [])
@@ -47,7 +47,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.catalog.approve_developer(self.cUtil.admin_ctx(), 'bob')
         self.catalog.approve_developer(self.cUtil.admin_ctx(),
                                        'bob')  # should be able to add again without error
-        devs = self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0]
+        devs = self.catalog.list_approved_developers(self.cUtil.admin_ctx())[0]
         self.assertEqual(devs, ['alice', 'bob', 'eve'])  # should be sorted
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
                                                          ['somebody', 'alice', 'otherperson',
@@ -73,7 +73,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.catalog.revoke_developer(self.cUtil.admin_ctx(), 'alice')
 
         # should have truncated list
-        devs = self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0]
+        devs = self.catalog.list_approved_developers(self.cUtil.admin_ctx())[0]
         self.assertEqual(devs, ['bob', 'eve'])  # should be sorted
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
                                                          ['somebody', 'alice', 'otherperson',
