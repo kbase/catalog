@@ -18,6 +18,13 @@ class AdminMethodsTest(unittest.TestCase):
         self.assertEqual(self.catalog.is_admin(self.cUtil.user_ctx(), userName)[0], 0)
         self.assertEqual(self.catalog.is_admin(self.cUtil.admin_ctx(), adminName)[0], 1)
 
+    # test with no token and user token (admin token gets tested in add_remove_developers
+    def test_list_approved_developers(self):
+        with self.assertRaisesRegex(ValueError, 'Authentication required'):
+            self.assertEqual(self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0], 0)
+        with self.assertRaisesRegex(ValueError, 'Only Admin users can list approved developers.'):
+            self.assertEqual(self.catalog.list_approved_developers(self.cUtil.user_ctx())[0], 0)
+
     # assumes no developers have been added yet
     def test_add_remove_developers(self):
 
