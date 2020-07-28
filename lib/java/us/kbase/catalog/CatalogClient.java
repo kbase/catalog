@@ -698,7 +698,7 @@ public class CatalogClient {
     public List<String> listApprovedDevelopers(RpcContext... jsonRpcContext) throws IOException, JsonClientException {
         List<Object> args = new ArrayList<Object>();
         TypeReference<List<List<String>>> retType = new TypeReference<List<List<String>>>() {};
-        List<List<String>> res = caller.jsonrpcCall("Catalog.list_approved_developers", args, retType, true, false, jsonRpcContext, this.serviceVersion);
+        List<List<String>> res = caller.jsonrpcCall("Catalog.list_approved_developers", args, retType, true, true, jsonRpcContext, this.serviceVersion);
         return res.get(0);
     }
 

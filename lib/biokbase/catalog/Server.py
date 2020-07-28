@@ -465,7 +465,7 @@ class Application(object):
         self.rpc_service.add(impl_Catalog.list_approved_developers,
                              name='Catalog.list_approved_developers',
                              types=[])
-        self.method_authentication['Catalog.list_approved_developers'] = 'none'  # noqa
+        self.method_authentication['Catalog.list_approved_developers'] = 'required'  # noqa
         self.rpc_service.add(impl_Catalog.approve_developer,
                              name='Catalog.approve_developer',
                              types=[str])

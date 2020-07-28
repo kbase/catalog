@@ -3404,7 +3404,7 @@ $usernames is a reference to a list where each element is a string
 {
     my($self, @args) = @_;
 
-# Authentication: none
+# Authentication: required
 
     if ((my $n = @args) != 0)
     {

@@ -607,7 +607,7 @@ module Catalog {
 
     /* temporary developer approval, should be moved to more mature user profile service */
     funcdef is_approved_developer(list<string>usernames) returns (list<boolean> is_approved);
-    funcdef list_approved_developers() returns (list<string> usernames);
+    funcdef list_approved_developers() returns (list<string> usernames) authentication required;
     funcdef approve_developer(string username) returns () authentication required;
     funcdef revoke_developer(string username) returns () authentication required;
 

@@ -7,9 +7,13 @@ services:
 
 before_install:
     #- docker run -d -p 5000:5000 --name registry registry:2
-    - docker run -p 27017:27017 --name mongo2.7 -d mongo:2.7
+    - docker run -p 27017:27017 --name mongo3.6 -d mongo:3.6
     - sleep 3
     - mongo --eval "printjson(db.serverStatus())"
+    - sudo apt install ant
+    - mkdir $(pwd)/bin
+    - docker run kbase/kb-sdk genscript > $(pwd)/bin/kb-sdk
+    - chmod 755 $(pwd)/bin/kb-sdk
 
 install:
     - pip install -r requirements.txt
@@ -17,14 +21,9 @@ install:
     - pip install coverage
     - cd ..
     - git clone https://github.com/kbase/jars
-    - git clone https://github.com/kbase/kb_sdk
-    - cd kb_sdk
-    - git checkout 9b628a9
-    - make
-    - make sdkbase
     - docker images
     - export PATH=$(pwd)/bin:$PATH
-    - cd ../catalog
+    - cd catalog
 
 script:
     - cp -n test/test.cfg.example test/test.cfg
