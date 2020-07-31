@@ -18,11 +18,17 @@ class AdminMethodsTest(unittest.TestCase):
         self.assertEqual(self.catalog.is_admin(self.cUtil.user_ctx(), userName)[0], 0)
         self.assertEqual(self.catalog.is_admin(self.cUtil.admin_ctx(), adminName)[0], 1)
 
+    # test with no token and user token (admin token gets tested in add_remove_developers
+    def test_list_approved_developers(self):
+        with self.assertRaisesRegex(ValueError, 'Only Admin users can list approved developers.'):
+            self.assertEqual(self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0], 0)
+            self.assertEqual(self.catalog.list_approved_developers(self.cUtil.user_ctx())[0], 0)
+
     # assumes no developers have been added yet
     def test_add_remove_developers(self):
 
         # nothing there yet
-        devs = self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0]
+        devs = self.catalog.list_approved_developers(self.cUtil.admin_ctx())[0]
         self.assertEqual(devs, [])
         is_approved = self.catalog.is_approved_developer([], self.cUtil.anonymous_ctx())[0]
         self.assertEqual(is_approved, [])
@@ -47,7 +53,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.catalog.approve_developer(self.cUtil.admin_ctx(), 'bob')
         self.catalog.approve_developer(self.cUtil.admin_ctx(),
                                        'bob')  # should be able to add again without error
-        devs = self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0]
+        devs = self.catalog.list_approved_developers(self.cUtil.admin_ctx())[0]
         self.assertEqual(devs, ['alice', 'bob', 'eve'])  # should be sorted
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
                                                          ['somebody', 'alice', 'otherperson',
@@ -73,7 +79,7 @@ class AdminMethodsTest(unittest.TestCase):
         self.catalog.revoke_developer(self.cUtil.admin_ctx(), 'alice')
 
         # should have truncated list
-        devs = self.catalog.list_approved_developers(self.cUtil.anonymous_ctx())[0]
+        devs = self.catalog.list_approved_developers(self.cUtil.admin_ctx())[0]
         self.assertEqual(devs, ['bob', 'eve'])  # should be sorted
         is_approved = self.catalog.is_approved_developer(self.cUtil.anonymous_ctx(),
                                                          ['somebody', 'alice', 'otherperson',
