@@ -21,6 +21,12 @@ COPY requirements.txt requirements.txt
 RUN source activate root && \
     pip install -r requirements.txt
 
+RUN apt-get update && apt-get install -y apt-transport-https gnupg2; \
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - ; \
+    echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list; \
+    apt-get update; \
+    apt-get install -y kubectl
+
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/kbase/catalog.git" \
       org.label-schema.vcs-ref=$VCS_REF \

@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-with-ttl
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+                - NET_BIND_SERVICE
+                - SETGID
+                - SETUID
+            drop:
+                - ALL
+      restartPolicy: Never

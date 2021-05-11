@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/name: kaniko2
+  name: kaniko2
+spec:
+  containers:
+  - name: kaniko2
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+    - "--dockerfile=./Dockerfile"
+    - "--context=git://github.com/kbase/init-sidecar.git"
+    - "--destination=registry:5000/init-sidecar2:latest"
+    - "--insecure"
+    - "--insecure-registry=dockerhub:5000"
+    securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+            add:
+                - CHOWN
+                - DAC_OVERRIDE
+                - FOWNER
+                - NET_BIND_SERVICE
+                - SETGID
+                - SETUID
+            drop:
+                - ALL
+  restartPolicy: Never
