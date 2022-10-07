@@ -1116,7 +1116,9 @@ class MongoCatalogDBI:
 
     def add_exec_stats_apps(self, app_module_name, app_id, creation_time, exec_start_time,
                             finish_time, is_error, type, time_range):
+        print("Going to return if no app id")
         if not app_id:
+            print("Sorry, not going to add exec stats apps for " + app_module_name)
             return
         full_app_id = app_id
         if app_module_name:
