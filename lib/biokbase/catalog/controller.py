@@ -1232,6 +1232,14 @@ class CatalogController:
                        is_error, job_id):
         if not self.is_admin(username, token):
             raise ValueError('You do not have permission to log execution statistics.')
+        logging.info("Adding exec stats")
+        aesa0 = "".join(user_id, app_module_name, app_id, func_module_name, func_name,
+                                   git_commit_hash, creation_time, exec_start_time, finish_time,
+                                   is_error, job_id)
+        logging.info(aesa0)
+       
+        
+        logging.info(
         self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name,
                                    git_commit_hash, creation_time, exec_start_time, finish_time,
                                    is_error, job_id)
