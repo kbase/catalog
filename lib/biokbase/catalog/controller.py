@@ -1238,9 +1238,6 @@ class CatalogController:
         parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
         
-        aesa1 = "".join(app_module_name, app_id, creation_time, exec_start_time, finish_time, is_error, "a", "*", "then", "w", week_time_range)
-        logging.info(aesa1)
-        
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time,
                                     finish_time, is_error, "a", "*")
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time,
