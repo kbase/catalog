@@ -1239,7 +1239,10 @@ class CatalogController:
         logging.info(aesa0)
        
         
-        logging.info(
+        adsr = "".join(user_id, app_module_name, app_id, func_module_name, func_name,
+                                   git_commit_hash, creation_time, exec_start_time, finish_time,
+                                   is_error, job_id)
+        logging.info(adsr)
         self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name,
                                    git_commit_hash, creation_time, exec_start_time, finish_time,
                                    is_error, job_id)
