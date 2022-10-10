@@ -1,6 +1,6 @@
 import copy
 import pprint
-
+import logging
 from pymongo import ASCENDING
 from pymongo import DESCENDING
 from pymongo import MongoClient
@@ -1096,7 +1096,7 @@ class MongoCatalogDBI:
             return None
         return '{}'
 
-   @log
+
     def add_exec_stats_raw(self, user_id, app_module_name, app_id, func_module_name, func_name,
                            git_commit_hash, creation_time, exec_start_time, finish_time, is_error,
                            job_id):
