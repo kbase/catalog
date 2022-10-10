@@ -1096,6 +1096,7 @@ class MongoCatalogDBI:
             return None
         return '{}'
 
+   @log
     def add_exec_stats_raw(self, user_id, app_module_name, app_id, func_module_name, func_name,
                            git_commit_hash, creation_time, exec_start_time, finish_time, is_error,
                            job_id):
@@ -1112,6 +1113,7 @@ class MongoCatalogDBI:
             'is_error': is_error,
             'job_id': job_id
         }
+        logging.info(str(stats))
         self.exec_stats_raw.insert_one(stats)
 
     def add_exec_stats_apps(self, app_module_name, app_id, creation_time, exec_start_time,
