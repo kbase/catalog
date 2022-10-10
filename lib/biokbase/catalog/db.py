@@ -1123,8 +1123,11 @@ class MongoCatalogDBI:
             print("Sorry, not going to add exec stats apps for " + app_module_name)
             return
         full_app_id = app_id
+        print("app_module_name",app_module_name)
         if app_module_name:
             full_app_id = app_module_name + "/" + app_id
+        print("full_api_id",full_app_id)    
+        
         queue_time = exec_start_time - creation_time
         exec_time = finish_time - exec_start_time
         new_data = {
@@ -1136,6 +1139,9 @@ class MongoCatalogDBI:
             'total_queue_time': queue_time,
             'total_exec_time': exec_time
         }
+        print("full_app_id",full_app_id,"type",type,"time_range",time_range)
+        print(new_data)
+        print(inc_data)
         self.exec_stats_apps.update_one(
             {'full_app_id': full_app_id, 'type': type, 'time_range': time_range},
             {'$setOnInsert': new_data, '$inc': inc_data}, upsert=True)
