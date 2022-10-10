@@ -1233,15 +1233,15 @@ class CatalogController:
         if not self.is_admin(username, token):
             raise ValueError('You do not have permission to log execution statistics.')
         logging.info("Adding exec stats")
-        aesa0 = "".join(user_id, app_module_name, app_id, func_module_name, func_name,
+        aesa0 = " ".join([user_id, app_module_name, app_id, func_module_name, func_name,
                                    git_commit_hash, creation_time, exec_start_time, finish_time,
-                                   is_error, job_id)
+                                   is_error, job_id])
         logging.info(aesa0)
        
         
-        adsr = "".join(user_id, app_module_name, app_id, func_module_name, func_name,
+        adsr = " ".join([user_id, app_module_name, app_id, func_module_name, func_name,
                                    git_commit_hash, creation_time, exec_start_time, finish_time,
-                                   is_error, job_id)
+                                   is_error, job_id])
         logging.info(adsr)
         self.db.add_exec_stats_raw(user_id, app_module_name, app_id, func_module_name, func_name,
                                    git_commit_hash, creation_time, exec_start_time, finish_time,
@@ -1249,7 +1249,7 @@ class CatalogController:
         parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
         
-        aesa1 = "".join(app_module_name, app_id, creation_time, exec_start_time, finish_time, is_error, "a", "*", "then", "w", week_time_range)
+        aesa1 = " ".join([app_module_name, app_id, creation_time, exec_start_time, finish_time, is_error, "a", "*", "then", "w", week_time_range])
         logging.info(aesa1)
         
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time,
