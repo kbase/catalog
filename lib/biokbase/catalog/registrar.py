@@ -159,10 +159,8 @@ class Registrar:
                         "Docker settings from environment variables are used: docker-host = " + docker_host +
                         ", docker_cert_path = " + str(docker_cert_path))
                     dockerclient = DockerClient(base_url=docker_host, timeout=docker_timeout,
-                                                version='auto', tls=docker_tls, credstore_env=credstore_env)
-
-
-
+                                                version='auto', tls=docker_tls)
+                    
                 # look for docker image
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 # self.log(str(dockerclient.inspect_image(repo_name)))
