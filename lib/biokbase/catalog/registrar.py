@@ -129,13 +129,15 @@ class Registrar:
             ref_data_folder = None
             ref_data_ver = None
             compilation_report = None
+            credstore_env = credstore_env
+
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 24 hours because we often get timeouts if multiple people try to
                 # push at the same time
                 docker_timeout = 86400
                 if len(str(self.docker_base_url)) > 0:
                     dockerclient = DockerClient(base_url=str(self.docker_base_url),
-                                                timeout=docker_timeout)
+                                                timeout=docker_timeout, credstore_env=credstore_env)
                 else:
                     # docker base URL is not set in config, let's use Docker-related env-vars in this case
                     docker_host = os.environ['DOCKER_HOST']
@@ -158,7 +160,10 @@ class Registrar:
                         "Docker settings from environment variables are used: docker-host = " + docker_host +
                         ", docker_cert_path = " + str(docker_cert_path))
                     dockerclient = DockerClient(base_url=docker_host, timeout=docker_timeout,
-                                                version='auto', tls=docker_tls)
+                                                version='auto', tls=docker_tls, credstore_env=credstore_env)
+
+
+
                 # look for docker image
                 # this tosses cookies if image doesn't exist, so wrap in try, and build if try reports "not found"
                 # self.log(str(dockerclient.inspect_image(repo_name)))
@@ -593,6 +598,11 @@ class Registrar:
         return imageId
 
     def push_docker_image(self, docker_client, image_name):
+        auth_config = None
+        if 'REGISTRY_USERNAME' in os.environ and 'REGISTRY_PASSWORD' in os.environ:
+            auth_config = {'username': os.environ['REGISTRY_USERNAME'], 'password': os.environ['REGISTRY_PASSWORD']}
+
+        
         self.log('\nPushing docker image to registry for ' + image_name)
         colon_pos = image_name.rfind(
             ':')  # This logic supports images with "host:port/" prefix for private registry
@@ -603,7 +613,7 @@ class Registrar:
         # self.log(str(response_stream))
 
         # to do: examine stream to determine success/failure of build
-        for lines in docker_client.push(image, tag=tag, stream=True):
+        for lines in docker_client.push(image, tag=tag, stream=True, auth_config=auth_config):
             for line in lines.strip().splitlines():
                 # example line:
                 # '{"status":"Pushing","progressDetail":{"current":32,"total":32},"progress":"[==================================================\\u003e]     32 B/32 B","id":"da200da4256c"}'
