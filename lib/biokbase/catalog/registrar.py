@@ -129,7 +129,6 @@ class Registrar:
             ref_data_folder = None
             ref_data_ver = None
             compilation_report = None
-            credstore_env = credstore_env
 
             if not Registrar._TEST_WITHOUT_DOCKER:
                 # timeout set to 24 hours because we often get timeouts if multiple people try to
@@ -137,7 +136,7 @@ class Registrar:
                 docker_timeout = 86400
                 if len(str(self.docker_base_url)) > 0:
                     dockerclient = DockerClient(base_url=str(self.docker_base_url),
-                                                timeout=docker_timeout, credstore_env=credstore_env)
+                                                timeout=docker_timeout)
                 else:
                     # docker base URL is not set in config, let's use Docker-related env-vars in this case
                     docker_host = os.environ['DOCKER_HOST']
@@ -602,7 +601,7 @@ class Registrar:
         if 'REGISTRY_USERNAME' in os.environ and 'REGISTRY_PASSWORD' in os.environ:
             auth_config = {'username': os.environ['REGISTRY_USERNAME'], 'password': os.environ['REGISTRY_PASSWORD']}
 
-        
+
         self.log('\nPushing docker image to registry for ' + image_name)
         colon_pos = image_name.rfind(
             ':')  # This logic supports images with "host:port/" prefix for private registry
