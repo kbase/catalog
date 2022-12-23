@@ -124,8 +124,13 @@ class Registrar:
             # perhaps make this a self attr?
             module_name_lc = self.get_required_field_as_string(self.kb_yaml,
                                                                'module-name').strip().lower()
-            self.image_name = self.docker_registry_host + '/kbase:' + module_name_lc + '.' + str(
-                git_commit_hash)
+            
+            # Previous format had all images under the same image name
+            # e.g. dockerhub-next.kbase.us/kbase:kbasereport.0356e0313025b0d4b1b7fa11e96050aeaaaa828c
+            # New format is
+            # dockerhub-next.kbase.us/kbase/kbasereport:0356e0313025b0d4b1b7fa11e96050aeaaaa828c
+            # Image name format is docker host + /kbase/ + module_name + tag
+            self.image_name = f"{self.docker_registry_host}/kbase/{module_name_lc}:{git_commit_hash}"
             ref_data_folder = None
             ref_data_ver = None
             compilation_report = None
