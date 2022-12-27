@@ -1226,6 +1226,7 @@ class CatalogController:
     def version(self):
         return biokbase.catalog.version.CATALOG_VERSION
 
+    @log
     def log_exec_stats(self, username, token, user_id, app_module_name, app_id, func_module_name,
                        func_name, git_commit_hash, creation_time, exec_start_time, finish_time,
                        is_error, job_id):
@@ -1236,6 +1237,7 @@ class CatalogController:
                                    is_error, job_id)
         parts = datetime.fromtimestamp(creation_time).isocalendar()
         week_time_range = str(parts[0]) + "-W" + str(parts[1])
+        
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time,
                                     finish_time, is_error, "a", "*")
         self.db.add_exec_stats_apps(app_module_name, app_id, creation_time, exec_start_time,
