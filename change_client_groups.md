@@ -36,6 +36,9 @@ As of Dec 2022, the default resources are
 
 
 # Give access to the "staging" area on the Data Transfer Node (dtn) for upload jobs
+**WARNING** THE DTN NODE IS FOR UPLOAD JOBS, NOT FOR JOBS THAT DO SIGNIFICANT COMPUTATION **WARNING** 
+**WARNING** PLEASE CHECK WITH THE DEVELOPER BEFORE ADDING COMPUTATIONALLY INTENSIVE JOBS TO THE UPLOAD QUEUE **WARNING** 
+
 ### Step 1: Choose the app you want to change
 * Get module name and function name
 ### Step 2: Select the ClientGroup
