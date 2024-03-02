@@ -116,7 +116,6 @@ class CatalogController:
                              'specified in the config')
         self.nms = NarrativeMethodStore(self.nms_url, token=self.nms_token)
 
-    @log
     def register_repo(self, params, username, token):
 
         if 'git_url' not in params:
