@@ -139,6 +139,7 @@ class MongoCatalogDBI:
 
         self.lock = threading.Lock()
         self.mongo_client = None
+        self.client_initialized = False
 
         # Initialize mongo client
         self._initialize_mongo_client()
@@ -154,14 +155,15 @@ class MongoCatalogDBI:
 
         # Close the MongoDB client manually
         self.mongo_client.close()
-        self.mongo_client = None
+        self.client_initialized = False
+        print("MongoDB client closed.")
 
     def _initialize_mongo_client(self):
         """Initialize MongoDB client with lock to prevent race conditions."""
         try:
             # Use the lock to ensure only one thread initializes the mongo client at a time
             with self.lock:
-                if self.mongo_client is None:  # Check if mongo_client is already initialized
+                if not self.client_initialized or self.mongo_client is None:
                     # This is only tested manually
                     if self.mongo_user and self.mongo_psswd:
                         # Connection string with authentication
@@ -174,6 +176,9 @@ class MongoCatalogDBI:
 
                     # Force a call to server to verify the connection
                     self.mongo_client.server_info()
+
+                    # Mark client as initialized
+                    self.client_initialized = True
                     print("Connection successful!")
 
         except ConnectionFailure as e:
