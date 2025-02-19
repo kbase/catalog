@@ -1,5 +1,4 @@
 import copy
-from functools import wraps
 import pprint
 import traceback
 import threading
@@ -102,10 +101,10 @@ LOCAL_FUNCTIONS
 '''
 
 def initialize_mongo_client(func):
-    """Decorator to ensure MongoDB client is initialized before calling the API function."""
-    @wraps(func)
+    """Decorator to ensure MongoDB client is initialized before calling API functions."""
     def wrapper(self, *args, **kwargs):
-        self._initialize_mongo_client()  # Ensure MongoDB client is initialized before the method executes
+        # Ensure MongoClient is initialized before the API method is called
+        self._initialize_mongo_client()
         return func(self, *args, **kwargs)
     return wrapper
 
@@ -160,9 +159,9 @@ class MongoCatalogDBI:
 
     def _initialize_mongo_client(self):
         """Initialize MongoDB client with lock to prevent race conditions."""
-        try:
-            # Use the lock to ensure only one thread initializes the mongo client at a time
-            with self.lock:
+        # Use the lock to ensure only one thread initializes the mongo client at a time
+        with self.lock:
+            try:
                 if not self.client_initialized or self.mongo_client is None:
                     # This is only tested manually
                     if self.mongo_user and self.mongo_psswd:
@@ -181,16 +180,16 @@ class MongoCatalogDBI:
                     self.client_initialized = True
                     print("Connection successful!")
 
-        except ConnectionFailure as e:
-            error_msg = "Cannot connect to Mongo server\n"
-            error_msg += "ERROR -- {}:\n{}".format(
-                e, "".join(traceback.format_exception(None, e, e.__traceback__))
-            )
-            raise ValueError(error_msg)
+            except ConnectionFailure as e:
+                error_msg = "Cannot connect to Mongo server\n"
+                error_msg += "ERROR -- {}:\n{}".format(
+                    e, "".join(traceback.format_exception(None, e, e.__traceback__))
+                )
+                raise ValueError(error_msg)
 
     def _create_collections(self):
         """Grab a handle to the database and collections."""
-        if not self.mongo_client:
+        if not self.client_initialized:
             self._initialize_mongo_client()
 
         self.db = self.mongo_client[self.mongo_db]
