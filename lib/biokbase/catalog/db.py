@@ -153,9 +153,7 @@ class MongoCatalogDBI:
         self._create_indexes()
 
         # Close the MongoDB client manually
-        self.mongo_client.close()
-        self.client_initialized = False
-        print("MongoDB client closed.")
+        self._close_mongo_client()
 
     def _initialize_mongo_client(self):
         """Initialize MongoDB client with lock to prevent race conditions."""
@@ -186,6 +184,14 @@ class MongoCatalogDBI:
                     e, "".join(traceback.format_exception(None, e, e.__traceback__))
                 )
                 raise ValueError(error_msg)
+
+    def _close_mongo_client(self):
+        """Manually close the MongoDB client and mark it as not initialized."""
+        if self.mongo_client:
+            self.mongo_client.close()
+            self.mongo_client = None  # Ensure client is set to None to prevent invalid access
+            self.client_initialized = False  # Mark client as closed
+            print("MongoDB client closed.")
 
     def _create_collections(self):
         """Grab a handle to the database and collections."""
