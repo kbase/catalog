@@ -178,6 +178,9 @@ class MongoCatalogDBI:
                     self.client_initialized = True
                     print("Connection successful!")
 
+                    # Recreate the database and collection handles after reinitializing the client
+                    self._create_collections()
+
             except ConnectionFailure as e:
                 error_msg = "Cannot connect to Mongo server\n"
                 error_msg += "ERROR -- {}:\n{}".format(
