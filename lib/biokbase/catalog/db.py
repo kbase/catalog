@@ -158,32 +158,32 @@ class MongoCatalogDBI:
     def _initialize_mongo_client(self):
         """Initialize MongoDB client with lock to prevent race conditions."""
         # Use the lock to ensure only one thread initializes the mongo client at a time
-        # with self.lock:
-        try:
-            if not self.client_initialized or self.mongo_client is None:
-                # This is only tested manually
-                if self.mongo_user and self.mongo_psswd:
-                    # Connection string with authentication
-                    self.mongo_client = MongoClient(
-                        f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
-                    )
-                else:
-                    # Connection string without authentication
-                    self.mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
+        with self.lock:
+            try:
+                if not self.client_initialized or self.mongo_client is None:
+                    # This is only tested manually
+                    if self.mongo_user and self.mongo_psswd:
+                        # Connection string with authentication
+                        self.mongo_client = MongoClient(
+                            f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
+                        )
+                    else:
+                        # Connection string without authentication
+                        self.mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
 
-                # Force a call to server to verify the connection
-                self.mongo_client.server_info()
+                    # Force a call to server to verify the connection
+                    self.mongo_client.server_info()
 
-                # Mark client as initialized
-                self.client_initialized = True
-                print("Connection successful!")
+                    # Mark client as initialized
+                    self.client_initialized = True
+                    print("Connection successful!")
 
-        except ConnectionFailure as e:
-            error_msg = "Cannot connect to Mongo server\n"
-            error_msg += "ERROR -- {}:\n{}".format(
-                e, "".join(traceback.format_exception(None, e, e.__traceback__))
-            )
-            raise ValueError(error_msg)
+            except ConnectionFailure as e:
+                error_msg = "Cannot connect to Mongo server\n"
+                error_msg += "ERROR -- {}:\n{}".format(
+                    e, "".join(traceback.format_exception(None, e, e.__traceback__))
+                )
+                raise ValueError(error_msg)
 
     def _close_mongo_client(self):
         """Manually close the MongoDB client and mark it as not initialized."""
@@ -195,9 +195,6 @@ class MongoCatalogDBI:
 
     def _create_collections(self):
         """Grab a handle to the database and collections."""
-        if not self.client_initialized:
-            self._initialize_mongo_client()
-
         self.db = self.mongo_client[self.mongo_db]
         self.modules = self.db[MongoCatalogDBI._MODULES]
         self.module_versions = self.db[MongoCatalogDBI._MODULE_VERSIONS]
