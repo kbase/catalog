@@ -144,7 +144,7 @@ class MongoCatalogDBI:
         # Create indexes
         self._create_indexes()
 
-        # Close the MongoDB client manually
+        # Close the MongoDB client manually before forking
         self._close_mongo_client()
 
     def _initialize_mongo_client(self):
