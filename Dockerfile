@@ -1,5 +1,6 @@
 FROM python:3.9.19 AS build
 
+# The rsync installation is required for the Makefile
 RUN apt-get update && apt-get install -y rsync
 RUN mkdir -p /kb/deployment/lib/biokbase
 

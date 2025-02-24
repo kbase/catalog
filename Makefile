@@ -98,10 +98,6 @@ setup-tests:
 	mkdir -p $(TESTDIR)/nms
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
 
-#	cd narrative_method_store; make; make build-classpath-list;
-#	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
-
-
 
 test: setup-tests
 	-cp -n $(TESTDIR)/test.cfg.example $(TESTDIR)/test.cfg

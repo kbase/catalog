@@ -100,6 +100,9 @@ LOCAL_FUNCTIONS
     }
 '''
 
+# Module level lock
+lock = threading.Lock()
+
 class MongoCatalogDBI:
     # Collection Names
 
@@ -128,9 +131,7 @@ class MongoCatalogDBI:
         self.mongo_psswd = mongo_psswd
         self.mongo_authMechanism = mongo_authMechanism
 
-        self.lock = threading.Lock()
         self.mongo_client = None
-        self.client_initialized = False
 
         # Initialize mongo client
         self._initialize_mongo_client()
@@ -149,29 +150,28 @@ class MongoCatalogDBI:
 
     def _initialize_mongo_client(self):
         """Initialize MongoDB client with lock to prevent race conditions."""
+        if self.mongo_client:
+            return
+
         # Use the lock to ensure only one thread initializes the mongo client at a time
-        with self.lock:
+        with lock:
             try:
-                if not self.client_initialized or self.mongo_client is None:
-                    # This is only tested manually
-                    if self.mongo_user and self.mongo_psswd:
-                        # Connection string with authentication
-                        self.mongo_client = MongoClient(
-                            f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
-                        )
-                    else:
-                        # Connection string without authentication
-                        self.mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
+                # This is only tested manually
+                if self.mongo_user and self.mongo_psswd:
+                    # Connection string with authentication
+                    self.mongo_client = MongoClient(
+                        f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
+                    )
+                else:
+                    # Connection string without authentication
+                    self.mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
 
-                    # Force a call to server to verify the connection
-                    self.mongo_client.server_info()
+                # Force a call to server to verify the connection
+                self.mongo_client.server_info()
+                print("Connection successful!")
 
-                    # Mark client as initialized
-                    self.client_initialized = True
-                    print("Connection successful!")
-
-                    # Recreate the database and collection handles to avoid using a closed MongoClient
-                    self._create_collections()
+                # Recreate the database and collection handles to avoid using a closed MongoClient
+                self._create_collections()
 
             except ConnectionFailure as e:
                 error_msg = "Cannot connect to Mongo server\n"
@@ -181,11 +181,10 @@ class MongoCatalogDBI:
                 raise ValueError(error_msg)
 
     def _close_mongo_client(self):
-        """Manually close the MongoDB client and mark it as not initialized."""
+        """Manually close the MongoDB client and mark it as None."""
         if self.mongo_client:
             self.mongo_client.close()
-            self.mongo_client = None  # Ensure client is set to None to prevent invalid access
-            self.client_initialized = False  # Mark client as closed
+            self.mongo_client = None
             print("MongoDB client closed.")
 
     def _create_collections(self):
@@ -819,6 +818,7 @@ class MongoCatalogDBI:
         return module_document
 
     #### LIST / SEARCH methods
+
     def find_basic_module_info(self, query):
         self._initialize_mongo_client()
         selection = {
@@ -924,6 +924,7 @@ class MongoCatalogDBI:
             }))
 
     #### developer check methods
+
     def approve_developer(self, developer):
         self._initialize_mongo_client()
         # if the developer is already on the list, just return
