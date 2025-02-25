@@ -179,6 +179,7 @@ class MongoCatalogDBI:
         # Don't enter the lock if we already have the client
         if not self.mongo_client:
             with lock:
+                # Double-check if another thread has already initialized the client while we were waiting for the lock
                 if self.mongo_client:
                     return
                 self.mongo_client = self._initialize_mongo_client()
