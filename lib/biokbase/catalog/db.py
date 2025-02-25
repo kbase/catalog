@@ -134,58 +134,55 @@ class MongoCatalogDBI:
         self.mongo_client = None
 
         # Initialize mongo client
-        self._initialize_mongo_client()
-
-        # Create dbs and collections
-        self._create_collections()
+        mongo_client = self._initialize_mongo_client()
 
         # Check the db schema
-        self.check_db_schema()
+        self.check_db_schema(mongo_client)
 
         # Create indexes
-        self._create_indexes()
+        self._create_indexes(mongo_client)
 
         # Close the MongoDB client manually before forking
-        self._close_mongo_client()
+        mongo_client.close()
+        print("MongoDB client closed.")
+
 
     def _initialize_mongo_client(self):
-        """Initialize MongoDB client with lock to prevent race conditions."""
-        if self.mongo_client:
-            return
-
+        """Initialize MongoDB client."""
         # Use the lock to ensure only one thread initializes the mongo client at a time
-        with lock:
-            try:
-                # This is only tested manually
-                if self.mongo_user and self.mongo_psswd:
-                    # Connection string with authentication
-                    self.mongo_client = MongoClient(
-                        f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
-                    )
-                else:
-                    # Connection string without authentication
-                    self.mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
-
-                # Force a call to server to verify the connection
-                self.mongo_client.server_info()
-                print("Connection successful!")
-
-                # Recreate the database and collection handles to avoid using a closed MongoClient
-                self._create_collections()
-
-            except ConnectionFailure as e:
-                error_msg = "Cannot connect to Mongo server\n"
-                error_msg += "ERROR -- {}:\n{}".format(
-                    e, "".join(traceback.format_exception(None, e, e.__traceback__))
+        try:
+            # This is only tested manually
+            if self.mongo_user and self.mongo_psswd:
+                # Connection string with authentication
+                mongo_client = MongoClient(
+                    f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
                 )
-                raise ValueError(error_msg)
+            else:
+                # Connection string without authentication
+                mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
 
-    def _close_mongo_client(self):
-        """Manually close the MongoDB client and mark it as None."""
-        if self.mongo_client:
-            self.mongo_client.close()
-            self.mongo_client = None
-            print("MongoDB client closed.")
+            # Force a call to server to verify the connection
+            mongo_client.server_info()
+            print("Connection successful!")
+
+            return mongo_client
+
+        except ConnectionFailure as e:
+            error_msg = "Cannot connect to Mongo server\n"
+            error_msg += "ERROR -- {}:\n{}".format(
+                e, "".join(traceback.format_exception(None, e, e.__traceback__))
+            )
+            raise ValueError(error_msg)
+
+    def _ensure_mongo_connection(self):
+        """Ensure the MongoDB connection is active."""
+        # Don't enter the lock if we already have the client
+        if not self.mongo_client:
+            with lock:
+                if self.mongo_client:
+                    return
+                self.mongo_client = self._initialize_mongo_client()
+                self._create_collections()
 
     def _create_collections(self):
         """Grab a handle to the database and collections."""
@@ -206,103 +203,116 @@ class MongoCatalogDBI:
 
         self.secure_config_params = self.db[MongoCatalogDBI._SECURE_CONFIG_PARAMS]
 
-    def _create_indexes(self):
+    def _create_indexes(self, mongo_client):
+        db = mongo_client[self.mongo_db]
+
         # Make sure we have an index on module and git_repo_url
-        self.module_versions.create_index('module_name_lc', sparse=False)
-        self.module_versions.create_index('git_commit_hash', sparse=False)
-        self.module_versions.create_index([
+        module_versions = db[MongoCatalogDBI._MODULE_VERSIONS]
+        module_versions.create_index('module_name_lc', sparse=False)
+        module_versions.create_index('git_commit_hash', sparse=False)
+        module_versions.create_index([
             ('module_name_lc', ASCENDING),
             ('git_commit_hash', ASCENDING)],
             unique=True, sparse=False)
 
         # Make sure we have a unique index on module_name_lc and git_commit_hash
-        self.local_functions.create_index('function_id')
-        self.local_functions.create_index([
+        local_functions = db[MongoCatalogDBI._LOCAL_FUNCTIONS]
+        local_functions.create_index('function_id')
+        local_functions.create_index([
             ('module_name_lc', ASCENDING),
             ('function_id', ASCENDING),
             ('git_commit_hash', ASCENDING)],
             unique=True, sparse=False)
 
         # local function indecies
-        self.local_functions.create_index('module_name_lc')
-        self.local_functions.create_index('git_commit_hash')
-        self.local_functions.create_index('function_id')
-        self.local_functions.create_index([
+        local_functions.create_index('module_name_lc')
+        local_functions.create_index('git_commit_hash')
+        local_functions.create_index('function_id')
+        local_functions.create_index([
             ('module_name_lc', ASCENDING),
             ('function_id', ASCENDING),
             ('git_commit_hash', ASCENDING)],
             unique=True, sparse=False)
 
         # developers indecies
-        self.developers.create_index('kb_username', unique=True)
+        developers = db[MongoCatalogDBI._DEVELOPERS]
+        developers.create_index('kb_username', unique=True)
 
-        self.build_logs.create_index('registration_id', unique=True)
-        self.build_logs.create_index('module_name_lc')
-        self.build_logs.create_index('timestamp')
-        self.build_logs.create_index('registration')
-        self.build_logs.create_index('git_url')
-        self.build_logs.create_index('current_versions.release.release_timestamp')
+        build_logs = db[MongoCatalogDBI._BUILD_LOGS]
+        build_logs.create_index('registration_id', unique=True)
+        build_logs.create_index('module_name_lc')
+        build_logs.create_index('timestamp')
+        build_logs.create_index('registration')
+        build_logs.create_index('git_url')
+        build_logs.create_index('current_versions.release.release_timestamp')
 
         # for favorites
-        self.favorites.create_index('user')
-        self.favorites.create_index('module_name_lc')
-        self.favorites.create_index('id')
+        favorites = db[MongoCatalogDBI._FAVORITES]
+        favorites.create_index('user')
+        favorites.create_index('module_name_lc')
+        favorites.create_index('id')
         # you can only favorite a method once, so put a unique index on the triple
-        self.favorites.create_index([
+        favorites.create_index([
             ('user', ASCENDING),
             ('id', ASCENDING),
             ('module_name_lc', ASCENDING)],
             unique=True, sparse=False)
 
         # execution stats
-        self.exec_stats_raw.create_index('user_id',
+        exec_stats_raw = db[MongoCatalogDBI._EXEC_STATS_RAW]
+        exec_stats_raw.create_index('user_id',
                                          unique=False, sparse=False)
-        self.exec_stats_raw.create_index([('app_module_name', ASCENDING),
+        exec_stats_raw.create_index([('app_module_name', ASCENDING),
                                           ('app_id', ASCENDING)],
                                          unique=False, sparse=True)
-        self.exec_stats_raw.create_index([('func_module_name', ASCENDING),
+        exec_stats_raw.create_index([('func_module_name', ASCENDING),
                                           ('func_name', ASCENDING)],
                                          unique=False, sparse=True)
-        self.exec_stats_raw.create_index('creation_time',
+        exec_stats_raw.create_index('creation_time',
                                          unique=False, sparse=False)
-        self.exec_stats_raw.create_index('finish_time',
+        exec_stats_raw.create_index('finish_time',
                                          unique=False, sparse=False)
 
-        self.exec_stats_apps.create_index('module_name',
+        exec_stats_apps = db[MongoCatalogDBI._EXEC_STATS_APPS]
+        exec_stats_apps.create_index('module_name',
                                           unique=False, sparse=True)
-        self.exec_stats_apps.create_index([('full_app_id', ASCENDING),
+        exec_stats_apps.create_index([('full_app_id', ASCENDING),
                                            ('type', ASCENDING),
                                            ('time_range', ASCENDING)],
                                           unique=True, sparse=False)
-        self.exec_stats_apps.create_index([('type', ASCENDING),
+        exec_stats_apps.create_index([('type', ASCENDING),
                                            ('time_range', ASCENDING)],
                                           unique=False, sparse=False)
 
-        self.exec_stats_users.create_index([('user_id', ASCENDING),
+        exec_stats_users = db[MongoCatalogDBI._EXEC_STATS_USERS]
+        exec_stats_users.create_index([('user_id', ASCENDING),
                                             ('type', ASCENDING),
                                             ('time_range', ASCENDING)],
                                            unique=True, sparse=False)
 
         # client groups and volume mounts
-        self.client_groups.create_index([('module_name_lc', ASCENDING),
+        client_groups = db[MongoCatalogDBI._CLIENT_GROUPS]
+        client_groups.create_index([('module_name_lc', ASCENDING),
                                          ('function_name', ASCENDING)],
                                         unique=True, sparse=False)
 
-        self.volume_mounts.create_index([('client_group', ASCENDING),
+        volume_mounts = db[MongoCatalogDBI._VOLUME_MOUNTS]
+        volume_mounts.create_index([('client_group', ASCENDING),
                                          ('module_name_lc', ASCENDING),
                                          ('function_name', ASCENDING)],
                                         unique=True, sparse=False)
 
         # hidden configuration parameters
-        self.secure_config_params.create_index('module_name_lc')
-        self.secure_config_params.create_index([
+        secure_config_params = db[MongoCatalogDBI._SECURE_CONFIG_PARAMS]
+        secure_config_params.create_index('module_name_lc')
+        secure_config_params.create_index([
             ('module_name_lc', ASCENDING),
             ('version', ASCENDING),
             ('param_name', ASCENDING)],
             unique=True, sparse=False)
 
     def is_registered(self, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not module_name and not git_url:
             return False
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
@@ -312,7 +322,7 @@ class MongoCatalogDBI:
         return False
 
     def module_name_lc_exists(self, module_name_lc=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not module_name_lc:
             return False
         module = self.modules.find_one({'module_name_lc': module_name_lc.lower()}, ['_id'])
@@ -322,7 +332,7 @@ class MongoCatalogDBI:
 
     #### SET methods
     def create_new_build_log(self, registration_id, timestamp, registration_state, git_url):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         build_log = {
             'registration_id': registration_id,
             'timestamp': timestamp,
@@ -334,26 +344,26 @@ class MongoCatalogDBI:
         self.build_logs.insert_one(build_log)
 
     def delete_build_log(self, registration_id):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         self.build_logs.delete_one({'registration_id': registration_id})
 
     # new_lines is a list to objects, each representing a line
     # the object structure is : {'content':... 'error':True/False}
     def append_to_build_log(self, registration_id, new_lines):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         result = self.build_logs.update_one({'registration_id': registration_id},
                                             {'$push': {'log': {'$each': new_lines}}})
         return self._check_update_result(result)
 
     def set_build_log_state(self, registration_id, registration_state, error_message=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         result = self.build_logs.update_one({'registration_id': registration_id},
                                             {'$set': {'registration': registration_state,
                                                       'error_message': error_message}})
         return self._check_update_result(result)
 
     def set_build_log_module_name(self, registration_id, module_name):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         result = self.build_logs.update_one({'registration_id': registration_id},
                                             {'$set': {'module_name_lc': module_name.lower()}})
         return self._check_update_result(result)
@@ -366,7 +376,7 @@ class MongoCatalogDBI:
                     only_running=False,
                     only_error=False,
                     only_complete=False):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = {}
 
         registration_match = None
@@ -405,7 +415,7 @@ class MongoCatalogDBI:
     # slice arg is used in the mongo query for getting lines.  It is either a
     # pos int (get first n lines), neg int (last n lines), or array [skip, limit]
     def get_parsed_build_log(self, registration_id, slice_arg=None):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         selection = {
             'registration_id': 1,
             'timestamp': 1,
@@ -423,7 +433,7 @@ class MongoCatalogDBI:
 
     def register_new_module(self, git_url, username, timestamp, registration_state,
                             registration_id):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # get current time since epoch in ms in utc
         module = {
             'info': {},
@@ -449,7 +459,7 @@ class MongoCatalogDBI:
     # if the last_state does not match indicating another process changed the state
     def set_module_registration_state(self, module_name='', git_url='', new_state=None,
                                       last_state=None, error_message=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if new_state:
             query = self._get_mongo_query(module_name=module_name, git_url=git_url)
             if last_state:
@@ -461,7 +471,7 @@ class MongoCatalogDBI:
 
     def set_module_release_state(self, module_name='', git_url='', new_state=None, last_state=None,
                                  review_message=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if new_state:
             query = self._get_mongo_query(module_name=module_name, git_url=git_url)
             if last_state:
@@ -472,7 +482,7 @@ class MongoCatalogDBI:
         return False
 
     def push_beta_to_release(self, module_name='', git_url='', release_timestamp=None):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         current_versions = self.get_module_current_versions(module_name=module_name,
                                                             git_url=git_url,
                                                             substitute_versions=False)
@@ -500,7 +510,7 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def push_dev_to_beta(self, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         current_versions = self.get_module_current_versions(module_name=module_name,
                                                             git_url=git_url,
                                                             substitute_versions=False)
@@ -511,7 +521,7 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def update_dev_version(self, version_info):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if version_info:
             if 'git_commit_hash' in version_info and 'module_name_lc' in version_info:
 
@@ -540,7 +550,7 @@ class MongoCatalogDBI:
         return False
 
     def save_local_function_specs(self, local_functions):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # just using insert doesn't accept a list of docs in mongo 2.6, so loop for now
         for l in local_functions:
             matcher = {'module_name_lc': l['module_name_lc'], 'function_id': l['function_id'],
@@ -556,7 +566,7 @@ class MongoCatalogDBI:
 
     def lookup_module_versions(self, module_name, git_commit_hash=None, released=None,
                                included_fields=[], excluded_fields=[]):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = {'module_name_lc': module_name.strip().lower()}
 
         if git_commit_hash is not None:
@@ -575,7 +585,7 @@ class MongoCatalogDBI:
         return list(self.module_versions.find(query, selection))
 
     def list_local_function_info(self, release_tag=None, module_names=[]):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         git_commit_hash_list = []
         git_commit_hash_release_tag_map = {}
 
@@ -647,7 +657,7 @@ class MongoCatalogDBI:
         return returned_funcs
 
     def get_local_function_spec(self, functions):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         result_list = []
 
         # first lookup all the module info so we can figure out any tags, and make a quick dict
@@ -745,7 +755,7 @@ class MongoCatalogDBI:
         return result_list
 
     def set_module_name(self, git_url, module_name):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not module_name:
             raise ValueError('module_name must be defined to set a module name')
         query = self._get_mongo_query(git_url=git_url)
@@ -754,7 +764,7 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def set_module_info(self, info, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not info:
             raise ValueError('info must be defined to set the info for a module')
         if type(info) is not dict:
@@ -764,7 +774,7 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def set_module_owners(self, owners, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not owners:
             raise ValueError('owners must be defined to set the owners for a module')
         if type(owners) is not list:
@@ -775,19 +785,19 @@ class MongoCatalogDBI:
 
     # active = True | False
     def set_module_active_state(self, active, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = self._get_mongo_query(git_url=git_url, module_name=module_name)
         result = self.modules.update_one(query, {'$set': {'state.active': active}})
         return self._check_update_result(result)
 
     #### GET methods
     def get_module_state(self, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query, ['state'])['state']
 
     def get_module_current_versions(self, module_name='', git_url='', substitute_versions=True):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_document = self.modules.find_one(query, ['module_name_lc', 'current_versions'])
         if substitute_versions and 'module_name_lc' in module_document:
@@ -795,12 +805,12 @@ class MongoCatalogDBI:
         return module_document['current_versions']
 
     def get_module_owners(self, module_name='', git_url=''):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         return self.modules.find_one(query, ['owners'])['owners']
 
     def get_module_details(self, module_name='', git_url='', substitute_versions=True):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_details = self.modules.find_one(query, ['module_name', 'module_name_lc', 'git_url',
                                                        'info', 'owners', 'state',
@@ -810,7 +820,7 @@ class MongoCatalogDBI:
         return module_details
 
     def get_module_full_details(self, module_name='', git_url='', substitute_versions=True):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
         module_document = self.modules.find_one(query)
         if substitute_versions and 'module_name_lc' in module_document:
@@ -820,7 +830,7 @@ class MongoCatalogDBI:
     #### LIST / SEARCH methods
 
     def find_basic_module_info(self, query):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         selection = {
             '_id': 0,
             'module_name': 1,
@@ -833,7 +843,7 @@ class MongoCatalogDBI:
         return list(self.modules.find(query, selection))
 
     def find_current_versions_and_owners(self, query):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         result = list(self.modules.find(query,
                                         {'module_name': 1, 'module_name_lc': 1, 'git_url': 1,
                                          'current_versions': 1, 'owners': 1, '_id': 0}))
@@ -841,7 +851,7 @@ class MongoCatalogDBI:
         return result
 
     def substitute_hashes_for_version_info(self, module_list):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # get all the version commit hashes
         hash_list = []
         for mod in module_list:
@@ -888,7 +898,7 @@ class MongoCatalogDBI:
 
     # tag should be one of dev, beta, release - do checking outside of this method
     def list_service_module_versions_with_tag(self, tag):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         mods = list(self.modules.find({'info.dynamic_service': 1},
                                       {'module_name_lc': 1, 'module_name': 1,
                                        'current_versions.' + tag: 1}))
@@ -909,7 +919,7 @@ class MongoCatalogDBI:
 
     # all released service module versions
     def list_all_released_service_module_versions(self):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         return list(self.module_versions.find(
             {
                 'dynamic_service': 1,
@@ -926,21 +936,21 @@ class MongoCatalogDBI:
     #### developer check methods
 
     def approve_developer(self, developer):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # if the developer is already on the list, just return
         if self.is_approved_developer([developer])[0]:
             return
         self.developers.insert_one({'kb_username': developer})
 
     def revoke_developer(self, developer):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # if the developer is not on the list, throw an error (maybe a typo, so let's catch it)
         if not self.is_approved_developer([developer])[0]:
             raise ValueError('Cannot revoke "' + developer + '", that developer was not found.')
         self.developers.delete_one({'kb_username': developer})
 
     def is_approved_developer(self, usernames):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # TODO: optimize, but I expect the list of usernames will be fairly small, so we can loop.  Regardless, in
         # old mongo (2.x) I think this is even faster in most cases than using $in within a very large list
         is_approved = []
@@ -953,11 +963,11 @@ class MongoCatalogDBI:
         return is_approved
 
     def list_approved_developers(self):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         return list(self.developers.find({}, {'kb_username': 1, '_id': 0}))
 
     def migrate_module_to_new_git_url(self, module_name, current_git_url, new_git_url):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not new_git_url.strip():
             raise ValueError('New git url is required to migrate_module_to_new_git_url.')
         query = self._get_mongo_query(module_name=module_name, git_url=current_git_url)
@@ -969,7 +979,7 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def delete_module(self, module_name, git_url):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not module_name and not git_url:
             raise ValueError('Module name or git url is required to delete a module.')
         query = self._get_mongo_query(module_name=module_name, git_url=git_url)
@@ -989,7 +999,7 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def add_favorite(self, module_name, app_id, username, timestamp):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         favoriteAddition = {
             'user': username,
             'module_name_lc': module_name.strip().lower(),
@@ -1004,7 +1014,7 @@ class MongoCatalogDBI:
         self.favorites.insert_one(favoriteAddition)
 
     def remove_favorite(self, module_name, app_id, username):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         favoriteAddition = {
             'user': username,
             'module_name_lc': module_name.strip().lower(),
@@ -1019,19 +1029,19 @@ class MongoCatalogDBI:
         return self._check_update_result(result)
 
     def list_user_favorites(self, username):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = {'user': username}
         selection = {'_id': 0, 'module_name_lc': 1, 'id': 1, 'timestamp': 1}
         return list(self.favorites.find(query, selection).sort('timestamp', DESCENDING))
 
     def list_app_favorites(self, module_name, app_id):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         query = {'module_name_lc': module_name.strip().lower(), 'id': app_id.strip()}
         selection = {'_id': 0, 'user': 1, 'timestamp': 1}
         return list(self.favorites.find(query, selection).sort('timestamp', DESCENDING))
 
     def aggregate_favorites_over_apps(self, module_names_lc):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         ### WARNING! If we switch to Mongo 3.x, the result object will change and this will break
 
         # setup the query
@@ -1075,7 +1085,7 @@ class MongoCatalogDBI:
 
     # DEPRECATED! temporary function until everything is migrated to new client group structure
     def list_client_groups(self, app_ids):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if app_ids is not None:
             selection = {
                 '_id': 0,
@@ -1103,7 +1113,7 @@ class MongoCatalogDBI:
         return list(self.client_groups.find({}, selection))
 
     def set_client_group_config(self, config):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         config['module_name_lc'] = config['module_name'].lower()
         return self._check_update_result(self.client_groups.replace_one(
             {
@@ -1115,7 +1125,7 @@ class MongoCatalogDBI:
         ))
 
     def remove_client_group_config(self, config):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         config['module_name_lc'] = config['module_name'].lower()
         return self._check_update_result(self.client_groups.delete_one(
             {
@@ -1125,7 +1135,7 @@ class MongoCatalogDBI:
         ))
 
     def list_client_group_configs(self, filter):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         selection = {"_id": 0, "module_name_lc": 0}
         if 'module_name' in filter:
             filter['module_name_lc'] = filter['module_name'].lower()
@@ -1133,7 +1143,7 @@ class MongoCatalogDBI:
         return list(self.client_groups.find(filter, selection))
 
     def set_volume_mount(self, volume_mount):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         volume_mount['module_name_lc'] = volume_mount['module_name'].lower()
         return self._check_update_result(self.volume_mounts.replace_one(
             {
@@ -1146,7 +1156,7 @@ class MongoCatalogDBI:
         ))
 
     def remove_volume_mount(self, volume_mount):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         volume_mount['module_name_lc'] = volume_mount['module_name'].lower()
         return self._check_update_result(self.volume_mounts.delete_one(
             {
@@ -1156,7 +1166,7 @@ class MongoCatalogDBI:
             }))
 
     def list_volume_mounts(self, filter):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         selection = {"_id": 0, "module_name_lc": 0}
         if 'module_name' in filter:
             filter['module_name_lc'] = filter['module_name'].lower()
@@ -1195,7 +1205,7 @@ class MongoCatalogDBI:
     def add_exec_stats_raw(self, user_id, app_module_name, app_id, func_module_name, func_name,
                            git_commit_hash, creation_time, exec_start_time, finish_time, is_error,
                            job_id):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         stats = {
             'user_id': user_id,
             'app_module_name': app_module_name,
@@ -1213,7 +1223,7 @@ class MongoCatalogDBI:
 
     def add_exec_stats_apps(self, app_module_name, app_id, creation_time, exec_start_time,
                             finish_time, is_error, type, time_range):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         if not app_id:
             return
         full_app_id = app_id
@@ -1236,7 +1246,7 @@ class MongoCatalogDBI:
 
     def add_exec_stats_users(self, user_id, creation_time, exec_start_time,
                              finish_time, is_error, type, time_range):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         queue_time = exec_start_time - creation_time
         exec_time = finish_time - exec_start_time
         inc_data = {
@@ -1250,7 +1260,7 @@ class MongoCatalogDBI:
             {'$inc': inc_data}, upsert=True)
 
     def get_exec_stats_apps(self, full_app_ids, type, time_range):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         filter = {}
         if full_app_ids:
             filter['full_app_id'] = {'$in': full_app_ids}
@@ -1271,7 +1281,7 @@ class MongoCatalogDBI:
         return list(self.exec_stats_apps.find(filter, selection))
 
     def aggr_exec_stats_table(self, minTime, maxTime):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         # setup the query
         aggParams = None
         group = {
@@ -1325,7 +1335,7 @@ class MongoCatalogDBI:
         return counts
 
     def get_exec_raw_stats(self, minTime, maxTime):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         filter = {}
         creationTimeFilter = {}
         if minTime is not None:
@@ -1340,7 +1350,7 @@ class MongoCatalogDBI:
         return list(self.exec_stats_raw.find(filter, {'_id': 0}))
 
     def set_secure_config_params(self, data_list):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         for param_data in data_list:
             param_data['module_name_lc'] = param_data['module_name'].lower()
             param_data['version'] = param_data.get('version', '')
@@ -1354,7 +1364,7 @@ class MongoCatalogDBI:
                 upsert=True)
 
     def remove_secure_config_params(self, data_list):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         for param_data in data_list:
             param_data['module_name_lc'] = param_data['module_name'].lower()
             param_data['version'] = param_data.get('version', '')
@@ -1366,7 +1376,7 @@ class MongoCatalogDBI:
                 })
 
     def get_secure_config_params(self, module_name):
-        self._initialize_mongo_client()
+        self._ensure_mongo_connection()
         selection = {"_id": 0, "module_name_lc": 0}
         filter = {"module_name_lc": module_name.lower()}
         return list(self.secure_config_params.find(filter, selection))
@@ -1375,27 +1385,28 @@ class MongoCatalogDBI:
 
     # todo: add 'in-progress' flag so if something goes done during an update, or if
     # another server is already starting an update, we can skip or abort
-    def check_db_schema(self):
+    def check_db_schema(self, mongo_client):
+        db = mongo_client[self.mongo_db]
 
-        db_version = self.get_db_version()
+        db_version = self.get_db_version(db)
         print('db_version=' + str(db_version))
 
         if db_version < 2:
             print('Updating DB schema to V2...')
-            self.update_db_1_to_2()
-            self.update_db_version(2)
+            self.update_db_1_to_2(db)
+            self.update_db_version(2, db)
             print('done.')
 
         if db_version < 3:
             print('Updating DB schema to V3...')
-            self.update_db_2_to_3()
-            self.update_db_version(3)
+            self.update_db_2_to_3(db)
+            self.update_db_version(3, db)
             print('done.')
 
         if db_version < 4:
             print('Updating DB schema to V4...')
-            self.update_db_3_to_4()
-            self.update_db_version(4)
+            self.update_db_3_to_4(db)
+            self.update_db_version(4, db)
             print('done.')
 
         if db_version > 4:
@@ -1404,28 +1415,30 @@ class MongoCatalogDBI:
                 'Incompatible DB versions.  Expecting DB V4, found DV V' + str(db_version) +
                 '. You are probably running an old version of the service.  Start up failed.')
 
-    def get_db_version(self):
+    def get_db_version(self, db):
+
         # version is a collection that should only have a single
-        version_collection = self.db[MongoCatalogDBI._DB_VERSION]
+        version_collection = db[MongoCatalogDBI._DB_VERSION]
         ver = version_collection.find_one({})
         if (ver):
             return ver['version']
         else:
             # if there is no version document, then we are DB v1
-            self.update_db_version(1)
+            self.update_db_version(1, db)
             return 1
 
-    def update_db_version(self, version):
+    def update_db_version(self, version, db):
+
         # make sure we can't have two version documents
-        version_collection = self.db[MongoCatalogDBI._DB_VERSION]
+        version_collection = db[MongoCatalogDBI._DB_VERSION]
         version_collection.create_index('version_doc', unique=True, sparse=False)
         version_collection.update_one({'version_doc': True}, {'$set': {'version': version}},
                                       upsert=True)
 
     # version 1 kept released module versions in a map, version 2 updates that to a list
     # and adds dynamic service tags
-    def update_db_1_to_2(self):
-        modules_collection = self.db[MongoCatalogDBI._MODULES]
+    def update_db_1_to_2(self, db):
+        modules_collection = db[MongoCatalogDBI._MODULES]
         for m in modules_collection.find({'release_versions': {'$exists': True}}):
             release_version_list = []
             for timestamp in m['release_versions']:
@@ -1464,7 +1477,7 @@ class MongoCatalogDBI:
                         {'$set': {'current_versions.dev.dynamic_service': 0}})
 
         # also ensure the execution stats fields have correct names
-        exec_stats_apps_colleciton = self.db[MongoCatalogDBI._EXEC_STATS_APPS]
+        exec_stats_apps_colleciton = db[MongoCatalogDBI._EXEC_STATS_APPS]
         exec_stats_apps_colleciton.update_many({'avg_queue_time': {'$exists': True}},
                                          {'$rename': {'avg_queue_time': 'total_queue_time',
                                                       'avg_exec_time': 'total_exec_time'}})
@@ -1474,9 +1487,9 @@ class MongoCatalogDBI:
 
     # version 3 moves the module version information out of the module document into
     # a separate module versions collection.
-    def update_db_2_to_3(self):
+    def update_db_2_to_3(self, db):
 
-        module_versions_collection = self.db[MongoCatalogDBI._MODULE_VERSIONS]
+        module_versions_collection = db[MongoCatalogDBI._MODULE_VERSIONS]
         module_versions_collection.create_index('module_name_lc', sparse=False)
         module_versions_collection.create_index('git_commit_hash', sparse=False)
         module_versions_collection.create_index([
@@ -1484,7 +1497,7 @@ class MongoCatalogDBI:
             ('git_commit_hash', ASCENDING)],
             unique=True, sparse=False)
 
-        modules_collection = self.db[MongoCatalogDBI._MODULES]
+        modules_collection = db[MongoCatalogDBI._MODULES]
         # update all module versions
         for m in modules_collection.find({}):
 
@@ -1559,11 +1572,11 @@ class MongoCatalogDBI:
                 version['release_timestamp'] = None
 
     # version 4 performs a small modification to the client group structure and volume_mounts structure
-    def update_db_3_to_4(self):
+    def update_db_3_to_4(self, db):
 
         # make sure we don't have any indecies on the collections
-        volume_mounts_collection = self.db[MongoCatalogDBI._VOLUME_MOUNTS]
-        client_groups_collection = self.db[MongoCatalogDBI._CLIENT_GROUPS]
+        volume_mounts_collection = db[MongoCatalogDBI._VOLUME_MOUNTS]
+        client_groups_collection = db[MongoCatalogDBI._CLIENT_GROUPS]
 
         volume_mounts_collection.drop_indexes()
         client_groups_collection.drop_indexes()
