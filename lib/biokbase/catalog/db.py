@@ -149,7 +149,6 @@ class MongoCatalogDBI:
 
     def _initialize_mongo_client(self):
         """Initialize MongoDB client."""
-        # Use the lock to ensure only one thread initializes the mongo client at a time
         try:
             # This is only tested manually
             if self.mongo_user and self.mongo_psswd:
@@ -168,16 +167,13 @@ class MongoCatalogDBI:
             return mongo_client
 
         except ConnectionFailure as e:
-            error_msg = "Cannot connect to Mongo server\n"
-            error_msg += "ERROR -- {}:\n{}".format(
-                e, "".join(traceback.format_exception(None, e, e.__traceback__))
-            )
-            raise ValueError(error_msg)
+            raise ValueError(f"Cannot connect to Mongo server: {e}") from e
 
     def _ensure_mongo_connection(self):
         """Ensure the MongoDB connection is active."""
         # Don't enter the lock if we already have the client
         if not self.mongo_client:
+            # Use the lock to ensure only one thread initializes the mongo client at a time
             with lock:
                 # Double-check if another thread has already initialized the client while we were waiting for the lock
                 if self.mongo_client:

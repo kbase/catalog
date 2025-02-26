@@ -17,9 +17,10 @@ services:
       - method_spec_temp_dir=narrative_method_store_temp
       - method_spec_mongo_host=mongo:27017
       - method_spec_mongo_dbname=method_store_repo_db
-      # For testing locally, either export the ADMIN_USER variable directly in the shell,
-      # or hardcode an admin user in the YAML file.
       - method_spec_admin_users=${ADMIN_USER}
+      # For local testing, you can comment the above line and
+      # set method_spec_admin_users directly to your kbase_id, as shown in the example below:
+      # - method_spec_admin_users=sijiex
       - endpoint_host=https://ci.kbase.us
       - endpoint_base=/services
       - method_spec_default_tag=dev
