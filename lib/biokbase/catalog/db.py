@@ -1486,7 +1486,9 @@ class MongoCatalogDBI:
         exec_stats_apps_colleciton.update_many({'avg_queue_time': {'$exists': True}},
                                          {'$rename': {'avg_queue_time': 'total_queue_time',
                                                       'avg_exec_time': 'total_exec_time'}})
-        exec_stats_apps_colleciton.update_many({'avg_queue_time': {'$exists': True}},
+
+        exec_stats_users_collection = db[MongoCatalogDBI._EXEC_STATS_USERS]
+        exec_stats_users_collection.update_many({'avg_queue_time': {'$exists': True}},
                                           {'$rename': {'avg_queue_time': 'total_queue_time',
                                                        'avg_exec_time': 'total_exec_time'}})
 
