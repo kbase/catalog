@@ -125,6 +125,14 @@ class MongoCatalogDBI:
 
     def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd, mongo_authMechanism):
 
+        # We're performing two MongoDB client initializations—one during the initial setup (on init), and
+        # another lazy initialization after the process is forked. This approach is necessary because MongoDB client
+        # connections are not fork-safe. When a process is forked, the child process inherits a copy of the parent’s memory,
+        # but the client connection doesn't transfer properly. This can cause issues if both the parent and child
+        # processes share the same connection. To prevent this, we close the MongoDB client connection before forking
+        # and reinitialize it in each process, ensuring that both the parent and child processes maintain
+        # their own independent, functional connections.
+
         self.mongo_host = mongo_host
         self.mongo_db = mongo_db
         self.mongo_user = mongo_user
