@@ -127,7 +127,9 @@ class MongoCatalogDBI:
 
         # We're performing two MongoDB client initializations—one during the initial setup (on init), and
         # another lazy initialization after the process is forked. This approach is necessary because MongoDB client
-        # connections are not fork-safe. When a process is forked, the child process inherits a copy of the parent’s memory,
+        # connections are not fork-safe and some servers, including uwsgi, fork workers from parent processes.
+
+        # When a process is forked, the child process inherits a copy of the parent’s memory,
         # but the client connection doesn't transfer properly. This can cause issues if both the parent and child
         # processes share the same connection. To prevent this, we close the MongoDB client connection before forking
         # and reinitialize it in each process, ensuring that both the parent and child processes maintain
@@ -1482,8 +1484,8 @@ class MongoCatalogDBI:
                         {'$set': {'current_versions.dev.dynamic_service': 0}})
 
         # also ensure the execution stats fields have correct names
-        exec_stats_apps_colleciton = db[MongoCatalogDBI._EXEC_STATS_APPS]
-        exec_stats_apps_colleciton.update_many({'avg_queue_time': {'$exists': True}},
+        exec_stats_apps_collection = db[MongoCatalogDBI._EXEC_STATS_APPS]
+        exec_stats_apps_collection.update_many({'avg_queue_time': {'$exists': True}},
                                          {'$rename': {'avg_queue_time': 'total_queue_time',
                                                       'avg_exec_time': 'total_exec_time'}})
 
