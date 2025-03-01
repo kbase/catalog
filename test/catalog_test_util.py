@@ -229,7 +229,8 @@ class CatalogTestUtil:
         # make sure NMS is clean after each test
         # Drop the database set by the method_spec_mongo_dbname environment variable
         # in the docker-compose_nms.yml file.
-        self.mongo.drop_database('method_store_repo_db')
+        nms_mongo_client = MongoClient('mongodb://localhost:27018')
+        nms_mongo_client.drop_database('method_store_repo_db')
 
     def log(self, mssg):
         # uncomment to debug test rig- warning: on travis this may print any passwords in your config
