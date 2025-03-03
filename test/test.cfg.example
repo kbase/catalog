@@ -3,11 +3,8 @@
 
 # TO RUN TESTS:
 #  1) copy this file to test.cfg
-#  2) fill in the mongodb-host url in both [catalog-test] and [NarrativeMethodStore]
-#  3) set the nms-admin-user and nms-admin-password or nms-admin-token to a
-#      kb user that matches the method-spec-admin-users list in
-#      the [NarrativeMethodStore section]
-# 
+#  2) set the nms-admin-token to a kb user that matches the method-spec-admin-users list
+#      in the docker-compose_nms.yml file
 
 [catalog-test]
 
@@ -38,28 +35,9 @@ mongodb-database = catalog-test
 docker-base-url = unix://var/run/docker.sock
 
 # Narrative Method Store configuration. Please provide a token.
-# If both are provided, the token is used.
-nms-url = http://localhost:7125
+nms-url = http://localhost:7125/rpc
 nms-admin-token = 
 
 # configs for reference data
 ref-data-base = /kb/data
 kbase-endpoint = https://ci.kbase.us/services
-
-
-[NarrativeMethodStore]
-
-method-spec-mongo-host = localhost:27017
-method-spec-admin-users = wstester4
-
-method-spec-git-repo-local-dir = nms/local_narrative_method_specs
-method-spec-temp-dir = nms/scratch
-
-method-spec-git-repo = https://github.com/kbase/narrative_method_specs
-method-spec-git-repo-branch = develop
-method-spec-git-repo-refresh-rate = 2000
-method-spec-cache-size = 5000
-method-spec-mongo-dbname = method_store_repo_db
-
-# The KBase auth server url.
-auth-service-url=https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login

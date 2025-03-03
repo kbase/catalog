@@ -21,10 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - python-version: '3.7'
+          - python-version: '3.9.19'
             mongo-version: '3.6'
-          # - python-version: '3.7'
-          #   mongo-version: '7.0.4'
+          - python-version: '3.9.19'
+            mongo-version: '7.0.4'
     services:
       mongo:
         image: mongo:${{matrix.mongo-version}}
@@ -32,11 +32,14 @@ jobs:
             - 27017:27017
         options: --name mongo${{matrix.mongo-version}}
 
+    env:
+      KBASE_CI_TOKEN: ${{ secrets.KBASE_CI_TOKEN }}
+      # This env var is also used in the catalog test docker compose file for starting NMS
+      ADMIN_USER: ${{ secrets.KBASE_BOT_USER_CI }}
+
     steps:
       - name: Repo checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -45,9 +48,6 @@ jobs:
 
       - name: Install dependencies and set up test config
         shell: bash
-        env:
-          KBASE_CI_TOKEN: ${{ secrets.KBASE_CI_TOKEN }}
-          ADMIN_USER: ${{ secrets.KBASE_BOT_USER_CI }}
 
         run: |
 

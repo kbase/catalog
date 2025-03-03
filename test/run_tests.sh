@@ -11,16 +11,15 @@
 # start the test NMS endpoint
 echo 'Starting NMS...'
 export KB_DEPLOYMENT_CONFIG=test.cfg
-classpath=`cat ../narrative_method_store/dist/jar.classpath.txt`
-java -cp $classpath us.kbase.narrativemethodstore.NarrativeMethodStoreServer 7125 > nms/error.log 2>&1 &
+docker compose -f docker-compose_nms.yml up -d
 NMS_PID=$!
 
 echo 'Starting Mock Auth API...'
-docker run -d --rm -v ${PWD}/mock_auth:/config -p 7777:5000 --name mock-auth mockservices/mock_json_service
+docker run -d --rm -v ${PWD}/mock_auth:/config -v ${PWD}/mock_auth/server.py:/server/server.py -p 7777:5000 --name mock-auth mockservices/mock_json_service
 
 echo 'Waiting for NMS to start...'
 sleep 25
-curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125
+curl -d '{"id":"1","params":[],"method":"NarrativeMethodStore.ver","version":"1.1"}' http://localhost:7125/rpc
 if [ $? -ne 0 ]; then
     kill -9 $NMS_PID
     echo 'NMS did not startup in time.  Fail.'
@@ -57,7 +56,7 @@ echo "unit tests returned with error code=${TEST_RETURN_CODE}"
 ####  SHUTDOWN stuff and exit
 
 # stop NMS
-kill -9 $NMS_PID
+docker compose -f docker-compose_nms.yml down
 
 #stop Docker containers
 docker stop mock-auth
