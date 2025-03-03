@@ -13,7 +13,7 @@ ARG BUILD_DATE
 ARG VCS_REF
 ARG BRANCH
 
-RUN apt-get update && apt-get install -y wget uwsgi
+RUN apt-get update && apt-get install -y wget
 
 # install dockerize
 WORKDIR /opt
