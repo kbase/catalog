@@ -123,7 +123,7 @@ class MongoCatalogDBI:
     _EXEC_STATS_USERS = 'exec_stats_users'
     _SECURE_CONFIG_PARAMS = 'secure_config_params'
 
-    def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd, mongo_authMechanism):
+    def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd, mongo_auth_mechanism):
 
         # We're performing two MongoDB client initializations—one during the initial setup (on init), and
         # another lazy initialization after the process is forked. This approach is necessary because MongoDB client
@@ -139,7 +139,7 @@ class MongoCatalogDBI:
         self.mongo_db = mongo_db
         self.mongo_user = mongo_user
         self.mongo_psswd = mongo_psswd
-        self.mongo_authMechanism = mongo_authMechanism
+        self.mongo_auth_mechanism = mongo_auth_mechanism
 
         self.mongo_client = None
 
@@ -164,7 +164,7 @@ class MongoCatalogDBI:
             if self.mongo_user and self.mongo_psswd:
                 # Connection string with authentication
                 mongo_client = MongoClient(
-                    f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_authMechanism}"
+                    f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_auth_mechanism}"
                 )
             else:
                 # Connection string without authentication
