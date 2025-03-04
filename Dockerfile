@@ -13,7 +13,7 @@ ARG BUILD_DATE
 ARG VCS_REF
 ARG BRANCH
 
-RUN apt-get update && apt-get install -y wget uwsgi
+RUN apt-get update && apt-get install -y wget
 
 # install dockerize
 WORKDIR /opt
@@ -30,9 +30,14 @@ COPY --from=build /kb/deployment/services /kb/deployment/services
 COPY --from=build /tmp/catalog/deployment/conf /kb/deployment/conf
 
 WORKDIR /tmp/catalog
-RUN pip install --upgrade pip
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+
+# install pipenv
+RUN pip install --upgrade pip && \
+    pip install pipenv
+
+# install deps
+COPY Pipfile* ./
+RUN pipenv sync --system
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/kbase/catalog.git" \
