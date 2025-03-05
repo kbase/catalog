@@ -1,6 +1,5 @@
 import copy
 import pprint
-import traceback
 import threading
 
 from pymongo import ASCENDING
@@ -123,7 +122,7 @@ class MongoCatalogDBI:
     _EXEC_STATS_USERS = 'exec_stats_users'
     _SECURE_CONFIG_PARAMS = 'secure_config_params'
 
-    def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd, mongo_auth_mechanism):
+    def __init__(self, mongo_host, mongo_db, mongo_user, mongo_psswd, mongo_auth_mechanism, mongo_retry_writes):
 
         # We're performing two MongoDB client initializations—one during the initial setup (on init), and
         # another lazy initialization after the process is forked. This approach is necessary because MongoDB client
@@ -140,6 +139,7 @@ class MongoCatalogDBI:
         self.mongo_user = mongo_user
         self.mongo_psswd = mongo_psswd
         self.mongo_auth_mechanism = mongo_auth_mechanism
+        self.mongo_retry_writes = mongo_retry_writes
 
         self.mongo_client = None
 
@@ -164,11 +164,19 @@ class MongoCatalogDBI:
             if self.mongo_user and self.mongo_psswd:
                 # Connection string with authentication
                 mongo_client = MongoClient(
-                    f"mongodb://{self.mongo_user}:{self.mongo_psswd}@{self.mongo_host}/{self.mongo_db}?authMechanism={self.mongo_auth_mechanism}"
+                    self.mongo_host,
+                    username=self.mongo_user,
+                    password=self.mongo_psswd,
+                    authSource=self.mongo_db,
+                    authMechanism=self.mongo_auth_mechanism,
+                    retryWrites=self.mongo_retry_writes
                 )
             else:
                 # Connection string without authentication
-                mongo_client = MongoClient(f"mongodb://{self.mongo_host}")
+                mongo_client = MongoClient(
+                    self.mongo_host,
+                    retryWrites=self.mongo_retry_writes
+                )
 
             # Force a call to server to verify the connection
             mongo_client.server_info()

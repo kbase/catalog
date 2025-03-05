@@ -15,6 +15,9 @@ mongodb-pwd = {{ default .Env.mongodb_pwd "" }}
 # auth mechanism
 mongodb-authmechanism = {{ default .Env.mongodb_authMechanism "DEFAULT" }}
 
+# Whether to enable the MongoDB retryWrites parameter or not
+mongodb-retrywrites={{ default .Env.db_retrywrites "false" }}
+
 # The KBase auth server url.
 auth-service-url = {{ default .Env.auth_service_url "https://kbase.us/services/authorization/Sessions/Login" }}
 # The KBase auth API.
