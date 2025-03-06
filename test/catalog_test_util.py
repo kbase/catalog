@@ -63,7 +63,6 @@ class CatalogTestUtil:
             'admin-users': self.test_user_2,
             'mongodb-host': self.test_cfg['mongodb-host'],
             'mongodb-database': self.test_cfg['mongodb-database'],
-            'mongodb-retrywrites': self.test_cfg['mongodb-retrywrites'],
             'temp-dir': self.scratch_dir,
             'docker-base-url': self.test_cfg['docker-base-url'],
             'docker-registry-host': self.test_cfg['docker-registry-host'],

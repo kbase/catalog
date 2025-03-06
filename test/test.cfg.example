@@ -31,10 +31,6 @@ docker-registry-host = localhost:5000
 # WARNING: this will get wiped!  Don't run tests against something that you may want to keep!
 mongodb-database = catalog-test
 
-# Whether to enable ('true') the MongoDB retryWrites parameter or not (anything other than 'true').
-# See https://www.mongodb.com/docs/manual/core/retryable-writes/
-mongodb-retrywrites=false
-
 # Path to docker socket/host - you can leave this blank if you have the appropriate docker env variables defined
 docker-base-url = unix://var/run/docker.sock
 
