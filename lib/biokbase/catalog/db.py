@@ -141,6 +141,10 @@ class MongoCatalogDBI:
         self.mongo_auth_mechanism = mongo_auth_mechanism
         self.mongo_retry_writes = mongo_retry_writes
 
+        print("*" * 50)
+        print(f"self.mongo_retry_writes is: {self.mongo_retry_writes}")
+        print("*" * 50)
+
         self.mongo_client = None
 
         # Initialize mongo client
