@@ -56,13 +56,21 @@ class CatalogController:
             warnings.warn('"mongodb-authmechanism" is not set in config of CatalogController, using DEFAULT.')
             config['mongodb-authmechanism'] = 'DEFAULT'
 
+        if 'mongodb-retrywrites' not in config:  # pragma: no cover
+            warnings.warn('"mongodb-retrywrites" is not set in config of CatalogController, using False.')
+            config['mongodb-retrywrites'] = False
+        else:
+            config['mongodb-retrywrites'] = config['mongodb-retrywrites'] == "true"
+
         # instantiate the mongo client
         self.db = MongoCatalogDBI(
             config['mongodb-host'],
             config['mongodb-database'],
             config['mongodb-user'],
             config['mongodb-pwd'],
-            config['mongodb-authmechanism'])
+            config['mongodb-authmechanism'],
+            config['mongodb-retrywrites']
+        )
 
         # check for the temp directory and make sure it exists
         if 'temp-dir' not in config:  # pragma: no cover
