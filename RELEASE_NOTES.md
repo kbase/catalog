@@ -8,7 +8,7 @@
   - Added pipenv to handle dependencies. 
   - Removed .travis.yml and added test.yml in .github/workflows for updated CI configuration.
   - Updated Python to 3.9.19.
-  - Implemented two MongoDB client initializations in db.py: one during the init setup and another for lazy initializtion after process forking, preventing the "MongoClient opened before fork" error.
+  - Implemented two MongoDB client initializations in db.py: one during the init setup and another for lazy initialization after process forking, preventing the "MongoClient opened before fork" error.
 
 ## v2.2.4 - 7/10/2020
   - Use auth role for list_approved_developers()
