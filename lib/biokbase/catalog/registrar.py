@@ -252,7 +252,7 @@ class Registrar:
         with codecs.open(os.path.join(basedir, yaml_filename), 'r', "utf-8",
                          errors='ignore') as kb_yaml_file:
             kb_yaml_string = kb_yaml_file.read()
-        self.kb_yaml = yaml.load(kb_yaml_string)
+        self.kb_yaml = yaml.safe_load(kb_yaml_string)
         self.log('=====kbase.yaml parse:')
         self.log(pprint.pformat(self.kb_yaml))
         self.log('=====end kbase.yaml')

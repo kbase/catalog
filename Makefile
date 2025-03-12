@@ -27,11 +27,6 @@ LIB_DIR = lib
 
 PATH := kb_sdk/bin:$(PATH)
 
-default: init
-
-init:
-	git submodule init
-	git submodule update
 
 compile-kb-module:
 	kb-sdk compile $(SPEC_FILE) \
@@ -102,10 +97,6 @@ setup-tests:
 	mkdir -p $(TESTLIB)/biokbase
 	mkdir -p $(TESTDIR)/nms
 	rsync -av lib/biokbase/* $(TESTLIB)/biokbase/. --exclude *.bak-*
-	rsync -av kbapi_common/lib/biokbase/* $(TESTLIB)/biokbase/.
-	cd narrative_method_store; make; make build-classpath-list;
-#	rsync -av narrative_method_store/lib/biokbase/* $(TESTLIB)/biokbase/.
-
 
 
 test: setup-tests

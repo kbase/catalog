@@ -37,6 +37,7 @@ class CoreRegistrationTest(unittest.TestCase):
         self.assertEqual(state['registration'], 'complete')
 
         # (3) check the log
+        sleep(3)  # sleep to make sure the catalog db gets the final log messages
         parsed_log = self.catalog.get_parsed_build_log(self.cUtil.anonymous_ctx(),
                                                        {'registration_id': registration_id})[0]
         self.assertEqual(parsed_log['registration'], 'complete')

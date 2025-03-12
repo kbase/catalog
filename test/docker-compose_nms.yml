@@ -1,0 +1,50 @@
+version: '3.4'
+
+services:
+  nms:
+    image: ghcr.io/kbase/narrative_method_store:v0.3.12
+    platform: linux/amd64
+    ports:
+      - "7125:7125"
+    depends_on: ["mongo"]
+    environment:
+      # see deployment/conf/.templates for more environment variables
+      - method_spec_git_repo=https://github.com/kbase/narrative_method_specs_ci
+      - method_spec_git_repo_branch=master
+      - method_spec_git_repo_local_dir=narrative_method_specs_recreated_at_startup
+      - method_spec_git_repo_refresh_rate=2
+      - method_spec_cache_size=5000
+      - method_spec_temp_dir=narrative_method_store_temp
+      - method_spec_mongo_host=mongo:27017
+      - method_spec_mongo_dbname=method_store_repo_db
+      - method_spec_admin_users=${ADMIN_USER}
+      # For local testing, you can comment the above line and
+      # set method_spec_admin_users directly to your kbase_id, as shown in the example below:
+      # - method_spec_admin_users=sijiex
+      - endpoint_host=https://ci.kbase.us
+      - endpoint_base=/services
+      - method_spec_default_tag=dev
+      - auth_service_url=https://ci.kbase.us/services/auth/api/legacy/KBase/Sessions/Login
+      - auth_service_url_allow_insecure=false
+      - service_port=7125
+    command:
+      - "-wait"
+      - "tcp://mongo:27017"
+      - "-timeout"
+      - "120s"
+      - "-template"
+      - "/kb/deployment/conf/.templates/deployment.cfg.templ:/kb/deployment/conf/deployment.cfg"
+      - "-template"
+      - "/kb/deployment/conf/.templates/http.ini.templ:/kb/deployment/services/narrative_method_store/start.d/http.ini"
+      - "-template"
+      - "/kb/deployment/conf/.templates/server.ini.templ:/kb/deployment/services/narrative_method_store/start.d/server.ini"
+      - "-template"
+      - "/kb/deployment/conf/.templates/start_server.sh.templ:/kb/deployment/bin/start_server.sh"
+      - "-stdout"
+      - "/kb/deployment/services/narrative_method_store/logs/request.log"
+      - "/kb/deployment/bin/start_server.sh"
+
+  mongo:
+    image: "mongo:7.0.4"
+    ports:
+      - "27018:27017"

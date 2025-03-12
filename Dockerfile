@@ -1,14 +1,27 @@
-FROM kbase/sdkbase2:python AS build
+FROM python:3.9.19 AS build
 
+# The rsync installation is required for the Makefile
+RUN apt-get update && apt-get install -y rsync
+RUN mkdir -p /kb/deployment/lib/biokbase
 
 COPY . /tmp/catalog
 RUN cd /tmp/catalog && make deploy-service deploy-server-control-scripts
 
-FROM kbase/sdkbase2:python
+FROM python:3.9.19
 # These ARGs values are passed in via the docker build command
 ARG BUILD_DATE
 ARG VCS_REF
 ARG BRANCH
+
+RUN apt-get update && apt-get install -y wget
+
+# install dockerize
+WORKDIR /opt
+RUN wget -q https://github.com/kbase/dockerize/raw/master/dockerize-linux-amd64-v0.6.1.tar.gz \
+    && tar xvzf dockerize-linux-amd64-v0.6.1.tar.gz \
+    && rm dockerize-linux-amd64-v0.6.1.tar.gz
+RUN mkdir -p /kb/deployment/bin/
+RUN ln -s /opt/dockerize /kb/deployment/bin/dockerize
 
 ENV KB_DEPLOYMENT_CONFIG "/kb/deployment/conf/deploy.cfg"
 
@@ -16,10 +29,15 @@ COPY --from=build /kb/deployment/lib/biokbase /kb/deployment/lib/biokbase
 COPY --from=build /kb/deployment/services /kb/deployment/services
 COPY --from=build /tmp/catalog/deployment/conf /kb/deployment/conf
 
-SHELL ["/bin/bash", "-c"]
-COPY requirements.txt requirements.txt
-RUN source activate root && \
-    pip install -r requirements.txt
+WORKDIR /tmp/catalog
+
+# install pipenv
+RUN pip install --upgrade pip && \
+    pip install pipenv
+
+# install deps
+COPY Pipfile* ./
+RUN pipenv sync --system
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/kbase/catalog.git" \

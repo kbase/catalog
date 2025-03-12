@@ -16,7 +16,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         # assume test user is already approved as a developer
         # (1) register the test repo
         giturl = self.cUtil.get_test_repo_1()
-        githash = 'a01e1a20b9c504a0136c75323b00b1cd4c7f7970'  # branch local_method_module
+        githash = 'a8915afe6811de9199897d710348befad8f6f7ab'  # branch local_method_module
         registration_id = self.catalog.register_repo(self.cUtil.user_ctx(),
                                                      {'git_url': giturl,
                                                       'git_commit_hash': githash})[0]
@@ -59,7 +59,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         self.assertEqual(len(specs), 1)
         info = specs[0]['info']
         self.assertEqual(info['function_id'], 'powerpoint_to_genome')
-        self.assertEqual(info['git_commit_hash'], 'a01e1a20b9c504a0136c75323b00b1cd4c7f7970')
+        self.assertEqual(info['git_commit_hash'], 'a8915afe6811de9199897d710348befad8f6f7ab')
         self.assertEqual(info['module_name'], 'GenomeToPowerpointConverter')
         self.assertEqual(info['name'], 'Powerpoint to Genome')
         self.assertEqual(info['release_tag'], ['dev'])
@@ -122,7 +122,7 @@ class LocalFunctionModuleTest(unittest.TestCase):
         self.assertEqual(len(specs), 1)
         info = specs[0]['info']
         self.assertEqual(info['function_id'], 'powerpoint_to_genome')
-        self.assertEqual(info['git_commit_hash'], 'a01e1a20b9c504a0136c75323b00b1cd4c7f7970')
+        self.assertEqual(info['git_commit_hash'], 'a8915afe6811de9199897d710348befad8f6f7ab')
         self.assertEqual(info['module_name'], 'GenomeToPowerpointConverter')
         self.assertEqual(info['name'], 'Powerpoint to Genome')
         self.assertEqual(info['release_tag'], ['beta', 'dev'])
@@ -179,12 +179,12 @@ class LocalFunctionModuleTest(unittest.TestCase):
         # make sure we can fetch it by commit hash
         specs = self.catalog.get_local_function_details(self.cUtil.user_ctx(), {'functions': [
             {'module_name': 'GenomeTopowerpointConverter', 'function_id': 'powerpoint_to_genome',
-             'git_commit_hash': 'a01e1a20b9c504a0136c75323b00b1cd4c7f7970'}]})[0]
+             'git_commit_hash': 'a8915afe6811de9199897d710348befad8f6f7ab'}]})[0]
 
         self.assertEqual(len(specs), 1)
         info = specs[0]['info']
         self.assertEqual(info['function_id'], 'powerpoint_to_genome')
-        self.assertEqual(info['git_commit_hash'], 'a01e1a20b9c504a0136c75323b00b1cd4c7f7970')
+        self.assertEqual(info['git_commit_hash'], 'a8915afe6811de9199897d710348befad8f6f7ab')
         self.assertEqual(info['module_name'], 'GenomeToPowerpointConverter')
         self.assertEqual(info['name'], 'Powerpoint to Genome')
         self.assertEqual(info['release_tag'], ['release', 'beta', 'dev'])
