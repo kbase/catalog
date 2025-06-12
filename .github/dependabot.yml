@@ -1,14 +1,26 @@
 version: 2
 updates:
-- package-ecosystem: docker
-  directory: "/"
-  schedule:
-    interval: weekly
-    time: '11:00'
-  open-pull-requests-limit: 10
-- package-ecosystem: pip
-  directory: "/"
-  schedule:
-    interval: weekly
-    time: '11:00'
-  open-pull-requests-limit: 10
+
+  # Docker base image updates
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+      time: "11:00"
+    open-pull-requests-limit: 10
+
+  # Python (pip) dependencies
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+      time: "11:00"
+    open-pull-requests-limit: 10
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: ".github/workflows"
+    schedule:
+      interval: weekly
+      time: "11:00"
+    open-pull-requests-limit: 10
