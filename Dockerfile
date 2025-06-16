@@ -1,4 +1,4 @@
-FROM python:3.9.19 AS build
+FROM python:3.13.5 AS build
 
 # The rsync installation is required for the Makefile
 RUN apt-get update && apt-get install -y rsync
@@ -7,7 +7,7 @@ RUN mkdir -p /kb/deployment/lib/biokbase
 COPY . /tmp/catalog
 RUN cd /tmp/catalog && make deploy-service deploy-server-control-scripts
 
-FROM python:3.9.19
+FROM python:3.13.5
 # These ARGs values are passed in via the docker build command
 ARG BUILD_DATE
 ARG VCS_REF
