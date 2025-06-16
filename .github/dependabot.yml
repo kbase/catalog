@@ -5,22 +5,22 @@ updates:
   - package-ecosystem: docker
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
       time: "11:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 25
 
   # Python (pip) dependencies
   - package-ecosystem: pip
     directory: "/"
     schedule:
-      interval: weekly
+      interval: monthly
       time: "11:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 25
 
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
     directory: ".github/workflows"
     schedule:
-      interval: weekly
+      interval: monthly
       time: "11:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 25
