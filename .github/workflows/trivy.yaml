@@ -1,0 +1,129 @@
+name: trivy
+
+on:
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+  schedule:
+    - cron: '0 0 1 * *'
+  push:
+    branches: [ "main", "master", "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      security-events: write # Required for uploading SARIF to GitHub Security tab
+
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -t docker.io/kbase/trivy:scan .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "kbase/trivy:scan"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          timeout: "20m"
+          ignore-unfixed: true
+          severity: 'HIGH,CRITICAL'
+          limit-severities-for-sarif: true
+          exit-code: '1' # Fail Step if CVE of specified severity is detected
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        # This step should always run to upload scan results, even if Trivy found issues
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Save SARIF file for subsequent jobs (1-day retention)
+        # Always upload artifact so subsequent job can run, even if previous step failed
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-sarif-results
+          path: trivy-results.sarif
+          retention-days: 1 # Artifact will be deleted from GitHub storage after 1 day
+
+  check_critical_cves: # Renamed job for clarity
+    permissions:
+      contents: read
+      statuses: write # Required to update GitHub commit status
+    name: Log4j CVE checker # Name displayed in GitHub Actions UI for this job
+    runs-on: ubuntu-latest
+    needs: build # This job depends on the 'build' job completing first
+    if: always() # Run this job even if the 'build' job failed (e.g., due to Trivy exit code)
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download SARIF file
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-sarif-results
+          path: . # Downloads to the current working directory
+
+      - name: Check for specific critical CVEs (Log4j/Spring)
+        id: cve_check # ID for this step, used to reference its outputs later
+        run: |
+          set -e # Exit immediately if a command exits with a non-zero status
+
+          REQUIRED_CVES="CVE-2021-4104 CVE-2021-44228 CVE-2021-45046 CVE-2022-22965"
+          SARIF_FILE="trivy-results.sarif"
+          FOUND_CRITICAL=false
+
+          # Check if the SARIF file exists after download
+          if [ ! -f "$SARIF_FILE" ]; then
+            echo "SARIF file not found: $SARIF_FILE. Cannot perform CVE check."
+            # Set outputs for GitHub Status to reflect that the check couldn't be performed
+            echo "cve_found=false" >> "$GITHUB_OUTPUT"
+            echo "status_description=SARIF not available for CVE check." >> "$GITHUB_OUTPUT"
+            exit 0 # Exit successfully, as the file wasn't there to check, not a CVE found failure
+          fi
+
+          # Loop through each required CVE and check its presence in the SARIF file
+          for CVE_ID in $REQUIRED_CVES; do
+            # Grep for the exact CVE ID within a JSON "id" field for precision
+            if grep -q "\"id\": \"${CVE_ID}\"" "$SARIF_FILE"; then
+              echo "::error file=${SARIF_FILE}::CRITICAL CVE detected: ${CVE_ID}"
+              FOUND_CRITICAL=true
+              # Do not break here; continue to find and report all occurrences
+            fi
+          done
+
+          # Determine final output and exit code based on whether any critical CVEs were found
+          if [ "$FOUND_CRITICAL" = true ]; then
+            echo "cve_found=true" >> "$GITHUB_OUTPUT"
+            echo "status_description=CRITICAL Log4j/Spring CVEs found!" >> "$GITHUB_OUTPUT"
+            echo "Workflow step failed due to specific critical CVEs."
+            exit 1 # Fail this step, which will cause the job to show as failed
+          else
+            echo "cve_found=false" >> "$GITHUB_OUTPUT"
+            echo "status_description=No critical Log4j/Spring CVEs found." >> "$GITHUB_OUTPUT"
+            exit 0 # Step succeeds
+          fi
+
+      - name: Update GitHub Commit Status for Log4j CVE checker
+        # This step must run always to ensure the commit status is updated
+        # regardless of whether the 'cve_check' step passed or failed.
+        if: always()
+        uses: Sibz/github-status-action@v1
+        with:
+          # State will be 'failure' if cve_found is true, otherwise 'success'
+          state: ${{ steps.cve_check.outputs.cve_found == 'true' && 'failure' || 'success' }}
+          # This is the line that appears in the GitHub status/checks UI
+          context: 'Log4j CVE checker'
+          # This is the detailed message displayed with the status
+          description: ${{ steps.cve_check.outputs.status_description }}
+          token: ${{ secrets.GITHUB_TOKEN }}
