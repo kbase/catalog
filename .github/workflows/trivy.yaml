@@ -114,16 +114,3 @@ jobs:
             exit 0 # Step succeeds
           fi
 
-      - name: Update GitHub Commit Status for Log4j CVE checker
-        # This step must run always to ensure the commit status is updated
-        # regardless of whether the 'cve_check' step passed or failed.
-        if: always()
-        uses: Sibz/github-status-action@v1
-        with:
-          # State will be 'failure' if cve_found is true, otherwise 'success'
-          state: ${{ steps.cve_check.outputs.cve_found == 'true' && 'failure' || 'success' }}
-          # This is the line that appears in the GitHub status/checks UI
-          context: 'Log4j CVE checker'
-          # This is the detailed message displayed with the status
-          description: ${{ steps.cve_check.outputs.status_description }}
-          token: ${{ secrets.GITHUB_TOKEN }}
