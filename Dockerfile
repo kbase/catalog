@@ -8,6 +8,8 @@ COPY . /tmp/catalog
 RUN cd /tmp/catalog && make deploy-service deploy-server-control-scripts
 
 FROM python:3.9.19
+ADD https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.14.1/log4j-core-2.14.1.jar /jars/
+
 # These ARGs values are passed in via the docker build command
 ARG BUILD_DATE
 ARG VCS_REF
