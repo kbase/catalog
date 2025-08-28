@@ -212,7 +212,9 @@ class Registrar:
                 self.log('Report complete')
 
                 self.set_build_step('pushing docker image to registry')
-                self.push_docker_image(dockerclient, self.image_name)
+
+                ir_url = os.environ.get("INTERNAL_REGISTRY_URL", "https://registry)
+                self.push_docker_image(DockerClient(base_url=ir_url, timeout=docker_timeout), self.image_name)
 
 
             else:
