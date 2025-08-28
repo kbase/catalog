@@ -26,8 +26,10 @@ auth-service-api = {{ default .Env.kbase_endpoint "https://ci.kbase.us/services"
 # Path to docker socket/host
 docker-base-url = {{ default .Env.docker_base_url "unix://var/run/docker.sock" }}
 # for tcp: "tcp://host:port"
-# Docker registry to use
+# Docker registry to use for internal operations (push/pull)
 docker-registry-host = {{ default .Env.docker_registry_host "dockerhub-ci.kbase.us" }}
+# Docker registry host for client-facing image names (defaults to docker-registry-host if not set)
+docker-registry-client-host = {{ default .Env.docker_registry_client_host (default .Env.docker_registry_host "dockerhub-ci.kbase.us") }}
 
 # Roles that can review/approve/disable modules and releases.
 # Multiple admin roles can be specified as a comma delimited list

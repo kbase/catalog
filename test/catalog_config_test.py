@@ -18,6 +18,21 @@ class CatalogConfigTest(unittest.TestCase):
         catalog = Catalog(self.catalog_cfg)
         self.assertTrue(catalog.cc.db.mongo_retry_writes)
 
+    def test_docker_registry_host_configuration(self):
+        # Test with only docker-registry-host set (backward compatibility)
+        config = self.catalog_cfg.copy()
+        catalog = Catalog(config)
+        self.assertEqual(catalog.cc.docker_registry_host, config['docker-registry-host'])
+        self.assertEqual(catalog.cc.docker_registry_client_host, config['docker-registry-host'])
+
+    def test_docker_registry_client_host_configuration(self):
+        # Test with both registry hosts set
+        config = self.catalog_cfg.copy()
+        config['docker-registry-client-host'] = 'external.example.com'
+        catalog = Catalog(config)
+        self.assertEqual(catalog.cc.docker_registry_host, config['docker-registry-host'])
+        self.assertEqual(catalog.cc.docker_registry_client_host, 'external.example.com')
+
     @classmethod
     def setUpClass(cls):
         print("++++++++++++ RUNNING catalog_config_test.py +++++++++++")
