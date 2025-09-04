@@ -21,7 +21,9 @@ repositories {
 }
 
 compileJava {
-	options.release = 11
+	// TODO BUILD remove when we no longer support java 8, use `options.release = 11` if needed
+	java.sourceCompatibility = JavaVersion.VERSION_1_8
+	java.targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 java {
