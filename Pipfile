@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 docker = "==7.1.0"
 jsonrpcbase = "==0.2.0"
-pymongo = "==4.7.2"
+pymongo = "==4.15.0"
 pyyaml = "==6.0.2"
 semantic-version = "==2.10.0"
 uwsgi = "==2.0.22"
