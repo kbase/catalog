@@ -21,9 +21,9 @@ class Catalog:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.1"
-    GIT_URL = "https://github.com/kbase/catalog"
-    GIT_COMMIT_HASH = "fda05a2962373163e4983dc5187b1c51cd1455b1"
+    VERSION = "0.1.0"
+    GIT_URL = "https://github.com/kbase/catalog.git"
+    GIT_COMMIT_HASH = "bfd28df246cd39404293ea4cf4cd4200950fc900"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER

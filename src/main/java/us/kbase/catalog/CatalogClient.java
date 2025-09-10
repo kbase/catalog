@@ -101,6 +101,7 @@ public class CatalogClient {
     /** Deprecated. Use isInsecureHttpConnectionAllowed().
      * @deprecated
      */
+    @Deprecated
     public boolean isAuthAllowedForHttp() {
         return caller.isAuthAllowedForHttp();
     }
@@ -116,6 +117,7 @@ public class CatalogClient {
     /** Deprecated. Use setIsInsecureHttpConnectionAllowed().
      * @deprecated
      */
+    @Deprecated
     public void setAuthAllowedForHttp(boolean isAuthAllowedForHttp) {
         caller.setAuthAllowedForHttp(isAuthAllowedForHttp);
     }

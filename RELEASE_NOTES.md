@@ -1,5 +1,8 @@
 # Catalog Service release notes
 
+## v2.3.1 - 9/3/2025
+  - Added a JITPack build for the catalog client
+
 ## v2.3.0 - 3/5/2025
   - Removed all submodules(jars, kbapi_common, nms) as part of repository clean up.
   - The MongoDB clients have been updated to the most recent version and the service tested against Mongo 7.

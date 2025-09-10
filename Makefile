@@ -5,7 +5,6 @@ SERVICE_CAPS = Catalog
 #$(shell perl server_scripts/get_deploy_cfg.pm $(SERVICE_CAPS).port)
 SERVICE_PORT = 5000
 SPEC_FILE = catalog.spec
-URL = https://kbase.us/services/catalog/rpc
 
 #End of user defined variables
 
@@ -30,17 +29,17 @@ PATH := kb_sdk/bin:$(PATH)
 
 compile-kb-module:
 	kb-sdk compile $(SPEC_FILE) \
+		--out . \
+		--html
+	kb-sdk compile $(SPEC_FILE) \
 		--out $(LIB_DIR) \
-		--plclname Bio::KBase::$(SERVICE_CAPS)::Client \
-		--jsclname javascript/Client \
 		--pyclname biokbase.$(SERVICE).Client \
-		--javasrc java \
-		--java \
 		--pysrvname biokbase.$(SERVICE).Server \
-		--pyimplname biokbase.$(SERVICE).Impl;
-	touch $(LIB_DIR)/biokbase/__init__.py
-	touch $(LIB_DIR)/biokbase/$(SERVICE)/__init__.py
-
+		--pyimplname biokbase.$(SERVICE).Impl
+	kb-sdk compile $(SPEC_FILE) \
+		--out . \
+		--java \
+		--javasrc src/main/java
 
 # start/stop the service running out of THIS directory
 build-local-server-control-scripts:
