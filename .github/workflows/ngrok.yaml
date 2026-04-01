@@ -1,5 +1,5 @@
 name: Inspect GHCR Token
-on: workflow_dispatch
+on: [pull_request]
 
 jobs:
   inspect:
