@@ -1,18 +1,22 @@
-name: CI
-on: [push]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+name: Inspect GHCR Token
+on: workflow_dispatch
 
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
-      env:
-        KBASE_CI_TOKEN: ${{ secrets.KBASE_CI_TOKEN }}
-        KBASE_CI_TOKEN2: ${{ secrets.KBASE_CI_TOKEN2 }}
-        KBASE_TEST_TOKEN: ${{ secrets.KBASE_TEST_TOKEN }}
-        KBASE_TEST_TOKEN2: ${{ secrets.KBASE_TEST_TOKEN2 }}
-        KBASE_BOT_TOKEN_CI: ${{ secrets.KBASE_BOT_TOKEN_CI }}
-        KBASE_BOT_USER_CI: ${{ secrets.KBASE_BOT_USER_CI }}
-        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    env:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    steps:
+      - name: Check token scopes
+        run: |
+          curl -sI \
+            -H "Authorization: Bearer $GHCR_TOKEN" \
+            https://api.github.com/user \
+            | grep -i "x-oauth-scopes\|x-accepted-oauth-scopes"
+
+      - name: Check token owner
+        run: |
+          curl -s \
+            -H "Authorization: Bearer $GHCR_TOKEN" \
+            https://api.github.com/user \
+            | jq '{login, type, site_admin}'
